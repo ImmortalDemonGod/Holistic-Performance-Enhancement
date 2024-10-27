@@ -14,3 +14,6 @@ d_ff = 256  # Feedforward network dimension
 output_dim = 30  # Output feature dimension
 learning_rate = 0.000001  # Learning rate
 batch_size = 16  # Batch size for DataLoader
+
+# Lambda parameter for differential attention
+lambda_init = 0.5

@@ -1,87 +1,44 @@
-# Step 1: Modifying train.py to include synthetic dataset logic for Gestalt principles
+# Creating a Python script to update the transformer_model.py file with the changes required to fix the `d_model` reference issue.
 
-train_content_with_gestalt_data = '''
-import torch
-import torch.optim as optim
-from torch.utils.data import DataLoader, TensorDataset, random_split
-import pytorch_lightning as pl
-from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
-from transformer_model import TransformerModel
-from config import *
-import torch.nn.functional as F
-
-# Sample Training Module
-
-class TransformerTrainer(pl.LightningModule):
-    def __init__(self):
-        super(TransformerTrainer, self).__init__()
-        self.model = TransformerModel(input_dim, d_model, N, heads, d_ff, output_dim)
-        self.learning_rate = learning_rate
-
-    def forward(self, x):
-        return self.model(x)
-
-    def training_step(self, batch, batch_idx):
-        x, y = batch
-        y_hat = self(x)
-        loss = F.mse_loss(y_hat, y)
-        self.log('train_loss', loss, prog_bar=True)
-        return loss
-
-    def validation_step(self, batch, batch_idx):
-        x, y = batch
-        y_hat = self(x)
-        loss = F.mse_loss(y_hat, y)
-        self.log('val_loss', loss, prog_bar=True)
-        return loss
-
-    def configure_optimizers(self):
-        return optim.Adam(self.model.parameters(), lr=self.learning_rate)
-
-# Prepare training and validation data with Gestalt Principles synthetic dataset
-def prepare_data():
-    # Function to generate synthetic data based on Gestalt Principles
-    def generate_gestalt_data(num_samples, input_dim, output_dim):
-        # Placeholder function to generate synthetic data with perceptual patterns (Closure, Proximity, etc.)
-        # You can modify this function to generate specific visual patterns for each Gestalt principle
-        x_data = torch.rand((num_samples, input_dim))
-        y_data = torch.rand((num_samples, output_dim))
-        return TensorDataset(x_data, y_data)
-
-    # Generate synthetic data
-    gestalt_dataset = generate_gestalt_data(1000, input_dim, output_dim)
-
-    # Split data into training and validation sets
-    train_size = int(0.8 * len(gestalt_dataset))
-    val_size = len(gestalt_dataset) - train_size
-    train_dataset, val_dataset = random_split(gestalt_dataset, [train_size, val_size])
-    
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size)
-    
-    return train_loader, val_loader
-'''
-
-with open(f'{directory_path}/train.py', 'w') as file:
-    file.write(train_content_with_gestalt_data)
-
-# Step 2: Updating transformer_model.py to include context embedding and 2D positional encoding
-transformer_model_with_context = '''
+# Updated DiffTransformerModel Class with `self.d_model` Reference
+transformer_model_content_fixed = '''
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from positional_encoding import PositionalEncoding
 
-class TransformerModel(nn.Module):
-    def __init__(self, input_dim, d_model, N, heads, d_ff, output_dim):
-        super(TransformerModel, self).__init__()
+class DiffTransformerModel(nn.Module):
+    def __init__(self, input_dim, d_model, N, heads, d_ff, output_dim, lambda_init=0.5):
+        super(DiffTransformerModel, self).__init__()
         self.input_fc = nn.Linear(input_dim, d_model)
         self.context_embedding = nn.Linear(d_model, d_model)
         self.positional_encoding = PositionalEncoding(d_model, mode='2d')  # Updated for 2D encoding
+        self.d_model = d_model  # Store d_model as a class attribute for later use
+        self.lambda_init = lambda_init  # Lambda for differential attention balance
+
         encoder_layer = nn.TransformerEncoderLayer(d_model, heads, d_ff)
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=N)
         self.output_fc = nn.Linear(d_model, output_dim)
+
+    def diff_attention(self, X, W_q, W_k, W_v):
+        """
+        Implements Differential Attention mechanism.
+        """
+        # Split the input projections into two groups
+        Q1, Q2 = torch.chunk(X @ W_q, 2, dim=-1)
+        K1, K2 = torch.chunk(X @ W_k, 2, dim=-1)
+        V = X @ W_v
+
+        # Calculate the attention scores
+        s = 1 / (self.d_model ** 0.5)  # scaling factor
+        A1 = torch.matmul(Q1, K1.transpose(-1, -2)) * s
+        A2 = torch.matmul(Q2, K2.transpose(-1, -2)) * s
+
+        # Apply differential attention
+        diff_attention_scores = torch.softmax(A1, dim=-1) - self.lambda_init * torch.softmax(A2, dim=-1)
+
+        # Compute the output
+        return torch.matmul(diff_attention_scores, V)
 
     def forward(self, x):
         # Apply input fully connected layer
@@ -99,8 +56,11 @@ class TransformerModel(nn.Module):
         # Transformer Encoder expects input shape as [sequence_length, batch_size, d_model]
         x = x.transpose(0, 1)  # Shape becomes [1, batch_size, d_model]
 
-        # Pass through Transformer Encoder
-        x = self.encoder(x)
+        # Pass through Transformer Encoder using differential attention
+        for layer in self.encoder.layers:
+            # Use self.d_model instead of d_model to ensure it's correctly referenced
+            W_q, W_k, W_v = layer.self_attn.in_proj_weight.split(self.d_model, dim=0)
+            x = self.diff_attention(x, W_q, W_k, W_v)
 
         # Reshape back and pass through final fully connected layer
         x = x.transpose(0, 1).squeeze(1)  # Shape becomes [batch_size, d_model]
@@ -109,54 +69,9 @@ class TransformerModel(nn.Module):
         return x
 '''
 
-with open(f'{directory_path}/transformer_model.py', 'w') as file:
-    file.write(transformer_model_with_context)
+# Writing the updated transformer_model.py to handle the `d_model` correctly within the forward method
+with open("transformer_model.py", 'w') as file:
+    file.write(transformer_model_content_fixed)
 
-# Step 3: Updating positional_encoding.py to support 2D positional encoding
-positional_encoding_with_2d = '''
-import torch
-import torch.nn as nn
-
-class PositionalEncoding(nn.Module):
-    def __init__(self, d_model, max_len=5000, mode='1d'):
-        super(PositionalEncoding, self).__init__()
-        self.d_model = d_model
-        self.mode = mode
-
-        if mode == '1d':
-            pe = torch.zeros(max_len, d_model)
-            position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-            div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-torch.log(torch.tensor(10000.0)) / d_model))
-            pe[:, 0::2] = torch.sin(position * div_term)
-            pe[:, 1::2] = torch.cos(position * div_term)
-            pe = pe.unsqueeze(0)
-        elif mode == '2d':
-            # Assuming a square grid for simplicity
-            max_len_sqrt = int(max_len ** 0.5)
-            pe = torch.zeros(max_len_sqrt, max_len_sqrt, d_model)
-            position_h = torch.arange(0, max_len_sqrt, dtype=torch.float).unsqueeze(1)
-            position_w = torch.arange(0, max_len_sqrt, dtype=torch.float).unsqueeze(1)
-            div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-torch.log(torch.tensor(10000.0)) / d_model))
-            for i in range(max_len_sqrt):
-                pe[i, :, 0::2] = torch.sin(position_h * div_term)
-                pe[:, i, 1::2] = torch.cos(position_w * div_term)
-            pe = pe.unsqueeze(0)
-        else:
-            raise ValueError("Unsupported mode for PositionalEncoding: {}".format(mode))
-        
-        self.register_buffer('pe', pe)
-
-    def forward(self, x):
-        if self.mode == '1d':
-            x = x + self.pe[:, :x.size(1), :]
-        elif self.mode == '2d':
-            batch_size, _, d_model = x.size()
-            x = x + self.pe[:, :batch_size, :d_model].view_as(x)
-        return x
-'''
-
-with open(f'{directory_path}/positional_encoding.py', 'w') as file:
-    file.write(positional_encoding_with_2d)
-
-# These updates provide context embedding, 2D positional encoding, and the ability to work with synthetic data inspired by Gestalt principles.
+# This script updates transformer_model.py to ensure that `d_model` is accessed using `self.d_model`, fixing the `NameError`.
 
