@@ -2,6 +2,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from custom_activation import CustomSigmoidActivation
 from positional_encoding import PositionalEncoding
 
 class TransformerModel(nn.Module):
@@ -13,7 +14,10 @@ class TransformerModel(nn.Module):
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=N)
         self.output_fc = nn.Linear(d_model, output_dim)
 
+        self.custom_activation = CustomSigmoidActivation(min_value=-1, max_value=9)
+
     def forward(self, x):
+        # Add an additional dimension for sequence length of 1
         # Add an additional dimension for sequence length of 1
         x = self.input_fc(x)
         x = x.view(x.size(0), -1, self.input_fc.out_features)  # Reshape to [batch_size, sequence_length, d_model]
@@ -31,4 +35,6 @@ class TransformerModel(nn.Module):
         x = x.transpose(0, 1).squeeze(1)  # Shape becomes [batch_size, d_model]
         x = self.output_fc(x)  # Shape becomes [batch_size, output_dim]
 
+        # Apply custom activation to constrain output
+        x = self.custom_activation(x)
         return x
