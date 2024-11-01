@@ -1,4 +1,4 @@
-# Transformer Model with Custom Sigmoid Activation
+# Transformer Model with Custom Sigmoid Activation.
 
 This project implements a Transformer model with a custom sigmoid activation function for processing grid-based input data. The model is designed to handle input and output grids ranging from 1x1 to 30x30, with values between 0 and 9. The data is loaded from JSON files located in the `training` folder, where each file contains training and testing examples.
 
