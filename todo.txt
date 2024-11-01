@@ -5,6 +5,8 @@ Saving checkpoint
 Training from checkpoint
 Cross entropy loss
 
+investigate utilizing decoders
+
 Accuracy logging w/ diff acc
 
 Validation fine-tuning (probably q-lora based)
