@@ -1,19 +1,19 @@
 
 Cuda compat
-Normalization in layers
-Saving checkpoint
-Training from checkpoint
-Cross entropy loss
+[M]Normalization in layers
+[M]Saving checkpoint
+[M]Training from checkpoint
 
+investigate Cross entropy loss
 investigate utilizing decoders
 
 Accuracy logging w/ diff acc
 
 Validation fine-tuning (probably q-lora based)
 
-Context encoding
-Mamba
+[M]Context encoding
+[J]Mamba
 
-Updated sigmoid function to stop the lower limit
+[J]Updated sigmoid function to stop the lower limit
 	-this will need to include the integer limit to output,
 			and put any negative number as -1 for output
