@@ -24,7 +24,7 @@ This project implements a Transformer model with a custom sigmoid activation fun
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   [git clone <repository-url>](https://github.com/leatherman55/JARC-Reactor.git)
    cd <repository-directory>
    ```
 
