@@ -14,6 +14,19 @@ if __name__ == '__main__':
         default=None,
         help='Path to the checkpoint to resume training from'
     )
+    parser.add_argument(
+        '--fast_dev_run',
+        type=int,
+        nargs='?',
+        const=True,
+        default=False,
+        help=(
+            'Run a limited number of batches for debugging purposes. '
+            'If an integer is provided, runs that number of batches. '
+            'If set without a value, runs one batch. '
+            'Default is False.'
+        )
+    )
     args = parser.parse_args()
 
     # Prepare data loaders for training and validation
@@ -58,8 +71,9 @@ if __name__ == '__main__':
         max_epochs=config.num_epochs,
         callbacks=[checkpoint_callback, early_stop_callback],
         devices=1,         # Use a single device (CPU)
-        accelerator='gpu' if config.device_choice == 'cuda' else 'cpu',  # Use GPU if specified
-        precision=config.precision  # Use precision from config
+        accelerator='gpu' if config.device_choice == 'cuda' else 'cpu', # Use GPU if specified
+        precision=config.precision,  # Use precision from config
+        fast_dev_run=args.fast_dev_run  # Add this line
     )
 
     # Start model training
