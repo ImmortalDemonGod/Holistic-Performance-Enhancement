@@ -1,4 +1,5 @@
 import argparse
+import torch
 from train import TransformerTrainer, prepare_data
 from pytorch_lightning import Trainer
 from metrics import compute_standard_accuracy, compute_differential_accuracy, TaskMetricsCollector
@@ -91,5 +92,4 @@ for task_id, metrics in task_summaries.items():
     print(f"Task {task_id}: Standard Accuracy = {metrics['standard_accuracy']:.4f}, "
           f"Differential Accuracy = {metrics['differential_accuracy']:.4f}")
 
-if __name__ == '__main__':
-    main()
+# No main function is defined, so we remove the call to it
