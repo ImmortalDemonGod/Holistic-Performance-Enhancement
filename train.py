@@ -1,4 +1,5 @@
 
+from config import include_sythtraining_data
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
@@ -71,7 +72,19 @@ def prepare_data():
                 test_inputs.append(input_tensor)
                 test_outputs.append(output_tensor)
 
-    # Convert lists to tensors
+    # Conditionally load data from the 'sythtraining' directory
+    if include_sythtraining_data:
+        for filename in os.listdir('sythtraining'):
+            if filename.endswith('.json'):
+                with open(os.path.join('sythtraining', filename), 'r') as f:
+                    data = json.load(f)
+
+                # Extract and pad data
+                for item in data:
+                    input_tensor = pad_to_fixed_size(torch.tensor(item['input'], dtype=torch.float32), target_shape=(30, 30))
+                    output_tensor = pad_to_fixed_size(torch.tensor(item['output'], dtype=torch.float32), target_shape=(30, 30))
+                    train_inputs.append(input_tensor)
+                    train_outputs.append(output_tensor)
     train_inputs = torch.stack(train_inputs)
     train_outputs = torch.stack(train_outputs)
     test_inputs = torch.stack(test_inputs)
@@ -82,7 +95,7 @@ def prepare_data():
     test_dataset = TensorDataset(test_inputs, test_outputs)
 
     # Create DataLoaders
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
+    val_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
     return train_loader, val_loader
