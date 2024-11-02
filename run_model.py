@@ -18,12 +18,25 @@ args = parser.parse_args()
 # Prepare data loaders for training and validation
 train_loader, val_loader = prepare_data()
 
-# Load model from checkpoint or initialize a new one
+# Set the quantization backend
+torch.backends.quantized.engine = 'qnnpack'  # Use 'fbgemm' for x86 platforms if needed
+
+# Prepare the model for static quantization
 if args.checkpoint:
     model = TransformerTrainer.load_from_checkpoint(args.checkpoint)
-else:
-    model = TransformerTrainer()
-    model.model = torch.jit.script(model.model)  # Script the model for optimized deployment
+model = TransformerTrainer()
+model.model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
+torch.quantization.prepare(model.model, inplace=True)
+
+# Calibrate the model with a few batches of data
+train_loader, val_loader = prepare_data()
+for batch in train_loader:
+    model.training_step(batch, 0)  # Run a few batches through the model
+
+# Convert the model to a quantized version
+torch.quantization.convert(model.model, inplace=True)
+model = TransformerTrainer()
+model.model = torch.jit.script(model.model)  # Script the model for optimized deployment
 
 # Set up model checkpointing and early stopping callbacks
 checkpoint_callback = ModelCheckpoint(
