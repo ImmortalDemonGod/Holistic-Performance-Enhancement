@@ -27,6 +27,10 @@ class TransformerTrainer(pl.LightningModule):
         self.learning_rate = learning_rate
         self.device_choice = 'cpu'
 
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        return optimizer
+
     def forward(self, src, tgt):
         return self.model(src.to('cpu'), tgt.to('cpu'))
 
@@ -138,7 +142,7 @@ def prepare_data():
         json.dump(task_id_map, f)
 
     # Create DataLoaders
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    val_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
+    val_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
 
     return train_loader, val_loader

@@ -39,13 +39,17 @@ if __name__ == '__main__':
     if args.checkpoint:
         model = TransformerTrainer.load_from_checkpoint(args.checkpoint)
     model = TransformerTrainer()
-    model.model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
+    qconfig = torch.quantization.QConfig(
+        activation=torch.quantization.MinMaxObserver.with_args(quant_min=0, quant_max=255),
+        weight=torch.quantization.MinMaxObserver.with_args(quant_min=0, quant_max=255)
+    )
+    model.model.qconfig = qconfig
     torch.quantization.prepare(model.model, inplace=True)
 
-    # Calibrate the model with a few batches of data
-    train_loader, val_loader = prepare_data()
+    # Calibrate the model with a few batches of data without manually calling training_step
     for batch in train_loader:
-        model.training_step(batch, 0)  # Run a few batches through the model
+        src, tgt, _ = batch
+        _ = model(src, tgt)  # Forward pass to run observers
 
     # Convert the model to a quantized version
     torch.quantization.convert(model.model, inplace=True)
