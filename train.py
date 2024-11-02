@@ -31,14 +31,14 @@ class TransformerTrainer(pl.LightningModule):
         return self.model(src.to('cpu'), tgt.to('cpu'))
 
     def training_step(self, batch, batch_idx):
-        src, tgt = batch
+        src, tgt, _ = batch  # Unpack three elements, ignore task_id
         y_hat = self(src, tgt)
         loss = F.mse_loss(y_hat, tgt)
         self.log('train_loss', loss, prog_bar=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        src, tgt = batch
+        src, tgt, _ = batch  # Unpack three elements, ignore task_id
         y_hat = self(src, tgt)
         loss = F.mse_loss(y_hat, tgt)
         self.log('val_loss', loss, prog_bar=True)
