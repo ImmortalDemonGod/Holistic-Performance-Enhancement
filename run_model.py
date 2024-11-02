@@ -16,25 +16,25 @@ parser.add_argument(
     help='Path to the checkpoint to resume training from'
 )
 args = parser.parse_args()
-    train_loader, val_loader = prepare_data()
-    if args.checkpoint:
-        model = TransformerTrainer.load_from_checkpoint(args.checkpoint)
-    else:
-        model = TransformerTrainer()
-        model.model = torch.jit.script(model.model)  # Script the model here
-    checkpoint_callback = ModelCheckpoint(
-        monitor="val_loss",
-        save_top_k=1,
-        mode="min",
-        filename="best-checkpoint",
-        save_last=True,  # Saves the last checkpoint with the suffix 'last'
-    )
-    early_stop_callback = EarlyStopping(monitor="val_loss", patience=10, mode="min")
-    trainer = Trainer(
-        max_epochs=num_epochs,
-        callbacks=[checkpoint_callback, early_stop_callback],
-        devices=1,  # Use 1 CPU
-        accelerator='cpu',  # Explicitly set to use CPU
-        resume_from_checkpoint=args.checkpoint  # Resume from checkpoint if provided
-    )
-    trainer.fit(model, train_loader, val_loader)
+train_loader, val_loader = prepare_data()
+if args.checkpoint:
+    model = TransformerTrainer.load_from_checkpoint(args.checkpoint)
+else:
+    model = TransformerTrainer()
+    model.model = torch.jit.script(model.model)  # Script the model here
+checkpoint_callback = ModelCheckpoint(
+    monitor="val_loss",
+    save_top_k=1,
+    mode="min",
+    filename="best-checkpoint",
+    save_last=True,  # Saves the last checkpoint with the suffix 'last'
+)
+early_stop_callback = EarlyStopping(monitor="val_loss", patience=10, mode="min")
+trainer = Trainer(
+    max_epochs=num_epochs,
+    callbacks=[checkpoint_callback, early_stop_callback],
+    devices=1,  # Use 1 CPU
+    accelerator='cpu',  # Explicitly set to use CPU
+    resume_from_checkpoint=args.checkpoint  # Resume from checkpoint if provided
+)
+trainer.fit(model, train_loader, val_loader)
