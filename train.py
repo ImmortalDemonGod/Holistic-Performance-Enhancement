@@ -115,9 +115,27 @@ def prepare_data():
     test_inputs = torch.stack(test_inputs)
     test_outputs = torch.stack(test_outputs)
 
-    # Create TensorDatasets with source, target pairs, and task_ids
-    train_dataset = TensorDataset(train_inputs, train_outputs, torch.tensor(train_task_ids))
-    test_dataset = TensorDataset(test_inputs, test_outputs, torch.tensor(test_task_ids))
+    # Create a sorted list of unique task_ids
+    unique_task_ids = sorted(set(train_task_ids + test_task_ids))
+
+    # Create a mapping from task_id string to unique integer
+    task_id_map = {task_id: idx for idx, task_id in enumerate(unique_task_ids)}
+
+    # Encode task_ids as integers using the mapping
+    train_task_ids_encoded = [task_id_map[tid] for tid in train_task_ids]
+    test_task_ids_encoded = [task_id_map[tid] for tid in test_task_ids]
+
+    # Convert the encoded task_ids to tensors
+    train_task_ids_tensor = torch.tensor(train_task_ids_encoded, dtype=torch.long)
+    test_task_ids_tensor = torch.tensor(test_task_ids_encoded, dtype=torch.long)
+
+    # Create TensorDatasets with encoded task_ids
+    train_dataset = TensorDataset(train_inputs, train_outputs, train_task_ids_tensor)
+    test_dataset = TensorDataset(test_inputs, test_outputs, test_task_ids_tensor)
+
+    # Optional: Save the task_id_map
+    with open('task_id_map.json', 'w') as f:
+        json.dump(task_id_map, f)
 
     # Create DataLoaders
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)

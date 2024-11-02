@@ -3,7 +3,14 @@ from train import TransformerTrainer, prepare_data
 from pytorch_lightning import Trainer
 from metrics import compute_standard_accuracy, compute_differential_accuracy, TaskMetricsCollector
 
-def main():
+import json
+
+# Load the task_id_map
+with open('task_id_map.json', 'r') as f:
+    task_id_map = json.load(f)
+
+# Create a reverse mapping
+int_to_task_id = {v: k for k, v in task_id_map.items()}
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description="Evaluate Transformer Model")
     parser.add_argument(
@@ -42,7 +49,9 @@ def main():
             predictions = outputs.argmax(dim=1)  # Assuming output is logits
 
         # Process each task in batch
-        for idx, task_id in enumerate(task_ids):
+        for idx, task_id_int in enumerate(task_ids):
+            # Convert integer task_id back to string
+            task_id = int_to_task_id[task_id_int.item()]
             # Get individual task tensors
             task_input = src[idx:idx+1]
             task_target = tgt[idx:idx+1]
