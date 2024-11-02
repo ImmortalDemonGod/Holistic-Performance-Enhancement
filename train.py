@@ -1,6 +1,7 @@
 
 from config import include_sythtraining_data
 import torch
+import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 import pytorch_lightning as pl
@@ -26,6 +27,7 @@ class TransformerTrainer(pl.LightningModule):
         self.model = TransformerModel(input_dim, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim)
         self.learning_rate = learning_rate
         self.device_choice = 'cpu'
+        self.criterion = nn.CrossEntropyLoss()
 
     def forward(self, src, tgt):
         return self.model(src.to('cpu'), tgt.to('cpu'))
@@ -33,16 +35,45 @@ class TransformerTrainer(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         src, tgt = batch
         y_hat = self(src, tgt)
-        loss = F.mse_loss(y_hat, tgt)
+        # Debugging: Print shapes of y_hat and tgt
+        print(f"y_hat shape: {y_hat.shape}, tgt shape: {tgt.shape}")
+
+        # Reshape y_hat to match the target's shape
+        y_hat = y_hat.view(-1, 11)
+        tgt = tgt.view(-1, 30)[:, 0].long()
+        # Mask out padding values in the target
+        valid_indices = tgt != -1
+        y_hat = y_hat[valid_indices]
+        tgt = tgt[valid_indices]
+
+        # Mask out padding values in the target
+        valid_indices = tgt != -1
+        y_hat = y_hat[valid_indices]
+        tgt = tgt[valid_indices]
+
+        loss = self.criterion(y_hat, tgt)
         self.log('train_loss', loss, prog_bar=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         src, tgt = batch
         y_hat = self(src, tgt)
-        loss = F.mse_loss(y_hat, tgt)
+        # Debugging: Print shapes of y_hat and tgt
+        print(f"y_hat shape: {y_hat.shape}, tgt shape: {tgt.shape}")
+
+        # Reshape y_hat to match the target's shape
+        y_hat = y_hat.view(-1, 11)
+        tgt = tgt.view(-1, 30)[:, 0].long()
+        # Convert logits to class predictions using argmax
+        predictions = torch.argmax(y_hat, dim=-1)  # Shape: [batch_size * 30]
+
+        # Compute loss
+        loss = self.criterion(y_hat, tgt)
         self.log('val_loss', loss, prog_bar=True)
-        return loss
+
+        # Optionally, log or return predictions for further evaluation
+        # For example, you might want to calculate accuracy or other metrics
+        return {'val_loss': loss, 'predictions': predictions, 'targets': tgt}
 
     def configure_optimizers(self):
         return optim.Adam(self.model.parameters(), lr=self.learning_rate)
