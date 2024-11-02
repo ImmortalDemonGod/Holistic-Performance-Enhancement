@@ -1,4 +1,5 @@
 import argparse
+import config
 import torch
 from train import TransformerTrainer, prepare_data
 import config
@@ -9,12 +10,6 @@ from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 if __name__ == '__main__':
     # Argument parsing for optional checkpoint resumption
     parser = argparse.ArgumentParser(description="Train Transformer Model")
-    parser.add_argument(
-        '--checkpoint',
-        type=str,
-        default=None,
-        help='Path to the checkpoint to resume training from'
-    )
     parser.add_argument(
         '--fast_dev_run',
         type=int,
@@ -37,8 +32,8 @@ if __name__ == '__main__':
     torch.backends.quantized.engine = 'qnnpack'  # Use 'fbgemm' for x86 platforms if needed
 
     # Prepare the model for static quantization
-    if args.checkpoint:
-        model = TransformerTrainer.load_from_checkpoint(args.checkpoint)
+    if config.CHECKPOINT_PATH:
+        model = TransformerTrainer.load_from_checkpoint(config.CHECKPOINT_PATH)
     else:
         model = TransformerTrainer(
             input_dim=config.input_dim,

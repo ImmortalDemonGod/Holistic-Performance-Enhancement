@@ -23,3 +23,4 @@ learning_rate = 0.0001  # Learning rate
 batch_size = 26  # Batch size for DataLoader
 dropout_rate = 0.35  # Dropout rate for the model
 include_sythtraining_data = False  # Set to True to include sythtraining data
+CHECKPOINT_PATH = 'checkpoints/default_checkpoint.ckpt'  # Update with your actual checkpoint path

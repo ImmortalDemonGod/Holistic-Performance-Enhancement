@@ -1,4 +1,5 @@
 import argparse
+import config
 import torch
 from train import TransformerTrainer, prepare_data
 from pytorch_lightning import Trainer
@@ -14,12 +15,7 @@ with open('task_id_map.json', 'r') as f:
 int_to_task_id = {v: k for k, v in task_id_map.items()}
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description="Evaluate Transformer Model")
-parser.add_argument(
-    '--checkpoint',
-    type=str,
-    required=True,
-    help='Path to the checkpoint to evaluate'
-)
+import config
 args = parser.parse_args()
 
 # Prepare data loaders
@@ -27,7 +23,7 @@ train_loader, val_loader = prepare_data()
 test_loader = val_loader  # Replace with a separate test loader if available
 
 # Instantiate the model and load the checkpoint
-model = TransformerTrainer.load_from_checkpoint(args.checkpoint, strict=True)
+model = TransformerTrainer.load_from_checkpoint(config.CHECKPOINT_PATH, strict=True)
 
 model.eval()  # Set model to evaluation mode
 
