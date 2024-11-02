@@ -64,6 +64,9 @@ def prepare_data():
     # Iterate over all JSON files in the 'training' directory
     for filename in os.listdir('training'):
         if filename.endswith('.json'):
+            # Extract task_id from filename (e.g., 'task_1.json' -> 'task_1')
+            task_id = os.path.splitext(filename)[0]
+
             with open(os.path.join('training', filename), 'r') as f:
                 data = json.load(f)
 
@@ -74,28 +77,26 @@ def prepare_data():
                 train_inputs.append(input_tensor)
                 train_outputs.append(output_tensor)
 
-                if 'task_id' in item:
-                    train_task_ids.append(item['task_id'])
-                else:
-                    train_task_ids.append('default_task_id')
-                    print(f"Warning: 'task_id' missing in item {item}. Assigned 'default_task_id'.")
+                # Assign task_id based on filename
+                train_task_ids.append(task_id)
 
             # Extract and pad test data
             for item in data['test']:
                 input_tensor = pad_to_fixed_size(torch.tensor(item['input'], dtype=torch.float32), target_shape=(30, 30))
                 output_tensor = pad_to_fixed_size(torch.tensor(item['output'], dtype=torch.float32), target_shape=(30, 30))
                 test_inputs.append(input_tensor)
-                if 'task_id' in item:
-                    test_task_ids.append(item['task_id'])
-                else:
-                    test_task_ids.append('default_task_id')
-                    print(f"Warning: 'task_id' missing in item {item}. Assigned 'default_task_id'.")
                 test_outputs.append(output_tensor)
+
+                # Assign task_id based on filename
+                test_task_ids.append(task_id)
 
     # Conditionally load data from the 'sythtraining' directory
     if include_sythtraining_data:
         for filename in os.listdir('sythtraining'):
             if filename.endswith('.json'):
+                # Extract task_id from filename
+                task_id = os.path.splitext(filename)[0]
+
                 with open(os.path.join('sythtraining', filename), 'r') as f:
                     data = json.load(f)
 
@@ -105,6 +106,9 @@ def prepare_data():
                     output_tensor = pad_to_fixed_size(torch.tensor(item['output'], dtype=torch.float32), target_shape=(30, 30))
                     train_inputs.append(input_tensor)
                     train_outputs.append(output_tensor)
+
+                    # Assign task_id based on filename
+                    train_task_ids.append(task_id)
     # Stack inputs, outputs, and task_ids
     train_inputs = torch.stack(train_inputs)
     train_outputs = torch.stack(train_outputs)
