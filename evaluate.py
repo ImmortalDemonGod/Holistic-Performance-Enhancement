@@ -97,7 +97,5 @@ for task_id, metrics in task_summaries.items():
     # Check if the task was completely solved
     if std_acc >= 0.999:
         print(f"--> Task {task_id} was completely solved with {std_acc*100:.2f}% accuracy.\n")
-    else:
-        print(f"--> Task {task_id} was not completely solved. Accuracy: {std_acc*100:.2f}%\n")
 
 # No main function is defined, so we remove the call to it
