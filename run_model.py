@@ -10,6 +10,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 if __name__ == '__main__':
     train_loader, val_loader = prepare_data()
     model = TransformerTrainer()
+    model.model = torch.jit.script(model.model)  # Script the model here
     checkpoint_callback = ModelCheckpoint(monitor="val_loss", save_top_k=1, mode="min")
     early_stop_callback = EarlyStopping(monitor="val_loss", patience=10, mode="min")
     trainer = Trainer(
