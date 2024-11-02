@@ -2,7 +2,7 @@ import config
 import os
 import torch
 from train import TransformerTrainer
-from data_preparation import prepare_data
+from Utils.data_preparation import prepare_data
 import config
 from torch.quantization import get_default_qconfig
 from pytorch_lightning import Trainer

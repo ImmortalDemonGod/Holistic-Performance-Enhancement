@@ -15,7 +15,7 @@ import os
 import json
 from Utils.padding_utils import pad_to_fixed_size
 import torch
-from data_preparation import prepare_data
+from Utils.data_preparation import prepare_data
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
