@@ -4,14 +4,16 @@ import os
 import torch
 from train import TransformerTrainer, prepare_data
 from pytorch_lightning import Trainer
-from metrics import compute_standard_accuracy, compute_differential_accuracy, TaskMetricsCollector
+from Utils.metrics import compute_standard_accuracy, compute_differential_accuracy, TaskMetricsCollector
+import config
 
 import json
 import argparse
+from config import device_choice
 
 # Add argument parser for command-line arguments
 parser = argparse.ArgumentParser(description='Evaluate the Transformer model with a specified checkpoint.')
-parser.add_argument('--checkpoint', type=str, required=True, help='Path to the checkpoint file.')
+#parser.add_argument('--checkpoint', type=str, required=True, help='Path to the checkpoint file.')
 args = parser.parse_args()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,7 +34,8 @@ test_loader = val_loader  # Replace with a separate test loader if available
 
 # Instantiate the model and load the checkpoint
 # Validate checkpoint path using the parsed argument
-checkpoint_path = args.checkpoint
+checkpoint_path = 'epoch=epoch=2-val_loss=val_loss=0.6359.ckpt'
+
 if checkpoint_path and not os.path.isfile(checkpoint_path):
     raise FileNotFoundError(f"Checkpoint file not found at {checkpoint_path}. Please provide a valid path.")
 
@@ -43,11 +46,12 @@ model.eval()  # Set model to evaluation mode
 logger.info("Set model to evaluation mode.")
 
 # Set up the Trainer for evaluation
+accelerator = 'cuda' if device_choice == 'gpu' else device_choice
 logger.info("Trainer initialized for evaluation.")
 trainer = Trainer(
-    devices=1,              # Use a single device (CPU)
-    accelerator='cpu',     # Set explicitly to CPU
-    logger=False,          # Disable loggers
+    devices=1,              # Use a single device
+    accelerator=accelerator,  # Use device_choice from config
+    logger=False,           # Disable loggers
     enable_progress_bar=True  # Enable progress bar for visibility
 )
 
@@ -60,7 +64,7 @@ for batch_idx, batch in enumerate(test_loader):
     src, tgt, task_ids = batch  # Ensure task_ids are included
     with torch.no_grad():
         outputs = model(src, tgt)
-        predictions = outputs.argmax(dim=1)  # Assuming output is logits
+        predictions = outputs.argmax(dim=-1)  # Assuming output is logits
 
     if (batch_idx + 1) % 10 == 0:
         logger.info(f"Processed {batch_idx + 1} batches...")
@@ -71,6 +75,10 @@ for batch_idx, batch in enumerate(test_loader):
         task_input = src[idx:idx+1]
         task_target = tgt[idx:idx+1]
         task_pred = predictions[idx:idx+1]
+
+        # Ensure task_pred and task_target have compatible shapes
+        task_pred = task_pred.view(-1, 30)[:, 0]  # Flatten to 1D
+        task_target = task_target.view(-1, 30)[:, 0]  # Flatten to 1D
 
         # Calculate metrics
         std_acc = compute_standard_accuracy(task_pred, task_target)

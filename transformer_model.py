@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import torch.quantization
 from config import dropout_rate, encoder_layers, decoder_layers
 from torch.nn import TransformerDecoder, TransformerDecoderLayer
-from positional_encoding import PositionalEncoding
+from Utils.positional_encoding import PositionalEncoding
 
 class TransformerModel(nn.Module):
     def __init__(self, input_dim, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim):
