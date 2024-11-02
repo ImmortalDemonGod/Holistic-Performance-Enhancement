@@ -7,7 +7,7 @@ DONE [M]Training from checkpoint
 investigate Cross entropy loss
 DONE [J] investigate utilizing decoders
 
-Accuracy logging w/ diff acc
+[M] Accuracy logging w/ diff acc
 
 Validation fine-tuning (probably q-lora based)
 
