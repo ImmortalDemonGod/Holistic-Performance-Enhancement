@@ -1,8 +1,8 @@
 
 Cuda compat
 [M]Normalization in layers
-[M]Saving checkpoint
-[M]Training from checkpoint
+DONE [M]Saving checkpoint
+DONE [M]Training from checkpoint
 
 investigate Cross entropy loss
 investigate utilizing decoders
