@@ -1,4 +1,3 @@
-import argparse
 import config
 import os
 import torch
@@ -9,22 +8,6 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
 if __name__ == '__main__':
-    # Argument parsing for optional checkpoint resumption
-    parser = argparse.ArgumentParser(description="Train Transformer Model")
-    parser.add_argument(
-        '--fast_dev_run',
-        type=int,
-        nargs='?',
-        const=True,
-        default=False,
-        help=(
-            'Run a limited number of batches for debugging purposes. '
-            'If an integer is provided, runs that number of batches. '
-            'If set without a value, runs one batch. '
-            'Default is False.'
-        )
-    )
-    args = parser.parse_args()
 
     # Prepare data loaders for training and validation
     train_loader, val_loader = prepare_data()
@@ -82,7 +65,7 @@ if __name__ == '__main__':
         devices=1,         # Use a single device (CPU)
         accelerator='gpu' if config.device_choice == 'cuda' else 'cpu', # Use GPU if specified
         precision=config.precision,  # Use precision from config
-        fast_dev_run=args.fast_dev_run  # Add this line
+        fast_dev_run=config.FAST_DEV_RUN  # Use config variable
     )
 
     # Set ckpt_path based on config.CHECKPOINT_PATH

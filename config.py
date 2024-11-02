@@ -24,3 +24,5 @@ batch_size = 26  # Batch size for DataLoader
 dropout_rate = 0.35  # Dropout rate for the model
 include_sythtraining_data = False  # Set to True to include sythtraining data
 CHECKPOINT_PATH = ''  # Start training from scratch
+
+FAST_DEV_RUN = False  # Set to True to enable fast development run
