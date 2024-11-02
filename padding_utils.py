@@ -2,7 +2,7 @@
 import torch
 
 # Central function for padding tensors to a fixed shape
-def pad_to_fixed_size(tensor, target_shape=(30, 30), pad_value=-1):
+def pad_to_fixed_size(tensor, target_shape=(30, 30), pad_value=10):
     """
     Pads the tensor to a fixed target shape using the specified pad value.
     Args:

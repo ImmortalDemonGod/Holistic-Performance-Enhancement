@@ -5,7 +5,6 @@ import torch.nn.functional as F
 import torch.quantization
 from config import dropout_rate, encoder_layers, decoder_layers
 from torch.nn import TransformerDecoder, TransformerDecoderLayer
-from custom_activation import CustomSigmoidActivation
 from positional_encoding import PositionalEncoding
 
 class TransformerModel(nn.Module):
@@ -27,10 +26,10 @@ class TransformerModel(nn.Module):
         else:
             self.decoder = None
         
-        self.output_fc = nn.Linear(d_model, output_dim)
+        # Output layer for 11 classes (-1 to 9) for each position in the 30x30 grid
+        self.output_fc = nn.Linear(d_model, 11)
         self.dropout = nn.Dropout(p=dropout_rate)
 
-        self.custom_activation = CustomSigmoidActivation(min_value=-1, max_value=9)
 
 
         # Add quantization stubs
@@ -64,6 +63,5 @@ class TransformerModel(nn.Module):
         
         output = output.transpose(0, 1)  # Shape back to [batch_size, sequence_length, d_model]
         output = self.output_fc(output)
-        output = self.custom_activation(output)
         output = self.dequant(output)  # Dequantize output
         return output
