@@ -1,5 +1,6 @@
 import argparse
 import config
+import os
 import torch
 from train import TransformerTrainer, prepare_data
 import config
@@ -30,6 +31,10 @@ if __name__ == '__main__':
 
     # Set the quantization backend
     torch.backends.quantized.engine = 'qnnpack'  # Use 'fbgemm' for x86 platforms if needed
+
+    # Validate checkpoint path
+    if config.CHECKPOINT_PATH and not os.path.isfile(config.CHECKPOINT_PATH):
+        raise FileNotFoundError(f"Checkpoint file not found at {config.CHECKPOINT_PATH}. Please update config.py with a valid path.")
 
     # Prepare the model for static quantization
     if config.CHECKPOINT_PATH:

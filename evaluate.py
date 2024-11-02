@@ -1,5 +1,6 @@
 import argparse
 import config
+import os
 import torch
 from train import TransformerTrainer, prepare_data
 from pytorch_lightning import Trainer
@@ -23,6 +24,10 @@ train_loader, val_loader = prepare_data()
 test_loader = val_loader  # Replace with a separate test loader if available
 
 # Instantiate the model and load the checkpoint
+# Validate checkpoint path
+if config.CHECKPOINT_PATH and not os.path.isfile(config.CHECKPOINT_PATH):
+    raise FileNotFoundError(f"Checkpoint file not found at {config.CHECKPOINT_PATH}. Please update config.py with a valid path.")
+
 model = TransformerTrainer.load_from_checkpoint(config.CHECKPOINT_PATH, strict=True)
 
 model.eval()  # Set model to evaluation mode
