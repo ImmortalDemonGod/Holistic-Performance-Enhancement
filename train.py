@@ -1,6 +1,3 @@
-def on_train_end(self):
-    # Save the scripted model at the end of training
-    torch.jit.save(self.scripted_model, "scripted_transformer_model.pt")
 
 import torch
 import torch.optim as optim
@@ -24,12 +21,8 @@ class TransformerTrainer(pl.LightningModule):
         self.learning_rate = learning_rate
         self.device_choice = 'cpu'
 
-        # Script the model using TorchScript
-        self.scripted_model = torch.jit.script(self.model)
-
     def forward(self, x):
-        # Use the scripted model for forward pass
-        return self.scripted_model(x.to('cpu'))
+        return self.model(x.to('cpu'))
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -88,7 +81,7 @@ def prepare_data():
     test_dataset = TensorDataset(test_inputs, test_outputs)
 
     # Create DataLoaders
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=8)
-    val_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=8)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     return train_loader, val_loader
