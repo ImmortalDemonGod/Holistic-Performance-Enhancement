@@ -11,15 +11,15 @@ with open('task_id_map.json', 'r') as f:
 
 # Create a reverse mapping
 int_to_task_id = {v: k for k, v in task_id_map.items()}
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description="Evaluate Transformer Model")
-    parser.add_argument(
-        '--checkpoint',
-        type=str,
-        required=True,
-        help='Path to the checkpoint to evaluate'
-    )
-    args = parser.parse_args()
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description="Evaluate Transformer Model")
+parser.add_argument(
+    '--checkpoint',
+    type=str,
+    required=True,
+    help='Path to the checkpoint to evaluate'
+)
+args = parser.parse_args()
 
     # Prepare data loaders
     train_loader, val_loader = prepare_data()
