@@ -58,7 +58,8 @@ if __name__ == '__main__':
         max_epochs=config.num_epochs,
         callbacks=[checkpoint_callback, early_stop_callback],
         devices=1,         # Use a single device (CPU)
-        accelerator='cpu'  # Set explicitly to CPU
+        accelerator='gpu' if config.device_choice == 'cuda' else 'cpu',  # Use GPU if specified
+        precision=config.precision  # Use precision from config
     )
 
     # Start model training
