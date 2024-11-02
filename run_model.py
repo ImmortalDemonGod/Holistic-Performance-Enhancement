@@ -1,22 +1,51 @@
-
+import argparse
 import torch
 from train import TransformerTrainer, prepare_data
-from config import *
+import config
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
-# Run Script to Start Training using Config Parameters
+# Argument parsing for optional checkpoint resumption
+parser = argparse.ArgumentParser(description="Train Transformer Model")
+parser.add_argument(
+    '--checkpoint',
+    type=str,
+    default=None,
+    help='Path to the checkpoint to resume training from'
+)
+args = parser.parse_args()
 
-if __name__ == '__main__':
-    train_loader, val_loader = prepare_data()
+# Prepare data loaders for training and validation
+train_loader, val_loader = prepare_data()
+
+# Load model from checkpoint or initialize a new one
+if args.checkpoint:
+    model = TransformerTrainer.load_from_checkpoint(args.checkpoint)
+else:
     model = TransformerTrainer()
-    model.model = torch.jit.script(model.model)  # Script the model here
-    checkpoint_callback = ModelCheckpoint(monitor="val_loss", save_top_k=1, mode="min")
-    early_stop_callback = EarlyStopping(monitor="val_loss", patience=10, mode="min")
-    trainer = Trainer(
-        max_epochs=num_epochs,
-        callbacks=[checkpoint_callback, early_stop_callback],
-        devices=1,  # Use 1 CPU
-        accelerator='cpu'  # Explicitly set to use CPU
-    )
-    trainer.fit(model, train_loader, val_loader)
+    model.model = torch.jit.script(model.model)  # Script the model for optimized deployment
+
+# Set up model checkpointing and early stopping callbacks
+checkpoint_callback = ModelCheckpoint(
+    monitor="val_loss",
+    save_top_k=1,
+    mode="min",
+    filename="epoch={epoch}-val_loss={val_loss:.4f}",
+    save_last=True  # Saves the last checkpoint with the suffix 'last'
+)
+early_stop_callback = EarlyStopping(
+    monitor="val_loss", 
+    patience=10, 
+    mode="min"
+)
+
+# Configure the Trainer
+trainer = Trainer(
+    max_epochs=config.num_epochs,
+    callbacks=[checkpoint_callback, early_stop_callback],
+    devices=1,         # Use a single device (CPU)
+    accelerator='cpu'  # Set explicitly to CPU
+)
+
+# Start model training
+trainer.fit(model, train_loader, val_loader, ckpt_path=args.checkpoint)

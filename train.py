@@ -11,6 +11,11 @@ import torch.nn.functional as F
 import os
 import json
 from padding_utils import pad_to_fixed_size
+import torch
+from torch.utils.data import DataLoader, TensorDataset
+import json
+import os
+from config import batch_size
 
 # Sample Training Module
 
@@ -40,11 +45,7 @@ class TransformerTrainer(pl.LightningModule):
 
     def configure_optimizers(self):
         return optim.Adam(self.model.parameters(), lr=self.learning_rate)
-import torch
-from torch.utils.data import DataLoader, TensorDataset
-import json
-import os
-from config import batch_size
+
 
 def prepare_data():
     train_inputs, train_outputs = [], []
