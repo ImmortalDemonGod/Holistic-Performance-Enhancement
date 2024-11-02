@@ -86,4 +86,4 @@ if __name__ == '__main__':
     )
 
     # Start model training
-    trainer.fit(model, train_loader, val_loader, ckpt_path=args.checkpoint)
+    trainer.fit(model, train_loader, val_loader, ckpt_path=config.CHECKPOINT_PATH)
