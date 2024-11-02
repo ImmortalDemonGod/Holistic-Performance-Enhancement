@@ -1,6 +1,6 @@
 
 Cuda compat
-[M]Normalization in layers
+DONE [M]Normalization in layers
 DONE [M]Saving checkpoint
 DONE [M]Training from checkpoint
 
