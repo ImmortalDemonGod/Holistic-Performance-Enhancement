@@ -2,6 +2,7 @@ import argparse
 import torch
 from train import TransformerTrainer, prepare_data
 import config
+from torch.quantization import get_default_qconfig
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
@@ -38,22 +39,19 @@ if __name__ == '__main__':
     # Prepare the model for static quantization
     if args.checkpoint:
         model = TransformerTrainer.load_from_checkpoint(args.checkpoint)
-    model = TransformerTrainer()
-    qconfig = torch.quantization.QConfig(
-        activation=torch.quantization.MinMaxObserver.with_args(quant_min=0, quant_max=255),
-        weight=torch.quantization.MinMaxObserver.with_args(quant_min=0, quant_max=255)
-    )
+    else:
+        model = TransformerTrainer()
+    qconfig = get_default_qconfig('qnnpack')  # Use 'fbgemm' if on x86 platforms
     model.model.qconfig = qconfig
     torch.quantization.prepare(model.model, inplace=True)
 
-    # Calibrate the model with a few batches of data without manually calling training_step
+    # Calibrate the model with a few batches of data
     for batch in train_loader:
         src, tgt, _ = batch
         _ = model(src, tgt)  # Forward pass to run observers
 
     # Convert the model to a quantized version
     torch.quantization.convert(model.model, inplace=True)
-    model = TransformerTrainer()
     model.model = torch.jit.script(model.model)  # Script the model for optimized deployment
 
     # Set up model checkpointing and early stopping callbacks
