@@ -40,7 +40,17 @@ if __name__ == '__main__':
     if args.checkpoint:
         model = TransformerTrainer.load_from_checkpoint(args.checkpoint)
     else:
-        model = TransformerTrainer()
+        model = TransformerTrainer(
+            input_dim=config.input_dim,
+            d_model=config.d_model,
+            encoder_layers=config.encoder_layers,
+            decoder_layers=config.decoder_layers,
+            heads=config.heads,
+            d_ff=config.d_ff,
+            output_dim=config.output_dim,
+            learning_rate=config.learning_rate,
+            include_sythtraining_data=config.include_sythtraining_data
+        )
     qconfig = get_default_qconfig('qnnpack')  # Use 'fbgemm' if on x86 platforms
     model.model.qconfig = qconfig
 

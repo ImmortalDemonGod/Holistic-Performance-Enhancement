@@ -21,10 +21,19 @@ from config import batch_size
 # Sample Training Module
 
 class TransformerTrainer(pl.LightningModule):
-    def __init__(self):
+    def __init__(self, input_dim, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, learning_rate, include_sythtraining_data):
         super(TransformerTrainer, self).__init__()
-        self.model = TransformerModel(input_dim, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim)
-        self.learning_rate = learning_rate
+        self.save_hyperparameters()
+        self.model = TransformerModel(
+            input_dim=self.hparams.input_dim,
+            d_model=self.hparams.d_model,
+            encoder_layers=self.hparams.encoder_layers,
+            decoder_layers=self.hparams.decoder_layers,
+            heads=self.hparams.heads,
+            d_ff=self.hparams.d_ff,
+            output_dim=self.hparams.output_dim
+        )
+        self.learning_rate = self.hparams.learning_rate
         self.device_choice = 'cpu'
 
     def configure_optimizers(self):

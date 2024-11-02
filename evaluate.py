@@ -27,7 +27,7 @@ train_loader, val_loader = prepare_data()
 test_loader = val_loader  # Replace with a separate test loader if available
 
 # Instantiate the model and load the checkpoint
-model = TransformerTrainer.load_from_checkpoint(args.checkpoint)
+model = TransformerTrainer.load_from_checkpoint(args.checkpoint, strict=True)
 
 model.eval()  # Set model to evaluation mode
 
