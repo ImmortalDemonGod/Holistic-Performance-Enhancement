@@ -26,7 +26,7 @@ checkpoint_callback = ModelCheckpoint(
     monitor="val_loss",
     save_top_k=1,
     mode="min",
-    filename="best-checkpoint",
+    filename="epoch={epoch}-val_loss={val_loss:.4f}",
     save_last=True,  # Saves the last checkpoint with the suffix 'last'
 )
 early_stop_callback = EarlyStopping(monitor="val_loss", patience=10, mode="min")
