@@ -1,5 +1,5 @@
 
-torch==1.13.1
-pytorch-lightning==1.9.0
+torch
+pytorch-lightning
 numpy
 aider-chat
