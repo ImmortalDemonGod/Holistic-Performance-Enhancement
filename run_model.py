@@ -34,7 +34,6 @@ trainer = Trainer(
     max_epochs=num_epochs,
     callbacks=[checkpoint_callback, early_stop_callback],
     devices=1,  # Use 1 CPU
-    accelerator='cpu',  # Explicitly set to use CPU
-    resume_from_checkpoint=args.checkpoint  # Resume from checkpoint if provided
+    accelerator='cpu'  # Explicitly set to use CPU
 )
-trainer.fit(model, train_loader, val_loader)
+trainer.fit(model, train_loader, val_loader, ckpt_path=args.checkpoint)
