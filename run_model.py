@@ -43,12 +43,9 @@ if __name__ == '__main__':
         model = TransformerTrainer()
     qconfig = get_default_qconfig('qnnpack')  # Use 'fbgemm' if on x86 platforms
     model.model.qconfig = qconfig
-    torch.quantization.prepare(model.model, inplace=True)
 
-    # Calibrate the model with a few batches of data
-    for batch in train_loader:
-        src, tgt, _ = batch
-        _ = model(src, tgt)  # Forward pass to run observers
+
+    #torch.quantization.prepare(model.model, inplace=True)
 
     # Convert the model to a quantized version
     torch.quantization.convert(model.model, inplace=True)
