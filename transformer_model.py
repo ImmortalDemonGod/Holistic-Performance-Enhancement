@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.quantization
+from config import dropout_rate
 from custom_activation import CustomSigmoidActivation
 from positional_encoding import PositionalEncoding
 
@@ -14,7 +15,7 @@ class TransformerModel(nn.Module):
         encoder_layer = nn.TransformerEncoderLayer(d_model, heads, d_ff, batch_first=True)
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=N)
         self.output_fc = nn.Linear(d_model, output_dim)
-        self.dropout = nn.Dropout(p=0.1)
+        self.dropout = nn.Dropout(p=dropout_rate)
 
         self.custom_activation = CustomSigmoidActivation(min_value=-1, max_value=9)
 
