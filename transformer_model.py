@@ -10,7 +10,7 @@ class TransformerModel(nn.Module):
         super(TransformerModel, self).__init__()
         self.input_fc = nn.Linear(input_dim, d_model)
         self.positional_encoding = PositionalEncoding(d_model)
-        encoder_layer = nn.TransformerEncoderLayer(d_model, heads, d_ff)
+        encoder_layer = nn.TransformerEncoderLayer(d_model, heads, d_ff, batch_first=True)
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=N)
         self.output_fc = nn.Linear(d_model, output_dim)
         self.dropout = nn.Dropout(p=0.1)  # You can adjust the dropout probability as needed
