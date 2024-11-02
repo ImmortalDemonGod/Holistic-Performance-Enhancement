@@ -8,6 +8,10 @@ from metrics import compute_standard_accuracy, compute_differential_accuracy, Ta
 
 import json
 
+# Initialize logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Load the task_id_map
 logger.info("Loading task_id_map.json...")
 with open('task_id_map.json', 'r') as f:
@@ -15,9 +19,6 @@ with open('task_id_map.json', 'r') as f:
 
 logger.info("Loaded task_id_map successfully.")
 int_to_task_id = {v: k for k, v in task_id_map.items()}
-# Initialize logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Prepare data loaders
 logger.info("Preparing data loaders...")
