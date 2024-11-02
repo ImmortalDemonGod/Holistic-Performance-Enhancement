@@ -83,7 +83,7 @@ def prepare_data():
             # Extract task_id from filename (e.g., 'task_1.json' -> 'task_1')
             task_id = os.path.splitext(filename)[0]
 
-            logger.info(f"Loading training data for task_id: {task_id}")
+            logger.info(f"Loading training data for task_id: {task_id} from file: {filename}")
             with open(os.path.join('training', filename), 'r') as f:
                 data = json.load(f)
 
