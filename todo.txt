@@ -5,7 +5,7 @@ DONE [M]Saving checkpoint
 DONE [M]Training from checkpoint
 
 investigate Cross entropy loss
-investigate utilizing decoders
+DONE [J] investigate utilizing decoders
 
 Accuracy logging w/ diff acc
 
