@@ -14,6 +14,4 @@ Validation fine-tuning (probably q-lora based)
 [M]Context encoding
 [J]Mamba
 
-[J]Updated sigmoid function to stop the lower limit
-	-this will need to include the integer limit to output,
-			and put any negative number as -1 for output
+
