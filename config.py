@@ -5,7 +5,7 @@
 # - 32: Full precision (FP32), the default for most training scenarios
 # - 64: Double precision (FP64), rarely used due to high computational cost
 # - 'bf16': Bfloat16 precision, used for specific hardware that supports it
-precision = 64  # Set to 16 for mixed precision, 32 for full precision, etc.
+precision = 32  # Set to 16 for mixed precision, 32 for full precision, etc.
 # These parameters should be treated as modifiable from the main run_model.py script
 
 device_choice = "cpu"  # Set to "cpu" for CPU
