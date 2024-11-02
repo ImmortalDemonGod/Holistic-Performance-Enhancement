@@ -44,7 +44,18 @@ class TransformerTrainer(pl.LightningModule):
         self.log('val_loss', loss, prog_bar=True)
         return loss
 
-    def configure_optimizers(self):
+    def test_step(self, batch, batch_idx):
+        src, tgt = batch
+        y_hat = self(src, tgt)
+        
+        # Example: Compute accuracy (modify according to your specific task)
+        # Assuming a regression task where predictions close to targets are considered correct
+        # Define a threshold for "correct" predictions
+        threshold = 0.1
+        correct = (torch.abs(y_hat - tgt) < threshold).float()
+        accuracy = correct.mean()
+        
+        self.log('test_accuracy', accuracy, prog_bar=True)
         return optim.Adam(self.model.parameters(), lr=self.learning_rate)
 
 
