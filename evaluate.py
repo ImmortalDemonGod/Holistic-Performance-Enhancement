@@ -1,4 +1,4 @@
-import argparse
+import logging
 import config
 import os
 import torch
@@ -9,18 +9,20 @@ from metrics import compute_standard_accuracy, compute_differential_accuracy, Ta
 import json
 
 # Load the task_id_map
+logger.info("Loading task_id_map.json...")
 with open('task_id_map.json', 'r') as f:
     task_id_map = json.load(f)
 
-# Create a reverse mapping
+logger.info("Loaded task_id_map successfully.")
 int_to_task_id = {v: k for k, v in task_id_map.items()}
-# Parse command-line arguments
-parser = argparse.ArgumentParser(description="Evaluate Transformer Model")
-import config
-args = parser.parse_args()
+# Initialize logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Prepare data loaders
+logger.info("Preparing data loaders...")
 train_loader, val_loader = prepare_data()
+logger.info("Data loaders prepared.")
 test_loader = val_loader  # Replace with a separate test loader if available
 
 # Instantiate the model and load the checkpoint
@@ -29,10 +31,13 @@ if config.CHECKPOINT_PATH and not os.path.isfile(config.CHECKPOINT_PATH):
     raise FileNotFoundError(f"Checkpoint file not found at {config.CHECKPOINT_PATH}. Please update config.py with a valid path.")
 
 model = TransformerTrainer.load_from_checkpoint(config.CHECKPOINT_PATH, strict=True)
+logger.info("Loaded model from checkpoint.")
 
 model.eval()  # Set model to evaluation mode
+logger.info("Set model to evaluation mode.")
 
 # Set up the Trainer for evaluation
+logger.info("Trainer initialized for evaluation.")
 trainer = Trainer(
     devices=1,              # Use a single device (CPU)
     accelerator='cpu',     # Set explicitly to CPU
@@ -44,13 +49,15 @@ trainer = Trainer(
 metrics_collector = TaskMetricsCollector()
 
 # Perform evaluation
-for batch in test_loader:
+logger.info("Starting evaluation...")
+for batch_idx, batch in enumerate(test_loader):
     src, tgt, task_ids = batch  # Ensure task_ids are included
     with torch.no_grad():
         outputs = model(src, tgt)
         predictions = outputs.argmax(dim=1)  # Assuming output is logits
 
-    # Process each task in batch
+    if (batch_idx + 1) % 10 == 0:
+        logger.info(f"Processed {batch_idx + 1} batches...")
     for idx, task_id_int in enumerate(task_ids):
         # Convert integer task_id back to string
         task_id = int_to_task_id[task_id_int.item()]
@@ -71,7 +78,7 @@ for batch in test_loader:
             'differential_accuracy': diff_acc
         })
 
-# Get final results
+logger.info("Evaluation completed.")
 task_summaries = metrics_collector.get_task_summary()
 
 # Calculate overall metrics
@@ -86,6 +93,7 @@ overall_standard_accuracy = sum(all_std_accs) / len(all_std_accs) if all_std_acc
 overall_differential_accuracy = sum(all_diff_accs) / len(all_diff_accs) if all_diff_accs else 0.0
 
 # Print the aggregated metrics
+logger.info("All metrics have been computed and displayed.")
 print(f"Overall Standard Accuracy: {overall_standard_accuracy:.4f}")
 print(f"Overall Differential Accuracy: {overall_differential_accuracy:.4f}")
 print("Per-Task Metrics:")

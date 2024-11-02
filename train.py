@@ -1,5 +1,6 @@
 
 from config import include_sythtraining_data
+import logging
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
@@ -18,7 +19,9 @@ import json
 import os
 from config import batch_size
 
-# Sample Training Module
+# Initialize logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class TransformerTrainer(pl.LightningModule):
     def __init__(self, input_dim, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, learning_rate, include_sythtraining_data):
@@ -80,6 +83,7 @@ def prepare_data():
             # Extract task_id from filename (e.g., 'task_1.json' -> 'task_1')
             task_id = os.path.splitext(filename)[0]
 
+            logger.info(f"Loading training data for task_id: {task_id}")
             with open(os.path.join('training', filename), 'r') as f:
                 data = json.load(f)
 
@@ -105,11 +109,13 @@ def prepare_data():
 
     # Conditionally load data from the 'sythtraining' directory
     if include_sythtraining_data:
+        logger.info("Including synthetic training data from 'sythtraining' directory.")
         for filename in os.listdir('sythtraining'):
             if filename.endswith('.json'):
                 # Extract task_id from filename
                 task_id = os.path.splitext(filename)[0]
 
+                logger.info(f"Loading synthetic training data for task_id: {task_id}")
                 with open(os.path.join('sythtraining', filename), 'r') as f:
                     data = json.load(f)
 
@@ -131,7 +137,9 @@ def prepare_data():
     # Create a sorted list of unique task_ids
     unique_task_ids = sorted(set(train_task_ids + test_task_ids))
 
-    # Create a mapping from task_id string to unique integer
+    logger.info(f"Total unique task_ids (including synthetic if any): {len(unique_task_ids)}")
+    if len(unique_task_ids) != (len(set(train_task_ids)) + len(set(test_task_ids))):
+        logger.warning("There are overlapping task_ids between training and test datasets.")
     task_id_map = {task_id: idx for idx, task_id in enumerate(unique_task_ids)}
 
     # Encode task_ids as integers using the mapping
