@@ -85,5 +85,6 @@ if __name__ == '__main__':
         fast_dev_run=args.fast_dev_run  # Add this line
     )
 
-    # Start model training
-    trainer.fit(model, train_loader, val_loader, ckpt_path=config.CHECKPOINT_PATH)
+    # Set ckpt_path based on config.CHECKPOINT_PATH
+    ckpt_path = config.CHECKPOINT_PATH if config.CHECKPOINT_PATH else None
+    trainer.fit(model, train_loader, val_loader, ckpt_path=ckpt_path)
