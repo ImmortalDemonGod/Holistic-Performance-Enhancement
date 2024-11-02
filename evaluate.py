@@ -7,8 +7,12 @@ from pytorch_lightning import Trainer
 from metrics import compute_standard_accuracy, compute_differential_accuracy, TaskMetricsCollector
 
 import json
+import argparse
 
-# Initialize logging
+# Add argument parser for command-line arguments
+parser = argparse.ArgumentParser(description='Evaluate the Transformer model with a specified checkpoint.')
+parser.add_argument('--checkpoint', type=str, required=True, help='Path to the checkpoint file.')
+args = parser.parse_args()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -27,11 +31,12 @@ logger.info("Data loaders prepared.")
 test_loader = val_loader  # Replace with a separate test loader if available
 
 # Instantiate the model and load the checkpoint
-# Validate checkpoint path
-if config.CHECKPOINT_PATH and not os.path.isfile(config.CHECKPOINT_PATH):
-    raise FileNotFoundError(f"Checkpoint file not found at {config.CHECKPOINT_PATH}. Please update config.py with a valid path.")
+# Validate checkpoint path using the parsed argument
+checkpoint_path = args.checkpoint
+if checkpoint_path and not os.path.isfile(checkpoint_path):
+    raise FileNotFoundError(f"Checkpoint file not found at {checkpoint_path}. Please provide a valid path.")
 
-model = TransformerTrainer.load_from_checkpoint(config.CHECKPOINT_PATH, strict=True)
+model = TransformerTrainer.load_from_checkpoint(checkpoint_path, strict=True)
 logger.info("Loaded model from checkpoint.")
 
 model.eval()  # Set model to evaluation mode
