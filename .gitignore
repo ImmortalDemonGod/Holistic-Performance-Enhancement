@@ -1,0 +1,6 @@
+.aider*
+.env
+ARC-AGI/*
+training/*
+lightning_logs/*
+__pycache__/*
