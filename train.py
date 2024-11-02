@@ -45,23 +45,21 @@ class TransformerTrainer(pl.LightningModule):
         return loss
 
     def test_step(self, batch, batch_idx):
-        src, tgt = batch
+        src, tgt, task_ids = batch  # Ensure task_ids are included in the batch
         y_hat = self(src, tgt)
         
-        # Example: Compute accuracy (modify according to your specific task)
-        # Assuming a regression task where predictions close to targets are considered correct
-        # Define a threshold for "correct" predictions
+        # Compute accuracy (modify according to your specific task)
         threshold = 0.1
         correct = (torch.abs(y_hat - tgt) < threshold).float()
         accuracy = correct.mean()
         
         self.log('test_accuracy', accuracy, prog_bar=True)
-        return optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        return accuracy
 
 
 def prepare_data():
-    train_inputs, train_outputs = [], []
-    test_inputs, test_outputs = [], []
+    train_inputs, train_outputs, train_task_ids = [], [], []
+    test_inputs, test_outputs, test_task_ids = [], [], []
 
     # Iterate over all JSON files in the 'training' directory
     for filename in os.listdir('training'):
@@ -76,11 +74,14 @@ def prepare_data():
                 train_inputs.append(input_tensor)
                 train_outputs.append(output_tensor)
 
+                train_task_ids.append(item['task_id'])  # Add task_id
+
             # Extract and pad test data
             for item in data['test']:
                 input_tensor = pad_to_fixed_size(torch.tensor(item['input'], dtype=torch.float32), target_shape=(30, 30))
                 output_tensor = pad_to_fixed_size(torch.tensor(item['output'], dtype=torch.float32), target_shape=(30, 30))
                 test_inputs.append(input_tensor)
+                test_task_ids.append(item['task_id'])  # Add task_id
                 test_outputs.append(output_tensor)
 
     # Conditionally load data from the 'sythtraining' directory
