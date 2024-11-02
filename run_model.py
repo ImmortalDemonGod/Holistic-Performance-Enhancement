@@ -1,4 +1,5 @@
 
+import argparse
 import torch
 from train import TransformerTrainer, prepare_data
 from config import *
@@ -7,10 +8,20 @@ from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
 # Run Script to Start Training using Config Parameters
 
-if __name__ == '__main__':
+parser = argparse.ArgumentParser(description="Train Transformer Model")
+parser.add_argument(
+    '--checkpoint',
+    type=str,
+    default=None,
+    help='Path to the checkpoint to resume training from'
+)
+args = parser.parse_args()
     train_loader, val_loader = prepare_data()
-    model = TransformerTrainer()
-    model.model = torch.jit.script(model.model)  # Script the model here
+    if args.checkpoint:
+        model = TransformerTrainer.load_from_checkpoint(args.checkpoint)
+    else:
+        model = TransformerTrainer()
+        model.model = torch.jit.script(model.model)  # Script the model here
     checkpoint_callback = ModelCheckpoint(
         monitor="val_loss",
         save_top_k=1,
@@ -23,6 +34,7 @@ if __name__ == '__main__':
         max_epochs=num_epochs,
         callbacks=[checkpoint_callback, early_stop_callback],
         devices=1,  # Use 1 CPU
-        accelerator='cpu'  # Explicitly set to use CPU
+        accelerator='cpu',  # Explicitly set to use CPU
+        resume_from_checkpoint=args.checkpoint  # Resume from checkpoint if provided
     )
     trainer.fit(model, train_loader, val_loader)
