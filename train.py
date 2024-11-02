@@ -97,15 +97,15 @@ def prepare_data():
                     output_tensor = pad_to_fixed_size(torch.tensor(item['output'], dtype=torch.float32), target_shape=(30, 30))
                     train_inputs.append(input_tensor)
                     train_outputs.append(output_tensor)
-    # Stack inputs and outputs
+    # Stack inputs, outputs, and task_ids
     train_inputs = torch.stack(train_inputs)
     train_outputs = torch.stack(train_outputs)
     test_inputs = torch.stack(test_inputs)
     test_outputs = torch.stack(test_outputs)
 
-    # Create TensorDatasets with source and target pairs
-    train_dataset = TensorDataset(train_inputs, train_outputs)
-    test_dataset = TensorDataset(test_inputs, test_outputs)
+    # Create TensorDatasets with source, target pairs, and task_ids
+    train_dataset = TensorDataset(train_inputs, train_outputs, torch.tensor(train_task_ids))
+    test_dataset = TensorDataset(test_inputs, test_outputs, torch.tensor(test_task_ids))
 
     # Create DataLoaders
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
