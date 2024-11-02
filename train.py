@@ -155,6 +155,7 @@ def prepare_data():
     test_dataset = TensorDataset(test_inputs, test_outputs, test_task_ids_tensor)
 
     # Optional: Save the task_id_map
+    logger.info("Saved task_id_map.json with the current task mappings.")
     with open('task_id_map.json', 'w') as f:
         json.dump(task_id_map, f)
 
