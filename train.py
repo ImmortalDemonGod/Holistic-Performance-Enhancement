@@ -74,14 +74,22 @@ def prepare_data():
                 train_inputs.append(input_tensor)
                 train_outputs.append(output_tensor)
 
-                train_task_ids.append(item['task_id'])  # Add task_id
+                if 'task_id' in item:
+                    train_task_ids.append(item['task_id'])
+                else:
+                    train_task_ids.append('default_task_id')
+                    print(f"Warning: 'task_id' missing in item {item}. Assigned 'default_task_id'.")
 
             # Extract and pad test data
             for item in data['test']:
                 input_tensor = pad_to_fixed_size(torch.tensor(item['input'], dtype=torch.float32), target_shape=(30, 30))
                 output_tensor = pad_to_fixed_size(torch.tensor(item['output'], dtype=torch.float32), target_shape=(30, 30))
                 test_inputs.append(input_tensor)
-                test_task_ids.append(item['task_id'])  # Add task_id
+                if 'task_id' in item:
+                    test_task_ids.append(item['task_id'])
+                else:
+                    test_task_ids.append('default_task_id')
+                    print(f"Warning: 'task_id' missing in item {item}. Assigned 'default_task_id'.")
                 test_outputs.append(output_tensor)
 
     # Conditionally load data from the 'sythtraining' directory
