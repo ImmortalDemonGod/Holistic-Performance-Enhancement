@@ -89,7 +89,15 @@ print(f"Overall Standard Accuracy: {overall_standard_accuracy:.4f}")
 print(f"Overall Differential Accuracy: {overall_differential_accuracy:.4f}")
 print("Per-Task Metrics:")
 for task_id, metrics in task_summaries.items():
-    print(f"Task {task_id}: Standard Accuracy = {metrics['standard_accuracy']:.4f}, "
-          f"Differential Accuracy = {metrics['differential_accuracy']:.4f}")
+    std_acc = metrics['standard_accuracy']
+    diff_acc = metrics['differential_accuracy']
+    print(f"Task {task_id}: Standard Accuracy = {std_acc:.4f}, "
+          f"Differential Accuracy = {diff_acc:.4f}")
+    
+    # Check if the task was completely solved
+    if std_acc >= 0.999:
+        print(f"--> Task {task_id} was completely solved with {std_acc*100:.2f}% accuracy.\n")
+    else:
+        print(f"--> Task {task_id} was not completely solved. Accuracy: {std_acc*100:.2f}%\n")
 
 # No main function is defined, so we remove the call to it
