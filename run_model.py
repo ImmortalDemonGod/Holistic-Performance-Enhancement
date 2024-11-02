@@ -2,7 +2,7 @@
 import argparse
 import torch
 from train import TransformerTrainer, prepare_data
-from config import *
+import config
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
@@ -31,7 +31,7 @@ checkpoint_callback = ModelCheckpoint(
 )
 early_stop_callback = EarlyStopping(monitor="val_loss", patience=10, mode="min")
 trainer = Trainer(
-    max_epochs=num_epochs,
+    max_epochs=config.num_epochs,
     callbacks=[checkpoint_callback, early_stop_callback],
     devices=1,  # Use 1 CPU
     accelerator='cpu'  # Explicitly set to use CPU
