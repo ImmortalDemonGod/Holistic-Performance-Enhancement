@@ -25,7 +25,7 @@ class PositionalEncoding(nn.Module):
         return x
 
 class Grid2DPositionalEncoding(nn.Module):
-    def __init__(self, d_model, max_height=30, max_width=30):
+    def __init__(self, d_model, max_height=30, max_width=30):  # Ensure defaults are 30x30
         super().__init__()
         self.d_model = d_model
         

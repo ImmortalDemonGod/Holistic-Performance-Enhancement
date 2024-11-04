@@ -12,7 +12,7 @@ class TransformerModel(nn.Module):
     def __init__(self, input_dim, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim):
         super(TransformerModel, self).__init__()
         self.input_fc = nn.Linear(input_dim, d_model)
-        self.positional_encoding = Grid2DPositionalEncoding(d_model)
+        self.positional_encoding = Grid2DPositionalEncoding(d_model, max_height=30, max_width=30)
         # Conditionally create the encoder
         if encoder_layers > 0:
             encoder_layer = TransformerEncoderLayer(d_model, heads, d_ff, batch_first=True)
