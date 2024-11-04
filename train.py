@@ -37,15 +37,15 @@ class TransformerTrainer(pl.LightningModule):
         super(TransformerTrainer, self).__init__()
         self.save_hyperparameters()
         self.model = TransformerModel(
-            input_dim=self.hparams.input_dim,
-            d_model=self.hparams.d_model,
-            encoder_layers=self.hparams.encoder_layers,
-            decoder_layers=self.hparams.decoder_layers,
-            heads=self.hparams.heads,
-            d_ff=self.hparams.d_ff,
-            output_dim=self.hparams.output_dim,
+            input_dim=self.hparams['input_dim'],
+            d_model=self.hparams['d_model'],
+            encoder_layers=self.hparams['encoder_layers'],
+            decoder_layers=self.hparams['decoder_layers'],
+            heads=self.hparams['heads'],
+            d_ff=self.hparams['d_ff'],
+            output_dim=self.hparams['output_dim'],
         )
-        self.learning_rate = self.hparams.learning_rate
+        self.learning_rate = self.hparams['learning_rate']
         self.device_choice = 'cpu'
         self.criterion = nn.CrossEntropyLoss()
 
