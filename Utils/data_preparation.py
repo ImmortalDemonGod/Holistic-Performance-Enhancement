@@ -41,6 +41,7 @@ def prepare_data():
     log_count = 0
     successful_files = 0
     total_files = 0
+    # Removed warning_log_limit and warning_log_count as they are no longer needed
     for filename in os.listdir('training'):
         if filename.endswith('.json'):
             total_files += 1
@@ -72,34 +73,34 @@ def prepare_data():
                 train_inputs.append(input_tensor)
                 train_outputs.append(output_tensor)
 
-                # Handle ContextPair creation with key checks
-                if 'context_input' in item and 'context_output' in item:
-                    try:
-                        context_input = pad_to_fixed_size(torch.tensor(item['context_input'], dtype=torch.float32), target_shape=(30, 30))
-                        context_output = pad_to_fixed_size(torch.tensor(item['context_output'], dtype=torch.float32), target_shape=(30, 30))
-                        context_pair = ContextPair(context_input=context_input, context_output=context_output)
-                        train_context_pairs.append(context_pair)
-                    except Exception as e:
-                        logger.error(f"Error processing context data for task {task_id} in file {filename}: {e}")
-                else:
-                    logger.warning(f"Missing 'context_input' or 'context_output' in train item for task {task_id} in file {filename}.")
+                # Create and append ContextPair using 'input' and 'output'
+                context_input = input_tensor  # Using input_tensor as context_input
+                context_output = output_tensor  # Using output_tensor as context_output
+                context_pair = ContextPair(context_input=context_input, context_output=context_output)
+                train_context_pairs.append(context_pair)
+                test_context_pairs.append(context_pair)
 
-                # Handle ContextPair creation with key checks
-                if 'context_input' in item and 'context_output' in item:
-                    try:
-                        context_input = pad_to_fixed_size(torch.tensor(item['context_input'], dtype=torch.float32), target_shape=(30, 30))
-                        context_output = pad_to_fixed_size(torch.tensor(item['context_output'], dtype=torch.float32), target_shape=(30, 30))
-                        context_pair = ContextPair(context_input=context_input, context_output=context_output)
-                        test_context_pairs.append(context_pair)
-                    except Exception as e:
-                        logger.error(f"Error processing context data for task {task_id} in file {filename}: {e}")
-                else:
-                    logger.warning(f"Missing 'context_input' or 'context_output' in test item for task {task_id} in file {filename}.")
+                # Assign task_id based on filename
+                train_task_ids.append(task_id)
 
                 # Assign task_id based on filename
                 train_task_ids.append(task_id)
 
             # Extract and pad test data
+            for item in data['test']:
+                input_tensor = pad_to_fixed_size(torch.tensor(item['input'], dtype=torch.float32), target_shape=(30, 30))
+                output_tensor = pad_to_fixed_size(torch.tensor(item['output'], dtype=torch.float32), target_shape=(30, 30))
+                test_inputs.append(input_tensor)
+                test_outputs.append(output_tensor)
+
+                # Create and append ContextPair using 'input' and 'output'
+                context_input = input_tensor  # Using input_tensor as context_input
+                context_output = output_tensor  # Using output_tensor as context_output
+                context_pair = ContextPair(context_input=context_input, context_output=context_output)
+                test_context_pairs.append(context_pair)
+
+                # Assign task_id based on filename
+                test_task_ids.append(task_id)
             for item in data['test']:
                 input_tensor = pad_to_fixed_size(torch.tensor(item['input'], dtype=torch.float32), target_shape=(30, 30))
                 output_tensor = pad_to_fixed_size(torch.tensor(item['output'], dtype=torch.float32), target_shape=(30, 30))
