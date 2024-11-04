@@ -8,7 +8,7 @@ import torch
 import numpy as np
 import logging
 from torch.utils.data import DataLoader, TensorDataset
-from config import include_sythtraining_data, batch_size
+from config import include_sythtraining_data, batch_size, synthetic_dir
 from Utils.context_data import ContextPair
 from Utils.padding_utils import pad_to_fixed_size
 
@@ -174,9 +174,9 @@ def prepare_data():
     # Load context pairs from 'training'
     load_context_pairs('training', context_map)
 
-    # Conditionally load context pairs from 'sythtraining'
+    # Conditionally load context pairs from synthetic_dir
     if include_sythtraining_data:
-        load_context_pairs('sythtraining', context_map)
+        load_context_pairs(synthetic_dir, context_map)
 
     # Load main dataset from 'training'
     load_main_data(
@@ -192,10 +192,10 @@ def prepare_data():
         test_context_pairs=test_context_pairs
     )
 
-    # Conditionally load main dataset from 'sythtraining'
+    # Conditionally load main dataset from synthetic_dir
     if include_sythtraining_data:
         load_main_data(
-            directory='sythtraining',
+            directory=synthetic_dir,
             context_map=context_map,
             train_inputs=train_inputs,
             train_outputs=train_outputs,
