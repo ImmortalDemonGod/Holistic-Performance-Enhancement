@@ -62,9 +62,9 @@ class TransformerModel(nn.Module):
 
         # Process main input
         x = self.input_fc(src)
-        print(f"After input_fc, x shape: {x.shape}")  # Print shape after input_fc
+        print(f"After input_fc (Linear layer: {src.shape[-1]} → {self.input_fc.out_features}), x shape: {x.shape}")
         x = self.positional_encoding(x)
-        print(f"After positional_encoding, x shape: {x.shape}")  # Print shape after positional_encoding
+        print(f"After positional_encoding (adds positional information), x shape: {x.shape}")
 
         # Integrate context if available
         if context_embedding is not None:
@@ -74,7 +74,7 @@ class TransformerModel(nn.Module):
             x = self.context_integration(
                 torch.cat([x, context_expanded], dim=-1)
             )
-            print(f"After context integration, x shape: {x.shape}")  # Print shape after context_integration
+            print(f"After context_integration (Concatenated with context_embedding and transformed from {x.shape[-1] * 2} → {x.shape[-1]}), x shape: {x.shape}")
         src = self.input_fc(src)
         src = self.positional_encoding(src)
         src = self.dropout(src)
@@ -82,10 +82,10 @@ class TransformerModel(nn.Module):
         print(f"Shape before encoder: {src.shape}")  # Print shape before encoder
         if self.encoder is not None:
             memory = self.encoder(src)
-            print(f"Memory shape after encoder: {memory.shape}")  # Print shape after encoder
+            print(f"Memory shape after encoder (TransformerEncoder applied), memory shape: {memory.shape}")
         else:
             memory = src  # If no encoder, pass input directly to decoder
-            print(f"Memory shape (no encoder): {memory.shape}")  # Print shape when encoder is not used
+            print(f"Memory shape (no encoder applied), memory shape: {memory.shape}")
         
         # Decoder
         tgt = self.input_fc(tgt)
@@ -96,16 +96,19 @@ class TransformerModel(nn.Module):
         print(f"Shape before decoder: {tgt.shape}")  # Print shape before decoder
         if self.decoder is not None:
             output = self.decoder(tgt, memory)
-            print(f"Output shape after decoder: {output.shape}")  # Print shape after decoder
+            print(f"Output shape after decoder (TransformerDecoder applied), output shape: {output.shape}")
         else:
             output = memory  # If no decoder, use memory directly
-            print(f"Output shape (no decoder): {output.shape}")  # Print shape when decoder is not used
+            print(f"Output shape (no decoder applied), output shape: {output.shape}")
         
         output = output.transpose(0, 1)  # Shape back to [batch_size, sequence_length, d_model]
-        print(f"Final output shape after transpose: {output.shape}")  # Print shape after transpose
+        output = output.transpose(0, 1)
+        print(f"After transpose (Shape changed to [Batch Size, Sequence Length, Feature Size]): {output.shape}")
+
         output = self.output_fc(output)
-        print(f"Final output shape after output_fc: {output.shape}")  # Print shape after output_fc
-        output = self.dequant(output)  # Dequantize output
-        print(f"Final output shape after dequant: {output.shape}")  # Print shape after dequant
+        print(f"After output_fc (Linear layer: {output.shape[2]} → {self.output_fc.out_features}), output shape: {output.shape}")
+
+        output = self.dequant(output)
+        print(f"After dequant (Dequantized output), output shape: {output.shape}")
         output = self.dequant(output)  # Dequantize output
         return output
