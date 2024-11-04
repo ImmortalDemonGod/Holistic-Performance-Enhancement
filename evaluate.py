@@ -37,7 +37,7 @@ test_loader = val_loader  # Replace with a separate test loader if available
 
 # Instantiate the model and load the checkpoint
 # Validate checkpoint path using the parsed argument
-checkpoint_path = 'epoch=epoch=2-val_loss=val_loss=0.6359.ckpt'
+checkpoint_path = '/workspaces/JARC-Reactor/lightning_logs/version_16/checkpoints/epoch=epoch=29-val_loss=val_loss=0.3991.ckpt'
 
 if checkpoint_path and not os.path.isfile(checkpoint_path):
     raise FileNotFoundError(
