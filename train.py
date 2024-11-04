@@ -53,12 +53,13 @@ class TransformerTrainer(pl.LightningModule):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
         return optimizer
 
-    def forward(self, src, tgt):
+    def forward(self, src, tgt, ctx_input=None, ctx_output=None):
+        return self.model(src.to("cpu"), tgt.to("cpu"), ctx_input, ctx_output)
         return self.model(src.to("cpu"), tgt.to("cpu"))
 
     def training_step(self, batch, batch_idx):
         src, tgt, ctx_input, ctx_output, task_ids = batch  # Unpack all 5 elements
-        y_hat = self(src, tgt)
+        y_hat = self(src, tgt, ctx_input, ctx_output)
 
         # Debugging: Print shapes of y_hat and tgt
         print(f"y_hat shape: {y_hat.shape}, tgt shape: {tgt.shape}")
@@ -78,7 +79,7 @@ class TransformerTrainer(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         src, tgt, ctx_input, ctx_output, task_ids = batch  # Unpack all 5 elements
-        y_hat = self(src, tgt)
+        y_hat = self(src, tgt, ctx_input, ctx_output)
 
         # Debugging: Print shapes of y_hat and tgt
         print(f"y_hat shape: {y_hat.shape}, tgt shape: {tgt.shape}")
@@ -97,8 +98,8 @@ class TransformerTrainer(pl.LightningModule):
 
 
     def test_step(self, batch, batch_idx):
-        src, tgt, task_ids = batch  # Ensure task_ids are included in the batch
-        y_hat = self(src, tgt)
+        src, tgt, ctx_input, ctx_output, task_ids = batch
+        y_hat = self(src, tgt, ctx_input, ctx_output)
 
         # Compute accuracy (modify according to your specific task)
         threshold = 0.1
