@@ -11,7 +11,7 @@ from Utils.padding_utils import pad_to_fixed_size
 
 # Initialize logging
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ def load_context_pairs(directory, context_map):
                 context_input=context_input,
                 context_output=context_output
             )
-            logger.debug(f"Created context pair for task '{task_id}' from '{directory}'")
+            # logger.debug(f"Created context pair for task '{task_id}' from '{directory}'")
         except Exception as e:
             logger.error(f"Error loading context for task '{task_id}' from '{filepath}': {str(e)}")
 
