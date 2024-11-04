@@ -55,7 +55,6 @@ class TransformerTrainer(pl.LightningModule):
 
     def forward(self, src, tgt, ctx_input=None, ctx_output=None):
         return self.model(src.to("cpu"), tgt.to("cpu"), ctx_input, ctx_output)
-        return self.model(src.to("cpu"), tgt.to("cpu"))
 
     def training_step(self, batch, batch_idx):
         src, tgt, ctx_input, ctx_output, task_ids = batch  # Unpack all 5 elements
