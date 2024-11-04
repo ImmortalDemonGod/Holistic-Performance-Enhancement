@@ -25,6 +25,11 @@ def inspect_data_structure(filename):
             logger.debug(f"Number of train examples: {len(data['train'])}")
             logger.debug(f"Number of test examples: {len(data['test'])}")
             logger.debug(f"Sample train input shape: {np.array(data['train'][0]['input']).shape}")
+            # Added lines to check context keys
+            logger.debug(f"Sample train context_input exists: {'context_input' in data['train'][0]}")
+            logger.debug(f"Sample train context_output exists: {'context_output' in data['train'][0]}")
+            logger.debug(f"Sample test context_input exists: {'context_input' in data['test'][0]}")
+            logger.debug(f"Sample test context_output exists: {'context_output' in data['test'][0]}")
             return True
     except Exception as e:
         logger.error(f"Error inspecting {filename}: {str(e)}")
@@ -67,17 +72,29 @@ def prepare_data():
                 train_inputs.append(input_tensor)
                 train_outputs.append(output_tensor)
 
-                # Create and append ContextPair
-                context_input = pad_to_fixed_size(torch.tensor(item['context_input'], dtype=torch.float32), target_shape=(30, 30))
-                context_output = pad_to_fixed_size(torch.tensor(item['context_output'], dtype=torch.float32), target_shape=(30, 30))
-                context_pair = ContextPair(context_input=context_input, context_output=context_output)
-                train_context_pairs.append(context_pair)
+                # Handle ContextPair creation with key checks
+                if 'context_input' in item and 'context_output' in item:
+                    try:
+                        context_input = pad_to_fixed_size(torch.tensor(item['context_input'], dtype=torch.float32), target_shape=(30, 30))
+                        context_output = pad_to_fixed_size(torch.tensor(item['context_output'], dtype=torch.float32), target_shape=(30, 30))
+                        context_pair = ContextPair(context_input=context_input, context_output=context_output)
+                        train_context_pairs.append(context_pair)
+                    except Exception as e:
+                        logger.error(f"Error processing context data for task {task_id} in file {filename}: {e}")
+                else:
+                    logger.warning(f"Missing 'context_input' or 'context_output' in train item for task {task_id} in file {filename}.")
 
-                # Create and append ContextPair
-                context_input = pad_to_fixed_size(torch.tensor(item['context_input'], dtype=torch.float32), target_shape=(30, 30))
-                context_output = pad_to_fixed_size(torch.tensor(item['context_output'], dtype=torch.float32), target_shape=(30, 30))
-                context_pair = ContextPair(context_input=context_input, context_output=context_output)
-                test_context_pairs.append(context_pair)
+                # Handle ContextPair creation with key checks
+                if 'context_input' in item and 'context_output' in item:
+                    try:
+                        context_input = pad_to_fixed_size(torch.tensor(item['context_input'], dtype=torch.float32), target_shape=(30, 30))
+                        context_output = pad_to_fixed_size(torch.tensor(item['context_output'], dtype=torch.float32), target_shape=(30, 30))
+                        context_pair = ContextPair(context_input=context_input, context_output=context_output)
+                        test_context_pairs.append(context_pair)
+                    except Exception as e:
+                        logger.error(f"Error processing context data for task {task_id} in file {filename}: {e}")
+                else:
+                    logger.warning(f"Missing 'context_input' or 'context_output' in test item for task {task_id} in file {filename}.")
 
                 # Assign task_id based on filename
                 train_task_ids.append(task_id)
