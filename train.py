@@ -1,4 +1,4 @@
-
+# train.py
 from config import include_sythtraining_data
 import logging
 import torch
@@ -21,20 +21,36 @@ from Utils.data_preparation import prepare_data
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class TransformerTrainer(pl.LightningModule):
-    def __init__(self, input_dim, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, learning_rate, include_sythtraining_data):
+    def __init__(
+        self,
+        input_dim,
+        d_model,
+        encoder_layers,
+        decoder_layers,
+        heads,
+        d_ff,
+        output_dim,
+        learning_rate,
+        include_sythtraining_data,
+    ):
         super(TransformerTrainer, self).__init__()
         self.save_hyperparameters()
+        from config import context_encoder_d_model, context_encoder_heads
+
         self.model = TransformerModel(
-            input_dim=self.hparams.input_dim,
-            d_model=self.hparams.d_model,
-            encoder_layers=self.hparams.encoder_layers,
-            decoder_layers=self.hparams.decoder_layers,
-            heads=self.hparams.heads,
-            d_ff=self.hparams.d_ff,
-            output_dim=self.hparams.output_dim
+            input_dim=self.hparams['input_dim'],
+            d_model=self.hparams['d_model'],
+            encoder_layers=self.hparams['encoder_layers'],
+            decoder_layers=self.hparams['decoder_layers'],
+            heads=self.hparams['heads'],
+            d_ff=self.hparams['d_ff'],
+            output_dim=self.hparams['output_dim'],
+            context_encoder_d_model=context_encoder_d_model,
+            context_encoder_heads=context_encoder_heads,
         )
-        self.learning_rate = self.hparams.learning_rate
+        self.learning_rate = self.hparams['learning_rate']
         self.device_choice = 'cpu'
         self.criterion = nn.CrossEntropyLoss()
 
@@ -42,14 +58,15 @@ class TransformerTrainer(pl.LightningModule):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
         return optimizer
 
-    def forward(self, src, tgt):
-        return self.model(src.to('cpu'), tgt.to('cpu'))
+    def forward(self, src, tgt, ctx_input=None, ctx_output=None):
+        return self.model(src.to("cpu"), tgt.to("cpu"), ctx_input, ctx_output)
 
     def training_step(self, batch, batch_idx):
-        src, tgt, _ = batch  # Unpack three elements, ignore task_id
-        y_hat = self(src, tgt)
+        src, tgt, ctx_input, ctx_output, task_ids = batch  # Unpack all 5 elements
+        y_hat = self(src, tgt, ctx_input, ctx_output)
+
         # Debugging: Print shapes of y_hat and tgt
-        print(f"y_hat shape: {y_hat.shape}, tgt shape: {tgt.shape}")
+        # print(f"y_hat shape: {y_hat.shape}, tgt shape: {tgt.shape}")
 
         # Reshape y_hat to match the target's shape
         y_hat = y_hat.view(-1, 11)
@@ -59,20 +76,17 @@ class TransformerTrainer(pl.LightningModule):
         y_hat = y_hat[valid_indices]
         tgt = tgt[valid_indices]
 
-        # Mask out padding values in the target
-        valid_indices = tgt != -1
-        y_hat = y_hat[valid_indices]
-        tgt = tgt[valid_indices]
-
         loss = self.criterion(y_hat, tgt)
         self.log('train_loss', loss, prog_bar=True)
+
         return loss
 
     def validation_step(self, batch, batch_idx):
-        src, tgt, _ = batch  # Unpack three elements, ignore task_id
-        y_hat = self(src, tgt)
+        src, tgt, ctx_input, ctx_output, task_ids = batch  # Unpack all 5 elements
+        y_hat = self(src, tgt, ctx_input, ctx_output)
+
         # Debugging: Print shapes of y_hat and tgt
-        print(f"y_hat shape: {y_hat.shape}, tgt shape: {tgt.shape}")
+        # print(f"y_hat shape: {y_hat.shape}, tgt shape: {tgt.shape}")
 
         # Reshape y_hat to match the target's shape
         y_hat = y_hat.view(-1, 11)
@@ -84,19 +98,36 @@ class TransformerTrainer(pl.LightningModule):
         loss = self.criterion(y_hat, tgt)
         self.log('val_loss', loss, prog_bar=True)
 
-        # Optionally, log or return predictions for further evaluation
-        # For example, you might want to calculate accuracy or other metrics
         return {'val_loss': loss, 'predictions': predictions, 'targets': tgt}
 
+
     def test_step(self, batch, batch_idx):
-        src, tgt, task_ids = batch  # Ensure task_ids are included in the batch
-        y_hat = self(src, tgt)
-        
+        src, tgt, ctx_input, ctx_output, task_ids = batch
+        y_hat = self(src, tgt, ctx_input, ctx_output)
+
         # Compute accuracy (modify according to your specific task)
         threshold = 0.1
         correct = (torch.abs(y_hat - tgt) < threshold).float()
         accuracy = correct.mean()
-        
-        self.log('test_accuracy', accuracy, prog_bar=True)
+
+        self.log("test_accuracy", accuracy, prog_bar=True)
         return accuracy
 
+
+
+def test_positional_encoding():
+    d_model = 512
+    batch_size = 2
+    height = 30
+    width = 30
+    
+    pos_enc = Grid2DPositionalEncoding(d_model)
+    x = torch.randn(batch_size, height * width, d_model)
+    
+    output = pos_enc(x)
+    logger.info(f"Input shape: {x.shape}")
+    logger.info(f"Output shape: {output.shape}")
+    logger.info(f"Position encoding added successfully: {(output - x != 0).any()}")
+
+if __name__ == "__main__":
+    test_positional_encoding()

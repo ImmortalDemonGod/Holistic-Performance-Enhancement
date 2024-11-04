@@ -4,3 +4,6 @@ ARC-AGI/*
 training/*
 lightning_logs/*
 __pycache__/*
+Utils/__pycache__/*
+sythtraining/*
+re_arc_50/*

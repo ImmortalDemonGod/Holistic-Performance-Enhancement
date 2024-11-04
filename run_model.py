@@ -13,7 +13,11 @@ if __name__ == '__main__':
     # Prepare data loaders for training and validation
     train_loader, val_loader = prepare_data()
 
-    # Set the quantization backend
+    # Calculate the number of training batches
+    num_training_batches = len(train_loader)
+
+    # Dynamically set log_every_n_steps to the smaller of 50 or the number of training batches
+    log_every_n_steps = min(50, num_training_batches) if num_training_batches > 0 else 1
     torch.backends.quantized.engine = 'qnnpack'  # Use 'fbgemm' for x86 platforms if needed
 
     # Validate checkpoint path
@@ -66,7 +70,8 @@ if __name__ == '__main__':
         devices=1,         # Use a single device (CPU)
         accelerator='gpu' if config.device_choice == 'cuda' else 'cpu', # Use GPU if specified
         precision=config.precision,  # Use precision from config
-        fast_dev_run=config.FAST_DEV_RUN  # Use config variable
+        fast_dev_run=config.FAST_DEV_RUN,  # Use config variable
+        log_every_n_steps=log_every_n_steps  # Dynamic logging interval
     )
 
     # Set ckpt_path based on config.CHECKPOINT_PATH
