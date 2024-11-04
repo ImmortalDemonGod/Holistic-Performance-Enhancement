@@ -83,9 +83,6 @@ def prepare_data():
                 # Assign task_id based on filename
                 train_task_ids.append(task_id)
 
-                # Assign task_id based on filename
-                train_task_ids.append(task_id)
-
             # Extract and pad test data
             for item in data['test']:
                 input_tensor = pad_to_fixed_size(torch.tensor(item['input'], dtype=torch.float32), target_shape=(30, 30))
@@ -97,16 +94,6 @@ def prepare_data():
                 context_input = input_tensor  # Using input_tensor as context_input
                 context_output = output_tensor  # Using output_tensor as context_output
                 context_pair = ContextPair(context_input=context_input, context_output=context_output)
-                test_context_pairs.append(context_pair)
-
-                # Assign task_id based on filename
-                test_task_ids.append(task_id)
-            for item in data['test']:
-                input_tensor = pad_to_fixed_size(torch.tensor(item['input'], dtype=torch.float32), target_shape=(30, 30))
-                output_tensor = pad_to_fixed_size(torch.tensor(item['output'], dtype=torch.float32), target_shape=(30, 30))
-                test_inputs.append(input_tensor)
-                test_outputs.append(output_tensor)
-
                 # Assign task_id based on filename
                 test_task_ids.append(task_id)
 
@@ -158,6 +145,10 @@ def prepare_data():
     train_context_outputs = torch.stack([pair.context_output for pair in train_context_pairs])
     test_context_inputs = torch.stack([pair.context_input for pair in test_context_pairs])
     test_context_outputs = torch.stack([pair.context_output for pair in test_context_pairs])
+
+    # Ensure that all tensors have matching sizes
+    assert train_inputs.size(0) == train_outputs.size(0) == train_context_inputs.size(0) == train_context_outputs.size(0) == train_task_ids_tensor.size(0), "Mismatch in training data tensor sizes."
+    assert test_inputs.size(0) == test_outputs.size(0) == test_context_inputs.size(0) == test_context_outputs.size(0) == test_task_ids_tensor.size(0), "Mismatch in testing data tensor sizes."
 
     # Create TensorDatasets with context data
     train_dataset = TensorDataset(train_inputs, train_outputs, train_context_inputs, train_context_outputs, train_task_ids_tensor)
