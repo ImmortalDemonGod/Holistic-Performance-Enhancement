@@ -103,9 +103,6 @@ class TransformerModel(nn.Module):
         else:
             output = memory  # If no decoder, use memory directly
             print(f"Output shape (no decoder): {output.shape}")  # Print shape when decoder is not used
-            output = self.decoder(tgt, memory)
-        else:
-            output = memory  # If no decoder, use memory directly
         
         output = output.transpose(0, 1)  # Shape back to [batch_size, sequence_length, d_model]
         print(f"Final output shape after transpose: {output.shape}")  # Print shape after transpose
