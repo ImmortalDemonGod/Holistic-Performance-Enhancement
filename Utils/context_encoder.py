@@ -33,10 +33,6 @@ class ContextEncoderModule(nn.Module):
         Returns:                                                                                                                                             
             context_embedding: [batch_size, d_model]                                                                                                         
         """                                                                                                                                                  
-        # Log shapes for debugging                                                                                                                           
-        logger.debug(f"Context input shape: {ctx_input.shape}")                                                                                              
-        logger.debug(f"Context output shape: {ctx_output.shape}")                                                                                            
-                                                                                                                                                            
         # Concatenate along sequence dimension                                                                                                               
         x = torch.cat([ctx_input, ctx_output], dim=1)                                                                                                        
                                                                                                                                                             
