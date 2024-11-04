@@ -4,6 +4,7 @@ import torch
 import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 from config import include_sythtraining_data, batch_size
+from Utils.context_data import ContextPair
 from Utils.padding_utils import pad_to_fixed_size
 import logging
 
@@ -47,6 +48,7 @@ def prepare_data():
         
     train_inputs, train_outputs, train_task_ids = [], [], []
     test_inputs, test_outputs, test_task_ids = [], [], []
+    train_context_pairs, test_context_pairs = [], []
 
     # Iterate over all JSON files in the 'training' directory
     for filename in os.listdir('training'):
@@ -64,6 +66,18 @@ def prepare_data():
                 output_tensor = pad_to_fixed_size(torch.tensor(item['output'], dtype=torch.float32), target_shape=(30, 30))
                 train_inputs.append(input_tensor)
                 train_outputs.append(output_tensor)
+
+                # Create and append ContextPair
+                context_input = pad_to_fixed_size(torch.tensor(item['context_input'], dtype=torch.float32), target_shape=(30, 30))
+                context_output = pad_to_fixed_size(torch.tensor(item['context_output'], dtype=torch.float32), target_shape=(30, 30))
+                context_pair = ContextPair(context_input=context_input, context_output=context_output)
+                train_context_pairs.append(context_pair)
+
+                # Create and append ContextPair
+                context_input = pad_to_fixed_size(torch.tensor(item['context_input'], dtype=torch.float32), target_shape=(30, 30))
+                context_output = pad_to_fixed_size(torch.tensor(item['context_output'], dtype=torch.float32), target_shape=(30, 30))
+                context_pair = ContextPair(context_input=context_input, context_output=context_output)
+                test_context_pairs.append(context_pair)
 
                 # Assign task_id based on filename
                 train_task_ids.append(task_id)
@@ -121,9 +135,15 @@ def prepare_data():
     train_task_ids_tensor = torch.tensor(train_task_ids_encoded, dtype=torch.long)
     test_task_ids_tensor = torch.tensor(test_task_ids_encoded, dtype=torch.long)
 
-    # Create TensorDatasets with encoded task_ids
-    train_dataset = TensorDataset(train_inputs, train_outputs, train_task_ids_tensor)
-    test_dataset = TensorDataset(test_inputs, test_outputs, test_task_ids_tensor)
+    # Convert ContextPair lists to tensors
+    train_context_inputs = torch.stack([pair.context_input for pair in train_context_pairs])
+    train_context_outputs = torch.stack([pair.context_output for pair in train_context_pairs])
+    test_context_inputs = torch.stack([pair.context_input for pair in test_context_pairs])
+    test_context_outputs = torch.stack([pair.context_output for pair in test_context_pairs])
+
+    # Create TensorDatasets with context data
+    train_dataset = TensorDataset(train_inputs, train_outputs, train_context_inputs, train_context_outputs, train_task_ids_tensor)
+    test_dataset = TensorDataset(test_inputs, test_outputs, test_context_inputs, test_context_outputs, test_task_ids_tensor)
 
     # Optional: Save the task_id_map
     logger.info("Saved task_id_map.json with the current task mappings.")
