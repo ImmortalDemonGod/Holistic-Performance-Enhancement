@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.quantization
 from config import dropout_rate, encoder_layers, decoder_layers
-from torch.nn import TransformerDecoder, TransformerDecoderLayer
+from torch.nn import TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder
 from Utils.positional_encoding import PositionalEncoding
 from Utils.context_encoder import ContextEncoderModule
 
@@ -15,15 +15,15 @@ class TransformerModel(nn.Module):
         self.positional_encoding = PositionalEncoding(d_model)
         # Conditionally create the encoder
         if encoder_layers > 0:
-            encoder_layer = nn.TransformerEncoderLayer(d_model, heads, d_ff, batch_first=True)
-            self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=encoder_layers)
+            encoder_layer = TransformerEncoderLayer(d_model, heads, d_ff, batch_first=True)
+            self.encoder = TransformerEncoder(encoder_layer, num_layers=encoder_layers)
         else:
             print("No context embedding available.")  # Indicate absence of context embedding
             self.encoder = None
         
         # Conditionally create the decoder
         if decoder_layers > 0:
-            decoder_layer = nn.TransformerDecoderLayer(d_model, heads, d_ff, batch_first=True)
+            decoder_layer = TransformerDecoderLayer(d_model, heads, d_ff, batch_first=True)
             self.decoder = TransformerDecoder(decoder_layer, num_layers=decoder_layers)
         else:
             self.decoder = None
