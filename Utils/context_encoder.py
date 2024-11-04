@@ -51,6 +51,4 @@ class ContextEncoderModule(nn.Module):
                                                                                                                                                             
         # Pool context embedding                                                                                                                             
         context_embedding = x.mean(dim=1)                                                                                                                    
-                                                                                                                                                            
-        logger.debug(f"Context embedding shape: {context_embedding.shape}")                                                                                  
         return context_embedding 
