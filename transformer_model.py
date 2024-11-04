@@ -17,9 +17,6 @@ class TransformerModel(nn.Module):
         if encoder_layers > 0:
             encoder_layer = nn.TransformerEncoderLayer(d_model, heads, d_ff, batch_first=True)
             self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=encoder_layers)
-            print(f"Quantized ctx_input shape: {ctx_input.shape}")  # Print shape of quantized ctx_input
-            print(f"Quantized ctx_output shape: {ctx_output.shape}")  # Print shape of quantized ctx_output
-            print(f"Context embedding shape: {context_embedding.shape}")  # Print shape of context_embedding
         else:
             print("No context embedding available.")  # Indicate absence of context embedding
             self.encoder = None
