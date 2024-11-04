@@ -7,6 +7,7 @@ from config import dropout_rate, encoder_layers, decoder_layers
 from torch.nn import TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder
 from Utils.positional_encoding import Grid2DPositionalEncoding
 from Utils.context_encoder import ContextEncoderModule
+from config import context_encoder_d_model, context_encoder_heads
 
 class TransformerModel(nn.Module):
     def __init__(self, input_dim, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim):
