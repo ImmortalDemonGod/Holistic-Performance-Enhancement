@@ -3,6 +3,7 @@ from validation_finetuning import ValidationFineTuner
 from train import TransformerTrainer
 from Utils.data_preparation import prepare_data
 import logging
+from validation_finetuning import log_exception
 import json
 
 def test_fine_tuning():
