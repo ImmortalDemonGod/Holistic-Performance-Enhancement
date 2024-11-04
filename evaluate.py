@@ -4,8 +4,10 @@ import os
 import torch
 from train import TransformerTrainer, prepare_data
 from pytorch_lightning import Trainer
+
 from Utils.metrics import compute_standard_accuracy, compute_differential_accuracy, TaskMetricsCollector
 import config
+
 
 import json
 import argparse
@@ -14,13 +16,14 @@ from config import device_choice
 # Add argument parser for command-line arguments
 parser = argparse.ArgumentParser(description='Evaluate the Transformer model with a specified checkpoint.')
 #parser.add_argument('--checkpoint', type=str, required=True, help='Path to the checkpoint file.')
+
 args = parser.parse_args()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Load the task_id_map
 logger.info("Loading task_id_map.json...")
-with open('task_id_map.json', 'r') as f:
+with open("task_id_map.json", "r") as f:
     task_id_map = json.load(f)
 
 logger.info("Loaded task_id_map successfully.")
@@ -37,7 +40,9 @@ test_loader = val_loader  # Replace with a separate test loader if available
 checkpoint_path = 'epoch=epoch=2-val_loss=val_loss=0.6359.ckpt'
 
 if checkpoint_path and not os.path.isfile(checkpoint_path):
-    raise FileNotFoundError(f"Checkpoint file not found at {checkpoint_path}. Please provide a valid path.")
+    raise FileNotFoundError(
+        f"Checkpoint file not found at {checkpoint_path}. Please provide a valid path."
+    )
 
 model = TransformerTrainer.load_from_checkpoint(checkpoint_path, strict=True)
 logger.info("Loaded model from checkpoint.")
@@ -53,6 +58,7 @@ trainer = Trainer(
     accelerator=accelerator,  # Use device_choice from config
     logger=False,           # Disable loggers
     enable_progress_bar=True  # Enable progress bar for visibility
+
 )
 
 # Initialize the metrics collector
@@ -72,9 +78,9 @@ for batch_idx, batch in enumerate(test_loader):
         # Convert integer task_id back to string
         task_id = int_to_task_id[task_id_int.item()]
         # Get individual task tensors
-        task_input = src[idx:idx+1]
-        task_target = tgt[idx:idx+1]
-        task_pred = predictions[idx:idx+1]
+        task_input = src[idx : idx + 1]
+        task_target = tgt[idx : idx + 1]
+        task_pred = predictions[idx : idx + 1]
 
         # Ensure task_pred and task_target have compatible shapes
         task_pred = task_pred.view(-1, 30)[:, 0]  # Flatten to 1D
@@ -82,15 +88,12 @@ for batch_idx, batch in enumerate(test_loader):
 
         # Calculate metrics
         std_acc = compute_standard_accuracy(task_pred, task_target)
-        diff_acc = compute_differential_accuracy(
-            task_input, task_target, task_pred
-        )
+        diff_acc = compute_differential_accuracy(task_input, task_target, task_pred)
 
         # Store results
-        metrics_collector.add_result(task_id, {
-            'standard_accuracy': std_acc,
-            'differential_accuracy': diff_acc
-        })
+        metrics_collector.add_result(
+            task_id, {"standard_accuracy": std_acc, "differential_accuracy": diff_acc}
+        )
 
 logger.info("Evaluation completed.")
 task_summaries = metrics_collector.get_task_summary()
@@ -100,11 +103,15 @@ all_std_accs = []
 all_diff_accs = []
 
 for task_metrics in task_summaries.values():
-    all_std_accs.append(task_metrics['standard_accuracy'])
-    all_diff_accs.append(task_metrics['differential_accuracy'])
+    all_std_accs.append(task_metrics["standard_accuracy"])
+    all_diff_accs.append(task_metrics["differential_accuracy"])
 
-overall_standard_accuracy = sum(all_std_accs) / len(all_std_accs) if all_std_accs else 0.0
-overall_differential_accuracy = sum(all_diff_accs) / len(all_diff_accs) if all_diff_accs else 0.0
+overall_standard_accuracy = (
+    sum(all_std_accs) / len(all_std_accs) if all_std_accs else 0.0
+)
+overall_differential_accuracy = (
+    sum(all_diff_accs) / len(all_diff_accs) if all_diff_accs else 0.0
+)
 
 # Print the aggregated metrics
 logger.info("All metrics have been computed and displayed.")
@@ -112,13 +119,17 @@ print(f"Overall Standard Accuracy: {overall_standard_accuracy:.4f}")
 print(f"Overall Differential Accuracy: {overall_differential_accuracy:.4f}")
 print("Per-Task Metrics:")
 for task_id, metrics in task_summaries.items():
-    std_acc = metrics['standard_accuracy']
-    diff_acc = metrics['differential_accuracy']
-    print(f"Task {task_id}: Standard Accuracy = {std_acc:.4f}, "
-          f"Differential Accuracy = {diff_acc:.4f}")
-    
+    std_acc = metrics["standard_accuracy"]
+    diff_acc = metrics["differential_accuracy"]
+    print(
+        f"Task {task_id}: Standard Accuracy = {std_acc:.4f}, "
+        f"Differential Accuracy = {diff_acc:.4f}"
+    )
+
     # Check if the task was completely solved
     if std_acc >= 0.999:
-        print(f"--> Task {task_id} was completely solved with {std_acc*100:.2f}% accuracy.\n")
+        print(
+            f"--> Task {task_id} was completely solved with {std_acc*100:.2f}% accuracy.\n"
+        )
 
 # No main function is defined, so we remove the call to it
