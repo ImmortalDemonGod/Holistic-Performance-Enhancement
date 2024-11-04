@@ -55,47 +55,143 @@ def prepare_data():
         
     train_inputs, train_outputs, train_task_ids = [], [], []
     test_inputs, test_outputs, test_task_ids = [], [], []
-    train_context_pairs, test_context_pairs = [], []
+    context_map = {}
 
-    # Iterate over all JSON files in the 'training' directory
+    # First pass: Load context pairs for each task
+    logger.info("Loading context pairs...")
     for filename in os.listdir('training'):
         if filename.endswith('.json'):
-            # Extract task_id from filename (e.g., 'task_1.json' -> 'task_1')
             task_id = os.path.splitext(filename)[0]
-
-            #logger.info(f"Loading training data for task_id: {task_id} from file: {filename}")
-            with open(os.path.join('training', filename), 'r') as f:
-                data = json.load(f)
-
-            # Extract and pad training data
-            for item in data['train']:
-                input_tensor = pad_to_fixed_size(torch.tensor(item['input'], dtype=torch.float32), target_shape=(30, 30))
-                output_tensor = pad_to_fixed_size(torch.tensor(item['output'], dtype=torch.float32), target_shape=(30, 30))
-                train_inputs.append(input_tensor)
-                train_outputs.append(output_tensor)
-
-                # Create and append ContextPair using 'input' and 'output'
-                context_input = input_tensor  # Using input_tensor as context_input
-                context_output = output_tensor  # Using output_tensor as context_output
-                context_pair = ContextPair(context_input=context_input, context_output=context_output)
-                train_context_pairs.append(context_pair)
-
-                # Assign task_id based on filename
-                train_task_ids.append(task_id)
-
-            # Extract and pad test data
-            for item in data['test']:
-                input_tensor = pad_to_fixed_size(torch.tensor(item['input'], dtype=torch.float32), target_shape=(30, 30))
-                output_tensor = pad_to_fixed_size(torch.tensor(item['output'], dtype=torch.float32), target_shape=(30, 30))
-                test_inputs.append(input_tensor)
-                test_outputs.append(output_tensor)
-
-                # Create and append ContextPair using 'input' and 'output'
-                context_input = input_tensor  # Using input_tensor as context_input
-                context_output = output_tensor  # Using output_tensor as context_output
-                context_pair = ContextPair(context_input=context_input, context_output=context_output)
-                # Assign task_id based on filename
-                test_task_ids.append(task_id)
+            try:
+                with open(os.path.join('training', filename), 'r') as f:
+                    data = json.load(f)
+                
+                if 'train' not in data or 'test' not in data:
+                    logger.error(f"Missing 'train' or 'test' key in {filename}")
+                    continue
+                
+                if len(data['train']) > 0:
+                    context_example = data['train'][0]
+                    context_input = pad_to_fixed_size(
+                        torch.tensor(context_example['input'], dtype=torch.float32),
+                        target_shape=(30, 30)
+                    )
+                    context_output = pad_to_fixed_size(
+                        torch.tensor(context_example['output'], dtype=torch.float32),
+                        target_shape=(30, 30)
+                    )
+                    context_map[task_id] = ContextPair(
+                        context_input=context_input,
+                        context_output=context_output
+                    )
+                    logger.debug(f"Created context pair for task {task_id}")
+            except Exception as e:
+                logger.error(f"Error loading context for task {task_id}: {str(e)}")
+    
+    if include_sythtraining_data:
+        logger.info("Loading synthetic context pairs from 'sythtraining'...")
+        for filename in os.listdir('sythtraining'):
+            if filename.endswith('.json'):
+                task_id = os.path.splitext(filename)[0]
+                try:
+                    with open(os.path.join('sythtraining', filename), 'r') as f:
+                        data = json.load(f)
+                    
+                    if 'input' in data[0] and 'output' in data[0]:
+                        context_example = data[0]
+                        context_input = pad_to_fixed_size(
+                            torch.tensor(context_example['input'], dtype=torch.float32),
+                            target_shape=(30, 30)
+                        )
+                        context_output = pad_to_fixed_size(
+                            torch.tensor(context_example['output'], dtype=torch.float32),
+                            target_shape=(30, 30)
+                        )
+                        context_map[task_id] = ContextPair(
+                            context_input=context_input,
+                            context_output=context_output
+                        )
+                        logger.debug(f"Created synthetic context pair for task {task_id}")
+                except Exception as e:
+                    logger.error(f"Error loading synthetic context for task {task_id}: {str(e)}")
+    
+    # Second pass: Load training and test data
+    logger.info("Loading main dataset...")
+    for filename in os.listdir('training'):
+        if filename.endswith('.json'):
+            task_id = os.path.splitext(filename)[0]
+            
+            if task_id not in context_map:
+                logger.warning(f"Skipping {task_id} - no context pair available")
+                continue
+                
+            try:
+                with open(os.path.join('training', filename), 'r') as f:
+                    data = json.load(f)
+                
+                for item in data['train'][1:]:
+                    input_tensor = pad_to_fixed_size(
+                        torch.tensor(item['input'], dtype=torch.float32),
+                        target_shape=(30, 30)
+                    )
+                    output_tensor = pad_to_fixed_size(
+                        torch.tensor(item['output'], dtype=torch.float32),
+                        target_shape=(30, 30)
+                    )
+                    
+                    train_inputs.append(input_tensor)
+                    train_outputs.append(output_tensor)
+                    train_task_ids.append(task_id)
+                
+                for item in data['test']:
+                    input_tensor = pad_to_fixed_size(
+                        torch.tensor(item['input'], dtype=torch.float32),
+                        target_shape=(30, 30)
+                    )
+                    output_tensor = pad_to_fixed_size(
+                        torch.tensor(item['output'], dtype=torch.float32),
+                        target_shape=(30, 30)
+                    )
+                    
+                    test_inputs.append(input_tensor)
+                    test_outputs.append(output_tensor)
+                    test_task_ids.append(task_id)
+                    
+            except Exception as e:
+                logger.error(f"Error processing file {filename}: {str(e)}")
+                continue
+    
+    if include_sythtraining_data:
+        logger.info("Loading synthetic main dataset from 'sythtraining'...")
+        for filename in os.listdir('sythtraining'):
+            if filename.endswith('.json'):
+                task_id = os.path.splitext(filename)[0]
+                
+                if task_id not in context_map:
+                    logger.warning(f"Skipping synthetic {task_id} - no context pair available")
+                    continue
+                    
+                try:
+                    with open(os.path.join('sythtraining', filename), 'r') as f:
+                        data = json.load(f)
+                    
+                    for item in data[1:]:
+                        input_tensor = pad_to_fixed_size(
+                            torch.tensor(item['input'], dtype=torch.float32),
+                            target_shape=(30, 30)
+                        )
+                        output_tensor = pad_to_fixed_size(
+                            torch.tensor(item['output'], dtype=torch.float32),
+                            target_shape=(30, 30)
+                        )
+                        
+                        train_inputs.append(input_tensor)
+                        train_outputs.append(output_tensor)
+                        train_task_ids.append(task_id)
+                        
+                except Exception as e:
+                    logger.error(f"Error processing synthetic file {filename}: {str(e)}")
+                    continue
 
     # Conditionally load data from the 'sythtraining' directory
     if include_sythtraining_data:
