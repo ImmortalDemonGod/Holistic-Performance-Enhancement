@@ -9,7 +9,7 @@ class ContextEncoderModule(nn.Module):
     """Context encoder following PQA architecture"""                                                                                                         
     def __init__(self, d_model, heads, dropout=0.1):                                                                                                         
         super().__init__()                                                                                                                                   
-        self.input_projection = nn.Linear(1, d_model)                                                                                                        
+        self.input_projection = nn.Linear(30, d_model)                                                                                                       
         self.self_attention = nn.MultiheadAttention(                                                                                                         
             d_model, heads, batch_first=True, dropout=dropout                                                                                                
         )                                                                                                                                                    
@@ -37,7 +37,7 @@ class ContextEncoderModule(nn.Module):
         x = torch.cat([ctx_input, ctx_output], dim=1)                                                                                                        
                                                                                                                                                             
         # Add channel dimension and project                                                                                                                  
-        x = self.input_projection(x.unsqueeze(-1))                                                                                                           
+        x = self.input_projection(x)                                                                                                                         
                                                                                                                                                             
         # Self-attention with residual and normalization                                                                                                     
         attn_out, _ = self.self_attention(x, x, x)                                                                                                           
