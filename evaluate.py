@@ -1,4 +1,5 @@
 import logging
+import config  # Imported config module
 import config
 import os
 import torch
@@ -15,7 +16,7 @@ from config import device_choice
 
 # Add argument parser for command-line arguments
 parser = argparse.ArgumentParser(description='Evaluate the Transformer model with a specified checkpoint.')
-#parser.add_argument('--checkpoint', type=str, required=True, help='Path to the checkpoint file.')
+# parser.add_argument('--checkpoint', type=str, required=True, help='Path to the checkpoint file.')
 
 args = parser.parse_args()
 logging.basicConfig(level=logging.INFO)
@@ -37,7 +38,7 @@ test_loader = val_loader  # Replace with a separate test loader if available
 
 # Instantiate the model and load the checkpoint
 # Validate checkpoint path using the parsed argument
-checkpoint_path = '/workspaces/JARC-Reactor/lightning_logs/version_23/checkpoints/epoch=epoch=96-val_loss=val_loss=0.1837.ckpt'  # Replace with the actual path
+checkpoint_path = config.CHECKPOINT_PATH  # Updated to use config
 
 if checkpoint_path and not os.path.isfile(checkpoint_path):
     raise FileNotFoundError(
