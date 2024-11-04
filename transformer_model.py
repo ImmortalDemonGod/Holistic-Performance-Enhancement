@@ -48,9 +48,9 @@ class TransformerModel(nn.Module):
 
     def forward(self, src, tgt, ctx_input=None, ctx_output=None):
         src = self.quant(src)  # Quantize input
-        print(f"Quantized src shape: {src.shape}")  # Print shape of quantized src
+        print(f"Quantized src shape: {src.shape} (Batch Size: {src.shape[0]}, Sequence Length: {src.shape[1]}, Feature Size: {src.shape[2]})")
         tgt = self.quant(tgt)  # Quantize target
-        print(f"Quantized tgt shape: {tgt.shape}")  # Print shape of quantized tgt
+        print(f"Quantized tgt shape: {tgt.shape} (Batch Size: {tgt.shape[0]}, Sequence Length: {tgt.shape[1]}, Feature Size: {tgt.shape[2]})")
 
         # Process context if available
         if ctx_input is not None and ctx_output is not None:
