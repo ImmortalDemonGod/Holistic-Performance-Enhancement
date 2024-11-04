@@ -62,7 +62,7 @@ class TransformerTrainer(pl.LightningModule):
         y_hat = self(src, tgt, ctx_input, ctx_output)
 
         # Debugging: Print shapes of y_hat and tgt
-        print(f"y_hat shape: {y_hat.shape}, tgt shape: {tgt.shape}")
+        # print(f"y_hat shape: {y_hat.shape}, tgt shape: {tgt.shape}")
 
         # Reshape y_hat to match the target's shape
         y_hat = y_hat.view(-1, 11)
@@ -82,7 +82,7 @@ class TransformerTrainer(pl.LightningModule):
         y_hat = self(src, tgt, ctx_input, ctx_output)
 
         # Debugging: Print shapes of y_hat and tgt
-        print(f"y_hat shape: {y_hat.shape}, tgt shape: {tgt.shape}")
+        # print(f"y_hat shape: {y_hat.shape}, tgt shape: {tgt.shape}")
 
         # Reshape y_hat to match the target's shape
         y_hat = y_hat.view(-1, 11)
