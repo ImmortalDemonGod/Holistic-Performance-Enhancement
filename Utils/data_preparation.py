@@ -31,14 +31,20 @@ def inspect_data_structure(filename):
 
 def prepare_data():
     logger.info("Starting data preparation...")
+    log_limit = 2
+    log_count = 0
     successful_files = 0
     total_files = 0
     for filename in os.listdir('training'):
         if filename.endswith('.json'):
             total_files += 1
-            if inspect_data_structure(filename):
+            log_count += 1
+            if log_count <= log_limit and inspect_data_structure(filename):
                 successful_files += 1
     logger.info(f"Successfully processed {successful_files}/{total_files} files")
+    if log_count > log_limit:
+        logger.debug(f"Se suprimieron los logs para los archivos adicionales después del primero {log_limit}.")
+        
     train_inputs, train_outputs, train_task_ids = [], [], []
     test_inputs, test_outputs, test_task_ids = [], [], []
 
