@@ -78,7 +78,6 @@ def prepare_data():
                 context_output = output_tensor  # Using output_tensor as context_output
                 context_pair = ContextPair(context_input=context_input, context_output=context_output)
                 train_context_pairs.append(context_pair)
-                test_context_pairs.append(context_pair)
 
                 # Assign task_id based on filename
                 train_task_ids.append(task_id)
@@ -146,9 +145,21 @@ def prepare_data():
     test_context_inputs = torch.stack([pair.context_input for pair in test_context_pairs])
     test_context_outputs = torch.stack([pair.context_output for pair in test_context_pairs])
 
-    # Ensure that all tensors have matching sizes
+    # Add Diagnostic Logging
+    logger.debug(f"Test Data Sizes - test_inputs: {len(test_inputs)}, "
+                 f"test_outputs: {len(test_outputs)}, "
+                 f"test_context_inputs: {len(test_context_pairs)}, "
+                 f"test_context_outputs: {len(test_context_pairs)}, "
+                 f"test_task_ids: {len(test_task_ids)}")
     assert train_inputs.size(0) == train_outputs.size(0) == train_context_inputs.size(0) == train_context_outputs.size(0) == train_task_ids_tensor.size(0), "Mismatch in training data tensor sizes."
-    assert test_inputs.size(0) == test_outputs.size(0) == test_context_inputs.size(0) == test_context_outputs.size(0) == test_task_ids_tensor.size(0), "Mismatch in testing data tensor sizes."
+    assert test_inputs.size(0) == test_outputs.size(0) == test_context_inputs.size(0) == test_context_outputs.size(0) == test_task_ids_tensor.size(0), (
+        f"Mismatch in testing data tensor sizes: "
+        f"test_inputs={test_inputs.size(0)}, "
+        f"test_outputs={test_outputs.size(0)}, "
+        f"test_context_inputs={test_context_inputs.size(0)}, "
+        f"test_context_outputs={test_context_outputs.size(0)}, "
+        f"test_task_ids={test_task_ids_tensor.size(0)}"
+    )
 
     # Create TensorDatasets with context data
     train_dataset = TensorDataset(train_inputs, train_outputs, train_context_inputs, train_context_outputs, train_task_ids_tensor)
