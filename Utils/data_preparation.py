@@ -44,7 +44,7 @@ def prepare_data():
                 successful_files += 1
     logger.info(f"Successfully processed {successful_files}/{total_files} files")
     if log_count > log_limit:
-        logger.debug(f"Se suprimieron los logs para los archivos adicionales después del primero {log_limit}.")
+        logger.debug(f"Suppressed logging for additional files after the first {log_limit}.")
         
     train_inputs, train_outputs, train_task_ids = [], [], []
     test_inputs, test_outputs, test_task_ids = [], [], []
