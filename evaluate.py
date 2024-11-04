@@ -37,8 +37,8 @@ logger.info("Data loaders prepared.")
 test_loader = val_loader  # Replace with a separate test loader if available
 
 # Instantiate the model and load the checkpoint
-# Validate checkpoint path using the parsed argument
-checkpoint_path = config.CHECKPOINT_PATH  # Updated to use config
+# Validate checkpoint path using the config
+checkpoint_path = config.CHECKPOINT_PATH
 
 if checkpoint_path and not os.path.isfile(checkpoint_path):
     raise FileNotFoundError(
