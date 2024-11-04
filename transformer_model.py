@@ -89,9 +89,6 @@ class TransformerModel(nn.Module):
         else:
             memory = src  # If no encoder, pass input directly to decoder
             print(f"Memory shape (no encoder): {memory.shape}")  # Print shape when encoder is not used
-            memory = self.encoder(src)
-        else:
-            memory = src  # If no encoder, pass input directly to decoder
         
         # Decoder
         tgt = self.input_fc(tgt)
