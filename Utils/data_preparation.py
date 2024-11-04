@@ -1,16 +1,44 @@
 import os
 import json
 import torch
+import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 from config import include_sythtraining_data, batch_size
 from Utils.padding_utils import pad_to_fixed_size
 import logging
 
 # Initialize logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
+def inspect_data_structure(filename):
+    """Debug helper to examine JSON structure"""
+    try:
+        with open(os.path.join('training', filename), 'r') as f:
+            data = json.load(f)
+            logger.debug(f"File structure for {filename}:")
+            logger.debug(f"Keys in data: {list(data.keys())}")
+            logger.debug(f"Number of train examples: {len(data['train'])}")
+            logger.debug(f"Number of test examples: {len(data['test'])}")
+            logger.debug(f"Sample train input shape: {np.array(data['train'][0]['input']).shape}")
+            return True
+    except Exception as e:
+        logger.error(f"Error inspecting {filename}: {str(e)}")
+        return False
+
 def prepare_data():
+    logger.info("Starting data preparation...")
+    successful_files = 0
+    total_files = 0
+    for filename in os.listdir('training'):
+        if filename.endswith('.json'):
+            total_files += 1
+            if inspect_data_structure(filename):
+                successful_files += 1
+    logger.info(f"Successfully processed {successful_files}/{total_files} files")
     train_inputs, train_outputs, train_task_ids = [], [], []
     test_inputs, test_outputs, test_task_ids = [], [], []
 
