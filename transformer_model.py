@@ -5,14 +5,14 @@ import torch.nn.functional as F
 import torch.quantization
 from config import dropout_rate, encoder_layers, decoder_layers
 from torch.nn import TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder
-from Utils.positional_encoding import PositionalEncoding
+from Utils.positional_encoding import Grid2DPositionalEncoding
 from Utils.context_encoder import ContextEncoderModule
 
 class TransformerModel(nn.Module):
     def __init__(self, input_dim, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim):
         super(TransformerModel, self).__init__()
         self.input_fc = nn.Linear(input_dim, d_model)
-        self.positional_encoding = PositionalEncoding(d_model)
+        self.positional_encoding = Grid2DPositionalEncoding(d_model)
         # Conditionally create the encoder
         if encoder_layers > 0:
             encoder_layer = TransformerEncoderLayer(d_model, heads, d_ff, batch_first=True)
@@ -75,40 +75,34 @@ class TransformerModel(nn.Module):
                 torch.cat([x, context_expanded], dim=-1)
             )
             # print(f"After context_integration (Concatenated with context_embedding and transformed from {x.shape[-1] * 2} → {x.shape[-1]}), x shape: {x.shape}")
-        src = self.input_fc(src)
-        src = self.positional_encoding(src)
-        src = self.dropout(src)
-        src = src.transpose(0, 1)  # Shape becomes [sequence_length, batch_size, d_model]
-        # print(f"Shape before encoder: {src.shape}")  # Print shape before encoder
+        # Reshape input for 2D positional encoding
+        batch_size, seq_len, _ = src.shape
+        x = self.input_fc(src)
+        x = self.positional_encoding(x)  # Now uses 2D positional encoding
+        
+        # Context integration
+        if context_embedding is not None:
+            context_expanded = context_embedding.unsqueeze(1).expand(-1, x.size(1), -1)
+            x = self.context_integration(torch.cat([x, context_expanded], dim=-1))
+        
+        # Rest of the processing remains the same
+        x = self.dropout(x)
+        x = x.transpose(0, 1)
+        
         if self.encoder is not None:
-            memory = self.encoder(src)
-            # print(f"Memory shape after encoder (TransformerEncoder applied), memory shape: {memory.shape}")
+            memory = self.encoder(x)
         else:
-            memory = src  # If no encoder, pass input directly to decoder
-            # print(f"Memory shape (no encoder applied), memory shape: {memory.shape}")
+            memory = x
         
-        # Decoder
-        tgt = self.input_fc(tgt)
-        tgt = self.positional_encoding(tgt)
-        tgt = self.dropout(tgt)
-        tgt = tgt.transpose(0, 1)  # Shape becomes [sequence_length, batch_size, d_model]
-        
-        # print(f"Shape before decoder: {tgt.shape}")  # Print shape before decoder
         if self.decoder is not None:
+            tgt = self.input_fc(tgt)
+            tgt = self.positional_encoding(tgt)
+            tgt = self.dropout(tgt)
+            tgt = tgt.transpose(0, 1)
             output = self.decoder(tgt, memory)
-            # print(f"Output shape after decoder (TransformerDecoder applied), output shape: {output.shape}")
         else:
-            output = memory  # If no decoder, use memory directly
-            # print(f"Output shape (no decoder applied), output shape: {output.shape}")
+            output = memory
         
-        output = output.transpose(0, 1)  # Shape back to [batch_size, sequence_length, d_model]
         output = output.transpose(0, 1)
-        # print(f"After transpose (Shape changed to [Batch Size, Sequence Length, Feature Size]): {output.shape}")
-
         output = self.output_fc(output)
-        # print(f"After output_fc (Linear layer: {output.shape[2]} → {self.output_fc.out_features}), output shape: {output.shape}")
-
-        output = self.dequant(output)
-        # print(f"After dequant (Dequantized output), output shape: {output.shape}")
-        output = self.dequant(output)  # Dequantize output
-        return output
+        return self.dequant(output)
