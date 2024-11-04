@@ -56,6 +56,7 @@ def prepare_data():
     train_inputs, train_outputs, train_task_ids = [], [], []
     test_inputs, test_outputs, test_task_ids = [], [], []
     context_map = {}
+    train_context_pairs, test_context_pairs = [], []
 
     # First pass: Load context pairs for each task
     logger.info("Loading context pairs...")
@@ -142,6 +143,7 @@ def prepare_data():
                     train_inputs.append(input_tensor)
                     train_outputs.append(output_tensor)
                     train_task_ids.append(task_id)
+                    train_context_pairs.append(context_map[task_id])
                 
                 for item in data['test']:
                     input_tensor = pad_to_fixed_size(
@@ -156,6 +158,7 @@ def prepare_data():
                     test_inputs.append(input_tensor)
                     test_outputs.append(output_tensor)
                     test_task_ids.append(task_id)
+                    test_context_pairs.append(context_map[task_id])
                     
             except Exception as e:
                 logger.error(f"Error processing file {filename}: {str(e)}")
