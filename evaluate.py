@@ -67,9 +67,9 @@ metrics_collector = TaskMetricsCollector()
 # Perform evaluation
 logger.info("Starting evaluation...")
 for batch_idx, batch in enumerate(test_loader):
-    src, tgt, task_ids = batch  # Ensure task_ids are included
+    src, tgt, ctx_input, ctx_output, task_ids = batch  # Unpack all 5 elements
     with torch.no_grad():
-        outputs = model(src, tgt)
+        outputs = model(src, tgt, ctx_input, ctx_output)  # Pass context data
         predictions = outputs.argmax(dim=-1)  # Assuming output is logits
 
     if (batch_idx + 1) % 10 == 0:
