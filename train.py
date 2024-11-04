@@ -37,6 +37,8 @@ class TransformerTrainer(pl.LightningModule):
     ):
         super(TransformerTrainer, self).__init__()
         self.save_hyperparameters()
+        from config import context_encoder_d_model, context_encoder_heads
+
         self.model = TransformerModel(
             input_dim=self.hparams['input_dim'],
             d_model=self.hparams['d_model'],
@@ -45,6 +47,8 @@ class TransformerTrainer(pl.LightningModule):
             heads=self.hparams['heads'],
             d_ff=self.hparams['d_ff'],
             output_dim=self.hparams['output_dim'],
+            context_encoder_d_model=context_encoder_d_model,
+            context_encoder_heads=context_encoder_heads,
         )
         self.learning_rate = self.hparams['learning_rate']
         self.device_choice = 'cpu'

@@ -26,3 +26,7 @@ include_sythtraining_data = True  # Set to True to include sythtraining data
 synthetic_dir = 'sythtraining'
 CHECKPOINT_PATH = ''  # Start training from scratch
 FAST_DEV_RUN = False  # Set to True to enable fast development run
+
+# Context Encoder Configuration
+context_encoder_d_model = 128  # Transformer model dimension for Context Encoder
+context_encoder_heads = 8       # Number of attention heads for Context Encoder

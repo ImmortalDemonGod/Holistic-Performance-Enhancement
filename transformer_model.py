@@ -29,7 +29,10 @@ class TransformerModel(nn.Module):
             self.decoder = None
         
         # Add Context Encoder
-        self.context_encoder = ContextEncoderModule(d_model, heads)
+        self.context_encoder = ContextEncoderModule(
+            d_model=context_encoder_d_model,
+            heads=context_encoder_heads
+        )
         
         # Context Integration Layer
         self.context_integration = nn.Sequential(
