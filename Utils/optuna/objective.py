@@ -27,7 +27,43 @@ class TrialMetrics:
         logger.debug(f"  Train Loss: {self.train_loss:.4f}")                                           
         logger.debug(f"  Val Accuracy: {self.val_accuracy:.4f}")                                       
         logger.debug(f"  Memory Used: {self.memory_used:.2f} MB")                                      
-def validate_dimensions(model):
+def create_trial_config(trial, base_config):
+    """Create a new config with trial-suggested values"""
+    try:
+        logger.debug("Creating trial config")
+        
+        # Get ranges from OptunaConfig
+        ranges = base_config.optuna.param_ranges
+        
+        # Create new config objects based on existing classes
+        model_config = base_config.model.__class__()
+        training_config = base_config.training.__class__()
+        
+        # Suggest hyperparameters using Optuna
+        # Suggest the number of heads first
+        model_config.heads = trial.suggest_int("heads", *ranges["heads"])
+
+        # Suggest a multiplier to ensure d_model is divisible by heads
+        d_model_multiplier = trial.suggest_int("d_model_multiplier", *ranges["d_model_multiplier"])
+
+        # Set d_model as a multiple of heads
+        model_config.d_model = model_config.heads * d_model_multiplier
+
+        model_config.decoder_layers = trial.suggest_int("decoder_layers", *ranges["decoder_layers"])
+        model_config.d_ff = trial.suggest_int("d_ff", *ranges["d_ff"])
+        model_config.dropout = trial.suggest_float("dropout", *ranges["dropout"])
+        
+        training_config.batch_size = trial.suggest_int("batch_size", *ranges["batch_size"])
+        training_config.learning_rate = trial.suggest_float(
+            "learning_rate", *ranges["learning_rate"], log=True
+        )
+        
+        logger.debug(f"Trial config created with params: {trial.params}")
+        return Config(model=model_config, training=training_config)
+        
+    except Exception as e:
+        logger.error(f"Error creating trial config: {str(e)}")
+        raise
     """Validate model dimensions before training"""
     try:
         logger.debug("Validating model dimensions")
@@ -118,7 +154,8 @@ def validate_dimensions(model):
         raise                                                                                          
                                                                                                     
 def create_objective(base_config):                                                                     
-    """Creates an objective function with closure over base_config"""                                  
+    """Creates an objective function with closure over base_config"""
+    from .objective import create_trial_config
                                                                                                     
     def objective(trial):                                                                              
         logger.debug(f"\nStarting trial {trial.number}")                                               
