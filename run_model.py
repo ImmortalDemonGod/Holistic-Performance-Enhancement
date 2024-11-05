@@ -35,8 +35,8 @@ if __name__ == '__main__':
 
     # Initialize the model
     if TRAIN_FROM_CHECKPOINT and config.CHECKPOINT_PATH:
-        model = TransformerTrainer.load_from_checkpoint(config.CHECKPOINT_PATH)
         logger.info(f"Resuming training from checkpoint: {config.CHECKPOINT_PATH}")
+        model = TransformerTrainer.load_from_checkpoint(config.CHECKPOINT_PATH)
         model = TransformerTrainer.load_from_checkpoint(config.CHECKPOINT_PATH)
     else:
         if TRAIN_FROM_CHECKPOINT and not config.CHECKPOINT_PATH:
@@ -104,5 +104,5 @@ if __name__ == '__main__':
     trainer = Trainer(**trainer_kwargs)
 
     # Set ckpt_path based on config.CHECKPOINT_PATH
-    ckpt_path = config.CHECKPOINT_PATH if config.CHECKPOINT_PATH else None
+    ckpt_path = config.CHECKPOINT_PATH if TRAIN_FROM_CHECKPOINT and config.CHECKPOINT_PATH else None
     trainer.fit(model, train_loader, val_loader, ckpt_path=ckpt_path)
