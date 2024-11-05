@@ -35,9 +35,12 @@ class TransformerModel(nn.Module):
             heads=context_encoder_heads
         )
         
+        # Store context_encoder_d_model as an instance variable
+        self.context_encoder_d_model = context_encoder_d_model
+
         # Context Integration Layer
         self.context_integration = nn.Sequential(
-            nn.Linear(d_model * 2, d_model),
+            nn.Linear(d_model + context_encoder_d_model, d_model),
             nn.ReLU(),
             nn.LayerNorm(d_model)
         )

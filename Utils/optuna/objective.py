@@ -78,12 +78,7 @@ def create_trial_config(trial, base_config):
         model_config.dropout = trial.suggest_float("dropout", *ranges["dropout"])
         
         # Context encoder parameters
-        model_config.context_encoder_d_model = trial.suggest_int(
-            "context_encoder_d_model",
-            ranges["context_encoder_d_model"][0],
-            ranges["context_encoder_d_model"][1],
-            step=ranges["context_encoder_d_model"][2]
-        )
+        model_config.context_encoder_d_model = model_config.d_model
         model_config.context_encoder_heads = trial.suggest_categorical(
             "context_encoder_heads",
             ranges["context_encoder_heads"]
@@ -249,10 +244,14 @@ def create_objective(base_config):
             trainer.fit(model, train_loader, val_loader)
             
             # Retrieve metrics
+            def get_metric(metric_name, default):
+                metric = trainer.callback_metrics.get(metric_name, default)
+                return metric.item() if isinstance(metric, torch.Tensor) else metric
+
             metrics = TrialMetrics(
-                val_loss=trainer.callback_metrics.get("val_loss", float('inf')).item(),
-                train_loss=trainer.callback_metrics.get("train_loss", float('inf')).item(),
-                val_accuracy=trainer.callback_metrics.get("val_accuracy", 0.0).item()
+                val_loss=get_metric("val_loss", float('inf')),
+                train_loss=get_metric("train_loss", float('inf')),
+                val_accuracy=get_metric("val_accuracy", 0.0)
             )
             
             # Log memory usage after training
