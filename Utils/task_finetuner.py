@@ -218,7 +218,7 @@ def main():
 
     try:
         # Load pretrained model
-        model_path = "pretrained_checkpoint.ckpt"  # Update this path
+        model_path = "/workspaces/JARC-Reactor/lightning_logs/version_0/checkpoints/epoch=epoch=15-val_loss=val_loss=0.4786.ckpt"  # Update this path
         if not Path(model_path).is_file():
             logger.error(f"Pretrained model checkpoint not found at {model_path}.")
             return
