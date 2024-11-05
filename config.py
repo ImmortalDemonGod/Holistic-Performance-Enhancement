@@ -100,7 +100,7 @@ class Config:
         self.optuna = OptunaConfig()
     
     class ModelConfig:
-        def __init__(self, batch_size, learning_rate, include_sythtraining_data, num_epochs, device_choice='cpu'):
+        def __init__(self):
             self.input_dim = input_dim
             self.d_model = d_model
             self.encoder_layers = encoder_layers
@@ -109,11 +109,11 @@ class Config:
             self.d_ff = d_ff
             self.output_dim = output_dim
             self.dropout = dropout_rate
-            self.context_encoder_d_model = context_encoder_d_model  # Ensure these are included
+            self.context_encoder_d_model = context_encoder_d_model
             self.context_encoder_heads = context_encoder_heads
     
     class TrainingConfig:
-        def __init__(self):
+        def __init__(self, batch_size, learning_rate, include_sythtraining_data, num_epochs, device_choice='cpu'):
             self.batch_size = batch_size
             self.learning_rate = learning_rate
             self.include_sythtraining_data = include_sythtraining_data
