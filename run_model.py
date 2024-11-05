@@ -7,7 +7,7 @@ import torch
 from train import TransformerTrainer
 from Utils.data_preparation import prepare_data
 import config
-from torch.quantization import get_default_qconfig
+import torch.quantization
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
@@ -73,11 +73,12 @@ def setup_model_training(cfg, args=None):
             include_sythtraining_data=cfg.training.include_sythtraining_data
         )
 
-    # Setup model quantization
-    qconfig = get_default_qconfig('qnnpack')  # Use 'fbgemm' if on x86 platforms
-    model.model.qconfig = qconfig
-    torch.quantization.prepare(model.model, inplace=True)
-    torch.quantization.convert(model.model, inplace=True)
+    # Setup dynamic quantization
+    model.model = torch.quantization.quantize_dynamic(
+        model.model,
+        {torch.nn.Linear, torch.nn.Conv2d},  # Layers to apply dynamic quantization
+        dtype=torch.qint8  # Quantization data type
+    )
     
     # Only apply scripting if not training from checkpoint
     if not cfg.training.train_from_checkpoint:
