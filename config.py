@@ -100,6 +100,9 @@ class Config:
             )
         
         self.optuna = OptunaConfig()
+        
+        # New: Add control for using best parameters
+        self.use_best_params = False  # Whether to load and use best parameters from Optuna study
     
     class ModelConfig:
         def __init__(self):
@@ -113,6 +116,9 @@ class Config:
             self.dropout = dropout_rate
             self.context_encoder_d_model = context_encoder_d_model
             self.context_encoder_heads = context_encoder_heads
+            
+            # New: Add checkpoint path
+            self.checkpoint_path = None  # Path to checkpoint file for resuming training
     
     class TrainingConfig:
         def __init__(self, batch_size, learning_rate, include_sythtraining_data, num_epochs, device_choice='cpu', precision=precision, fast_dev_run=FAST_DEV_RUN):
