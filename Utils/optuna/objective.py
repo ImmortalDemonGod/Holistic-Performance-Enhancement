@@ -37,7 +37,15 @@ def create_trial_config(trial, base_config):
         
         # Create new config objects
         model_config = base_config.model.__class__()
-        training_config = base_config.training.__class__()
+        training_config = base_config.training.__class__(
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            include_sythtraining_data=include_sythtraining_data,
+            num_epochs=num_epochs,
+            device_choice=device_choice,
+            precision=precision,
+            fast_dev_run=base_config.training.FAST_DEV_RUN
+        )
         
         # First determine core architecture parameters
         model_config.heads = trial.suggest_categorical("heads", [2, 4, 8, 16])
