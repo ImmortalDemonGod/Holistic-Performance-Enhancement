@@ -15,10 +15,11 @@ import torch
 import logging                                                                                         
 from pathlib import Path                                                                               
 from typing import Dict, Any                                                                           
-import json                                                                                            
-from torch.utils.data import DataLoader, TensorDataset                                                 
-                                                                                                    
-from train import TransformerTrainer                                                                   
+import json
+from tqdm import tqdm
+from torch.utils.data import DataLoader, TensorDataset
+
+from train import TransformerTrainer
 from pytorch_lightning.callbacks import EarlyStopping                                                  
 from Utils.data_preparation import prepare_data                                                        
 from Utils.metrics import TaskMetricsCollector                                                         
@@ -251,8 +252,8 @@ class TaskFineTuner:
         else:
             tasks_to_process = list(task_id_map.keys())
 
-        # Process each task
-        for task_id in tasks_to_process:
+        # Process each task with a progress bar
+        for task_id in tqdm(tasks_to_process, desc="Fine-tuning Tasks", unit="task"):
             try:
                 if task_id not in test_examples:
                     self.logger.error(f"No test example found for task {task_id}. Skipping.")
