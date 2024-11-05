@@ -102,7 +102,7 @@ class TransformerTrainer(pl.LightningModule):
         return self.model(src, tgt, ctx_input, ctx_output)
 
     def training_step(self, batch, batch_idx):
-        src, tgt, ctx_input, ctx_output, task_ids = batch
+        src, tgt, ctx_input, ctx_output, _ = batch
         y_hat = self(src, tgt, ctx_input, ctx_output)
 
         # Debugging: Print shapes of y_hat and tgt

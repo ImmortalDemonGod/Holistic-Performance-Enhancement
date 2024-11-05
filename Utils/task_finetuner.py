@@ -74,10 +74,6 @@ class TaskFineTuner:
                     outputs.append(tgt[mask])
                     ctx_inputs.append(ctx_input[mask])
                     ctx_outputs.append(ctx_output[mask])
-                inputs.append(src[mask])
-                outputs.append(tgt[mask])
-                ctx_inputs.append(ctx_input[mask])
-                ctx_outputs.append(ctx_output[mask])
 
             if not inputs:
                 raise ValueError(f"No {purpose} data found for task {task_id}")
@@ -95,8 +91,8 @@ class TaskFineTuner:
         val_data = filter_task_data(val_loader, "validation")
 
         # Create task-specific datasets
-        train_dataset = self._create_dataset(*train_data)
-        val_dataset = self._create_dataset(*val_data)
+        train_dataset = self._create_dataset(*train_data, task_id_tensor)
+        val_dataset = self._create_dataset(*val_data, task_id_tensor)
 
         # Create dataloaders
         task_train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
@@ -104,9 +100,9 @@ class TaskFineTuner:
 
         return task_train_loader, task_val_loader
 
-    def _create_dataset(self, src, tgt, ctx_input, ctx_output):
+    def _create_dataset(self, src, tgt, ctx_input, ctx_output, task_ids):
         """Helper to create dataset with consistent formatting."""
-        return TensorDataset(src, tgt, ctx_input, ctx_output)  # Ensure only four tensors are included
+        return TensorDataset(src, tgt, ctx_input, ctx_output, task_ids)  # Now includes task_ids
 
     def finetune_task(self, task_id: str, train_loader, val_loader, test_example):
         """Fine-tune model for specific task and evaluate."""
@@ -152,7 +148,7 @@ class TaskFineTuner:
             # Evaluate on test example
             task_model.eval()
             with torch.no_grad():
-                src, tgt, ctx_input, ctx_output, task_id_received = test_example
+                src, tgt, ctx_input, ctx_output, _ = test_example
                 src = src.unsqueeze(0).to(self.device)
                 tgt = tgt.unsqueeze(0).to(self.device)
                 ctx_input = ctx_input.unsqueeze(0).to(self.device)
