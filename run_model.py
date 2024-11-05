@@ -167,3 +167,7 @@ if __name__ == '__main__':
         val_loader,
         ckpt_path=cfg.model.checkpoint_path if cfg.training.train_from_checkpoint else None
     )
+
+    # Add device memory logging after training
+    if torch.cuda.is_available():
+        logger.info(f"GPU Memory after training: {torch.cuda.memory_allocated()/1e9:.2f} GB")
