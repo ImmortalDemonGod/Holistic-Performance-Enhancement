@@ -87,6 +87,7 @@ class TransformerTrainer(pl.LightningModule):
         logger.debug(f"Forward pass input shapes:")
         logger.debug(f"  src: {src.shape}")
         logger.debug(f"  tgt: {tgt.shape}")
+        logger.debug(f"Model is on device: {device}")
         if ctx_input is not None:
             logger.debug(f"  ctx_input: {ctx_input.shape}")
         if ctx_output is not None:
