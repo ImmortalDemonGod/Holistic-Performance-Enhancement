@@ -240,5 +240,5 @@ import pytorch_lightning as pl
          logger.error(f"Fine-tuning failed: {str(e)}")                                                  
          raise                                                                                          
                                                                                                         
- if __name__ == "__main__":                                                                             
-     main()       
+if __name__ == "__main__":                                                                             
+    main()       
