@@ -8,6 +8,7 @@ parent_dir = current_dir.parent
 # Add the parent directory to sys.path
 sys.path.append(str(parent_dir))
 
+import argparse
 import random
 import pytorch_lightning as pl
 import torch                                                                                           
@@ -311,7 +312,15 @@ class TaskFineTuner:
 
 def main():
     """Main entry point for fine-tuning process."""
-    # Setup logging
+    parser = argparse.ArgumentParser(description="Task Fine-Tuner")
+    parser.add_argument(
+        '--mode',
+        type=str,
+        choices=['random', 'all'],
+        default='random',
+        help='Mode of fine-tuning: "random" for a single random task or "all" for all tasks.'
+    )
+    args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger("finetuning_main")
 
@@ -347,10 +356,14 @@ def main():
         # Initialize fine-tuner
         finetuner = TaskFineTuner(base_model, device=device)
 
-        # Select a random task_id
-        selected_task = random.choice(list(task_id_map.keys()))
-        selected_tasks = [selected_task]
-        logger.info(f"Fine-tuning will be performed on randomly selected task: {selected_task}")
+        # Select tasks based on the mode
+        if args.mode == 'random':
+            selected_task = random.choice(list(task_id_map.keys()))
+            selected_tasks = [selected_task]
+            logger.info(f"Fine-tuning will be performed on randomly selected task: {selected_task}")
+        elif args.mode == 'all':
+            selected_tasks = list(task_id_map.keys())
+            logger.info(f"Fine-tuning will be performed on all {len(selected_tasks)} tasks.")
 
         # Run fine-tuning
         results = finetuner.run_all_tasks(train_loader, val_loader, task_id_map, selected_tasks)
