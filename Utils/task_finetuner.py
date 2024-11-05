@@ -64,7 +64,7 @@ class TaskFineTuner:
             inputs, outputs, ctx_inputs, ctx_outputs = [], [], [], []
 
             for batch in loader:
-                src, tgt, ctx_input, ctx_output, batch_task_ids = batch
+                src, tgt, ctx_input, ctx_output = batch
                 mask = batch_task_ids == task_id_tensor
 
                 if mask.any():
@@ -178,7 +178,7 @@ class TaskFineTuner:
         # Get test examples for each task
         test_examples = {}
         for batch in val_loader:
-            src, tgt, ctx_input, ctx_output, task_ids = batch
+            src, tgt, ctx_input, ctx_output = batch
             for i, task_idx in enumerate(task_ids):
                 task_id = idx_to_task_id.get(task_idx.item())
                 if task_id is None:
