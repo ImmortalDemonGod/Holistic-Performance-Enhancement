@@ -40,7 +40,7 @@ def create_trial_config(trial, base_config):
         training_config = base_config.training.__class__()
         
         # First determine core architecture parameters
-        model_config.heads = trial.suggest_categorical("heads", ranges["heads"])
+        model_config.heads = trial.suggest_categorical("heads", [2, 4, 8, 16])
         
         # Ensure d_model is divisible by both heads and 4
         d_model = trial.suggest_int(
@@ -102,7 +102,7 @@ def create_trial_config(trial, base_config):
         )
         model_config.context_encoder_heads = trial.suggest_categorical(
             "context_encoder_heads",
-            [2, 4, 8, 16]          # Updated list with added 16
+            [2, 4, 8]          # Fixed list of choices
         )
         
         # Training parameters

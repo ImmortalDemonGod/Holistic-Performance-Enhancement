@@ -50,7 +50,7 @@ class OptunaConfig:
             # Model Architecture
             # Model Architecture Parameters
             "d_model": (32, 512, 16),      # Expanded from 32 to 512 with step 16
-            "heads": [2, 4, 8, 16, 32],    # Added 32 heads for increased model complexity
+            "heads": [2, 4, 8, 16],    # Fixed list of choices
             "encoder_layers": (1, 12),     # Expanded upper bound to 12 layers
             "decoder_layers": (1, 12),     # Expanded upper bound to 12 layers
             "d_ff": (64, 1024, 64),        # Expanded from 64 to 1024 with step 64
@@ -58,7 +58,7 @@ class OptunaConfig:
             
             # Context Encoder Parameters (actually used in model)
             "context_encoder_d_model": (32, 512, 32),  # Expanded from 32 to 512 with step 32
-            "context_encoder_heads": [2, 4, 8, 16],   # Added 16 heads for increased complexity
+            "context_encoder_heads": [2, 4, 8],   # Fixed list of choices
             
             # Training Parameters
             "batch_size": (8, 256),                   # Expanded batch size range from 8 to 256
