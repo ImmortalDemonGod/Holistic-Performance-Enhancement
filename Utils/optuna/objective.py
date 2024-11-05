@@ -61,11 +61,16 @@ def create_trial_config(trial, base_config):
         model_config.encoder_layers = trial.suggest_int("encoder_layers", *ranges["encoder_layers"])
         model_config.decoder_layers = trial.suggest_int("decoder_layers", *ranges["decoder_layers"])
         
-        # Feedforward dimension
+        # Suggest d_ff, ensuring it's greater than d_model
+        min_d_ff = d_model + 64  # Constrain d_ff to be at least d_model + 64
+        if min_d_ff > ranges["d_ff"][1]:
+            logger.warning(f"Cannot set d_ff > d_model={d_model} within the parameter range.")
+            raise optuna.TrialPruned()
+        
         model_config.d_ff = trial.suggest_int(
             "d_ff", 
-            ranges["d_ff"][0],
-            ranges["d_ff"][1],
+            max(min_d_ff, ranges["d_ff"][0]), 
+            ranges["d_ff"][1], 
             step=ranges["d_ff"][2]
         )
         
@@ -92,7 +97,13 @@ def create_trial_config(trial, base_config):
             log=True
         )
         
-        # **New:** Suggest max_epochs
+        # Suggest gradient_clip_val
+        training_config.gradient_clip_val = trial.suggest_float(
+            "gradient_clip_val",
+            0.0,       # Minimum value
+            5.0,       # Maximum value
+            step=0.1   # Step size (adjust as needed)
+        )
         training_config.max_epochs = trial.suggest_int(
             "max_epochs",
             ranges["max_epochs"][0],
