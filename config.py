@@ -28,6 +28,7 @@ include_sythtraining_data = True  # Set to True to include sythtraining data
 synthetic_dir = 'sythtraining'
 CHECKPOINT_PATH = 'path_to_pretrained_checkpoint.ckpt'  # Specify the actual checkpoint path
 FAST_DEV_RUN = False  # Set to True to enable fast development run
+TRAIN_FROM_CHECKPOINT = False  # Set to True to resume training from a checkpoint
 
 # Context Encoder Configuration
 context_encoder_d_model = 128  # Transformer model dimension for Context Encoder

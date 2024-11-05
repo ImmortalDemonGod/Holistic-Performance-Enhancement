@@ -2,6 +2,7 @@ import config
 import os
 import torch
 from train import TransformerTrainer
+from config import TRAIN_FROM_CHECKPOINT
 from Utils.data_preparation import prepare_data
 import config
 from torch.quantization import get_default_qconfig
@@ -64,15 +65,27 @@ if __name__ == '__main__':
     )
 
     # Configure the Trainer
-    trainer = Trainer(
-        max_epochs=config.num_epochs,
-        callbacks=[checkpoint_callback, early_stop_callback],
-        devices=1,         # Use a single device (CPU)
-        accelerator='gpu' if config.device_choice == 'cuda' else 'cpu', # Use GPU if specified
-        precision=config.precision,  # Use precision from config
-        fast_dev_run=config.FAST_DEV_RUN,  # Use config variable
-        log_every_n_steps=log_every_n_steps  # Dynamic logging interval
-    )
+    if TRAIN_FROM_CHECKPOINT and config.CHECKPOINT_PATH:
+        trainer = Trainer(
+            max_epochs=config.num_epochs,
+            callbacks=[checkpoint_callback, early_stop_callback],
+            devices=1,         # Use a single device (CPU)
+            accelerator='gpu' if config.device_choice == 'cuda' else 'cpu', # Use GPU if specified
+            precision=config.precision,  # Use precision from config
+            fast_dev_run=config.FAST_DEV_RUN,  # Use config variable
+            log_every_n_steps=log_every_n_steps,  # Dynamic logging interval
+            resume_from_checkpoint=config.CHECKPOINT_PATH
+        )
+    else:
+        trainer = Trainer(
+            max_epochs=config.num_epochs,
+            callbacks=[checkpoint_callback, early_stop_callback],
+            devices=1,         # Use a single device (CPU)
+            accelerator='gpu' if config.device_choice == 'cuda' else 'cpu', # Use GPU if specified
+            precision=config.precision,  # Use precision from config
+            fast_dev_run=config.FAST_DEV_RUN,  # Use config variable
+            log_every_n_steps=log_every_n_steps  # Dynamic logging interval
+        )
 
     # Set ckpt_path based on config.CHECKPOINT_PATH
     ckpt_path = config.CHECKPOINT_PATH if config.CHECKPOINT_PATH else None
