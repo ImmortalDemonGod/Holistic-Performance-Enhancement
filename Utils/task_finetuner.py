@@ -8,6 +8,7 @@ parent_dir = current_dir.parent
 # Add the parent directory to sys.path
 sys.path.append(str(parent_dir))
 
+import argparse
 import pytorch_lightning as pl
 import torch                                                                                           
 import logging                                                                                         
@@ -167,8 +168,8 @@ class TaskFineTuner:
             self.logger.error(f"Failed fine-tuning task {task_id}: {str(e)}")
             raise
 
-    def run_all_tasks(self, train_loader, val_loader, task_id_map):
-        """Fine-tune and evaluate all tasks."""
+    def run_all_tasks(self, train_loader, val_loader, task_id_map, selected_task_ids=None):
+        """Fine-tune and evaluate specified tasks. If no tasks are specified, fine-tune all tasks."""
         self.logger.info("Starting fine-tuning for all tasks")
 
         # Create a reverse mapping from index to task_id
@@ -183,14 +184,27 @@ class TaskFineTuner:
                 if task_id is None:
                     self.logger.error(f"Task index {task_idx.item()} not found in task_id_map.")
                     continue  # Skip this task or handle the error as needed
-                if task_id not in test_examples:
+                if selected_task_ids and task_id not in selected_task_ids:
+                    continue  # Skip tasks not selected
                     test_examples[task_id] = (
                         src[i], tgt[i], ctx_input[i], ctx_output[i]
                     )
 
+        # Determine the list of tasks to process
+        if selected_task_ids:
+            tasks_to_process = selected_task_ids
+        else:
+            tasks_to_process = list(task_id_map.keys())
+
         # Process each task
-        for task_id, task_idx in task_id_map.items():
+        for task_id in tasks_to_process:
             try:
+                if task_id not in test_examples:
+                    self.logger.error(f"No test example found for task {task_id}. Skipping.")
+                    self.results[task_id] = {'error': 'No test example found.'}
+                    self.metrics_collector.add_result(task_id, {'error': 'No test example found.'})
+                    continue
+
                 # Prepare task data
                 task_train_loader, task_val_loader = self.prepare_task_data(
                     train_loader, val_loader, task_idx
@@ -226,7 +240,10 @@ def main():
     logger = logging.getLogger("finetuning_main")
 
     try:
-        # Load pretrained model
+        # Parse command-line arguments
+        parser = argparse.ArgumentParser(description='Fine-tune transformer model on specific tasks.')
+        parser.add_argument('--task_id', type=str, help='Optional Task ID to fine-tune. If not provided, all tasks will be processed.')
+        args = parser.parse_args()
         model_path = "/workspaces/JARC-Reactor/lightning_logs/version_0/checkpoints/epoch=epoch=15-val_loss=val_loss=0.4786.ckpt"  # Update this path
         if not Path(model_path).is_file():
             logger.error(f"Pretrained model checkpoint not found at {model_path}.")
@@ -248,9 +265,22 @@ def main():
         with open(task_map_path, 'r') as f:
             task_id_map = json.load(f)
 
-        # Initialize and run fine-tuning
+        # Initialize fine-tuner
         finetuner = TaskFineTuner(base_model)
-        results = finetuner.run_all_tasks(train_loader, val_loader, task_id_map)
+
+        # Determine which tasks to process
+        if args.task_id:
+            if args.task_id not in task_id_map:
+                logger.error(f"Provided task_id '{args.task_id}' not found in task_id_map.")
+                return
+            selected_tasks = [args.task_id]
+            logger.info(f"Fine-tuning will be performed on task: {args.task_id}")
+        else:
+            selected_tasks = None  # Fine-tune all tasks
+            logger.info("Fine-tuning will be performed on all tasks.")
+
+        # Run fine-tuning
+        results = finetuner.run_all_tasks(train_loader, val_loader, task_id_map, selected_tasks)
 
         logger.info("Fine-tuning complete")
         logger.info(f"Results saved to {finetuner.save_dir}/final_results.json")
