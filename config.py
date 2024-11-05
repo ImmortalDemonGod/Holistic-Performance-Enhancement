@@ -95,7 +95,8 @@ class Config:
                 include_sythtraining_data=include_sythtraining_data,
                 num_epochs=num_epochs,
                 device_choice=device_choice,
-                precision=precision
+                precision=precision,
+                fast_dev_run=FAST_DEV_RUN
             )
         
         self.optuna = OptunaConfig()
@@ -114,7 +115,7 @@ class Config:
             self.context_encoder_heads = context_encoder_heads
     
     class TrainingConfig:
-        def __init__(self, batch_size, learning_rate, include_sythtraining_data, num_epochs, device_choice='cpu', precision=precision):
+        def __init__(self, batch_size, learning_rate, include_sythtraining_data, num_epochs, device_choice='cpu', precision=precision, fast_dev_run=FAST_DEV_RUN):
             self.batch_size = batch_size
             self.learning_rate = learning_rate
             self.include_sythtraining_data = include_sythtraining_data
@@ -122,3 +123,4 @@ class Config:
             self.device_choice = device_choice
             self.gradient_clip_val = 1.0
             self.precision = precision
+            self.FAST_DEV_RUN = fast_dev_run
