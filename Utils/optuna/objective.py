@@ -199,7 +199,8 @@ def create_objective(base_config, train_dataset, val_dataset):
                 include_sythtraining_data=trial_config.training.include_sythtraining_data,
             )
 
-            # **Create DataLoaders with the suggested batch_size**
+            # **Create DataLoaders with the suggested batch_size from trial_config**
+            batch_size = trial_config.training.batch_size
             train_loader = DataLoader(
                 train_dataset, 
                 batch_size=batch_size, 
