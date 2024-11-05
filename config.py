@@ -11,7 +11,7 @@ precision = 32  # Set to 16 for mixed precision, 32 for full precision, etc.
 TRAIN_FROM_CHECKPOINT = False  # Set to True to resume training from a checkpoint
 # These parameters should be treated as modifiable from the main run_model.py script
 
-device_choice = "cuda" if torch.cuda.is_available() else "cpu"  # Auto-select device
+device_choice = 'gpu' if torch.cuda.is_available() else 'cpu'  # Auto-select device
 calculate_parameters = True  # Whether to calculate and print the total parameter size before training
 run_for_100_epochs = True  # Whether to only run for 100 epochs and estimate time for 20,000 epochs
 num_epochs = 100  # Number of training epochs
@@ -83,8 +83,9 @@ class Config:
     def __init__(self, model=None, training=None, device_choice=None):
         self.model = model if model is not None else self.ModelConfig()
         
+        # Update device_choice to use 'gpu' or 'cpu'
         if device_choice is None:
-            device_choice = 'cuda' if torch.cuda.is_available() else 'cpu'
+            device_choice = 'gpu' if torch.cuda.is_available() else 'cpu'
         
         if training is not None:
             self.training = training
@@ -94,15 +95,15 @@ class Config:
                 learning_rate=learning_rate,
                 include_sythtraining_data=include_sythtraining_data,
                 num_epochs=num_epochs,
-                device_choice=device_choice,
+                device_choice=device_choice,  # Pass the corrected device_choice
                 precision=precision,
                 fast_dev_run=FAST_DEV_RUN,
-                train_from_checkpoint=TRAIN_FROM_CHECKPOINT  # Added parameter
+                train_from_checkpoint=TRAIN_FROM_CHECKPOINT  # Ensure this parameter is included
             )
         
         self.optuna = OptunaConfig()
         
-        # New: Add control for using best parameters
+        # Control for using best parameters
         self.use_best_params = False  # Whether to load and use best parameters from Optuna study
     
     class ModelConfig:
@@ -130,7 +131,7 @@ class Config:
             self.device_choice = device_choice
             self.precision = precision  # Moved here
             self.train_from_checkpoint = train_from_checkpoint
-            assert self.device_choice in ['cpu', 'cuda'], "device_choice must be 'cpu' or 'cuda'"
+            assert self.device_choice in ['cpu', 'gpu'], "device_choice must be 'cpu' or 'gpu'"
             assert self.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
             self.gradient_clip_val = 1.0
             self.FAST_DEV_RUN = fast_dev_run

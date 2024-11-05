@@ -51,27 +51,41 @@ def setup_model_training(cfg, args=None):
     logger.info(f"Model parameters: {cfg.model.__dict__}")
     logger.info(f"Training parameters: {cfg.training.__dict__}")
 
-    # Initialize model
-    if cfg.training.train_from_checkpoint and cfg.model.checkpoint_path:
-        checkpoint_path = cfg.model.checkpoint_path
-        if os.path.isfile(checkpoint_path):
-            logger.info(f"Resuming from checkpoint: {checkpoint_path}")
-            model = TransformerTrainer.load_from_checkpoint(checkpoint_path)
+    try:
+        # Initialize model
+        if cfg.training.train_from_checkpoint and cfg.model.checkpoint_path:
+            checkpoint_path = cfg.model.checkpoint_path
+            if os.path.isfile(checkpoint_path):
+                logger.info(f"Resuming from checkpoint: {checkpoint_path}")
+                model = TransformerTrainer.load_from_checkpoint(checkpoint_path)
+            else:
+                raise FileNotFoundError(f"Checkpoint file not found at {checkpoint_path}")
         else:
-            raise FileNotFoundError(f"Checkpoint file not found at {checkpoint_path}")
-    else:
-        logger.info("Initializing new model")
-        model = TransformerTrainer(
-            input_dim=cfg.model.input_dim,
-            d_model=cfg.model.d_model,
-            encoder_layers=cfg.model.encoder_layers,
-            decoder_layers=cfg.model.decoder_layers,
-            heads=cfg.model.heads,
-            d_ff=cfg.model.d_ff,
-            output_dim=cfg.model.output_dim,
-            learning_rate=cfg.training.learning_rate,
-            include_sythtraining_data=cfg.training.include_sythtraining_data
-        )
+            logger.info("Initializing new model")
+            model = TransformerTrainer(
+                input_dim=cfg.model.input_dim,
+                d_model=cfg.model.d_model,
+                encoder_layers=cfg.model.encoder_layers,
+                decoder_layers=cfg.model.decoder_layers,
+                heads=cfg.model.heads,
+                d_ff=cfg.model.d_ff,
+                output_dim=cfg.model.output_dim,
+                learning_rate=cfg.training.learning_rate,
+                include_sythtraining_data=cfg.training.include_sythtraining_data
+            )
+
+        # Log device information
+        logger.info(f"CUDA available: {torch.cuda.is_available()}")
+        if torch.cuda.is_available():
+            logger.info(f"CUDA device: {torch.cuda.get_device_name(0)}")
+            logger.info(f"CUDA device count: {torch.cuda.device_count()}")
+        logger.info(f"Selected device: {cfg.training.device_choice}")
+
+        return model
+
+    except Exception as e:
+        logger.error(f"Error in setup_model_training: {str(e)}")
+        raise
 
     # Setup dynamic quantization
     #model.model = torch.quantization.quantize_dynamic(
@@ -127,7 +141,7 @@ if __name__ == '__main__':
         "max_epochs": cfg.training.max_epochs,
         "callbacks": callbacks,
         "devices": 1,
-        "accelerator": 'gpu' if cfg.training.device_choice == 'cuda' else 'cpu',
+        "accelerator": cfg.training.device_choice,
         "precision": cfg.training.precision,
         "fast_dev_run": cfg.training.FAST_DEV_RUN,
         "log_every_n_steps": log_every_n_steps,
@@ -139,6 +153,13 @@ if __name__ == '__main__':
 
     trainer = Trainer(**trainer_kwargs)
     
+    # Add device memory logging before training
+    if torch.cuda.is_available():
+        logger.info("Starting training on GPU...")
+        logger.info(f"GPU Memory before training: {torch.cuda.memory_allocated()/1e9:.2f} GB")
+    else:
+        logger.info("Starting training on CPU...")
+
     # Train model
     trainer.fit(
         model, 
