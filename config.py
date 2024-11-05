@@ -36,3 +36,25 @@ context_encoder_heads = 8       # Number of attention heads for Context Encoder
 # Fine-Tuning Configurations
 finetuning_patience = 5
 finetuning_max_epochs = 100
+
+class OptunaConfig:
+    def __init__(self):
+        # Debug: Print when config is created
+        print("DEBUG: Creating OptunaConfig")
+        
+        self.n_trials = 100
+        self.study_name = "jarc_optimization"
+        self.storage_url = "sqlite:///jarc_optuna.db"
+        
+        # Hyperparameter ranges
+        self.param_ranges = {
+            "learning_rate": (1e-5, 1e-2),
+            "batch_size": (16, 128),
+            "d_model": (64, 256),
+            "decoder_layers": (4, 32),
+            "heads": (2, 16),
+            "d_ff": (128, 512),
+            "dropout": (0.1, 0.5)
+        }
+        
+        print("DEBUG: OptunaConfig created with ranges:", self.param_ranges)
