@@ -21,14 +21,23 @@ if __name__ == '__main__':
     log_every_n_steps = min(50, num_training_batches) if num_training_batches > 0 else 1
     torch.backends.quantized.engine = 'qnnpack'  # Use 'fbgemm' for x86 platforms if needed
 
-    # Validate checkpoint path
-    if config.CHECKPOINT_PATH and not os.path.isfile(config.CHECKPOINT_PATH):
-        raise FileNotFoundError(f"Checkpoint file not found at {config.CHECKPOINT_PATH}. Please update config.py with a valid path.")
+    # Validate checkpoint path only if TRAIN_FROM_CHECKPOINT is True
+    if TRAIN_FROM_CHECKPOINT:
+        if config.CHECKPOINT_PATH and not os.path.isfile(config.CHECKPOINT_PATH):
+            raise FileNotFoundError(
+                f"Checkpoint file not found at {config.CHECKPOINT_PATH}. Please update config.py with a valid path."
+            )
 
-    # Prepare the model for static quantization
-    if config.CHECKPOINT_PATH:
+    # Initialize the model
+    if TRAIN_FROM_CHECKPOINT and config.CHECKPOINT_PATH:
+        model = TransformerTrainer.load_from_checkpoint(config.CHECKPOINT_PATH)
+        logger.info(f"Resuming training from checkpoint: {config.CHECKPOINT_PATH}")
         model = TransformerTrainer.load_from_checkpoint(config.CHECKPOINT_PATH)
     else:
+        if TRAIN_FROM_CHECKPOINT and not config.CHECKPOINT_PATH:
+            logger.warning("TRAIN_FROM_CHECKPOINT is True but CHECKPOINT_PATH is not set. Starting training from scratch.")
+        else:
+            logger.info("Starting training from scratch.")
         model = TransformerTrainer(
             input_dim=config.input_dim,
             d_model=config.d_model,
@@ -64,28 +73,30 @@ if __name__ == '__main__':
         mode="min"
     )
 
-    # Configure the Trainer
+    # Set up logging statements for clarity
     if TRAIN_FROM_CHECKPOINT and config.CHECKPOINT_PATH:
-        trainer = Trainer(
-            max_epochs=config.num_epochs,
-            callbacks=[checkpoint_callback, early_stop_callback],
-            devices=1,         # Use a single device (CPU)
-            accelerator='gpu' if config.device_choice == 'cuda' else 'cpu', # Use GPU if specified
-            precision=config.precision,  # Use precision from config
-            fast_dev_run=config.FAST_DEV_RUN,  # Use config variable
-            log_every_n_steps=log_every_n_steps,  # Dynamic logging interval
-            resume_from_checkpoint=config.CHECKPOINT_PATH
-        )
+        logger.info(f"Resuming training from checkpoint: {config.CHECKPOINT_PATH}")
     else:
-        trainer = Trainer(
-            max_epochs=config.num_epochs,
-            callbacks=[checkpoint_callback, early_stop_callback],
-            devices=1,         # Use a single device (CPU)
-            accelerator='gpu' if config.device_choice == 'cuda' else 'cpu', # Use GPU if specified
-            precision=config.precision,  # Use precision from config
-            fast_dev_run=config.FAST_DEV_RUN,  # Use config variable
-            log_every_n_steps=log_every_n_steps  # Dynamic logging interval
-        )
+        if TRAIN_FROM_CHECKPOINT and not config.CHECKPOINT_PATH:
+            logger.warning("TRAIN_FROM_CHECKPOINT is True but CHECKPOINT_PATH is not set. Starting training from scratch.")
+        else:
+            logger.info("Starting training from scratch.")
+
+    # Configure the Trainer with conditional checkpoint resumption
+    trainer_kwargs = {
+        "max_epochs": config.num_epochs,
+        "callbacks": [checkpoint_callback, early_stop_callback],
+        "devices": 1,  # Use a single device
+        "accelerator": 'gpu' if config.device_choice == 'cuda' else 'cpu',
+        "precision": config.precision,
+        "fast_dev_run": config.FAST_DEV_RUN,
+        "log_every_n_steps": log_every_n_steps,
+    }
+
+    if TRAIN_FROM_CHECKPOINT and config.CHECKPOINT_PATH:
+        trainer_kwargs["resume_from_checkpoint"] = config.CHECKPOINT_PATH
+
+    trainer = Trainer(**trainer_kwargs)
 
     # Set ckpt_path based on config.CHECKPOINT_PATH
     ckpt_path = config.CHECKPOINT_PATH if config.CHECKPOINT_PATH else None
