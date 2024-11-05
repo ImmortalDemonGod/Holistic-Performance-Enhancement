@@ -194,10 +194,11 @@ class TaskFineTuner:
                     continue  # Skip tasks not selected
                 if task_id not in test_examples:
                     test_examples[task_id] = (
-                        src[i],
-                        tgt[i],
-                        ctx_input[i],
-                        ctx_output[i]
+                        src[i], 
+                        tgt[i], 
+                        ctx_input[i], 
+                        ctx_output[i], 
+                        task_ids[i]
                     )
             # Optionally, break early if all selected tasks have been assigned
             if selected_task_ids and len(test_examples) >= len(selected_task_ids):
