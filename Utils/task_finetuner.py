@@ -184,14 +184,26 @@ class TaskFineTuner:
         # Get test examples for each task
         test_examples = {}
         for batch in val_loader:
-            src, tgt, ctx_input, ctx_output = batch
-            # Assuming task_id_map contains task_id as keys and indices as values
-            for task_id, idx in task_id_map.items():
+            src, tgt, ctx_input, ctx_output, task_ids = batch
+            # Iterate through the batch to find a test example for each task_id
+            for i, task_id_idx in enumerate(task_ids):
+                task_id = idx_to_task_id[task_id_idx.item()]
                 if selected_task_ids and task_id not in selected_task_ids:
                     continue  # Skip tasks not selected
-                test_examples[task_id] = (
-                    src[idx], tgt[idx], ctx_input[idx], ctx_output[idx]
-                )
+                if task_id not in test_examples:
+                    test_examples[task_id] = (
+                        src[i],
+                        tgt[i],
+                        ctx_input[i],
+                        ctx_output[i]
+                    )
+            # Optionally, break early if all selected tasks have been assigned
+            if selected_task_ids and len(test_examples) >= len(selected_task_ids):
+                break
+
+        if not test_examples:
+            self.logger.error("No test examples found for any tasks.")
+            raise ValueError("No test examples found for any tasks.")
 
         # Determine the list of tasks to process
         if selected_task_ids:
