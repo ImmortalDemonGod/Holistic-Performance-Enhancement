@@ -89,6 +89,16 @@ class TransformerTrainer(pl.LightningModule):
             logger.debug(f"  ctx_input: {ctx_input.shape}")
         if ctx_output is not None:
             logger.debug(f"  ctx_output: {ctx_output.shape}")
+
+        # Move tensors to the same device as the model
+        device = next(self.model.parameters()).device
+        src = src.to(device)
+        tgt = tgt.to(device)
+        if ctx_input is not None:
+            ctx_input = ctx_input.to(device)
+        if ctx_output is not None:
+            ctx_output = ctx_output.to(device)
+
         return self.model(src, tgt, ctx_input, ctx_output)
 
     def training_step(self, batch, batch_idx):
