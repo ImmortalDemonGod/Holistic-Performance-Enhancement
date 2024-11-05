@@ -1,4 +1,5 @@
 import config
+import logging
 import os
 import torch
 from train import TransformerTrainer
@@ -8,6 +9,10 @@ import config
 from torch.quantization import get_default_qconfig
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+
+# Initialize logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
 
