@@ -45,9 +45,9 @@ def create_trial_config(trial, base_config):
         # Ensure d_model is divisible by both heads and 4
         d_model = trial.suggest_int(
             "d_model", 
-            ranges["d_model"][0], 
-            ranges["d_model"][1], 
-            step=ranges["d_model"][2]
+            32,                # Updated lower bound
+            512,               # Updated upper bound
+            step=16            # Step remains the same
         )
         
         # Validate dimensions
@@ -58,38 +58,65 @@ def create_trial_config(trial, base_config):
         model_config.d_model = d_model
         
         # Layer configuration
-        model_config.encoder_layers = trial.suggest_int("encoder_layers", *ranges["encoder_layers"])
-        model_config.decoder_layers = trial.suggest_int("decoder_layers", *ranges["decoder_layers"])
+        model_config.encoder_layers = trial.suggest_int(
+            "encoder_layers",
+            1,          # Updated lower bound
+            12,         # Updated upper bound
+            step=1      # Step remains as 1
+        )
+        model_config.decoder_layers = trial.suggest_int(
+            "decoder_layers",
+            1,          # Updated lower bound
+            12,         # Updated upper bound
+            step=1      # Step remains as 1
+        )
         
         # Suggest d_ff, ensuring it's greater than d_model
         min_d_ff = d_model + 64  # Constrain d_ff to be at least d_model + 64
-        if min_d_ff > ranges["d_ff"][1]:
+        if min_d_ff > 1024:    # Updated upper bound
             logger.warning(f"Cannot set d_ff > d_model={d_model} within the parameter range.")
             raise optuna.TrialPruned()
         
         model_config.d_ff = trial.suggest_int(
             "d_ff", 
-            max(min_d_ff, ranges["d_ff"][0]), 
-            ranges["d_ff"][1], 
-            step=ranges["d_ff"][2]
+            max(min_d_ff, 64),     # Updated lower bound
+            1024,                  # Updated upper bound
+            step=64                # Step remains the same
         )
         
         # Dropout
-        model_config.dropout = trial.suggest_float("dropout", *ranges["dropout"])
+        model_config.dropout = trial.suggest_float(
+            "dropout",
+            0.05,                  # Updated lower bound
+            0.7,                   # Updated upper bound
+            step=None,             # Continuous range
+            log=False               # Linear scale
+        )
         
         # Context encoder parameters
-        model_config.context_encoder_d_model = model_config.d_model
+        model_config.context_encoder_d_model = trial.suggest_int(
+            "context_encoder_d_model",
+            32,                    # Updated lower bound
+            512,                   # Updated upper bound
+            step=32
+        )
         model_config.context_encoder_heads = trial.suggest_categorical(
             "context_encoder_heads",
-            ranges["context_encoder_heads"]
+            [2, 4, 8, 16]          # Updated list with added 16
         )
         
         # Training parameters
-        training_config.batch_size = trial.suggest_int("batch_size", *ranges["batch_size"])
+        training_config.batch_size = trial.suggest_int(
+            "batch_size",
+            8,                      # Updated lower bound
+            256,                    # Updated upper bound
+            step=8                  # Step adjusted for practical batch sizes
+        )
         training_config.learning_rate = trial.suggest_float(
-            "learning_rate", 
-            *ranges["learning_rate"], 
-            log=True
+            "learning_rate",
+            1e-6,                   # Updated lower bound
+            1e-1,                   # Updated upper bound
+            log=True                # Log scale remains for learning rates
         )
         
         # Suggest gradient_clip_val

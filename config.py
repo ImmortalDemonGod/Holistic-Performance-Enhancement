@@ -49,20 +49,20 @@ class OptunaConfig:
         self.param_ranges = {
             # Model Architecture
             # Model Architecture Parameters
-            "d_model": (64, 256, 16),      # Step set to 16 to ensure divisibility by 16
-            "heads": [2, 4, 8, 16],        # Powers of 2 for efficiency
-            "encoder_layers": (1, 4),      # Updated range to start from 1
-            "decoder_layers": (1, 8),      # At least 1 decoder layer needed
-            "d_ff": (128, 512, 64),        # Feedforward dimension
-            "dropout": (0.1, 0.5),         # Dropout rate
+            "d_model": (32, 512, 16),      # Expanded from 32 to 512 with step 16
+            "heads": [2, 4, 8, 16, 32],    # Added 32 heads for increased model complexity
+            "encoder_layers": (1, 12),     # Expanded upper bound to 12 layers
+            "decoder_layers": (1, 12),     # Expanded upper bound to 12 layers
+            "d_ff": (64, 1024, 64),        # Expanded from 64 to 1024 with step 64
+            "dropout": (0.05, 0.7),        # Expanded dropout rate range
             
             # Context Encoder Parameters (actually used in model)
-            "context_encoder_d_model": (64, 256, 32),
-            "context_encoder_heads": [2, 4, 8],
+            "context_encoder_d_model": (32, 512, 32),  # Expanded from 32 to 512 with step 32
+            "context_encoder_heads": [2, 4, 8, 16],   # Added 16 heads for increased complexity
             
             # Training Parameters
-            "batch_size": (16, 128),
-            "learning_rate": (1e-5, 1e-2),
+            "batch_size": (8, 256),                   # Expanded batch size range from 8 to 256
+            "learning_rate": (1e-6, 1e-1),            # Expanded learning rate range from 1e-6 to 1e-1
             
             # **New:** Add max_epochs range
             "max_epochs": (1, 5, 1),    # Increased range from (1, 5, 1) to (10, 100, 10)
