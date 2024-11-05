@@ -113,14 +113,7 @@ class Config:
             self.context_encoder_heads = context_encoder_heads
     
     class TrainingConfig:
-        def __init__(
-            self, 
-            batch_size, 
-            learning_rate, 
-            include_sythtraining_data, 
-            num_epochs, 
-            device_choice='cpu'
-        ):
+        def __init__(self):
             self.batch_size = batch_size
             self.learning_rate = learning_rate
             self.include_sythtraining_data = include_sythtraining_data
