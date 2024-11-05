@@ -105,14 +105,17 @@ class Config:
             self.context_encoder_heads = context_encoder_heads
     
     class TrainingConfig:
-        def __init__(self):
+        def __init__(
+            self, 
+            batch_size, 
+            learning_rate, 
+            include_sythtraining_data, 
+            num_epochs, 
+            device_choice='cpu'
+        ):
             self.batch_size = batch_size
             self.learning_rate = learning_rate
             self.include_sythtraining_data = include_sythtraining_data
-            
-            # Initialize max_epochs with the existing num_epochs value
-            self.max_epochs = num_epochs  # Default value from config
-            
-            # Add device_choice attribute with a default value
+            self.max_epochs = num_epochs
             self.device_choice = device_choice
-            self.gradient_clip_val = 1.0  # Specifies the maximum norm of the gradients
+            self.gradient_clip_val = 1.0
