@@ -47,8 +47,6 @@ class TransformerTrainer(pl.LightningModule):
             heads=self.hparams['heads'],
             d_ff=self.hparams['d_ff'],
             output_dim=self.hparams['output_dim'],
-            context_encoder_d_model=context_encoder_d_model,
-            context_encoder_heads=context_encoder_heads,
         )
         self.learning_rate = self.hparams['learning_rate']
         self.device_choice = 'cpu'
