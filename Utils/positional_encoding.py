@@ -11,6 +11,7 @@ class PositionalEncoding(nn.Module):
     def __init__(self, d_model, max_len=5000):
         super(PositionalEncoding, self).__init__()
         self.d_model = d_model
+        assert self.d_model % 4 == 0, f"d_model must be divisible by 4, got d_model={self.d_model}"
 
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
