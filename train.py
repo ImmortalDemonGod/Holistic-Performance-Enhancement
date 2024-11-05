@@ -77,6 +77,7 @@ class TransformerTrainer(pl.LightningModule):
         self.model.to(self.device)
         self.learning_rate = self.hparams['learning_rate']
         self.device_choice = 'cpu'
+        self.device = self.device_choice
         self.criterion = nn.CrossEntropyLoss()
 
     def configure_optimizers(self):
@@ -87,14 +88,13 @@ class TransformerTrainer(pl.LightningModule):
         logger.debug(f"Forward pass input shapes:")
         logger.debug(f"  src: {src.shape}")
         logger.debug(f"  tgt: {tgt.shape}")
+        # Move tensors to the same device as the model
+        device = next(self.model.parameters()).device
         logger.debug(f"Model is on device: {device}")
         if ctx_input is not None:
             logger.debug(f"  ctx_input: {ctx_input.shape}")
         if ctx_output is not None:
             logger.debug(f"  ctx_output: {ctx_output.shape}")
-
-        # Move tensors to the same device as the model
-        device = next(self.model.parameters()).device
         src = src.to(device)
         tgt = tgt.to(device)
         if ctx_input is not None:
