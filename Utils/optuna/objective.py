@@ -7,7 +7,7 @@ import optuna
 from config import Config
 from Utils.data_preparation import prepare_data
 from train import TransformerTrainer
-from pytorch_lightning import Trainer
+from pytorch_lightning import Trainer, Callback
 from pytorch_lightning.callbacks import EarlyStopping
 
 # Setup logging
@@ -272,7 +272,7 @@ def create_objective(base_config):
             raise optuna.TrialPruned()
             
     return objective
-class PerformancePruningCallback(pl.Callback):
+class PerformancePruningCallback(Callback):
     def __init__(self, trial, monitor="val_loss", patience=3):
         self.trial = trial
         self.monitor = monitor
@@ -305,7 +305,7 @@ class PerformancePruningCallback(pl.Callback):
             logger.info(f"Trial {self.trial.number} pruned by Optuna")
             raise optuna.TrialPruned()
 
-class ResourcePruningCallback(pl.Callback):
+class ResourcePruningCallback(Callback):
     def __init__(self, trial, max_memory_gb=None):
         self.trial = trial
         self.max_memory_gb = max_memory_gb or (torch.cuda.get_device_properties(0).total_memory / 1e9 * 0.9)
