@@ -5,7 +5,6 @@ import logging
 import os
 import torch
 from train import TransformerTrainer
-from config import TRAIN_FROM_CHECKPOINT
 from Utils.data_preparation import prepare_data
 import config
 from torch.quantization import get_default_qconfig
@@ -53,9 +52,13 @@ def setup_model_training(cfg, args=None):
     logger.info(f"Training parameters: {cfg.training.__dict__}")
 
     # Initialize model
-    if cfg.model.checkpoint_path and os.path.isfile(cfg.model.checkpoint_path):
-        logger.info(f"Resuming from checkpoint: {cfg.model.checkpoint_path}")
-        model = TransformerTrainer.load_from_checkpoint(cfg.model.checkpoint_path)
+    if cfg.training.train_from_checkpoint and cfg.model.checkpoint_path:
+        checkpoint_path = cfg.model.checkpoint_path
+        if os.path.isfile(checkpoint_path):
+            logger.info(f"Resuming from checkpoint: {checkpoint_path}")
+            model = TransformerTrainer.load_from_checkpoint(checkpoint_path)
+        else:
+            raise FileNotFoundError(f"Checkpoint file not found at {checkpoint_path}")
     else:
         logger.info("Initializing new model")
         model = TransformerTrainer(
@@ -70,8 +73,23 @@ def setup_model_training(cfg, args=None):
             include_sythtraining_data=cfg.training.include_sythtraining_data
         )
 
+    # Setup model quantization
+    qconfig = get_default_qconfig('qnnpack')  # Use 'fbgemm' if on x86 platforms
+    model.model.qconfig = qconfig
+    torch.quantization.prepare(model.model, inplace=True)
+    torch.quantization.convert(model.model, inplace=True)
+    
+    # Only apply scripting if not training from checkpoint
+    if not cfg.training.train_from_checkpoint:
+        try:
+            model.model = torch.jit.script(model.model)
+            logger.info("Successfully applied TorchScript optimization")
+        except Exception as e:
+            logger.warning(f"Failed to apply TorchScript: {str(e)}")
+
     return model
 
+if __name__ == '__main__':
     args = parse_arguments()
     
     # Initialize configuration
@@ -83,50 +101,9 @@ def setup_model_training(cfg, args=None):
     # Prepare data
     train_loader, val_loader = prepare_data(batch_size=cfg.training.batch_size)
 
-    # Calculate the number of training batches
+    # Calculate logging frequency
     num_training_batches = len(train_loader)
-
-    # Dynamically set log_every_n_steps to the smaller of 50 or the number of training batches
     log_every_n_steps = min(50, num_training_batches) if num_training_batches > 0 else 1
-    torch.backends.quantized.engine = 'qnnpack'  # Use 'fbgemm' for x86 platforms if needed
-
-    # Validate checkpoint path only if TRAIN_FROM_CHECKPOINT is True
-    if TRAIN_FROM_CHECKPOINT:
-        if cfg.model.CHECKPOINT_PATH and not os.path.isfile(cfg.model.CHECKPOINT_PATH):
-            raise FileNotFoundError(
-                f"Checkpoint file not found at {cfg.model.CHECKPOINT_PATH}. Please update config.py with a valid path."
-            )
-
-    # Initialize the model
-    if TRAIN_FROM_CHECKPOINT and config.CHECKPOINT_PATH:
-        logger.info(f"Resuming training from checkpoint: {config.CHECKPOINT_PATH}")
-        model = TransformerTrainer.load_from_checkpoint(cfg.model.CHECKPOINT_PATH)
-        model = TransformerTrainer.load_from_checkpoint(config.CHECKPOINT_PATH)
-    else:
-        if TRAIN_FROM_CHECKPOINT and not config.CHECKPOINT_PATH:
-            logger.warning("TRAIN_FROM_CHECKPOINT is True but CHECKPOINT_PATH is not set. Starting training from scratch.")
-        else:
-            logger.info("Starting training from scratch.")
-        model = TransformerTrainer(
-            input_dim=cfg.model.input_dim,
-            d_model=cfg.model.d_model,
-            encoder_layers=cfg.model.encoder_layers,
-            decoder_layers=cfg.model.decoder_layers,
-            heads=cfg.model.heads,
-            d_ff=cfg.model.d_ff,
-            output_dim=cfg.model.output_dim,
-            learning_rate=cfg.training.learning_rate,
-            include_sythtraining_data=cfg.training.include_sythtraining_data
-        )
-    qconfig = get_default_qconfig('qnnpack')  # Use 'fbgemm' if on x86 platforms
-    model.model.qconfig = qconfig
-
-
-    #torch.quantization.prepare(model.model, inplace=True)
-
-    # Commented out TorchScript scripting during training
-    # torch.quantization.convert(model.model, inplace=True)
-    # model.model = torch.jit.script(model.model)  # Script the model for optimized deployment
 
     # Setup callbacks
     callbacks = [
@@ -144,31 +121,27 @@ def setup_model_training(cfg, args=None):
         )
     ]
 
-    # Set up logging statements for clarity
-    if TRAIN_FROM_CHECKPOINT and config.CHECKPOINT_PATH:
-        logger.info(f"Resuming training from checkpoint: {config.CHECKPOINT_PATH}")
-    else:
-        if TRAIN_FROM_CHECKPOINT and not config.CHECKPOINT_PATH:
-            logger.warning("TRAIN_FROM_CHECKPOINT is True but CHECKPOINT_PATH is not set. Starting training from scratch.")
-        else:
-            logger.info("Starting training from scratch.")
+    # Configure trainer with resume_from_checkpoint
+    trainer_kwargs = {
+        "max_epochs": cfg.training.max_epochs,
+        "callbacks": callbacks,
+        "devices": 1,
+        "accelerator": 'gpu' if cfg.training.device_choice == 'cuda' else 'cpu',
+        "precision": cfg.training.precision,
+        "fast_dev_run": cfg.training.FAST_DEV_RUN,
+        "log_every_n_steps": log_every_n_steps,
+        "gradient_clip_val": cfg.training.gradient_clip_val
+    }
 
-    # Configure trainer
-    trainer = Trainer(
-        max_epochs=cfg.training.max_epochs,
-        callbacks=callbacks,
-        devices=1,
-        accelerator='gpu' if cfg.training.device_choice == 'cuda' else 'cpu',
-        precision=cfg.training.precision,
-        fast_dev_run=cfg.training.FAST_DEV_RUN,
-        log_every_n_steps=log_every_n_steps,
-        gradient_clip_val=cfg.training.gradient_clip_val
-    )
+    if cfg.training.train_from_checkpoint and cfg.model.checkpoint_path:
+        trainer_kwargs["resume_from_checkpoint"] = cfg.model.checkpoint_path
+
+    trainer = Trainer(**trainer_kwargs)
     
     # Train model
     trainer.fit(
         model, 
         train_loader, 
-        val_loader, 
-        ckpt_path=cfg.model.checkpoint_path if cfg.model.checkpoint_path else None
+        val_loader,
+        ckpt_path=cfg.model.checkpoint_path if cfg.training.train_from_checkpoint else None
     )

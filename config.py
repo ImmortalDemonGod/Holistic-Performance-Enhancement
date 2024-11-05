@@ -28,7 +28,6 @@ include_sythtraining_data = False  # Set to True to include sythtraining data
 synthetic_dir = 'sythtraining'
 CHECKPOINT_PATH = 'pretrained_checkpoint.ckpt'  # Update this path accordingly
 FAST_DEV_RUN = False  # Set to True to enable fast development run
-TRAIN_FROM_CHECKPOINT = False  # Set to True to resume training from a checkpoint
 
 # Context Encoder Configuration
 context_encoder_d_model = 128  # Transformer model dimension for Context Encoder
@@ -96,7 +95,8 @@ class Config:
                 num_epochs=num_epochs,
                 device_choice=device_choice,
                 precision=precision,
-                fast_dev_run=FAST_DEV_RUN
+                fast_dev_run=FAST_DEV_RUN,
+                train_from_checkpoint=TRAIN_FROM_CHECKPOINT  # Added parameter
             )
         
         self.optuna = OptunaConfig()
