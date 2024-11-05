@@ -104,10 +104,13 @@ class TaskFineTuner:
         """Fine-tune model for specific task and evaluate."""
         self.logger.info(f"Starting fine-tuning for task {task_id}")
 
-        # Create task-specific model
+        # Create task-specific model with overridden learning_rate
+        hparams = self.base_model.hparams.copy()
+        hparams.pop('learning_rate', None)  # Remove existing learning_rate
+
         task_model = TransformerTrainer(
-            **self.base_model.hparams,  # Unpack hyperparameters from base model
-            learning_rate=self.learning_rate
+            **hparams,  # Unpack hyperparameters without learning_rate
+            learning_rate=self.learning_rate  # Add the desired learning_rate
         )
         task_model.load_state_dict(self.base_model.state_dict())
         task_model.to(self.device)
