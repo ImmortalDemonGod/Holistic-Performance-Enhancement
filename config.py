@@ -80,15 +80,23 @@ class OptunaConfig:
         print("DEBUG: OptunaConfig created with ranges:", self.param_ranges)
 
 class Config:
-    def __init__(self, model=None, training=None, device_choice='cpu'):
+    def __init__(self, model=None, training=None, device_choice=None):
         self.model = model if model is not None else self.ModelConfig()
-        self.training = training if training is not None else self.TrainingConfig(
-            batch_size=batch_size,
-            learning_rate=learning_rate,
-            include_sythtraining_data=include_sythtraining_data,
-            num_epochs=num_epochs,
-            device_choice=device_choice  # Pass the new device_choice parameter
-        )
+        
+        if device_choice is None:
+            device_choice = 'cuda' if torch.cuda.is_available() else 'cpu'
+        
+        if training is not None:
+            self.training = training
+        else:
+            self.training = self.TrainingConfig(
+                batch_size=batch_size,
+                learning_rate=learning_rate,
+                include_sythtraining_data=include_sythtraining_data,
+                num_epochs=num_epochs,
+                device_choice=device_choice
+            )
+        
         self.optuna = OptunaConfig()
     
     class ModelConfig:
