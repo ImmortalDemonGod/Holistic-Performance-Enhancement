@@ -37,7 +37,20 @@ class TransformerTrainer(pl.LightningModule):
     ):
         super(TransformerTrainer, self).__init__()
 
-        # Assign hyperparameters as instance attributes
+        # Logging dimensions
+        logger.debug(f"Initializing TransformerTrainer with dimensions:")
+        logger.debug(f"  input_dim: {input_dim}")
+        logger.debug(f"  d_model: {d_model}")
+        logger.debug(f"  heads: {heads}")
+        logger.debug(f"  d_ff: {d_ff}")
+
+        # Validate dimensions before creating model
+        if d_model % heads != 0:
+            raise ValueError(f"d_model ({d_model}) must be divisible by heads ({heads})")
+        if d_model % 4 != 0:
+            raise ValueError(f"d_model ({d_model}) must be divisible by 4")
+        if d_ff < d_model:
+            raise ValueError(f"d_ff ({d_ff}) must be greater than d_model ({d_model})")
         self.input_dim = input_dim
         self.d_model = d_model
         self.encoder_layers = encoder_layers
@@ -68,6 +81,13 @@ class TransformerTrainer(pl.LightningModule):
         return optimizer
 
     def forward(self, src, tgt, ctx_input=None, ctx_output=None):
+        logger.debug(f"Forward pass input shapes:")
+        logger.debug(f"  src: {src.shape}")
+        logger.debug(f"  tgt: {tgt.shape}")
+        if ctx_input is not None:
+            logger.debug(f"  ctx_input: {ctx_input.shape}")
+        if ctx_output is not None:
+            logger.debug(f"  ctx_output: {ctx_output.shape}")
         return self.model(src.to("cpu"), tgt.to("cpu"), ctx_input, ctx_output)
 
     def training_step(self, batch, batch_idx):
