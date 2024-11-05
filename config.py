@@ -63,6 +63,9 @@ class OptunaConfig:
             # Training Parameters
             "batch_size": (16, 128),
             "learning_rate": (1e-5, 1e-2),
+            
+            # **New:** Add max_epochs range
+            "max_epochs": (10, 100, 5),    # Range from 10 to 100 epochs in steps of 5
         }
         
         # Pruning Configuration
@@ -99,3 +102,6 @@ class Config:
             self.batch_size = batch_size
             self.learning_rate = learning_rate
             self.include_sythtraining_data = include_sythtraining_data
+            
+            # **New:** Initialize max_epochs with the existing num_epochs value
+            self.max_epochs = num_epochs  # Default value from config

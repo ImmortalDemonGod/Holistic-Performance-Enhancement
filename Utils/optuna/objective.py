@@ -92,7 +92,14 @@ def create_trial_config(trial, base_config):
             log=True
         )
         
-        # Add dimension debugging
+        # **New:** Suggest max_epochs
+        training_config.max_epochs = trial.suggest_int(
+            "max_epochs",
+            ranges["max_epochs"][0],
+            ranges["max_epochs"][1],
+            step=ranges["max_epochs"][2]
+        )
+        
         logger.debug(f"Model dimensions:")
         logger.debug(f"  d_model: {model_config.d_model}")
         logger.debug(f"  heads: {model_config.heads}")
@@ -206,7 +213,7 @@ def create_objective(base_config):
                 logger.info("CUDA not available. Skipping ResourcePruningCallback.")
 
             trainer = Trainer(
-                max_epochs=trial_config.training.max_epochs,
+                max_epochs=trial_config.training.max_epochs,  # Use max_epochs from trial
                 callbacks=callbacks,
                 enable_progress_bar=True,
                 accelerator='gpu' if torch.cuda.is_available() else 'cpu',

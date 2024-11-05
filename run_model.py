@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     # Configure the Trainer with conditional checkpoint resumption
     trainer_kwargs = {
-        "max_epochs": config.num_epochs,
+        "max_epochs": config.training.max_epochs,  # **Modified:** Use max_epochs from TrainingConfig
         "callbacks": [checkpoint_callback, early_stop_callback],
         "devices": 1,  # Use a single device
         "accelerator": 'gpu' if config.device_choice == 'cuda' else 'cpu',
