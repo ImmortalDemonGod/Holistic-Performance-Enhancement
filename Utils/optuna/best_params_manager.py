@@ -104,7 +104,7 @@ class BestParamsManager:
             return None
 
     def update_config(self, config):
-        """Update config with best parameters while preserving config-specified values.
+        """Update config with best parameters, overwriting existing values.
         
         Args:
             config: The configuration object to update
@@ -124,21 +124,68 @@ class BestParamsManager:
                 best_params = self.extract_params(best_trial)
                 self.save_params(best_params)
 
-            # Update model parameters
+            # Update model parameters - always overwrite
             for key, value in best_params.model_params.items():
-                if not hasattr(config.model, key) or getattr(config.model, key) is None:
-                    setattr(config.model, key, value)
-                    logger.debug(f"Updated model parameter {key}={value}")
+                old_value = getattr(config.model, key, None)
+                setattr(config.model, key, value)
+                logger.info(f"Updated model parameter '{key}': {old_value} -> {value}")
             
-            # Update training parameters
+            # Update training parameters - always overwrite except for 'max_epochs'
             for key, value in best_params.training_params.items():
-                if not hasattr(config.training, key) or getattr(config.training, key) is None:
+                if key != 'max_epochs':  # Don't override epochs
+                    old_value = getattr(config.training, key, None)
                     setattr(config.training, key, value)
-                    logger.debug(f"Updated training parameter {key}={value}")
+                    logger.info(f"Updated training parameter '{key}': {old_value} -> {value}")
             
-            logger.info("Configuration updated successfully")
+            # Add: Post-update validation
+            self.validate_updated_config(config, best_params)
+            
+            # Add: Log the entire updated configuration
+            self.log_updated_config(config)
+            
+            logger.info("Configuration updated successfully with best parameters")
             return True
-                
+            
         except Exception as e:
             logger.error(f"Failed to update config: {str(e)}")
             return False
+
+    def validate_updated_config(self, config, best_params: BestParams):
+        """Validate that the configuration has been updated correctly.
+        
+        Args:
+            config: The configuration object to validate
+            best_params: The BestParams object containing expected values
+        """
+        # Validate model parameters
+        for key, expected_value in best_params.model_params.items():
+            actual_value = getattr(config.model, key, None)
+            assert actual_value == expected_value, f"Model parameter '{key}' mismatch: expected {expected_value}, got {actual_value}"
+            logger.debug(f"Validated model parameter '{key}': {actual_value} == {expected_value}")
+        
+        # Validate training parameters
+        for key, expected_value in best_params.training_params.items():
+            if key != 'max_epochs':  # Skip 'max_epochs' as it's not overwritten
+                actual_value = getattr(config.training, key, None)
+                assert actual_value == expected_value, f"Training parameter '{key}' mismatch: expected {expected_value}, got {actual_value}"
+                logger.debug(f"Validated training parameter '{key}': {actual_value} == {expected_value}")
+
+    def log_updated_config(self, config):
+        """Log the entire updated configuration for verification.
+        
+        Args:
+            config: The configuration object to log
+        """
+        try:
+            config_str = json.dumps({
+                'model': config.model.__dict__,
+                'training': config.training.__dict__,
+                'use_best_params': config.use_best_params,
+                'optuna': {
+                    'study_name': config.optuna.study_name,
+                    'storage_url': config.optuna.storage_url
+                }
+            }, indent=2)
+            logger.info("Updated Configuration:\n" + config_str)
+        except Exception as e:
+            logger.error(f"Failed to log updated configuration: {str(e)}")
