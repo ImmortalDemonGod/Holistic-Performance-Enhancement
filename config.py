@@ -49,19 +49,19 @@ class OptunaConfig:
         self.param_ranges = {
             # Model Architecture
             # Model Architecture Parameters
-            "d_model": (32, 512, 16),      # Expanded from 32 to 512 with step 16
-            "heads": [2, 4, 8, 16],    # Fixed list of choices
+            "d_model": (32, 2048, 16),      # Expanded from 32 to 512 with step 16
+            "heads": [2, 4, 8, 16, 32, 64],    # Fixed list of choices
             "encoder_layers": (1, 12),     # Expanded upper bound to 12 layers
             "decoder_layers": (1, 12),     # Expanded upper bound to 12 layers
-            "d_ff": (64, 1024, 64),        # Expanded from 64 to 1024 with step 64
-            "dropout": (0.05, 0.7),        # Expanded dropout rate range
+            "d_ff": (64, 2048, 64),        # Expanded from 64 to 1024 with step 64
+            "dropout": (0.01, 0.7),        # Expanded dropout rate range
             
             # Context Encoder Parameters (actually used in model)
             "context_encoder_d_model": (32, 512, 32),  # Expanded from 32 to 512 with step 32
             "context_encoder_heads": [2, 4, 8],   # Fixed list of choices
             
             # Training Parameters
-            "batch_size": (8, 256),                   # Expanded batch size range from 8 to 256
+            "batch_size": (8, 512),                   # Expanded batch size range from 8 to 256
             "learning_rate": (1e-6, 1e-1),            # Expanded learning rate range from 1e-6 to 1e-1
             
             # **New:** Add max_epochs range
