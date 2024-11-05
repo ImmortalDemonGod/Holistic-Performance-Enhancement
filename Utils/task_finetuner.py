@@ -201,7 +201,7 @@ class TaskFineTuner:
 
                 # Prepare task data
                 task_train_loader, task_val_loader = self.prepare_task_data(
-                    train_loader, val_loader, task_idx
+                    train_loader, val_loader, task_id
                 )
 
                 # Fine-tune and evaluate
