@@ -27,8 +27,58 @@ class TrialMetrics:
         logger.debug(f"  Train Loss: {self.train_loss:.4f}")                                           
         logger.debug(f"  Val Accuracy: {self.val_accuracy:.4f}")                                       
         logger.debug(f"  Memory Used: {self.memory_used:.2f} MB")                                      
-                                                                                                    
-def create_trial_config(trial, base_config):                                                           
+def validate_dimensions(model):
+    """Validate model dimensions before training"""
+    try:
+        logger.debug("Validating model dimensions")
+        
+        # Extract model configurations
+        d_model = model.model.d_model if hasattr(model.model, 'd_model') else model.d_model
+        heads = model.model.heads if hasattr(model.model, 'heads') else model.heads
+        
+        # Check divisibility by 4 for positional encoding
+        if d_model % 4 != 0:
+            logger.error(f"d_model ({d_model}) must be divisible by 4")
+            return False
+            
+        # Check divisibility by heads
+        if d_model % heads != 0:
+            logger.error(f"d_model ({d_model}) must be divisible by number of heads ({heads})")
+            return False
+            
+        # Check head dimensions
+        head_dim = d_model // heads
+        if head_dim * heads != d_model:
+            logger.error(f"Invalid head dimension: {head_dim} * {heads} != {d_model}")
+            return False
+        
+        # Additional Checks:
+        
+        # Check that decoder_layers and encoder_layers are positive integers
+        encoder_layers = model.model.encoder_layers if hasattr(model.model, 'encoder_layers') else model.encoder_layers
+        decoder_layers = model.model.decoder_layers if hasattr(model.model, 'decoder_layers') else model.decoder_layers
+        if encoder_layers <= 0 or decoder_layers <= 0:
+            logger.error(f"Encoder layers ({encoder_layers}) and decoder layers ({decoder_layers}) must be positive integers")
+            return False
+        
+        # Check that d_ff is greater than d_model
+        d_ff = model.model.d_ff if hasattr(model.model, 'd_ff') else model.d_ff
+        if d_ff < d_model:
+            logger.error(f"d_ff ({d_ff}) must be greater than or equal to d_model ({d_model})")
+            return False
+        
+        # Check that dropout is between 0 and 1
+        dropout = model.model.dropout if hasattr(model.model, 'dropout') else model.dropout
+        if not (0.0 <= dropout <= 1.0):
+            logger.error(f"Dropout rate ({dropout}) must be between 0 and 1")
+            return False
+        
+        logger.debug("Model dimensions validated successfully")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error validating dimensions: {str(e)}")
+        return False
     """Create a new config with trial-suggested values"""                                              
     try:                                                                                               
         logger.debug("Creating trial config")                                                          
@@ -95,7 +145,10 @@ def create_objective(base_config):
                 include_sythtraining_data=trial_config.training.include_sythtraining_data              
             )                                                                                          
                                                                                                     
-            # Prepare data loaders
+            # Validate dimensions before training
+            if not validate_dimensions(model):
+                logger.warning("Model dimension validation failed")
+                raise optuna.TrialPruned()
             train_loader, val_loader = prepare_data()
 
             # Setup early stopping callback
