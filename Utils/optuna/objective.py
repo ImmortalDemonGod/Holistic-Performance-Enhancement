@@ -211,7 +211,6 @@ def create_objective(base_config):
                     monitor=base_config.optuna.pruning.get("monitor", "val_loss"),
                     patience=base_config.optuna.pruning.get("patience", 3)
                 ),
-                ResourcePruningCallback(trial),
                 EarlyStopping(
                     monitor="val_loss",
                     patience=base_config.optuna.pruning.get("patience", 3),
@@ -219,6 +218,15 @@ def create_objective(base_config):
                 )
             ]
             
+            # Conditionally add ResourcePruningCallback if CUDA is available
+            if torch.cuda.is_available():
+                callbacks.append(
+                    ResourcePruningCallback(trial)
+                )
+                logger.debug("ResourcePruningCallback added to callbacks.")
+            else:
+                logger.info("CUDA not available. Skipping ResourcePruningCallback.")
+
             trainer = Trainer(
                 max_epochs=trial_config.training.max_epochs,
                 callbacks=callbacks,
@@ -308,11 +316,16 @@ class PerformancePruningCallback(Callback):
 class ResourcePruningCallback(Callback):
     def __init__(self, trial, max_memory_gb=None):
         self.trial = trial
-        self.max_memory_gb = max_memory_gb or (torch.cuda.get_device_properties(0).total_memory / 1e9 * 0.9)
+        if torch.cuda.is_available():
+            self.max_memory_gb = max_memory_gb or (torch.cuda.get_device_properties(0).total_memory / 1e9 * 0.9)
+            logger.debug(f"ResourcePruningCallback initialized with max_memory_gb={self.max_memory_gb} GB")
+        else:
+            self.max_memory_gb = None
+            logger.info("CUDA not available. ResourcePruningCallback will not monitor memory usage.")
         
     def on_batch_end(self, trainer, pl_module):
-        if torch.cuda.is_available():
+        if self.max_memory_gb is not None and torch.cuda.is_available():
             current_memory = torch.cuda.memory_allocated() / 1e9
             if current_memory > self.max_memory_gb:
-                logger.warning(f"Trial {self.trial.number} pruned due to excessive memory usage: {current_memory:.2f}GB")
+                logger.warning(f"Trial {self.trial.number} pruned due to excessive memory usage: {current_memory:.2f} GB")
                 raise optuna.TrialPruned()
