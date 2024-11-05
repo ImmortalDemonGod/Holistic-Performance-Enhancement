@@ -91,8 +91,8 @@ class TaskFineTuner:
         val_data = filter_task_data(val_loader, "validation")
 
         # Create task-specific datasets
-        train_dataset = self._create_dataset(*train_data, task_id_tensor)
-        val_dataset = self._create_dataset(*val_data, task_id_tensor)
+        train_dataset = self._create_dataset(*train_data)
+        val_dataset = self._create_dataset(*val_data)
 
         # Create dataloaders
         task_train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
