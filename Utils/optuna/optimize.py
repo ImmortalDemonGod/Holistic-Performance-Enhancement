@@ -34,10 +34,6 @@ def run_optimization(config, delete_study=False):
             logger.info(f"Deleting existing study '{config.optuna.study_name}'")
             optuna.delete_study(study_name=config.optuna.study_name, storage=config.optuna.storage_url)
             logger.info(f"Deleted study '{config.optuna.study_name}'")
-        logger.debug(f"CUDA available: {torch.cuda.is_available()}")
-        if torch.cuda.is_available():
-            logger.debug(f"GPU: {torch.cuda.get_device_name(0)}")
-            logger.debug(f"GPU memory: {torch.cuda.get_device_properties(0).total_memory / 1024**2:.2f} MB")
 
         # Create study
         study = optuna.create_study(
