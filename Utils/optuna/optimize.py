@@ -55,40 +55,16 @@ def run_optimization(config, delete_study=False):
         logger.info(f"Running {config.optuna.n_trials} trials")
         study.optimize(objective, n_trials=config.optuna.n_trials)
 
-        # Prepare data loaders based on config
-        train_loader, val_loader = prepare_data(batch_size=config.training.batch_size)
-
-        # Initialize the model
-        model = TransformerTrainer(
-            input_dim=config.model.input_dim,
-            d_model=config.model.d_model,
-            encoder_layers=config.model.encoder_layers,
-            decoder_layers=config.model.decoder_layers,
-            heads=config.model.heads,
-            d_ff=config.model.d_ff,
-            output_dim=config.model.output_dim,
-            learning_rate=config.training.learning_rate,
-            include_sythtraining_data=config.training.include_sythtraining_data
-        )
-
-        # Set up the trainer
-        trainer = Trainer(
-            max_epochs=config.training.max_epochs,
-            callbacks=[EarlyStopping(monitor="val_loss", patience=3, mode="min")],
-            enable_progress_bar=True,
-            accelerator='gpu' if torch.cuda.is_available() else 'cpu',
-            devices=1
-        )
-
-        # Train the model
-        trainer.fit(model, train_loader, val_loader)
-
-        # Retrieve metrics
-        metrics = TrialMetrics(
-            val_loss=float(trainer.callback_metrics.get("val_loss", float('inf'))),
-            train_loss=float(trainer.callback_metrics.get("train_loss", float('inf'))),
-            val_accuracy=float(trainer.callback_metrics.get("val_accuracy", 0.0))
-        )
+        # **Add logging for optimization results**
+        logger.info("Optimization completed")
+        best_trial = study.best_trial
+        logger.info(f"Best trial: {best_trial.number}")
+        logger.info(f"Best value: {best_trial.value}")
+        logger.info("Best params:")
+        for key, value in best_trial.params.items():
+            logger.info(f"  {key}: {value}")
+        
+        return best_trial
 
     except Exception as e:
         logger.error(f"Optimization failed: {str(e)}")

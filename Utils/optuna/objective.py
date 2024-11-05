@@ -100,11 +100,10 @@ def create_trial_config(trial, base_config):
             step=0.1   # Step size (adjust as needed)
         )
         training_config.max_epochs = trial.suggest_int(
-            "max_epochs",
-            ranges["max_epochs"][0],
-            ranges["max_epochs"][1],
-            step=ranges["max_epochs"][2]
+            "max_epochs", 
+            *base_config.optuna.param_ranges["max_epochs"]
         )
+        logger.debug(f"Set max_epochs to {training_config.max_epochs}")
         
         logger.debug(f"Model dimensions:")
         logger.debug(f"  d_model: {model_config.d_model}")
@@ -222,12 +221,13 @@ def create_objective(base_config):
             epoch_logging_callback = EpochLoggingCallback()
             callbacks.append(epoch_logging_callback)
             trainer = Trainer(
-                max_epochs=trial_config.training.max_epochs,  # Use max_epochs from trial
+                max_epochs=trial_config.training.max_epochs,  # Use max_epochs from trial config
                 callbacks=callbacks,
                 enable_progress_bar=True,
                 accelerator='gpu' if torch.cuda.is_available() else 'cpu',
                 devices=1,
-                gradient_clip_val=trial_config.training.gradient_clip_val
+                gradient_clip_val=trial_config.training.gradient_clip_val,
+                log_every_n_steps=10  # Set log_every_n_steps to 10 to avoid warnings
             )
             
             # Prepare data loaders based on trial_config.training.batch_size
