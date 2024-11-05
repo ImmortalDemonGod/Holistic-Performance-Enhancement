@@ -151,11 +151,6 @@ def validate_dimensions(model):
         # Check that decoder_layers and encoder_layers are positive integers
         encoder_layers = model.encoder_layers
         decoder_layers = model.decoder_layers
-        if encoder_layers <= 0 or decoder_layers <= 0:
-            logger.error(
-                f"Encoder layers ({encoder_layers}) and decoder layers ({decoder_layers}) must be positive integers"
-            )
-            return False
 
         # Check that d_ff is greater than d_model
         d_ff = model.d_ff

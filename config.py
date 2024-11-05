@@ -51,7 +51,7 @@ class OptunaConfig:
             # Model Architecture Parameters
             "d_model": (64, 256, 16),      # Step set to 16 to ensure divisibility by 16
             "heads": [2, 4, 8, 16],        # Powers of 2 for efficiency
-            "encoder_layers": (0, 4),      # Allows encoder-less architecture
+            "encoder_layers": (1, 4),      # Updated range to start from 1
             "decoder_layers": (1, 8),      # At least 1 decoder layer needed
             "d_ff": (128, 512, 64),        # Feedforward dimension
             "dropout": (0.1, 0.5),         # Dropout rate
