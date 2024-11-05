@@ -186,11 +186,11 @@ class TaskFineTuner:
                     )
 
         # Process each task
-        for task_id in task_id_map.keys():
+        for task_id, task_idx in task_id_map.items():
             try:
                 # Prepare task data
                 task_train_loader, task_val_loader = self.prepare_task_data(
-                    train_loader, val_loader, task_id
+                    train_loader, val_loader, task_idx
                 )
 
                 # Fine-tune and evaluate

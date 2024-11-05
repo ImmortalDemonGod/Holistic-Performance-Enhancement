@@ -53,12 +53,11 @@ class TaskMetricsCollector:
                 }
         """
         if task_id not in self.task_metrics:
-            self.task_metrics[task_id] = {
-                'standard_accuracy': [],
-                'differential_accuracy': []
-            }
-            
+            self.task_metrics[task_id] = {}
+        
         for metric_name, value in metrics_dict.items():
+            if metric_name not in self.task_metrics[task_id]:
+                self.task_metrics[task_id][metric_name] = []
             self.task_metrics[task_id][metric_name].append(value)
             
     def get_task_summary(self):
