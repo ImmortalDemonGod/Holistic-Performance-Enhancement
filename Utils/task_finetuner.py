@@ -168,12 +168,18 @@ class TaskFineTuner:
         """Fine-tune and evaluate all tasks."""
         self.logger.info("Starting fine-tuning for all tasks")
 
+        # Create a reverse mapping from index to task_id
+        idx_to_task_id = {idx: task_id for task_id, idx in task_id_map.items()}
+
         # Get test examples for each task
         test_examples = {}
         for batch in val_loader:
             src, tgt, ctx_input, ctx_output, task_ids = batch
             for i, task_idx in enumerate(task_ids):
-                task_id = task_id_map[str(task_idx.item())]  # Ensure task_id_map keys are strings
+                task_id = idx_to_task_id.get(task_idx.item())
+                if task_id is None:
+                    self.logger.error(f"Task index {task_idx.item()} not found in task_id_map.")
+                    continue  # Skip this task or handle the error as needed
                 if task_id not in test_examples:
                     test_examples[task_id] = (
                         src[i], tgt[i], ctx_input[i], ctx_output[i]
