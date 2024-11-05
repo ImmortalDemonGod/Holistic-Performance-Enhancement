@@ -5,7 +5,7 @@ import sys
 from pathlib import Path                                                                               
                                                                                                     
 # Add project root to path to ensure modules can be imported correctly                                 
-project_root = Path(__file__).parent                                                                   
+project_root = Path(__file__).resolve().parents[2]  # Navigate two levels up to root
 sys.path.append(str(project_root))                                                                     
                                                                                                     
 from config import Config                                                                              
