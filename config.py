@@ -50,7 +50,7 @@ class OptunaConfig:
         self.param_ranges = {
             "learning_rate": (1e-5, 1e-2),
             "batch_size": (16, 128),
-            "d_model": (64, 256),
+            "d_model_multiplier": (4, 32),  # New hyperparameter
             "decoder_layers": (4, 32),
             "heads": (2, 16),
             "d_ff": (128, 512),

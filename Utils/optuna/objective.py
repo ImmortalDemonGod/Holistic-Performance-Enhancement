@@ -2,7 +2,8 @@ import torch
 import logging                                                                                         
 from dataclasses import dataclass                                                                      
 import optuna                                                                                          
-from config import Config                                                                              
+from config import Config
+from Utils.data_preparation import prepare_data
 from train import TransformerTrainer                                                                   
 from pytorch_lightning import Trainer                                                                  
 from pytorch_lightning.callbacks import EarlyStopping                                                  
@@ -85,7 +86,10 @@ def create_objective(base_config):
                 include_sythtraining_data=trial_config.training.include_sythtraining_data              
             )                                                                                          
                                                                                                     
-            # Setup early stopping callback                                                            
+            # Prepare data loaders
+            train_loader, val_loader = prepare_data()
+
+            # Setup early stopping callback
             early_stop = EarlyStopping(monitor="val_loss", patience=3, mode="min")                     
                                                                                                     
             # Initialize Trainer                                                                       
@@ -99,7 +103,7 @@ def create_objective(base_config):
                                                                                                     
             # Train the model                                                                          
             logger.debug("Starting training")                                                          
-            trainer.fit(model)                                                                         
+            trainer.fit(model, train_loader, val_loader)
                                                                                                     
             # Retrieve metrics                                                                         
             metrics = TrialMetrics(                                                                    
