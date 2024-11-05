@@ -27,7 +27,58 @@ class TrialMetrics:
         logger.debug(f"  Train Loss: {self.train_loss:.4f}")                                           
         logger.debug(f"  Val Accuracy: {self.val_accuracy:.4f}")                                       
         logger.debug(f"  Memory Used: {self.memory_used:.2f} MB")                                      
-def create_trial_config(trial, base_config):
+def validate_dimensions(model):
+    """Validate model dimensions before training"""
+    try:
+        logger.debug("Validating model dimensions")
+        
+        # Extract model configurations
+        d_model = model.d_model
+        heads = model.heads
+        
+        # Check divisibility by 4 for positional encoding
+        if d_model % 4 != 0:
+            logger.error(f"d_model ({d_model}) must be divisible by 4")
+            return False
+            
+        # Check divisibility by heads
+        if d_model % heads != 0:
+            logger.error(f"d_model ({d_model}) must be divisible by number of heads ({heads})")
+            return False
+            
+        # Check head dimensions
+        head_dim = d_model // heads
+        if head_dim * heads != d_model:
+            logger.error(f"Invalid head dimension: {head_dim} * {heads} != {d_model}")
+            return False
+        
+        # Additional Checks:
+        
+        # Check that decoder_layers and encoder_layers are positive integers
+        encoder_layers = model.encoder_layers
+        decoder_layers = model.decoder_layers
+        if encoder_layers <= 0 or decoder_layers <= 0:
+            logger.error(f"Encoder layers ({encoder_layers}) and decoder layers ({decoder_layers}) must be positive integers")
+            return False
+        
+        # Check that d_ff is greater than d_model
+        d_ff = model.d_ff
+        if d_ff < d_model:
+            logger.error(f"d_ff ({d_ff}) must be greater than or equal to d_model ({d_model})")
+            return False
+        
+        # Check that dropout is between 0 and 1
+        dropout = model.dropout
+        if not (0.0 <= dropout <= 1.0):
+            logger.error(f"Dropout rate ({dropout}) must be between 0 and 1")
+            return False
+        
+        logger.debug("Model dimensions validated successfully")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error validating dimensions: {str(e)}")
+        return False
     """Create a new config with trial-suggested values"""
     try:
         logger.debug("Creating trial config")
@@ -155,7 +206,7 @@ def create_trial_config(trial, base_config):
                                                                                                     
 def create_objective(base_config):                                                                     
     """Creates an objective function with closure over base_config"""
-    from .objective import create_trial_config
+    from .objective import create_trial_config, validate_dimensions
                                                                                                     
     def objective(trial):                                                                              
         logger.debug(f"\nStarting trial {trial.number}")                                               
