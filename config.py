@@ -8,6 +8,7 @@
 import torch
 
 precision = 32  # Set to 16 for mixed precision, 32 for full precision, etc.
+TRAIN_FROM_CHECKPOINT = False  # Set to True to resume training from a checkpoint
 # These parameters should be treated as modifiable from the main run_model.py script
 
 device_choice = "cuda" if torch.cuda.is_available() else "cpu"  # Auto-select device
