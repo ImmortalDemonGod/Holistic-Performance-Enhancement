@@ -65,7 +65,7 @@ class OptunaConfig:
             "learning_rate": (1e-6, 1e-1),            # Expanded learning rate range from 1e-6 to 1e-1
             
             # **New:** Add max_epochs range
-            "max_epochs": (4, 5, 1),    # Increased range from (1, 5, 1) to (10, 100, 10)
+            "max_epochs": (4, 5, 1),       # Updated range
             "gradient_clip_val": (0.0, 5.0),  # Add gradient_clip_val range
         }
         
