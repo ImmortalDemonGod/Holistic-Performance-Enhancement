@@ -74,16 +74,16 @@ def setup_model_training(cfg, args=None):
         )
 
     # Setup dynamic quantization
-    model.model = torch.quantization.quantize_dynamic(
-        model.model,
-        {torch.nn.Linear, torch.nn.Conv2d},  # Layers to apply dynamic quantization
-        dtype=torch.qint8  # Quantization data type
-    )
+    #model.model = torch.quantization.quantize_dynamic(
+    #    model.model,
+    #    {torch.nn.Linear, torch.nn.Conv2d},  # Layers to apply dynamic quantization
+    #    dtype=torch.qint8  # Quantization data type
+    #)
     
     # Only apply scripting if not training from checkpoint
     if not cfg.training.train_from_checkpoint:
         try:
-            model.model = torch.jit.script(model.model)
+            #model.model = torch.jit.script(model.model)
             logger.info("Successfully applied TorchScript optimization")
         except Exception as e:
             logger.warning(f"Failed to apply TorchScript: {str(e)}")
