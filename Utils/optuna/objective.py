@@ -42,31 +42,25 @@ def create_trial_config(trial, base_config):
         training_config = base_config.training.__class__()
 
         # Suggest hyperparameters using Optuna
-        # Suggest the number of heads first
+        # Suggest the number of heads (must be power of 2)
         model_config.heads = trial.suggest_categorical("heads", ranges["heads"])
+        logger.debug(f"Selected heads: {model_config.heads}")
 
         # Determine base dimension (must be divisible by 32)
         base_dim = trial.suggest_int(
             "base_dim",
             low=ranges["base_dim"][0],
             high=ranges["base_dim"][1],
-            step=ranges["base_dim"][2]  # Pass 'step' as a keyword argument
+            step=ranges["base_dim"][2]
         )
         logger.debug(f"Selected base_dim: {base_dim}")
-
-        # Determine number of heads (must be power of 2)
-        heads = trial.suggest_int("heads", *ranges["heads"])
-        logger.debug(f"Selected heads: {heads}")
 
         # Set d_model to be equal to base_dim
         model_config.d_model = base_dim
 
-        # Set number of heads
-        model_config.heads = heads
-
         # Validate d_model is divisible by both heads and 4
-        if model_config.d_model % heads != 0 or model_config.d_model % 4 != 0:
-            logger.warning(f"Invalid dimension combination: d_model={model_config.d_model}, heads={heads}")
+        if model_config.d_model % model_config.heads != 0 or model_config.d_model % 4 != 0:
+            logger.warning(f"Invalid dimension combination: d_model={model_config.d_model}, heads={model_config.heads}")
             raise optuna.TrialPruned()
 
         # Set other parameters based on base_dim
@@ -74,7 +68,6 @@ def create_trial_config(trial, base_config):
         model_config.d_ff = base_dim * d_ff_multiplier
 
         model_config.decoder_layers = trial.suggest_int("decoder_layers", *ranges["decoder_layers"])
-        model_config.d_ff = trial.suggest_int("d_ff", *ranges["d_ff"])
         model_config.dropout = trial.suggest_float("dropout", *ranges["dropout"])
 
         training_config.batch_size = trial.suggest_int("batch_size", *ranges["batch_size"])
