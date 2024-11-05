@@ -112,22 +112,3 @@ class TransformerTrainer(pl.LightningModule):
 
         self.log("test_accuracy", accuracy, prog_bar=True)
         return accuracy
-
-
-
-def test_positional_encoding():
-    d_model = 512
-    batch_size = 2
-    height = 30
-    width = 30
-    
-    pos_enc = Grid2DPositionalEncoding(d_model)
-    x = torch.randn(batch_size, height * width, d_model)
-    
-    output = pos_enc(x)
-    logger.info(f"Input shape: {x.shape}")
-    logger.info(f"Output shape: {output.shape}")
-    logger.info(f"Position encoding added successfully: {(output - x != 0).any()}")
-
-if __name__ == "__main__":
-    test_positional_encoding()
