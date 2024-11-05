@@ -1,3 +1,13 @@
+import sys
+from pathlib import Path
+
+# Determine the current directory and the parent directory
+current_dir = Path(__file__).resolve().parent
+parent_dir = current_dir.parent
+
+# Add the parent directory to sys.path
+sys.path.append(str(parent_dir))
+
 import pytorch_lightning as pl
 import torch                                                                                           
 import logging                                                                                         
