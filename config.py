@@ -27,7 +27,7 @@ dropout_rate = 0.35  # Dropout rate for the model
 include_sythtraining_data = True  # Set to True to include sythtraining data
 synthetic_dir = 'sythtraining'
 CHECKPOINT_PATH = 'path_to_pretrained_checkpoint.ckpt'  # Specify the actual checkpoint path
-FAST_DEV_RUN = False  # Set to True to enable fast development run
+FAST_DEV_RUN = True  # Set to True to enable fast development run
 TRAIN_FROM_CHECKPOINT = False  # Set to True to resume training from a checkpoint
 
 # Context Encoder Configuration
