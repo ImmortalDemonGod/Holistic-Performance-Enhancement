@@ -32,8 +32,7 @@ def run_optimization(config):
         logger.debug(f"CUDA available: {torch.cuda.is_available()}")                                   
         if torch.cuda.is_available():                                                                  
             logger.debug(f"GPU: {torch.cuda.get_device_name(0)}")                                      
-            logger.debug(f"GPU memory: {torch.cuda.get_device_properties(0).total_memory / 1024**2:.2f 
-MB")                                                                                                   
+            logger.debug(f"GPU memory: {torch.cuda.get_device_properties(0).total_memory / 1024**2:.2f} MB")
                                                                                                     
         # Create study                                                                                 
         study = optuna.create_study(                                                                   
