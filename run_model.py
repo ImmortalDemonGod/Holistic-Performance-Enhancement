@@ -1,4 +1,4 @@
-from best_params_manager import BestParamsManager
+from Utils.optuna.best_params_manager import BestParamsManager
 import argparse
 from config import Config
 import logging
