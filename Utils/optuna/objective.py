@@ -54,6 +54,7 @@ def create_trial_config(trial, base_config):
         model_config.d_model = base_dim
 
         # Validate d_model is divisible by both heads and 4
+        model_config.heads = trial.suggest_categorical("heads", ranges["heads"])
         if model_config.d_model % model_config.heads != 0 or model_config.d_model % 4 != 0:
             logger.warning(f"Invalid dimension combination: d_model={model_config.d_model}, heads={model_config.heads}")
             raise optuna.TrialPruned()

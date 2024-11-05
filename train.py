@@ -55,7 +55,7 @@ class TransformerTrainer(pl.LightningModule):
         self.d_model = d_model
         self.encoder_layers = encoder_layers
         self.decoder_layers = decoder_layers
-        self.heads = heads
+        self.heads = self.hparams['heads']
         self.d_ff = d_ff
         self.output_dim = output_dim
         self.learning_rate = learning_rate
