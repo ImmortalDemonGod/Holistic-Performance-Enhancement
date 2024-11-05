@@ -26,7 +26,7 @@ batch_size = 50  # Batch size for DataLoader
 dropout_rate = 0.35  # Dropout rate for the model
 include_sythtraining_data = False  # Set to True to include sythtraining data
 synthetic_dir = 'sythtraining'
-CHECKPOINT_PATH = 'path_to_pretrained_checkpoint.ckpt'  # Specify the actual checkpoint path
+CHECKPOINT_PATH = 'pretrained_checkpoint.ckpt'  # Update this path accordingly
 FAST_DEV_RUN = True  # Set to True to enable fast development run
 TRAIN_FROM_CHECKPOINT = False  # Set to True to resume training from a checkpoint
 
