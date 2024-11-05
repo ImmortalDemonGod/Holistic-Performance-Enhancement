@@ -73,6 +73,8 @@ class TransformerTrainer(pl.LightningModule):
             d_ff=self.hparams['d_ff'],
             output_dim=self.hparams['output_dim'],
         )
+        # Ensure the model is on the correct device
+        self.model.to(self.device)
         self.learning_rate = self.hparams['learning_rate']
         self.device_choice = 'cpu'
         self.criterion = nn.CrossEntropyLoss()

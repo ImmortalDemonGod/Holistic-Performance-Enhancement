@@ -121,6 +121,9 @@ class Config:
             self.include_sythtraining_data = include_sythtraining_data
             self.max_epochs = num_epochs
             self.device_choice = device_choice
+            # Add assertions to validate configuration
+            assert self.device_choice in ['cpu', 'cuda'], "device_choice must be 'cpu' or 'cuda'"
+            assert self.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
             self.gradient_clip_val = 1.0
             self.precision = precision
             self.FAST_DEV_RUN = fast_dev_run

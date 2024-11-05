@@ -61,9 +61,9 @@ if __name__ == '__main__':
 
     #torch.quantization.prepare(model.model, inplace=True)
 
-    # Convert the model to a quantized version
-    torch.quantization.convert(model.model, inplace=True)
-    model.model = torch.jit.script(model.model)  # Script the model for optimized deployment
+    # Commented out TorchScript scripting during training
+    # torch.quantization.convert(model.model, inplace=True)
+    # model.model = torch.jit.script(model.model)  # Script the model for optimized deployment
 
     # Set up model checkpointing and early stopping callbacks
     checkpoint_callback = ModelCheckpoint(
