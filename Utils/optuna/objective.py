@@ -35,7 +35,13 @@ def create_trial_config(trial, base_config):
         logger.debug("Creating trial config")
         ranges = base_config.optuna.param_ranges
         
-        # Create new config objects
+        # Create new config objects with trial-suggested values
+        batch_size = trial.suggest_int("batch_size", 8, 256, step=8)
+        learning_rate = trial.suggest_float("learning_rate", 1e-6, 1e-1, log=True)
+        include_sythtraining_data = base_config.training.include_sythtraining_data
+        num_epochs = trial.suggest_int("max_epochs", 4, 5, step=1)
+        device_choice = base_config.training.device_choice
+        precision = base_config.training.precision
         model_config = base_config.model.__class__()
         training_config = base_config.training.__class__(
             batch_size=batch_size,
