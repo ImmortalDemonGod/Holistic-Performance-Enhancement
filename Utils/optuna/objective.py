@@ -27,7 +27,7 @@ class TrialMetrics:
         logger.debug(f"  Train Loss: {self.train_loss:.4f}")                                           
         logger.debug(f"  Val Accuracy: {self.val_accuracy:.4f}")                                       
         logger.debug(f"  Memory Used: {self.memory_used:.2f} MB")                                      
-def validate_dimensions(model):
+def create_trial_config(trial, base_config):
     """Validate model dimensions before training"""
     try:
         logger.debug("Validating model dimensions")
