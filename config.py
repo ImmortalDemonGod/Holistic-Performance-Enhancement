@@ -80,13 +80,19 @@ class OptunaConfig:
         print("DEBUG: OptunaConfig created with ranges:", self.param_ranges)
 
 class Config:
-    def __init__(self, model=None, training=None):
+    def __init__(self, model=None, training=None, device_choice='cpu'):
         self.model = model if model is not None else self.ModelConfig()
-        self.training = training if training is not None else self.TrainingConfig()
+        self.training = training if training is not None else self.TrainingConfig(
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            include_sythtraining_data=include_sythtraining_data,
+            num_epochs=num_epochs,
+            device_choice=device_choice  # Pass the new device_choice parameter
+        )
         self.optuna = OptunaConfig()
     
     class ModelConfig:
-        def __init__(self):
+        def __init__(self, batch_size, learning_rate, include_sythtraining_data, num_epochs, device_choice='cpu'):
             self.input_dim = input_dim
             self.d_model = d_model
             self.encoder_layers = encoder_layers
@@ -104,6 +110,9 @@ class Config:
             self.learning_rate = learning_rate
             self.include_sythtraining_data = include_sythtraining_data
             
-            # **New:** Initialize max_epochs with the existing num_epochs value
+            # Initialize max_epochs with the existing num_epochs value
             self.max_epochs = num_epochs  # Default value from config
+            
+            # Add device_choice attribute with a default value
+            self.device_choice = device_choice
             self.gradient_clip_val = 1.0  # Specifies the maximum norm of the gradients
