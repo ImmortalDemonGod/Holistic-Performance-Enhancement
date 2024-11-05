@@ -13,7 +13,9 @@ from config import Config
 from Utils.optuna.objective import TrialMetrics
 from train import TransformerTrainer
 from pytorch_lightning import Trainer
-from Utils.optuna.objective import create_objective                                                    
+from Utils.optuna.objective import create_objective
+from Utils.data_preparation import prepare_data
+from pytorch_lightning.callbacks import EarlyStopping
                                                                                                     
 # Setup logging                                                                                        
 logging.basicConfig(                                                                                   
