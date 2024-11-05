@@ -49,7 +49,7 @@ class OptunaConfig:
         self.param_ranges = {
             # Model Architecture
             # Model Architecture Parameters
-            "d_model": (64, 256, 32),      # Must be divisible by both heads and 4
+            "d_model": (64, 256, 16),      # Step set to 16 to ensure divisibility by 16
             "heads": [2, 4, 8, 16],        # Powers of 2 for efficiency
             "encoder_layers": (0, 4),      # Allows encoder-less architecture
             "decoder_layers": (1, 8),      # At least 1 decoder layer needed
@@ -65,7 +65,7 @@ class OptunaConfig:
             "learning_rate": (1e-5, 1e-2),
             
             # **New:** Add max_epochs range
-            "max_epochs": (1, 5, 1),    # Range from 10 to 100 epochs in steps of 5
+            "max_epochs": (10, 100, 10),    # Increased range from (1, 5, 1) to (10, 100, 10)
             "gradient_clip_val": (0.0, 5.0),  # Add gradient_clip_val range
         }
         

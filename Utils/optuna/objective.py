@@ -101,7 +101,9 @@ def create_trial_config(trial, base_config):
         )
         training_config.max_epochs = trial.suggest_int(
             "max_epochs", 
-            *base_config.optuna.param_ranges["max_epochs"]
+            low=base_config.optuna.param_ranges["max_epochs"][0], 
+            high=base_config.optuna.param_ranges["max_epochs"][1],
+            step=base_config.optuna.param_ranges["max_epochs"][2]
         )
         logger.debug(f"Set max_epochs to {training_config.max_epochs}")
         
@@ -288,7 +290,7 @@ class EpochLoggingCallback(Callback):
         logger.debug(f"Finished epoch {current_epoch}/{trainer.max_epochs}")
 
 class PerformancePruningCallback(Callback):
-    def __init__(self, trial, monitor="val_loss", patience=3):
+    def __init__(self, trial, monitor="val_loss", patience=5):  # Increased patience from 3 to 5
         self.trial = trial
         self.monitor = monitor
         self.patience = patience

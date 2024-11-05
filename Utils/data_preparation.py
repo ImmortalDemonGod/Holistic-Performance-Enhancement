@@ -97,7 +97,9 @@ def load_main_data(directory, context_map, train_inputs, train_outputs, train_ta
         task_id = os.path.splitext(filename)[0]
         filepath = os.path.join(directory, filename)
 
-        if task_id not in context_map:
+        if task_id in train_task_ids and not is_synthetic:
+            logger.warning(f"Task ID '{task_id}' already exists in training data. Skipping to prevent overlap.")
+            continue
             logger.warning(f"Skipping task '{task_id}' - no context pair available")
             continue
 
