@@ -58,7 +58,7 @@ class OptunaConfig:
             # Training Parameters
             "learning_rate": (1e-5, 1e-2),
             "batch_size": (16, 128),
-            "max_epochs": (50, 200),
+            "max_epochs": (1, 5),
             "weight_decay": (0.0, 0.1),
             
             # Context Encoder Parameters
