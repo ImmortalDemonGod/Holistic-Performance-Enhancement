@@ -89,7 +89,7 @@ class TransformerTrainer(pl.LightningModule):
             logger.debug(f"  ctx_input: {ctx_input.shape}")
         if ctx_output is not None:
             logger.debug(f"  ctx_output: {ctx_output.shape}")
-        return self.model(src.to("cpu"), tgt.to("cpu"), ctx_input, ctx_output)
+        return self.model(src, tgt, ctx_input, ctx_output)
 
     def training_step(self, batch, batch_idx):
         src, tgt, ctx_input, ctx_output, task_ids = batch  # Unpack all 5 elements
