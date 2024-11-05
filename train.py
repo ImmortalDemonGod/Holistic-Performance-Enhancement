@@ -99,13 +99,6 @@ class TransformerTrainer(pl.LightningModule):
         return {'val_loss': loss, 'predictions': predictions, 'targets': tgt}
 
 
-    def train_dataloader(self):
-        train_loader, _ = prepare_data()
-        return train_loader
-
-    def val_dataloader(self):
-        _, val_loader = prepare_data()
-        return val_loader
 
     def test_step(self, batch, batch_idx):
         src, tgt, ctx_input, ctx_output, task_ids = batch
