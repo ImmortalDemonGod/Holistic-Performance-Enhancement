@@ -115,8 +115,10 @@ class TaskFineTuner:
         hparams = self.base_model.hparams.copy()
         hparams.pop('learning_rate', None)  # Remove existing learning_rate
 
+        hparams.pop('device_choice', None)  # Remove 'device_choice' if present
+
         task_model = TransformerTrainer(
-            **hparams,  # Unpack hyperparameters without learning_rate
+            **hparams,  # Unpack hyperparameters without learning_rate and device_choice
             learning_rate=self.learning_rate  # Add the desired learning_rate
         )
         task_model.load_state_dict(self.base_model.state_dict())
