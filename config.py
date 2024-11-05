@@ -48,27 +48,21 @@ class OptunaConfig:
         # Expanded hyperparameter ranges
         self.param_ranges = {
             # Model Architecture
-            "base_dim": (32, 256, 32),    # Must be divisible by 32
-            "heads": [2, 4, 8, 16],       # Only powers of two
-            "encoder_layers": (0, 4),     # Allow 0 for encoder-less architecture
-            "decoder_layers": (1, 8),     # Must have at least 1 decoder layer
-            "d_ff_multiplier": (2, 8),    # For feedforward dimension
-            "dropout": (0.1, 0.5),
+            # Model Architecture Parameters
+            "d_model": (64, 256, 32),      # Must be divisible by both heads and 4
+            "heads": [2, 4, 8, 16],        # Powers of 2 for efficiency
+            "encoder_layers": (0, 4),      # Allows encoder-less architecture
+            "decoder_layers": (1, 8),      # At least 1 decoder layer needed
+            "d_ff": (128, 512, 64),        # Feedforward dimension
+            "dropout": (0.1, 0.5),         # Dropout rate
+            
+            # Context Encoder Parameters (actually used in model)
+            "context_encoder_d_model": (64, 256, 32),
+            "context_encoder_heads": [2, 4, 8],
             
             # Training Parameters
-            "learning_rate": (1e-5, 1e-2),
             "batch_size": (16, 128),
-            "max_epochs": (1, 5),
-            "weight_decay": (0.0, 0.1),
-            
-            # Context Encoder Parameters
-            "context_encoder_heads": [2, 4, 8],
-            "context_encoder_layers": (1, 4),
-            
-            # Additional Parameters
-            "warmup_steps": (100, 1000),
-            "gradient_clip_val": (0.1, 1.0),
-            "label_smoothing": (0.0, 0.1)
+            "learning_rate": (1e-5, 1e-2),
         }
         
         # Pruning Configuration
@@ -97,6 +91,8 @@ class Config:
             self.d_ff = d_ff
             self.output_dim = output_dim
             self.dropout = dropout_rate
+            self.context_encoder_d_model = context_encoder_d_model  # Ensure these are included
+            self.context_encoder_heads = context_encoder_heads
     
     class TrainingConfig:
         def __init__(self):

@@ -50,19 +50,12 @@ def run_optimization(config, delete_study=False):
         logger.info(f"Running {config.optuna.n_trials} trials")
         study.optimize(objective, n_trials=config.optuna.n_trials)
 
-        # Log results
-        logger.info("Optimization completed")
-        try:
-            best_trial = study.best_trial
-            logger.info(f"Best trial: {best_trial.number}")
-            logger.info(f"Best value: {best_trial.value}")
-            logger.info("Best params:")
-            for key, value in best_trial.params.items():
-                logger.info(f"  {key}: {value}")
-            return best_trial
-        except ValueError:
-            logger.error("No valid trials found in the study.")
-            raise
+        # Retrieve metrics
+        metrics = TrialMetrics(
+            val_loss=float(trainer.callback_metrics.get("val_loss", float('inf'))),
+            train_loss=float(trainer.callback_metrics.get("train_loss", float('inf'))),
+            val_accuracy=float(trainer.callback_metrics.get("val_accuracy", 0.0))
+        )
 
     except Exception as e:
         logger.error(f"Optimization failed: {str(e)}")

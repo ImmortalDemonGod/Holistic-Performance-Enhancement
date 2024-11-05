@@ -39,88 +39,66 @@ def create_trial_config(trial, base_config):
         model_config = base_config.model.__class__()
         training_config = base_config.training.__class__()
         
-        # Model Architecture Parameters
-        base_dim = trial.suggest_int(
-            "base_dim", 
-            ranges["base_dim"][0],
-            ranges["base_dim"][1],
-            step=ranges["base_dim"][2]
-        )
-        model_config.d_model = base_dim
-        
-        # Number of heads
+        # First determine core architecture parameters
         model_config.heads = trial.suggest_categorical("heads", ranges["heads"])
         
+        # Ensure d_model is divisible by both heads and 4
+        d_model = trial.suggest_int(
+            "d_model", 
+            ranges["d_model"][0], 
+            ranges["d_model"][1], 
+            step=ranges["d_model"][2]
+        )
+        
         # Validate dimensions
-        if model_config.d_model % model_config.heads != 0:
-            logger.warning(f"Invalid head configuration: d_model={model_config.d_model}, heads={model_config.heads}")
+        if d_model % model_config.heads != 0 or d_model % 4 != 0:
+            logger.warning(f"Invalid dimension combination: d_model={d_model}, heads={model_config.heads}")
             raise optuna.TrialPruned()
+            
+        model_config.d_model = d_model
         
         # Layer configuration
-        model_config.encoder_layers = trial.suggest_int(
-            "encoder_layers", 
-            *ranges["encoder_layers"]
-        )
-        model_config.decoder_layers = trial.suggest_int(
-            "decoder_layers", 
-            *ranges["decoder_layers"]
-        )
+        model_config.encoder_layers = trial.suggest_int("encoder_layers", *ranges["encoder_layers"])
+        model_config.decoder_layers = trial.suggest_int("decoder_layers", *ranges["decoder_layers"])
         
         # Feedforward dimension
-        d_ff_multiplier = trial.suggest_int(
-            "d_ff_multiplier", 
-            *ranges["d_ff_multiplier"]
+        model_config.d_ff = trial.suggest_int(
+            "d_ff", 
+            ranges["d_ff"][0],
+            ranges["d_ff"][1],
+            step=ranges["d_ff"][2]
         )
-        model_config.d_ff = base_dim * d_ff_multiplier
         
         # Dropout
-        model_config.dropout = trial.suggest_float(
-            "dropout", 
-            *ranges["dropout"]
+        model_config.dropout = trial.suggest_float("dropout", *ranges["dropout"])
+        
+        # Context encoder parameters
+        model_config.context_encoder_d_model = trial.suggest_int(
+            "context_encoder_d_model",
+            ranges["context_encoder_d_model"][0],
+            ranges["context_encoder_d_model"][1],
+            step=ranges["context_encoder_d_model"][2]
+        )
+        model_config.context_encoder_heads = trial.suggest_categorical(
+            "context_encoder_heads",
+            ranges["context_encoder_heads"]
         )
         
-        # Training Parameters
+        # Training parameters
+        training_config.batch_size = trial.suggest_int("batch_size", *ranges["batch_size"])
         training_config.learning_rate = trial.suggest_float(
             "learning_rate", 
             *ranges["learning_rate"], 
             log=True
         )
-        training_config.batch_size = trial.suggest_int(
-            "batch_size", 
-            *ranges["batch_size"]
-        )
-        training_config.max_epochs = trial.suggest_int(
-            "max_epochs", 
-            *ranges["max_epochs"]
-        )
-        training_config.weight_decay = trial.suggest_float(
-            "weight_decay", 
-            *ranges["weight_decay"]
-        )
         
-        # Context Encoder Parameters
-        training_config.context_encoder_heads = trial.suggest_categorical(
-            "context_encoder_heads", 
-            ranges["context_encoder_heads"]
-        )
-        training_config.context_encoder_layers = trial.suggest_int(
-            "context_encoder_layers", 
-            *ranges["context_encoder_layers"]
-        )
-        
-        # Additional Training Parameters
-        training_config.warmup_steps = trial.suggest_int(
-            "warmup_steps", 
-            *ranges["warmup_steps"]
-        )
-        training_config.gradient_clip_val = trial.suggest_float(
-            "gradient_clip_val", 
-            *ranges["gradient_clip_val"]
-        )
-        training_config.label_smoothing = trial.suggest_float(
-            "label_smoothing", 
-            *ranges["label_smoothing"]
-        )
+        # Add dimension debugging
+        logger.debug(f"Model dimensions:")
+        logger.debug(f"  d_model: {model_config.d_model}")
+        logger.debug(f"  heads: {model_config.heads}")
+        logger.debug(f"  head_dim: {model_config.d_model // model_config.heads}")
+        logger.debug(f"  d_ff: {model_config.d_ff}")
+        logger.debug(f"  context_encoder_d_model: {model_config.context_encoder_d_model}")
         
         logger.debug(f"Trial config created with params: {trial.params}")
         return Config(model=model_config, training=training_config)

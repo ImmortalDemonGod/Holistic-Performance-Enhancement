@@ -29,7 +29,7 @@ class TransformerModel(nn.Module):
         else:
             self.decoder = None
         
-        # Add Context Encoder
+        # Add Context Encoder with optimized parameters
         self.context_encoder = ContextEncoderModule(
             d_model=context_encoder_d_model,
             heads=context_encoder_heads
