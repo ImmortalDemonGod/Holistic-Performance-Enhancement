@@ -60,9 +60,9 @@ class OptunaConfig:
         print("DEBUG: OptunaConfig created with ranges:", self.param_ranges)
 
 class Config:
-    def __init__(self):
-        self.model = self.ModelConfig()
-        self.training = self.TrainingConfig()
+    def __init__(self, model=None, training=None):
+        self.model = model if model is not None else self.ModelConfig()
+        self.training = training if training is not None else self.TrainingConfig()
         self.optuna = OptunaConfig()
     
     class ModelConfig:
