@@ -58,3 +58,26 @@ class OptunaConfig:
         }
         
         print("DEBUG: OptunaConfig created with ranges:", self.param_ranges)
+
+class Config:
+    def __init__(self):
+        self.model = self.ModelConfig()
+        self.training = self.TrainingConfig()
+        self.optuna = OptunaConfig()
+    
+    class ModelConfig:
+        def __init__(self):
+            self.input_dim = input_dim
+            self.d_model = d_model
+            self.encoder_layers = encoder_layers
+            self.decoder_layers = decoder_layers
+            self.heads = heads
+            self.d_ff = d_ff
+            self.output_dim = output_dim
+            self.dropout = dropout_rate
+    
+    class TrainingConfig:
+        def __init__(self):
+            self.batch_size = batch_size
+            self.learning_rate = learning_rate
+            self.include_sythtraining_data = include_sythtraining_data
