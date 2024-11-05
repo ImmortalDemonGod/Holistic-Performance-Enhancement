@@ -102,7 +102,7 @@ class TransformerTrainer(pl.LightningModule):
         return self.model(src, tgt, ctx_input, ctx_output)
 
     def training_step(self, batch, batch_idx):
-        src, tgt, ctx_input, ctx_output, task_ids = batch  # Unpack all 5 elements
+        src, tgt, ctx_input, ctx_output, task_ids = batch
         y_hat = self(src, tgt, ctx_input, ctx_output)
 
         # Debugging: Print shapes of y_hat and tgt
@@ -122,7 +122,7 @@ class TransformerTrainer(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        src, tgt, ctx_input, ctx_output, task_ids = batch  # Unpack all 5 elements
+        src, tgt, ctx_input, ctx_output, task_ids = batch
         y_hat = self(src, tgt, ctx_input, ctx_output)
 
         # Debugging: Print shapes of y_hat and tgt

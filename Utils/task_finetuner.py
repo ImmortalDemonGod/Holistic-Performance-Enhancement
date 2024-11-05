@@ -74,10 +74,10 @@ class TaskFineTuner:
                     outputs.append(tgt[mask])
                     ctx_inputs.append(ctx_input[mask])
                     ctx_outputs.append(ctx_output[mask])
-                inputs.append(src)
-                outputs.append(tgt)
-                ctx_inputs.append(ctx_input)
-                ctx_outputs.append(ctx_output)
+                inputs.append(src[mask])
+                outputs.append(tgt[mask])
+                ctx_inputs.append(ctx_input[mask])
+                ctx_outputs.append(ctx_output[mask])
 
             if not inputs:
                 raise ValueError(f"No {purpose} data found for task {task_id}")
@@ -86,7 +86,8 @@ class TaskFineTuner:
                 torch.cat(inputs),
                 torch.cat(outputs),
                 torch.cat(ctx_inputs),
-                torch.cat(ctx_outputs)
+                torch.cat(ctx_outputs),
+                torch.full((len(torch.cat(inputs)),), task_id_idx, dtype=torch.long)  # Add task_ids
             )
 
         # Get task-specific data
@@ -151,7 +152,7 @@ class TaskFineTuner:
             # Evaluate on test example
             task_model.eval()
             with torch.no_grad():
-                src, tgt, ctx_input, ctx_output, _ = test_example
+                src, tgt, ctx_input, ctx_output, task_id_received = test_example
                 src = src.unsqueeze(0).to(self.device)
                 tgt = tgt.unsqueeze(0).to(self.device)
                 ctx_input = ctx_input.unsqueeze(0).to(self.device)
