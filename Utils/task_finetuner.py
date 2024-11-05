@@ -8,7 +8,7 @@ parent_dir = current_dir.parent
 # Add the parent directory to sys.path
 sys.path.append(str(parent_dir))
 
-import argparse
+import random
 import pytorch_lightning as pl
 import torch                                                                                           
 import logging                                                                                         
@@ -240,10 +240,6 @@ def main():
     logger = logging.getLogger("finetuning_main")
 
     try:
-        # Parse command-line arguments
-        parser = argparse.ArgumentParser(description='Fine-tune transformer model on specific tasks.')
-        parser.add_argument('--task_id', type=str, help='Optional Task ID to fine-tune. If not provided, all tasks will be processed.')
-        args = parser.parse_args()
         model_path = "/workspaces/JARC-Reactor/lightning_logs/version_0/checkpoints/epoch=epoch=15-val_loss=val_loss=0.4786.ckpt"  # Update this path
         if not Path(model_path).is_file():
             logger.error(f"Pretrained model checkpoint not found at {model_path}.")
@@ -268,16 +264,10 @@ def main():
         # Initialize fine-tuner
         finetuner = TaskFineTuner(base_model)
 
-        # Determine which tasks to process
-        if args.task_id:
-            if args.task_id not in task_id_map:
-                logger.error(f"Provided task_id '{args.task_id}' not found in task_id_map.")
-                return
-            selected_tasks = [args.task_id]
-            logger.info(f"Fine-tuning will be performed on task: {args.task_id}")
-        else:
-            selected_tasks = None  # Fine-tune all tasks
-            logger.info("Fine-tuning will be performed on all tasks.")
+        # Select a random task_id
+        selected_task = random.choice(list(task_id_map.keys()))
+        selected_tasks = [selected_task]
+        logger.info(f"Fine-tuning will be performed on randomly selected task: {selected_task}")
 
         # Run fine-tuning
         results = finetuner.run_all_tasks(train_loader, val_loader, task_id_map, selected_tasks)
