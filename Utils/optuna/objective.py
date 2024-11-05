@@ -188,6 +188,7 @@ def create_objective(base_config):
         try:
             # Create config and model
             trial_config = create_trial_config(trial, base_config)
+            logger.debug(f"Trial {trial.number} - max_epochs: {trial_config.training.max_epochs}")
             model = TransformerTrainer(
                 input_dim=trial_config.model.input_dim,
                 d_model=trial_config.model.d_model,
@@ -223,6 +224,8 @@ def create_objective(base_config):
             else:
                 logger.info("CUDA not available. Skipping ResourcePruningCallback.")
 
+            epoch_logging_callback = EpochLoggingCallback()
+            callbacks.append(epoch_logging_callback)
             trainer = Trainer(
                 max_epochs=trial_config.training.max_epochs,  # Use max_epochs from trial
                 callbacks=callbacks,
@@ -241,7 +244,7 @@ def create_objective(base_config):
                 memory_before = torch.cuda.memory_allocated() / 1e9
                 logger.debug(f"GPU memory before training: {memory_before:.2f} GB")
             
-            # Train the model
+            logger.debug(f"Trainer initialized with max_epochs={trial_config.training.max_epochs}")
             logger.debug("Starting training")
             trainer.fit(model, train_loader, val_loader)
             
@@ -276,6 +279,15 @@ def create_objective(base_config):
             raise optuna.TrialPruned()
             
     return objective
+class EpochLoggingCallback(Callback):
+    def on_epoch_start(self, trainer, pl_module):
+        current_epoch = trainer.current_epoch + 1  # Trainer starts from 0
+        logger.debug(f"Starting epoch {current_epoch}/{trainer.max_epochs}")
+
+    def on_epoch_end(self, trainer, pl_module):
+        current_epoch = trainer.current_epoch + 1
+        logger.debug(f"Finished epoch {current_epoch}/{trainer.max_epochs}")
+
 class PerformancePruningCallback(Callback):
     def __init__(self, trial, monitor="val_loss", patience=3):
         self.trial = trial
