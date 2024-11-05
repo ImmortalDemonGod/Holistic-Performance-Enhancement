@@ -65,13 +65,10 @@ class TaskFineTuner:
 
             for batch in loader:
                 src, tgt, ctx_input, ctx_output = batch
-                mask = batch_task_ids == task_id_tensor
-
-                if mask.any():
-                    inputs.append(src[mask])
-                    outputs.append(tgt[mask])
-                    ctx_inputs.append(ctx_input[mask])
-                    ctx_outputs.append(ctx_output[mask])
+                inputs.append(src)
+                outputs.append(tgt)
+                ctx_inputs.append(ctx_input)
+                ctx_outputs.append(ctx_output)
 
             if not inputs:
                 raise ValueError(f"No {purpose} data found for task {task_id}")
@@ -179,16 +176,13 @@ class TaskFineTuner:
         test_examples = {}
         for batch in val_loader:
             src, tgt, ctx_input, ctx_output = batch
-            for i, task_idx in enumerate(task_ids):
-                task_id = idx_to_task_id.get(task_idx.item())
-                if task_id is None:
-                    self.logger.error(f"Task index {task_idx.item()} not found in task_id_map.")
-                    continue  # Skip this task or handle the error as needed
+            # Assuming task_id_map contains task_id as keys and indices as values
+            for task_id, idx in task_id_map.items():
                 if selected_task_ids and task_id not in selected_task_ids:
                     continue  # Skip tasks not selected
-                    test_examples[task_id] = (
-                        src[i], tgt[i], ctx_input[i], ctx_output[i]
-                    )
+                test_examples[task_id] = (
+                    src[idx], tgt[idx], ctx_input[idx], ctx_output[idx]
+                )
 
         # Determine the list of tasks to process
         if selected_task_ids:
