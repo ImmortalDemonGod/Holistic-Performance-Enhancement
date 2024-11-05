@@ -40,7 +40,9 @@ def run_optimization(config, delete_study=False):
             optuna.delete_study(study_name=config.optuna.study_name, storage=config.optuna.storage_url)
             logger.info(f"Deleted study '{config.optuna.study_name}'")
 
-        # Create study
+        # **Add: Load datasets once before defining the objective**
+        logger.info("Loading datasets once for all trials.")
+        train_dataset, val_dataset = prepare_data(return_datasets=True)
         study = optuna.create_study(
             study_name=config.optuna.study_name,
             storage=config.optuna.storage_url,
@@ -48,8 +50,8 @@ def run_optimization(config, delete_study=False):
             load_if_exists=True
         )
 
-        # Create objective
-        objective = create_objective(config)
+        # **Modify: Pass preloaded datasets to create_objective**
+        objective = create_objective(config, train_dataset, val_dataset)
 
         # Run optimization
         logger.info(f"Running {config.optuna.n_trials} trials")

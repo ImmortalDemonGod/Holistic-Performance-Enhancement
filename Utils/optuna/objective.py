@@ -176,7 +176,9 @@ def validate_dimensions(model):
         logger.error(f"Error validating dimensions: {str(e)}")
         return False
 
-def create_objective(base_config):
+from torch.utils.data import DataLoader  # Ensure DataLoader is imported
+
+def create_objective(base_config, train_dataset, val_dataset):
     """Creates an objective function with closure over base_config"""
 
     def objective(trial):
@@ -197,7 +199,19 @@ def create_objective(base_config):
                 include_sythtraining_data=trial_config.training.include_sythtraining_data,
             )
 
-            # Setup callbacks with advanced pruning
+            # **Create DataLoaders with the suggested batch_size**
+            train_loader = DataLoader(
+                train_dataset, 
+                batch_size=batch_size, 
+                shuffle=True, 
+                num_workers=0
+            )
+            val_loader = DataLoader(
+                val_dataset, 
+                batch_size=batch_size, 
+                shuffle=False, 
+                num_workers=0
+            )
             callbacks = [
                 PerformancePruningCallback(
                     trial,

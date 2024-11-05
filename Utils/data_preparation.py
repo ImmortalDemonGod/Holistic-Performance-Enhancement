@@ -147,7 +147,7 @@ def load_main_data(directory, context_map, train_inputs, train_outputs, train_ta
         except Exception as e:
             logger.error(f"Error processing file '{filepath}': {str(e)}")
 
-def prepare_data(batch_size=None):
+def prepare_data(batch_size=None, return_datasets=False):
     import config  # Ensure config is accessible within the function
     if batch_size is None:
         batch_size = config.batch_size  # Use the default from config if not provided
@@ -273,9 +273,13 @@ def prepare_data(batch_size=None):
     except Exception as e:
         logger.error(f"Failed to save task_id_map.json: {str(e)}")
 
-    # Create DataLoaders using the local batch_size variable
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
-    val_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
+    if return_datasets:
+        logger.info("Returning TensorDatasets instead of DataLoaders.")
+        return train_dataset, test_dataset
+    else:
+        # Create DataLoaders using the local batch_size variable
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+        val_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
 
-    logger.info("Data preparation completed successfully.")
-    return train_loader, val_loader
+        logger.info("Data preparation completed successfully.")
+        return train_loader, val_loader
