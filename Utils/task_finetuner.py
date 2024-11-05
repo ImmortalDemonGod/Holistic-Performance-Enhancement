@@ -164,7 +164,7 @@ class TaskFineTuner:
             accelerator=self.device,
             devices=1,
             enable_progress_bar=True,
-            enable_checkpointing=True,
+            enable_checkpointing=False,
             default_root_dir=self.save_dir / f"task_{task_id}"
         )
 
