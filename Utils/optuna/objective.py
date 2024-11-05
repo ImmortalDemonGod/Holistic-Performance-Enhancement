@@ -44,14 +44,11 @@ def create_trial_config(trial, base_config):
         model_config.heads = trial.suggest_int("heads", *ranges["heads"])
 
         # Suggest a multiplier to ensure d_model is divisible by heads
-        d_model_multiplier = trial.suggest_int("d_model_multiplier", 4, ranges["d_model"][1] // model_config.heads)
+        d_model_multiplier = trial.suggest_int("d_model_multiplier", *ranges["d_model_multiplier"])
 
         # Set d_model as a multiple of heads
         model_config.d_model = model_config.heads * d_model_multiplier
 
-        # Ensure d_model does not exceed its maximum range
-        if model_config.d_model > ranges["d_model"][1]:
-            model_config.d_model = ranges["d_model"][1]
 
         model_config.decoder_layers = trial.suggest_int("decoder_layers", *ranges["decoder_layers"])   
         model_config.d_ff = trial.suggest_int("d_ff", *ranges["d_ff"])                                 

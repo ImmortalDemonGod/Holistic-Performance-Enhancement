@@ -23,46 +23,50 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)                                                                   
                                                                                                     
 def run_optimization(config):                                                                          
-    """Main optimization entry point"""                                                                
-    try:                                                                                               
-        logger.info("Starting optimization")                                                           
-        logger.debug(f"Using config: {vars(config.optuna)}")                                           
-                                                                                                    
-        # Log system info                                                                              
-        logger.debug(f"CUDA available: {torch.cuda.is_available()}")                                   
-        if torch.cuda.is_available():                                                                  
-            logger.debug(f"GPU: {torch.cuda.get_device_name(0)}")                                      
+    """Main optimization entry point"""
+    try:
+        logger.info("Starting optimization")
+        logger.debug(f"Using config: {vars(config.optuna)}")
+
+        # Log system info
+        logger.debug(f"CUDA available: {torch.cuda.is_available()}")
+        if torch.cuda.is_available():
+            logger.debug(f"GPU: {torch.cuda.get_device_name(0)}")
             logger.debug(f"GPU memory: {torch.cuda.get_device_properties(0).total_memory / 1024**2:.2f} MB")
-                                                                                                    
-        # Create study                                                                                 
-        study = optuna.create_study(                                                                   
-            study_name=config.optuna.study_name,                                                       
-            storage=config.optuna.storage_url,                                                         
-            direction="minimize",                                                                      
-            load_if_exists=True                                                                        
-        )                                                                                              
-                                                                                                    
-        # Create objective                                                                             
-        objective = create_objective(config)                                                           
-                                                                                                    
-        # Run optimization                                                                             
-        logger.info(f"Running {config.optuna.n_trials} trials")                                        
-        study.optimize(objective, n_trials=config.optuna.n_trials)                                     
-                                                                                                    
-        # Log results                                                                                  
-        logger.info("Optimization completed")                                                          
-        logger.info(f"Best trial: {study.best_trial.number}")                                          
-        logger.info(f"Best value: {study.best_trial.value}")                                           
-        logger.info("Best params:")                                                                    
-        for key, value in study.best_trial.params.items():                                             
-            logger.info(f"  {key}: {value}")                                                           
-                                                                                                    
-        return study.best_trial                                                                        
-                                                                                                    
-    except Exception as e:                                                                             
-        logger.error(f"Optimization failed: {str(e)}")                                                 
-        logger.error("Stack trace:", exc_info=True)                                                    
-        raise                                                                                          
+
+        # Create study
+        study = optuna.create_study(
+            study_name=config.optuna.study_name,
+            storage=config.optuna.storage_url,
+            direction="minimize",
+            load_if_exists=True
+        )
+
+        # Create objective
+        objective = create_objective(config)
+
+        # Run optimization
+        logger.info(f"Running {config.optuna.n_trials} trials")
+        study.optimize(objective, n_trials=config.optuna.n_trials)
+
+        # Log results
+        logger.info("Optimization completed")
+        try:
+            best_trial = study.best_trial
+            logger.info(f"Best trial: {best_trial.number}")
+            logger.info(f"Best value: {best_trial.value}")
+            logger.info("Best params:")
+            for key, value in best_trial.params.items():
+                logger.info(f"  {key}: {value}")
+            return best_trial
+        except ValueError:
+            logger.error("No valid trials found in the study.")
+            raise
+
+    except Exception as e:
+        logger.error(f"Optimization failed: {str(e)}")
+        logger.error("Stack trace:", exc_info=True)
+        raise
                                                                                                     
 if __name__ == "__main__":                                                                             
     try:                                                                                               
