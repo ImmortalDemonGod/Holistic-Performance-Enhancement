@@ -43,10 +43,15 @@ def create_trial_config(trial, base_config):
 
         # Suggest hyperparameters using Optuna
         # Suggest the number of heads first
-        model_config.heads = trial.suggest_int("heads", *ranges["heads"])
+        model_config.heads = trial.suggest_categorical("heads", ranges["heads"])
 
         # Determine base dimension (must be divisible by 32)
-        base_dim = trial.suggest_int("base_dim", *ranges["base_dim"])
+        base_dim = trial.suggest_int(
+            "base_dim",
+            low=ranges["base_dim"][0],
+            high=ranges["base_dim"][1],
+            step=ranges["base_dim"][2]  # Pass 'step' as a keyword argument
+        )
         logger.debug(f"Selected base_dim: {base_dim}")
 
         # Determine number of heads (must be power of 2)

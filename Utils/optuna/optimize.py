@@ -23,13 +23,17 @@ logging.basicConfig(
 )                                                                                                      
 logger = logging.getLogger(__name__)                                                                   
                                                                                                     
-def run_optimization(config):                                                                          
+def run_optimization(config, delete_study=False):                                                                          
     """Main optimization entry point"""
     try:
         logger.info("Starting optimization")
         logger.debug(f"Using config: {vars(config.optuna)}")
 
-        # Log system info
+        # Optionally delete existing study
+        if delete_study:
+            logger.info(f"Deleting existing study '{config.optuna.study_name}'")
+            optuna.delete_study(study_name=config.optuna.study_name, storage=config.optuna.storage_url)
+            logger.info(f"Deleted study '{config.optuna.study_name}'")
         logger.debug(f"CUDA available: {torch.cuda.is_available()}")
         if torch.cuda.is_available():
             logger.debug(f"GPU: {torch.cuda.get_device_name(0)}")
@@ -76,7 +80,8 @@ if __name__ == "__main__":
         parser = argparse.ArgumentParser(description="Run Optuna optimization for JARC Reactor")       
         parser.add_argument("--n_trials", type=int, default=10, help="Number of Optuna trials to run") 
         parser.add_argument("--debug", action="store_true", help="Enable debug logging")               
-        args = parser.parse_args()                                                                     
+        parser.add_argument("--delete_study", action="store_true", help="Delete existing Optuna study before running")
+        args = parser.parse_args()
                                                                                                     
         if args.debug:                                                                                 
             logging.getLogger().setLevel(logging.DEBUG)                                                
@@ -87,7 +92,7 @@ if __name__ == "__main__":
         config.optuna.n_trials = args.n_trials                                                         
                                                                                                     
         # Run the optimization                                                                         
-        best_trial = run_optimization(config)                                                          
+        best_trial = run_optimization(config, delete_study=args.delete_study)                                                          
         print(f"\nOptimization completed. Best trial: {best_trial.number}")                            
         print(f"Best parameters: {best_trial.params}")                                                 
                                                                                                     

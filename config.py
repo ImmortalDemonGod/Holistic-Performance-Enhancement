@@ -51,11 +51,10 @@ class OptunaConfig:
             "learning_rate": (1e-5, 1e-2),
             "batch_size": (16, 128),
             "base_dim": (32, 256, 32),       # Must be divisible by 32 for proper alignment
-            "heads": (4, 16, 4),             # Must be powers of 2 for stability
+            "heads": [2, 4, 8, 16],          # Only powers of two
             "d_ff_multiplier": (2, 8),       # Will multiply by base_dim
-            "decoder_layers": (4, 32),
-            "heads": (2, 16),
-            "d_ff": (128, 512),
+            "decoder_layers": (2, 8),
+            "dropout": (0.1, 0.5)
             "dropout": (0.1, 0.5)
         }
         
