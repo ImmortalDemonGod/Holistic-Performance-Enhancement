@@ -1,4 +1,4 @@
-import config
+from config import Config
 import logging
 import os
 import torch
@@ -10,7 +10,8 @@ from torch.quantization import get_default_qconfig
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
-# Initialize logging
+# Instantiate the Config class
+cfg = Config()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -28,15 +29,15 @@ if __name__ == '__main__':
 
     # Validate checkpoint path only if TRAIN_FROM_CHECKPOINT is True
     if TRAIN_FROM_CHECKPOINT:
-        if config.CHECKPOINT_PATH and not os.path.isfile(config.CHECKPOINT_PATH):
+        if cfg.model.CHECKPOINT_PATH and not os.path.isfile(cfg.model.CHECKPOINT_PATH):
             raise FileNotFoundError(
-                f"Checkpoint file not found at {config.CHECKPOINT_PATH}. Please update config.py with a valid path."
+                f"Checkpoint file not found at {cfg.model.CHECKPOINT_PATH}. Please update config.py with a valid path."
             )
 
     # Initialize the model
     if TRAIN_FROM_CHECKPOINT and config.CHECKPOINT_PATH:
         logger.info(f"Resuming training from checkpoint: {config.CHECKPOINT_PATH}")
-        model = TransformerTrainer.load_from_checkpoint(config.CHECKPOINT_PATH)
+        model = TransformerTrainer.load_from_checkpoint(cfg.model.CHECKPOINT_PATH)
         model = TransformerTrainer.load_from_checkpoint(config.CHECKPOINT_PATH)
     else:
         if TRAIN_FROM_CHECKPOINT and not config.CHECKPOINT_PATH:
@@ -44,15 +45,15 @@ if __name__ == '__main__':
         else:
             logger.info("Starting training from scratch.")
         model = TransformerTrainer(
-            input_dim=config.input_dim,
-            d_model=config.d_model,
-            encoder_layers=config.encoder_layers,
-            decoder_layers=config.decoder_layers,
-            heads=config.heads,
-            d_ff=config.d_ff,
-            output_dim=config.output_dim,
-            learning_rate=config.learning_rate,
-            include_sythtraining_data=config.include_sythtraining_data
+            input_dim=cfg.model.input_dim,
+            d_model=cfg.model.d_model,
+            encoder_layers=cfg.model.encoder_layers,
+            decoder_layers=cfg.model.decoder_layers,
+            heads=cfg.model.heads,
+            d_ff=cfg.model.d_ff,
+            output_dim=cfg.model.output_dim,
+            learning_rate=cfg.training.learning_rate,
+            include_sythtraining_data=cfg.training.include_sythtraining_data
         )
     qconfig = get_default_qconfig('qnnpack')  # Use 'fbgemm' if on x86 platforms
     model.model.qconfig = qconfig
@@ -89,20 +90,20 @@ if __name__ == '__main__':
 
     # Configure the Trainer with conditional checkpoint resumption
     trainer_kwargs = {
-        "max_epochs": config.training.max_epochs,  # **Modified:** Use max_epochs from TrainingConfig
+        "max_epochs": cfg.training.max_epochs,  # **Modified:** Use max_epochs from TrainingConfig
         "callbacks": [checkpoint_callback, early_stop_callback],
         "devices": 1,  # Use a single device
-        "accelerator": 'gpu' if config.device_choice == 'cuda' else 'cpu',
-        "precision": config.precision,
-        "fast_dev_run": config.FAST_DEV_RUN,
+        "accelerator": 'gpu' if cfg.training.device_choice == 'cuda' else 'cpu',
+        "precision": cfg.training.precision,
+        "fast_dev_run": cfg.training.FAST_DEV_RUN,
         "log_every_n_steps": log_every_n_steps,
     }
 
-    if TRAIN_FROM_CHECKPOINT and config.CHECKPOINT_PATH:
-        trainer_kwargs["resume_from_checkpoint"] = config.CHECKPOINT_PATH
+    if TRAIN_FROM_CHECKPOINT and cfg.model.CHECKPOINT_PATH:
+        trainer_kwargs["resume_from_checkpoint"] = cfg.model.CHECKPOINT_PATH
 
     trainer = Trainer(**trainer_kwargs)
 
     # Set ckpt_path based on config.CHECKPOINT_PATH
-    ckpt_path = config.CHECKPOINT_PATH if TRAIN_FROM_CHECKPOINT and config.CHECKPOINT_PATH else None
+    ckpt_path = cfg.model.CHECKPOINT_PATH if TRAIN_FROM_CHECKPOINT and cfg.model.CHECKPOINT_PATH else None
     trainer.fit(model, train_loader, val_loader, ckpt_path=ckpt_path)
