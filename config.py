@@ -106,3 +106,4 @@ class Config:
             
             # **New:** Initialize max_epochs with the existing num_epochs value
             self.max_epochs = num_epochs  # Default value from config
+            self.gradient_clip_val = 1.0  # Specifies the maximum norm of the gradients
