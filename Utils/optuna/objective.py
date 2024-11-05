@@ -58,17 +58,19 @@ def create_trial_config(trial, base_config):
         model_config.d_model = d_model
         
         # Layer configuration
+        low, high = base_config.optuna.param_ranges["encoder_layers"]
         model_config.encoder_layers = trial.suggest_int(
             "encoder_layers",
-            1,          # Updated lower bound
-            12,         # Updated upper bound
-            step=1      # Ensure 'step' is a keyword
+            low=low,
+            high=high,
+            step=1
         )
+        low, high = base_config.optuna.param_ranges["decoder_layers"]
         model_config.decoder_layers = trial.suggest_int(
             "decoder_layers",
-            1,          # Updated lower bound
-            12,         # Updated upper bound
-            step=1      # Ensure 'step' is a keyword
+            low=low,
+            high=high,
+            step=1
         )
         
         # Suggest d_ff, ensuring it's greater than d_model
@@ -126,6 +128,7 @@ def create_trial_config(trial, base_config):
             5.0,       # Maximum value
             step=0.1   # Ensure 'step' is a keyword
         )
+        low, high, step = base_config.optuna.param_ranges["max_epochs"]
         low, high, step = base_config.optuna.param_ranges["max_epochs"]
         training_config.max_epochs = trial.suggest_int(
             "max_epochs",
