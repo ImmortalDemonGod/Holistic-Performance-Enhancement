@@ -36,6 +36,17 @@ class TransformerTrainer(pl.LightningModule):
         include_sythtraining_data,
     ):
         super(TransformerTrainer, self).__init__()
+
+        # Assign hyperparameters as instance attributes
+        self.input_dim = input_dim
+        self.d_model = d_model
+        self.encoder_layers = encoder_layers
+        self.decoder_layers = decoder_layers
+        self.heads = heads
+        self.d_ff = d_ff
+        self.output_dim = output_dim
+        self.learning_rate = learning_rate
+        self.dropout = self.hparams.get('dropout', 0.1)  # Default to 0.1 if not provided
         self.save_hyperparameters()
         from config import context_encoder_d_model, context_encoder_heads
 
