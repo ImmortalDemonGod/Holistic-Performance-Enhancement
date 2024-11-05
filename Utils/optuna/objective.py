@@ -126,11 +126,12 @@ def create_trial_config(trial, base_config):
             5.0,       # Maximum value
             step=0.1   # Ensure 'step' is a keyword
         )
+        low, high, step = base_config.optuna.param_ranges["max_epochs"]
         training_config.max_epochs = trial.suggest_int(
             "max_epochs",
-            low=base_config.optuna.param_ranges["max_epochs"][0],
-            high=base_config.optuna.param_ranges["max_epochs"][1],
-            step=base_config.optuna.param_ranges["max_epochs"][2]
+            low=low,
+            high=high,
+            step=step
         )
         logger.debug(f"Set max_epochs to {training_config.max_epochs}")
         
