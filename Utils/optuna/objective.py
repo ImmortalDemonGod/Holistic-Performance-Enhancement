@@ -33,47 +33,98 @@ def create_trial_config(trial, base_config):
     """Create a new config with trial-suggested values"""
     try:
         logger.debug("Creating trial config")
-
-        # Get ranges from OptunaConfig
         ranges = base_config.optuna.param_ranges
-
-        # Create new config objects based on existing classes
+        
+        # Create new config objects
         model_config = base_config.model.__class__()
         training_config = base_config.training.__class__()
-
-        # Determine base dimension (must be divisible by 32)
+        
+        # Model Architecture Parameters
         base_dim = trial.suggest_int(
-            "base_dim",
-            low=ranges["base_dim"][0],
-            high=ranges["base_dim"][1],
+            "base_dim", 
+            ranges["base_dim"][0],
+            ranges["base_dim"][1],
             step=ranges["base_dim"][2]
         )
-        logger.debug(f"Selected base_dim: {base_dim}")
-
-        # Set d_model to be equal to base_dim
         model_config.d_model = base_dim
-
-        # Validate d_model is divisible by both heads and 4
+        
+        # Number of heads
         model_config.heads = trial.suggest_categorical("heads", ranges["heads"])
-        if model_config.d_model % model_config.heads != 0 or model_config.d_model % 4 != 0:
-            logger.warning(f"Invalid dimension combination: d_model={model_config.d_model}, heads={model_config.heads}")
+        
+        # Validate dimensions
+        if model_config.d_model % model_config.heads != 0:
+            logger.warning(f"Invalid head configuration: d_model={model_config.d_model}, heads={model_config.heads}")
             raise optuna.TrialPruned()
-
-        # Set other parameters based on base_dim
-        d_ff_multiplier = trial.suggest_int("d_ff_multiplier", *ranges["d_ff_multiplier"])
-        model_config.d_ff = base_dim * d_ff_multiplier
-
-        model_config.decoder_layers = trial.suggest_int("decoder_layers", *ranges["decoder_layers"])
-        model_config.dropout = trial.suggest_float("dropout", *ranges["dropout"])
-
-        training_config.batch_size = trial.suggest_int("batch_size", *ranges["batch_size"])
-        training_config.learning_rate = trial.suggest_float(
-            "learning_rate", *ranges["learning_rate"], log=True
+        
+        # Layer configuration
+        model_config.encoder_layers = trial.suggest_int(
+            "encoder_layers", 
+            *ranges["encoder_layers"]
         )
-
+        model_config.decoder_layers = trial.suggest_int(
+            "decoder_layers", 
+            *ranges["decoder_layers"]
+        )
+        
+        # Feedforward dimension
+        d_ff_multiplier = trial.suggest_int(
+            "d_ff_multiplier", 
+            *ranges["d_ff_multiplier"]
+        )
+        model_config.d_ff = base_dim * d_ff_multiplier
+        
+        # Dropout
+        model_config.dropout = trial.suggest_float(
+            "dropout", 
+            *ranges["dropout"]
+        )
+        
+        # Training Parameters
+        training_config.learning_rate = trial.suggest_float(
+            "learning_rate", 
+            *ranges["learning_rate"], 
+            log=True
+        )
+        training_config.batch_size = trial.suggest_int(
+            "batch_size", 
+            *ranges["batch_size"]
+        )
+        training_config.max_epochs = trial.suggest_int(
+            "max_epochs", 
+            *ranges["max_epochs"]
+        )
+        training_config.weight_decay = trial.suggest_float(
+            "weight_decay", 
+            *ranges["weight_decay"]
+        )
+        
+        # Context Encoder Parameters
+        training_config.context_encoder_heads = trial.suggest_categorical(
+            "context_encoder_heads", 
+            ranges["context_encoder_heads"]
+        )
+        training_config.context_encoder_layers = trial.suggest_int(
+            "context_encoder_layers", 
+            *ranges["context_encoder_layers"]
+        )
+        
+        # Additional Training Parameters
+        training_config.warmup_steps = trial.suggest_int(
+            "warmup_steps", 
+            *ranges["warmup_steps"]
+        )
+        training_config.gradient_clip_val = trial.suggest_float(
+            "gradient_clip_val", 
+            *ranges["gradient_clip_val"]
+        )
+        training_config.label_smoothing = trial.suggest_float(
+            "label_smoothing", 
+            *ranges["label_smoothing"]
+        )
+        
         logger.debug(f"Trial config created with params: {trial.params}")
         return Config(model=model_config, training=training_config)
-
+        
     except Exception as e:
         logger.error(f"Error creating trial config: {str(e)}")
         raise
@@ -139,10 +190,8 @@ def create_objective(base_config):
     def objective(trial):
         logger.debug(f"\nStarting trial {trial.number}")
         try:
-            # Create trial-specific config
+            # Create config and model
             trial_config = create_trial_config(trial, base_config)
-
-            # Initialize the model with trial-specific hyperparameters
             model = TransformerTrainer(
                 input_dim=trial_config.model.input_dim,
                 d_model=trial_config.model.d_model,
@@ -152,65 +201,118 @@ def create_objective(base_config):
                 d_ff=trial_config.model.d_ff,
                 output_dim=trial_config.model.output_dim,
                 learning_rate=trial_config.training.learning_rate,
-                include_sythtraining_data=trial_config.training.include_sythtraining_data
+                include_sythtraining_data=trial_config.training.include_sythtraining_data,
             )
 
-            # Validate dimensions before training
-            if not validate_dimensions(model):
-                logger.warning("Model dimension validation failed")
-                raise optuna.TrialPruned()
-
-            # Prepare data
-            train_loader, val_loader = prepare_data()
-
-            # Setup early stopping callback
-            early_stop = EarlyStopping(monitor="val_loss", patience=3, mode="min")
-
-            # Initialize Trainer
+            # Setup callbacks with advanced pruning
+            callbacks = [
+                PerformancePruningCallback(
+                    trial,
+                    monitor=base_config.optuna.pruning.get("monitor", "val_loss"),
+                    patience=base_config.optuna.pruning.get("patience", 3)
+                ),
+                ResourcePruningCallback(trial),
+                EarlyStopping(
+                    monitor="val_loss",
+                    patience=base_config.optuna.pruning.get("patience", 3),
+                    mode="min"
+                )
+            ]
+            
             trainer = Trainer(
-                max_epochs=10,  # Adjust epochs as needed
-                callbacks=[early_stop],
+                max_epochs=trial_config.training.max_epochs,
+                callbacks=callbacks,
                 enable_progress_bar=True,
                 accelerator='gpu' if torch.cuda.is_available() else 'cpu',
-                devices=1
+                devices=1,
+                gradient_clip_val=trial_config.training.gradient_clip_val
             )
-
+            
+            # Prepare data loaders based on trial_config.training.batch_size
+            train_loader, val_loader = prepare_data(batch_size=trial_config.training.batch_size)
+            
             # Log memory usage before training
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
-                memory_before = torch.cuda.memory_allocated() / 1024**2
-                logger.debug(f"GPU memory before training: {memory_before:.2f} MB")
-
+                memory_before = torch.cuda.memory_allocated() / 1e9
+                logger.debug(f"GPU memory before training: {memory_before:.2f} GB")
+            
             # Train the model
             logger.debug("Starting training")
             trainer.fit(model, train_loader, val_loader)
-
+            
             # Retrieve metrics
             metrics = TrialMetrics(
-                val_loss=trainer.callback_metrics.get("val_loss", float('inf')),
-                train_loss=trainer.callback_metrics.get("train_loss", float('inf')),
-                val_accuracy=trainer.callback_metrics.get("val_accuracy", 0.0)
+                val_loss=trainer.callback_metrics.get("val_loss", float('inf')).item(),
+                train_loss=trainer.callback_metrics.get("train_loss", float('inf')).item(),
+                val_accuracy=trainer.callback_metrics.get("val_accuracy", 0.0).item()
             )
-
+            
             # Log memory usage after training
             if torch.cuda.is_available():
-                memory_after = torch.cuda.memory_allocated() / 1024**2
+                memory_after = torch.cuda.memory_allocated() / 1e9
                 metrics.memory_used = memory_after - memory_before
-                logger.debug(f"GPU memory used: {metrics.memory_used:.2f} MB")
-
+                logger.debug(f"GPU memory used: {metrics.memory_used:.2f} GB")
+            
             # Log metrics
             metrics.log_metrics()
-
+            
             # Prune trial if validation loss is invalid
             if not metrics.val_loss or torch.isnan(torch.tensor(metrics.val_loss)):
                 logger.warning("Invalid validation loss detected")
                 raise optuna.TrialPruned()
-
+            
             return metrics.val_loss
-
+        
+        except optuna.TrialPruned:
+            raise
         except Exception as e:
             logger.error(f"Trial {trial.number} failed: {str(e)}")
             logger.error("Stack trace:", exc_info=True)
             raise optuna.TrialPruned()
-
+            
     return objective
+class PerformancePruningCallback(pl.Callback):
+    def __init__(self, trial, monitor="val_loss", patience=3):
+        self.trial = trial
+        self.monitor = monitor
+        self.patience = patience
+        self.best_value = float('inf')
+        self.no_improvement_count = 0
+        
+    def on_validation_end(self, trainer, pl_module):
+        current_value = trainer.callback_metrics.get(self.monitor)
+        if current_value is None:
+            return
+            
+        # Report to Optuna
+        self.trial.report(current_value.item(), step=trainer.current_epoch)
+        
+        # Check for improvement
+        if current_value < self.best_value:
+            self.best_value = current_value
+            self.no_improvement_count = 0
+        else:
+            self.no_improvement_count += 1
+            
+        # Prune if no improvement for patience epochs
+        if self.no_improvement_count >= self.patience:
+            logger.info(f"Trial {self.trial.number} pruned due to no improvement for {self.patience} epochs")
+            raise optuna.TrialPruned()
+            
+        # Let Optuna decide if trial should be pruned
+        if self.trial.should_prune():
+            logger.info(f"Trial {self.trial.number} pruned by Optuna")
+            raise optuna.TrialPruned()
+
+class ResourcePruningCallback(pl.Callback):
+    def __init__(self, trial, max_memory_gb=None):
+        self.trial = trial
+        self.max_memory_gb = max_memory_gb or (torch.cuda.get_device_properties(0).total_memory / 1e9 * 0.9)
+        
+    def on_batch_end(self, trainer, pl_module):
+        if torch.cuda.is_available():
+            current_memory = torch.cuda.memory_allocated() / 1e9
+            if current_memory > self.max_memory_gb:
+                logger.warning(f"Trial {self.trial.number} pruned due to excessive memory usage: {current_memory:.2f}GB")
+                raise optuna.TrialPruned()
