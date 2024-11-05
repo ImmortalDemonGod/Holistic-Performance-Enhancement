@@ -39,7 +39,7 @@ def create_trial_config(trial, base_config):
         training_config = base_config.training.__class__()                                             
                                                                                                     
         # Suggest hyperparameters using Optuna                                                         
-        model_config.d_model = trial.suggest_int("d_model", *ranges["d_model"])                        
+        model_config.d_model = trial.suggest_int("d_model", *ranges["d_model"], step=4)                        
         model_config.decoder_layers = trial.suggest_int("decoder_layers", *ranges["decoder_layers"])   
         model_config.heads = trial.suggest_int("heads", *ranges["heads"])                              
         model_config.d_ff = trial.suggest_int("d_ff", *ranges["d_ff"])                                 
