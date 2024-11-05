@@ -58,13 +58,22 @@ class TaskFineTuner:
 
     def prepare_task_data(self, train_loader, val_loader, task_id):
         """Extract task-specific data from loaders."""
-        task_id_tensor = torch.tensor(task_id)
+        # Map the task_id string to its corresponding integer index
+        task_id_idx = task_id_map[task_id]
+        task_id_tensor = torch.tensor(task_id_idx)
 
         def filter_task_data(loader, purpose="training"):
             inputs, outputs, ctx_inputs, ctx_outputs = [], [], [], []
 
             for batch in loader:
-                src, tgt, ctx_input, ctx_output = batch
+                src, tgt, ctx_input, ctx_output, task_ids = batch
+                # Create a mask for the current task_id
+                mask = (task_ids == task_id_tensor)
+                if mask.any():
+                    inputs.append(src[mask])
+                    outputs.append(tgt[mask])
+                    ctx_inputs.append(ctx_input[mask])
+                    ctx_outputs.append(ctx_output[mask])
                 inputs.append(src)
                 outputs.append(tgt)
                 ctx_inputs.append(ctx_input)
@@ -96,7 +105,7 @@ class TaskFineTuner:
 
     def _create_dataset(self, src, tgt, ctx_input, ctx_output):
         """Helper to create dataset with consistent formatting."""
-        return TensorDataset(src, tgt, ctx_input, ctx_output)
+        return TensorDataset(src, tgt, ctx_input, ctx_output)  # Ensure only four tensors are included
 
     def finetune_task(self, task_id: str, train_loader, val_loader, test_example):
         """Fine-tune model for specific task and evaluate."""
@@ -140,7 +149,7 @@ class TaskFineTuner:
             # Evaluate on test example
             task_model.eval()
             with torch.no_grad():
-                src, tgt, ctx_input, ctx_output = test_example
+                src, tgt, ctx_input, ctx_output, _ = test_example
                 src = src.unsqueeze(0).to(self.device)
                 tgt = tgt.unsqueeze(0).to(self.device)
                 ctx_input = ctx_input.unsqueeze(0).to(self.device)
