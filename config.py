@@ -65,7 +65,7 @@ class OptunaConfig:
             "learning_rate": (1e-5, 1e-2),
             
             # **New:** Add max_epochs range
-            "max_epochs": (10, 100, 5),    # Range from 10 to 100 epochs in steps of 5
+            "max_epochs": (1, 5, 1),    # Range from 10 to 100 epochs in steps of 5
             "gradient_clip_val": (0.0, 5.0),  # Add gradient_clip_val range
         }
         
@@ -73,7 +73,7 @@ class OptunaConfig:
         self.pruning = {
             "n_warmup_steps": 5,           # Number of trials before pruning starts
             "n_startup_trials": 10,        # Number of trials before using pruning
-            "patience": 1,                 # Number of epochs without improvement before pruning
+            "patience": 2,                 # Number of epochs without improvement before pruning
             "pruning_percentile": 25,      # Percentile for pruning
         }
         
