@@ -8,7 +8,7 @@ import torch
 import numpy as np
 import logging
 from torch.utils.data import DataLoader, TensorDataset
-from config import include_sythtraining_data, batch_size, synthetic_dir
+from config import include_sythtraining_data, synthetic_dir
 from Utils.context_data import ContextPair
 from Utils.padding_utils import pad_to_fixed_size
 
@@ -145,8 +145,11 @@ def load_main_data(directory, context_map, train_inputs, train_outputs, train_ta
         except Exception as e:
             logger.error(f"Error processing file '{filepath}': {str(e)}")
 
-def prepare_data():
-    logger.info("Starting data preparation...")
+def prepare_data(batch_size=None):
+    import config  # Ensure config is accessible within the function
+    if batch_size is None:
+        batch_size = config.batch_size  # Use the default from config if not provided
+    logger.info(f"Starting data preparation with batch_size={batch_size}...")
     log_limit = 2
     successful_files = 0
     total_files = 0
@@ -268,7 +271,7 @@ def prepare_data():
     except Exception as e:
         logger.error(f"Failed to save task_id_map.json: {str(e)}")
 
-    # Create DataLoaders
+    # Create DataLoaders using the local batch_size variable
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
     val_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
 
