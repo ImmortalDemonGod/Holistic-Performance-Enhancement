@@ -54,8 +54,7 @@ class OptunaConfig:
             "heads": [2, 4, 8, 16],          # Only powers of two
             "d_ff_multiplier": (2, 8),       # Will multiply by base_dim
             "decoder_layers": (2, 8),
-            "dropout": (0.1, 0.5)
-            "dropout": (0.1, 0.5)
+            "dropout": (0.1, 0.5),
         }
         
         print("DEBUG: OptunaConfig created with ranges:", self.param_ranges)
