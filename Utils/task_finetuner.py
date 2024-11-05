@@ -56,7 +56,7 @@ class TaskFineTuner:
         # Store results
         self.results: Dict[str, Any] = {}
 
-    def prepare_task_data(self, train_loader, val_loader, task_id):
+    def prepare_task_data(self, train_loader, val_loader, task_id, task_id_map):
         """Extract task-specific data from loaders."""
         # Map the task_id string to its corresponding integer index
         task_id_idx = task_id_map[task_id]
@@ -210,7 +210,7 @@ class TaskFineTuner:
 
                 # Prepare task data
                 task_train_loader, task_val_loader = self.prepare_task_data(
-                    train_loader, val_loader, task_id
+                    train_loader, val_loader, task_id, task_id_map
                 )
 
                 # Fine-tune and evaluate
