@@ -47,7 +47,7 @@ def create_trial_config(trial, base_config):
             "d_model", 
             32,                # Updated lower bound
             512,               # Updated upper bound
-            step=16            # Step remains the same
+            step=16            # Ensure 'step' is a keyword
         )
         
         # Validate dimensions
@@ -62,13 +62,13 @@ def create_trial_config(trial, base_config):
             "encoder_layers",
             1,          # Updated lower bound
             12,         # Updated upper bound
-            step=1      # Step remains as 1
+            step=1      # Ensure 'step' is a keyword
         )
         model_config.decoder_layers = trial.suggest_int(
             "decoder_layers",
             1,          # Updated lower bound
             12,         # Updated upper bound
-            step=1      # Step remains as 1
+            step=1      # Ensure 'step' is a keyword
         )
         
         # Suggest d_ff, ensuring it's greater than d_model
@@ -81,7 +81,7 @@ def create_trial_config(trial, base_config):
             "d_ff", 
             max(min_d_ff, 64),     # Updated lower bound
             1024,                  # Updated upper bound
-            step=64                # Step remains the same
+            step=64                # Ensure 'step' is a keyword
         )
         
         # Dropout
@@ -110,7 +110,7 @@ def create_trial_config(trial, base_config):
             "batch_size",
             8,                      # Updated lower bound
             256,                    # Updated upper bound
-            step=8                  # Step adjusted for practical batch sizes
+            step=8                  # Ensure 'step' is a keyword
         )
         training_config.learning_rate = trial.suggest_float(
             "learning_rate",
@@ -124,7 +124,7 @@ def create_trial_config(trial, base_config):
             "gradient_clip_val",
             0.0,       # Minimum value
             5.0,       # Maximum value
-            step=0.1   # Step size (adjust as needed)
+            step=0.1   # Ensure 'step' is a keyword
         )
         training_config.max_epochs = trial.suggest_int(
             "max_epochs",
