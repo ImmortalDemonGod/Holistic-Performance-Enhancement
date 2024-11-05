@@ -261,8 +261,15 @@ def main():
             return
 
         logger.info(f"Loading pretrained model from {model_path}")
+        # Define the device based on availability
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        logger.info(f"Using device: {device}")
+
+        # Load the base model from checkpoint
         base_model = TransformerTrainer.load_from_checkpoint(model_path)
-        base_model.to(base_model.device_choice)  # Ensure model is on the correct device
+        
+        # Move the base model to the specified device
+        base_model.to(device)  # Ensure model is on the correct device
 
         # Prepare data
         train_loader, val_loader = prepare_data()
@@ -277,7 +284,7 @@ def main():
             task_id_map = json.load(f)
 
         # Initialize fine-tuner
-        finetuner = TaskFineTuner(base_model)
+        finetuner = TaskFineTuner(base_model, device=device)
 
         # Select a random task_id
         selected_task = random.choice(list(task_id_map.keys()))
