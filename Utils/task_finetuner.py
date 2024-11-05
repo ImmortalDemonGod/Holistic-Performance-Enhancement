@@ -106,12 +106,37 @@ class TaskFineTuner:
 
     def finetune_task(self, task_id: str, train_loader, val_loader, test_example):
         """Fine-tune model for specific task and evaluate."""
-        self.logger.info(f"Starting fine-tuning for task {task_id}")
+        self.logger.info(f"\n{'='*50}\nFine-tuning task {task_id}\n{'='*50}")
+        
+        # Unpack test example
+        src, tgt, ctx_input, ctx_output, _ = test_example
+        
+        # Log test example details
+        self.logger.info("\nTest Example:")
+        self.logger.info(f"Input shape: {src.shape}")
+        self.logger.info(f"Target shape: {tgt.shape}")
+        self.logger.info(f"Target values (first 20): {tgt.flatten()[:20].tolist()}")  # Show first 20 values
+        
+        # Get base model prediction before fine-tuning
+        self.base_model.eval()
+        with torch.no_grad():
+            src_b = src.unsqueeze(0).to(self.device)
+            tgt_b = tgt.unsqueeze(0).to(self.device)
+            ctx_input_b = ctx_input.unsqueeze(0).to(self.device)
+            ctx_output_b = ctx_output.unsqueeze(0).to(self.device)
+            
+            base_prediction = self.base_model(src_b, tgt_b, ctx_input_b, ctx_output_b)
+            base_prediction = base_prediction.argmax(dim=-1)
+            
+            # Calculate base accuracy
+            base_acc = (base_prediction.cpu() == tgt.long()).float().mean().item()
+            self.logger.info(f"\nBase Model Accuracy: {base_acc:.4f}")
+            self.logger.info(f"Base Model Prediction (first 20): {base_prediction.cpu().flatten()[:20].tolist()}")
 
-        # Create task-specific model with overridden learning_rate
+        # Proceed with fine-tuning as usual
+        # Initialize task-specific model with overridden learning_rate
         hparams = self.base_model.hparams.copy()
         hparams.pop('learning_rate', None)  # Remove existing learning_rate
-
         hparams.pop('device_choice', None)  # Remove 'device_choice' if present
 
         task_model = TransformerTrainer(
@@ -158,11 +183,25 @@ class TaskFineTuner:
                 prediction = prediction.argmax(dim=-1)
 
             # Calculate metrics
+            final_acc = (prediction.cpu() == tgt.long()).float().mean().item()
+            accuracy_improvement = final_acc - base_acc
+
             metrics = {
                 'val_loss': trainer.callback_metrics.get('val_loss', float('inf')).item(),
-                'prediction': prediction.cpu().numpy().tolist(),
+                'base_accuracy': base_acc,
+                'base_prediction': base_prediction.cpu().flatten().tolist(),
+                'target': tgt.cpu().flatten().tolist(),
+                'final_prediction': prediction.cpu().flatten().tolist(),
+                'final_accuracy': final_acc,
+                'accuracy_improvement': accuracy_improvement,
                 'converged_epoch': trainer.current_epoch
             }
+
+            self.logger.info(f"\nResults for task {task_id}:")
+            self.logger.info(f"Base Accuracy: {metrics['base_accuracy']:.4f}")
+            self.logger.info(f"Final Accuracy: {metrics['final_accuracy']:.4f}")
+            self.logger.info(f"Improvement: {metrics['accuracy_improvement']:.4f}")
+            self.logger.info(f"Final Prediction (first 20): {metrics['final_prediction'][:20]}")
 
             # Save task results
             self.results[task_id] = metrics
@@ -233,14 +272,36 @@ class TaskFineTuner:
                     test_examples[task_id]
                 )
 
-                self.logger.info(f"Completed task {task_id} - Loss: {metrics['val_loss']:.4f}")
+                self.logger.info(f"Completed task {task_id} - Val Loss: {metrics['val_loss']:.4f}")
 
             except Exception as e:
                 self.logger.error(f"Failed processing task {task_id}: {str(e)}")
                 self.results[task_id] = {'error': str(e)}
                 self.metrics_collector.add_result(task_id, {'error': str(e)})
 
-        # Save final results
+        # **Update the JSON Structure before saving**
+        for task_id in list(self.results.keys()):
+            if 'error' not in self.results[task_id]:
+                formatted_results = {
+                    'test_details': {
+                        'target': self.results[task_id]['target'],
+                        'input_shape': list(test_examples[task_id][0].shape)
+                    },
+                    'base_model': {
+                        'prediction': self.results[task_id]['base_prediction'],
+                        'accuracy': self.results[task_id]['base_accuracy']
+                    },
+                    'fine_tuned_model': {
+                        'prediction': self.results[task_id]['final_prediction'],
+                        'accuracy': self.results[task_id]['final_accuracy'],
+                        'val_loss': self.results[task_id]['val_loss'],
+                        'converged_epoch': self.results[task_id]['converged_epoch']
+                    },
+                    'improvement': self.results[task_id]['accuracy_improvement']
+                }
+                self.results[task_id] = formatted_results
+
+        # Then save as before:
         results_file = self.save_dir / 'final_results.json'
         with open(results_file, 'w') as f:
             json.dump(self.results, f, indent=2)
