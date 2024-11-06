@@ -229,7 +229,10 @@ def create_objective(base_config, train_dataset, val_dataset):
             trial_config = create_trial_config(trial, base_config)
         
             # Use the factory function to create the model
-            model = create_transformer_trainer(config=trial_config)
+            model = create_transformer_trainer(
+                config=trial_config,
+                checkpoint_path=None
+            )
 
             # **Create DataLoaders with the suggested batch_size from trial_config**
             batch_size = trial_config.training.batch_size

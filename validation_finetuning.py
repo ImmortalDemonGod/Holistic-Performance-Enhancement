@@ -126,11 +126,11 @@ class ValidationFineTuner:
         
         try:
             # **Create a task-specific model using the factory function**
-            # Initialize a new config for the task-specific model if necessary
-            # Assuming you have access to the config object or can create one on the fly
-            task_config = deepcopy(self.config)  # Replace with actual config acquisition
-            # Override necessary parameters if needed
-            
+            task_model = create_transformer_trainer(
+                config=self.config,
+                checkpoint_path=None  # Instantiate without loading from checkpoint
+            )
+            task_model.load_state_dict(self.base_model.state_dict())
             task_model = create_transformer_trainer(
                 config=task_config,
                 checkpoint_path=None  # Instantiate without loading from checkpoint
