@@ -238,7 +238,6 @@ def create_objective(base_config, train_dataset, val_dataset):
                 output_dim=trial_config.model.output_dim,
                 learning_rate=trial_config.training.learning_rate,
                 include_synthetic_training_data=trial_config.training.include_synthetic_training_data,
-                include_synthetic_training_data=trial_config.training.include_synthetic_training_data,
                 dropout_rate=trial_config.model.dropout,
                 context_encoder_d_model=trial_config.model.context_encoder_d_model,
                 context_encoder_heads=trial_config.model.context_encoder_heads
