@@ -1,6 +1,7 @@
 import json
 import logging
 import optuna
+from train import TransformerTrainer
 from pathlib import Path
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
@@ -151,6 +152,7 @@ class BestParamsManager:
             return False
 
         # Ensure all required parameters are passed when loading from checkpoint
+        checkpoint_path = config.model.checkpoint_path
         model = TransformerTrainer.load_from_checkpoint(
             checkpoint_path,
             input_dim=config.model.input_dim,
