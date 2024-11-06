@@ -232,17 +232,13 @@ def create_objective(base_config, train_dataset, val_dataset):
             hparams.pop('include_synthetic_training_data', None)  # Remove to prevent duplication
             hparams.pop('learning_rate', None)  # Prevents passing learning_rate twice
             hparams.pop('dropout', None)  # Prevents passing dropout twice
-            hparams.pop('learning_rate', None)  # Remove learning_rate to avoid duplication
+            hparams.pop('batch_size', None)  # Remove batch_size to avoid duplication
+            hparams.pop('max_epochs', None)  # Remove max_epochs to avoid duplication
+            hparams.pop('precision', None)  # Remove precision to avoid duplication
+            hparams.pop('gradient_clip_val', None)  # Remove gradient_clip_val to avoid duplication
 
             model = TransformerTrainer(
-                **hparams,  # Unpack hyperparameters without include_synthetic_training_data
-                input_dim=trial_config.model.input_dim,
-                d_model=trial_config.model.d_model,
-                encoder_layers=trial_config.model.encoder_layers,
-                decoder_layers=trial_config.model.decoder_layers,
-                heads=trial_config.model.heads,
-                d_ff=trial_config.model.d_ff,
-                output_dim=trial_config.model.output_dim,
+                **trial_config.model.__dict__,  # Use model-specific parameters
                 learning_rate=trial_config.training.learning_rate,
                 include_synthetic_training_data=trial_config.training.include_synthetic_training_data,  # Pass directly
                 dropout=trial_config.model.dropout,  # Correct parameter name
