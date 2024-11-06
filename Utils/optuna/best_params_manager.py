@@ -150,6 +150,23 @@ class BestParamsManager:
             logger.error(f"Failed to update config: {str(e)}")
             return False
 
+        # Ensure all required parameters are passed when loading from checkpoint
+        model = TransformerTrainer.load_from_checkpoint(
+            checkpoint_path,
+            input_dim=config.model.input_dim,
+            d_model=config.model.d_model,
+            encoder_layers=config.model.encoder_layers,
+            decoder_layers=config.model.decoder_layers,
+            heads=config.model.heads,
+            d_ff=config.model.d_ff,
+            output_dim=config.model.output_dim,
+            learning_rate=config.training.learning_rate,
+            include_synthetic_training_data=config.training.include_synthetic_training_data,
+            dropout_rate=config.model.dropout,
+            context_encoder_d_model=config.model.context_encoder_d_model,
+            context_encoder_heads=config.model.context_encoder_heads
+        )
+
     def validate_updated_config(self, config, best_params: BestParams):
         """Validate that the configuration has been updated correctly.
         
