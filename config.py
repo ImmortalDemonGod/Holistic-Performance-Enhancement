@@ -60,7 +60,7 @@ learning_rate = 0.00007  # Learning rate
 batch_size = 50  # Batch size for DataLoader
 dropout_rate = 0.35  # Dropout rate for the model
 synthetic_dir = 'synthetic_training'
-CHECKPOINT_PATH = '/workspaces/JARC-Reactor/lightning_logs/version_0/checkpoints/epoch=15-val_loss=0.4786.ckpt'  # Correct path
+CHECKPOINT_PATH = '/workspaces/JARC-Reactor/lightning_logs/version_11/checkpoints/epoch=epoch=1-val_loss=val_loss=0.8080.ckpt'  # Correct path
 FAST_DEV_RUN = True  # Set to True to enable fast development run
 
 # Context Encoder Configuration
