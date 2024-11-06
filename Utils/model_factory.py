@@ -1,4 +1,4 @@
-from Utils.model_factory import create_transformer_trainer
+from train import TransformerTrainer
 from typing import Union
 from config import Config
 

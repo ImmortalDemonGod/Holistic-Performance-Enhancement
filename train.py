@@ -31,7 +31,6 @@ class TransformerTrainer(pl.LightningModule):
         d_ff,
         output_dim,
         learning_rate,
-        include_synthetic_training_data,
         dropout: Optional[float] = None,
         context_encoder_d_model: Optional[int] = None,
         context_encoder_heads: Optional[int] = None,
