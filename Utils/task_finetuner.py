@@ -25,15 +25,7 @@ from Utils.data_preparation import prepare_data
 from Utils.metrics import TaskMetricsCollector                                                         
                                                                                                         
 class TaskFineTuner:
-    def __init__(
-        self,
-        base_model: TransformerTrainer,
-        save_dir: str = "finetuning_results",
-        device: str = "cuda" if torch.cuda.is_available() else "cpu",
-        max_epochs: int = 100,
-        learning_rate: float = 1e-5,
-        patience: int = 5
-    ):
+    def __init__(self, base_model: TransformerTrainer, config: Config, save_dir: str = "finetuning_results", device: str = "cuda" if torch.cuda.is_available() else "cpu", max_epochs: int = 100, learning_rate: float = 1e-5, patience: int = 5):
         """Initialize fine-tuner with base model and configuration."""
         self.save_dir = Path(save_dir)
         self.save_dir.mkdir(parents=True, exist_ok=True)
