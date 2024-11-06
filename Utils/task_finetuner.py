@@ -370,7 +370,4 @@ def main():
         raise
 
 if __name__ == "__main__":
-    from config import Config  # Ensure Config is imported
-    
-    config = Config()  # Initialize Config
-    main(config)  # Pass Config instance to main
+    main()  # Call main without arguments
