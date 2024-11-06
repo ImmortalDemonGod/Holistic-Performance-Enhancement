@@ -25,7 +25,6 @@ class TrainingConfig:
             train_from_checkpoint = False  # Default train_from_checkpoint
         self.batch_size = batch_size
         self.learning_rate = learning_rate
-        self.include_synthetic_training_data = include_synthetic_training_data
         self.max_epochs = num_epochs
         self.device_choice = device_choice
         self.precision = precision  # Moved here
@@ -60,7 +59,6 @@ output_dim = 30  # Number of features per output row
 learning_rate = 0.00007  # Learning rate
 batch_size = 50  # Batch size for DataLoader
 dropout_rate = 0.35  # Dropout rate for the model
-include_synthetic_training_data = False  # Set to True to include synthetic training data
 synthetic_dir = 'synthetic_training'
 CHECKPOINT_PATH = '/workspaces/JARC-Reactor/lightning_logs/version_0/checkpoints/epoch=15-val_loss=0.4786.ckpt'  # Correct path
 FAST_DEV_RUN = True  # Set to True to enable fast development run

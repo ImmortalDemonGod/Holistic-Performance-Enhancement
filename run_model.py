@@ -1,6 +1,5 @@
 from Utils.optuna.best_params_manager import BestParamsManager
 import argparse
-from config import Config
 import logging
 import os
 import torch
@@ -73,7 +72,6 @@ def setup_model_training(cfg, args=None):
                     d_ff=cfg.model.d_ff,
                     output_dim=cfg.model.output_dim,
                     learning_rate=cfg.training.learning_rate,
-                    include_synthetic_training_data=cfg.training.include_synthetic_training_data
                 )
             else:
                 raise FileNotFoundError(f"Checkpoint file not found at {checkpoint_path}")
@@ -88,7 +86,6 @@ def setup_model_training(cfg, args=None):
                 d_ff=cfg.model.d_ff,
                 output_dim=cfg.model.output_dim,
                 learning_rate=cfg.training.learning_rate,
-                include_synthetic_training_data=cfg.training.include_synthetic_training_data
             )
 
         # Log device information

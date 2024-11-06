@@ -1,5 +1,4 @@
 # train.py
-from config import include_synthetic_training_data
 import logging
 import torch
 import torch.nn as nn
@@ -33,7 +32,6 @@ class TransformerTrainer(pl.LightningModule):
         d_ff,
         output_dim,
         learning_rate,
-        include_synthetic_training_data,
     ):
         super(TransformerTrainer, self).__init__()
 
