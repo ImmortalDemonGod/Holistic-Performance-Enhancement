@@ -228,7 +228,11 @@ def create_objective(base_config, train_dataset, val_dataset):
             # Create config and model
             trial_config = create_trial_config(trial, base_config)
             logger.debug(f"Trial {trial.number} - max_epochs: {trial_config.training.max_epochs}")
+            hparams = trial_config.training.__dict__.copy()
+            hparams.pop('include_synthetic_training_data', None)  # Remove to prevent duplication
+
             model = TransformerTrainer(
+                **hparams,  # Unpack hyperparameters without include_synthetic_training_data
                 input_dim=trial_config.model.input_dim,
                 d_model=trial_config.model.d_model,
                 encoder_layers=trial_config.model.encoder_layers,
@@ -237,8 +241,8 @@ def create_objective(base_config, train_dataset, val_dataset):
                 d_ff=trial_config.model.d_ff,
                 output_dim=trial_config.model.output_dim,
                 learning_rate=trial_config.training.learning_rate,
-                include_synthetic_training_data=trial_config.training.include_synthetic_training_data,
-                dropout=trial_config.model.dropout,
+                include_synthetic_training_data=trial_config.training.include_synthetic_training_data,  # Pass directly
+                dropout=trial_config.model.dropout,  # Correct parameter name
                 context_encoder_d_model=trial_config.model.context_encoder_d_model,
                 context_encoder_heads=trial_config.model.context_encoder_heads
             )
