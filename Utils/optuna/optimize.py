@@ -79,10 +79,13 @@ def run_optimization(config, delete_study=False):
                                                                                                     
 if __name__ == "__main__":                                                                             
     try:                                                                                               
+        # Instantiate the Config class first
+        config = Config()
+
         # Import argparse here to ensure it's only loaded when running the script                      
         import argparse                                                                                
         parser = argparse.ArgumentParser(description="Run Optuna optimization for JARC Reactor")       
-        parser.add_argument("--n_trials", type=int, default=10, help="Number of Optuna trials to run") 
+        parser.add_argument("--n_trials", type=int, default=config.optuna.n_trials, help="Number of Optuna trials to run") 
         parser.add_argument("--debug", action="store_true", help="Enable debug logging")               
         parser.add_argument("--delete_study", action="store_true", help="Delete existing Optuna study before running")
         args = parser.parse_args()
@@ -91,11 +94,10 @@ if __name__ == "__main__":
             logging.getLogger().setLevel(logging.DEBUG)                                                
             logger.debug("Debug mode enabled")                                                         
                                                                                                     
-        # Create config and update the number of trials based on user input                            
-        config = Config()                                                                              
+        # Update the number of trials based on user input                            
         config.optuna.n_trials = args.n_trials                                                         
                                                                                                     
-        # Run the optimization                                                                         
+        # Run the optimization with the updated config
         best_trial = run_optimization(config, delete_study=args.delete_study)                                                          
         print(f"\nOptimization completed. Best trial: {best_trial.number}")                            
         print(f"Best parameters: {best_trial.params}")                                                 
