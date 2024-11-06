@@ -41,6 +41,7 @@ class TaskFineTuner:
 
         # Store configuration
         self.base_model = base_model
+        self.config = config
         self.device = config.training.device_choice
         self.max_epochs = config.finetuning.max_epochs
         self.learning_rate = config.finetuning.learning_rate
