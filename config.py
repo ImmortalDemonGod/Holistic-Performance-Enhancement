@@ -76,7 +76,7 @@ class OptunaConfig:
     def __init__(self):
         print("DEBUG: Creating OptunaConfig")
         
-        self.n_trials = 100
+        self.n_trials = 1
         self.study_name = "jarc_optimization_v3"  # Updated study name
         self.storage_url = "sqlite:///jarc_optuna.db"
         
