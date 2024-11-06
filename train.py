@@ -66,8 +66,6 @@ class TransformerTrainer(pl.LightningModule):
         self.output_dim = output_dim
         self.learning_rate = learning_rate
         self.include_synthetic_training_data = include_synthetic_training_data
-        self.dropout = dropout  # Use the passed dropout value
-
         # Pass the new parameters to TransformerModel
         self.model = TransformerModel(
             input_dim=self.input_dim,
@@ -77,7 +75,7 @@ class TransformerTrainer(pl.LightningModule):
             heads=self.heads,
             d_ff=self.d_ff,
             output_dim=self.output_dim,
-            dropout_rate=self.dropout,
+            dropout_rate=dropout,
             context_encoder_d_model=self.context_encoder_d_model,
             context_encoder_heads=self.context_encoder_heads,
         ).to(self.device)
