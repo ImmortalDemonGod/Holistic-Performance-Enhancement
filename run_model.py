@@ -60,32 +60,15 @@ def setup_model_training(cfg):
                 )
             else:
                 logger.info("Initializing new model")
-                model = TransformerTrainer(
-                    input_dim=cfg.model.input_dim,
-                    d_model=cfg.model.d_model,
-                    encoder_layers=cfg.model.encoder_layers,
-                    decoder_layers=cfg.model.decoder_layers,
-                    heads=cfg.model.heads,
-                    d_ff=cfg.model.d_ff,
-                    output_dim=cfg.model.output_dim,
-                    learning_rate=cfg.training.learning_rate,
-                    include_synthetic_training_data=cfg.training.include_synthetic_training_data,
-                    dropout=cfg.model.dropout,
-                    context_encoder_d_model=cfg.model.context_encoder_d_model,
-                    context_encoder_heads=cfg.model.context_encoder_heads
+                model = create_transformer_trainer(
+                    config=cfg,
+                    checkpoint_path=None
                 )
         else:
             logger.info("Initializing new model")
-            model = TransformerTrainer(
-                input_dim=cfg.model.input_dim,
-                d_model=cfg.model.d_model,
-                encoder_layers=cfg.model.encoder_layers,
-                decoder_layers=cfg.model.decoder_layers,
-                heads=cfg.model.heads,
-                d_ff=cfg.model.d_ff,
-                output_dim=cfg.model.output_dim,
-                learning_rate=cfg.training.learning_rate,
-                include_synthetic_training_data=cfg.training.include_synthetic_training_data
+            model = create_transformer_trainer(
+                config=cfg,
+                checkpoint_path=None
             )
 
         # Log device information
