@@ -236,7 +236,6 @@ def create_objective(base_config, train_dataset, val_dataset):
                 d_ff=trial_config.model.d_ff,
                 output_dim=trial_config.model.output_dim,
                 learning_rate=trial_config.training.learning_rate,
-                include_synthetic_training_data=trial_config.training.include_synthetic_training_data,
             )
 
             # **Create DataLoaders with the suggested batch_size from trial_config**
