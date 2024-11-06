@@ -128,20 +128,31 @@ class TaskFineTuner:
             self.logger.info(f"\nBase Model Accuracy: {base_acc:.4f}")
             self.logger.info(f"Base Model Prediction (first 20): {base_prediction.cpu().flatten()[:20].tolist()}")
 
-        # Proceed with fine-tuning as usual
-        # Initialize task-specific model with overridden learning_rate
+        # Proceed with fine-tuning using the factory function
         hparams = self.base_model.hparams.copy()
-        hparams.pop('learning_rate', None)  # Remove existing learning_rate
-        hparams.pop('device_choice', None)  # Remove 'device_choice' if present
+        # Remove parameters that need to be overridden
+        hparams.pop('learning_rate', None)
+        hparams.pop('device_choice', None)
+        hparams.pop('dropout', None)
+        hparams.pop('context_encoder_d_model', None)
+        hparams.pop('context_encoder_heads', None)
+        hparams.pop('include_synthetic_training_data', None)
 
-        task_model = TransformerTrainer(
-            **hparams,  # Unpack hyperparameters without learning_rate, device_choice, and include_synthetic_training_data
-            learning_rate=self.learning_rate,
-            context_encoder_d_model=self.base_model.context_encoder_d_model,
-            context_encoder_heads=self.base_model.context_encoder_heads
+        # Create a new config with overridden parameters
+        new_config = deepcopy(self.base_model)
+        new_config.hparams.update({
+            'learning_rate': self.learning_rate,
+            'dropout': self.base_model.dropout,  # Ensure dropout is set correctly
+            'context_encoder_d_model': self.base_model.context_encoder_d_model,
+            'context_encoder_heads': self.base_model.context_encoder_heads
+        })
+
+        # Use the factory function to create a task-specific model
+        task_model = create_transformer_trainer(
+            config=self.config,  # Assuming you have access to the config object
+            checkpoint_path=None  # Instantiate without loading from checkpoint
         )
         task_model.load_state_dict(self.base_model.state_dict())
-        task_model.to(self.device)
 
         # Setup callbacks
         callbacks = [

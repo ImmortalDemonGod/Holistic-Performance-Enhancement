@@ -125,10 +125,17 @@ class ValidationFineTuner:
         self.logger.info(f"\n{'='*50}\nStarting fine-tuning for task {task_id}\n{'='*50}")
         
         try:
-            # Create task-specific model copy
-            task_model = deepcopy(self.base_model)
-            task_model.to(self.device)
-            task_model.train()
+            # **Create a task-specific model using the factory function**
+            # Initialize a new config for the task-specific model if necessary
+            # Assuming you have access to the config object or can create one on the fly
+            task_config = deepcopy(self.config)  # Replace with actual config acquisition
+            # Override necessary parameters if needed
+            
+            task_model = create_transformer_trainer(
+                config=task_config,
+                checkpoint_path=None  # Instantiate without loading from checkpoint
+            )
+            task_model.load_state_dict(self.base_model.state_dict())
             
             # Debug model state
             self.logger.info(f"Model device after moving: {next(task_model.parameters()).device}")

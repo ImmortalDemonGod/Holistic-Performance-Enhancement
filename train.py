@@ -32,41 +32,31 @@ class TransformerTrainer(pl.LightningModule):
         output_dim,
         learning_rate,
         include_synthetic_training_data,
-        dropout=0.1,  # Add dropout with a default value
-        context_encoder_d_model=128,  # Add context_encoder_d_model with a default value
-        context_encoder_heads=8,       # Add context_encoder_heads with a default value
+        dropout: Optional[float] = None,
+        context_encoder_d_model: Optional[int] = None,
+        context_encoder_heads: Optional[int] = None,
+        include_synthetic_training_data: Optional[bool] = None,
+        **kwargs  # Catch any extra parameters
     ):
         super(TransformerTrainer, self).__init__()
 
         self.save_hyperparameters()
 
-        # Logging dimensions
-        logger.debug(f"Initializing TransformerTrainer with dimensions:")
-        logger.debug(f"  input_dim: {input_dim}")
-        logger.debug(f"  d_model: {d_model}")
-        logger.debug(f"  heads: {heads}")
-        logger.debug(f"  d_ff: {d_ff}")
+        # Assign parameters from self.hparams
+        self.input_dim = self.hparams.input_dim
+        self.d_model = self.hparams.d_model
+        self.encoder_layers = self.hparams.encoder_layers
+        self.decoder_layers = self.hparams.decoder_layers
+        self.heads = self.hparams.heads
+        self.d_ff = self.hparams.d_ff
+        self.output_dim = self.hparams.output_dim
+        self.learning_rate = self.hparams.learning_rate
+        self.include_synthetic_training_data = self.hparams.include_synthetic_training_data
+        self.dropout = self.hparams.dropout
+        self.context_encoder_d_model = self.hparams.context_encoder_d_model
+        self.context_encoder_heads = self.hparams.context_encoder_heads
 
-        # Validate dimensions before creating model
-        if d_model % heads != 0:
-            raise ValueError(f"d_model ({d_model}) must be divisible by heads ({heads})")
-        if d_model % 4 != 0:
-            raise ValueError(f"d_model ({d_model}) must be divisible by 4")
-        if d_ff < d_model:
-            raise ValueError(f"d_ff ({d_ff}) must be greater than d_model ({d_model})")
-        # Set the new attributes
-        self.context_encoder_d_model = context_encoder_d_model
-        self.context_encoder_heads = context_encoder_heads
-        self.input_dim = input_dim
-        self.d_model = d_model
-        self.encoder_layers = encoder_layers
-        self.decoder_layers = decoder_layers
-        self.heads = heads
-        self.d_ff = d_ff
-        self.output_dim = output_dim
-        self.learning_rate = learning_rate
-        self.include_synthetic_training_data = include_synthetic_training_data
-        # Pass the new parameters to TransformerModel
+        # Initialize the TransformerModel with all parameters
         self.model = TransformerModel(
             input_dim=self.input_dim,
             d_model=self.d_model,
@@ -75,12 +65,11 @@ class TransformerTrainer(pl.LightningModule):
             heads=self.heads,
             d_ff=self.d_ff,
             output_dim=self.output_dim,
-            dropout_rate=dropout,
+            dropout_rate=self.dropout,  # Passed explicitly
             context_encoder_d_model=self.context_encoder_d_model,
             context_encoder_heads=self.context_encoder_heads,
         ).to(self.device)
-        # Ensure the model is on the correct device
-        self.learning_rate = self.hparams['learning_rate']
+
         self.criterion = nn.CrossEntropyLoss()
 
     def configure_optimizers(self):

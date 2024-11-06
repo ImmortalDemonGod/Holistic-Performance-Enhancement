@@ -225,21 +225,11 @@ def create_objective(base_config, train_dataset, val_dataset):
     def objective(trial):
         logger.debug(f"\nStarting trial {trial.number}")
         try:
-            # Create config and model
+            # Create config and model using the factory function
             trial_config = create_trial_config(trial, base_config)
-            logger.debug(f"Trial {trial.number} - max_epochs: {trial_config.training.max_epochs}")
-            hparams = trial_config.training.__dict__.copy()
-            hparams.pop('include_synthetic_training_data', None)  # Remove to prevent duplication
-            hparams.pop('learning_rate', None)  # Prevents passing learning_rate twice
-            hparams.pop('dropout', None)  # Prevents passing dropout twice
-
-            model = TransformerTrainer(
-                **trial_config.model.__dict__,  # Use model-specific parameters
-                learning_rate=trial_config.training.learning_rate,
-                include_synthetic_training_data=trial_config.training.include_synthetic_training_data,  # Pass directly
-                context_encoder_d_model=trial_config.model.context_encoder_d_model,
-                context_encoder_heads=trial_config.model.context_encoder_heads
-            )
+        
+            # Use the factory function to create the model
+            model = create_transformer_trainer(config=trial_config)
 
             # **Create DataLoaders with the suggested batch_size from trial_config**
             batch_size = trial_config.training.batch_size
