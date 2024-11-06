@@ -130,8 +130,6 @@ if __name__ == '__main__':
         "gradient_clip_val": cfg.training.gradient_clip_val
     }
 
-    if cfg.training.train_from_checkpoint and cfg.model.checkpoint_path:
-        trainer_kwargs["resume_from_checkpoint"] = cfg.model.checkpoint_path
 
     trainer = Trainer(**trainer_kwargs)
     
@@ -146,8 +144,7 @@ if __name__ == '__main__':
     trainer.fit(
         model, 
         train_loader, 
-        val_loader,
-        ckpt_path=cfg.model.checkpoint_path if cfg.training.train_from_checkpoint else None
+        val_loader
     )
 
     # Add device memory logging after training
