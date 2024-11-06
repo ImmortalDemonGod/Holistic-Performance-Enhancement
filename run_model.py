@@ -56,10 +56,6 @@ def setup_model_training(cfg):
                     include_synthetic_training_data=cfg.training.include_synthetic_training_data,
                     dropout=cfg.model.dropout,
                     context_encoder_d_model=cfg.model.context_encoder_d_model,
-                    context_encoder_heads=cfg.model.context_encoder_heads,
-                    include_synthetic_training_data=cfg.training.include_synthetic_training_data,
-                    dropout_rate=cfg.model.dropout,
-                    context_encoder_d_model=cfg.model.context_encoder_d_model,
                     context_encoder_heads=cfg.model.context_encoder_heads
                 )
             else:
