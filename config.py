@@ -6,6 +6,7 @@
 # - 64: Double precision (FP64), rarely used due to high computational cost
 # - 'bf16': Bfloat16 precision, used for specific hardware that supports it
 import torch
+import logging
 
 precision = 32  # Set to 16 for mixed precision, 32 for full precision, etc.
 TRAIN_FROM_CHECKPOINT = False  # Set to True to resume training from a checkpoint
@@ -79,6 +80,18 @@ class OptunaConfig:
         
         print("DEBUG: OptunaConfig created with ranges:", self.param_ranges)
 
+class LoggingConfig:
+    def __init__(self):
+        self.level = "INFO"  # Default logging level
+        self.debug_mode = False
+        logging.debug("Initializing LoggingConfig")  # Debugging statement
+
+class FineTuningConfig:
+    def __init__(self):
+        self.mode = "all"  # "all" or "random"
+        self.num_random_tasks = 1  # Only used if mode is "random"
+        logging.debug("Initializing FineTuningConfig")  # Debugging statement
+
 class Config:
     def __init__(self, model=None, training=None, device_choice=None):
         self.model = model if model is not None else self.ModelConfig()
@@ -101,12 +114,17 @@ class Config:
                 train_from_checkpoint=TRAIN_FROM_CHECKPOINT  # Ensure this parameter is included
             )
         
+        self.logging = LoggingConfig()
+        self.finetuning = FineTuningConfig()
         self.optuna = OptunaConfig()
         
         # Control for using best parameters
         self.use_best_params = False  # Whether to load and use best parameters from Optuna study
     
-    class ModelConfig:
+        logging.debug("Config initialized with:")
+        logging.debug(f"  - Logging level: {self.logging.level}")
+        logging.debug(f"  - Fine-tuning mode: {self.finetuning.mode}")
+        logging.debug(f"  - Device: {device_choice}")
         def __init__(self):
             self.input_dim = input_dim
             self.d_model = d_model
