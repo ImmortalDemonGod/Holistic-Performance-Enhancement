@@ -29,6 +29,7 @@ class TrainingConfig:
         self.device_choice = device_choice
         self.precision = precision  # Moved here
         self.train_from_checkpoint = train_from_checkpoint
+        self.include_synthetic_training_data = include_synthetic_training_data
         assert self.device_choice in ['cpu', 'gpu'], "device_choice must be 'cpu' or 'gpu'"
         assert self.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
         self.gradient_clip_val = 1.0
