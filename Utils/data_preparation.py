@@ -9,7 +9,7 @@ import torch
 import numpy as np
 import logging
 from torch.utils.data import DataLoader, TensorDataset
-from config import include_sythtraining_data, synthetic_dir
+from config import include_synthetic_training_data, synthetic_dir
 from Utils.context_data import ContextPair
 from Utils.padding_utils import pad_to_fixed_size
 
@@ -176,7 +176,7 @@ def prepare_data(batch_size=None, return_datasets=False):
     load_context_pairs('training', context_map)
 
     # Conditionally load context pairs from synthetic_dir
-    if include_sythtraining_data:
+    if include_synthetic_training_data:
         load_context_pairs(synthetic_dir, context_map)
 
     # Load main dataset from 'training' with progress bar

@@ -13,10 +13,10 @@ class ModelConfig:
         self.dropout = dropout_rate
         self.context_encoder_d_model = context_encoder_d_model
         self.context_encoder_heads = context_encoder_heads
-        self.checkpoint_path = None  # Path to checkpoint file for resuming training
+        self.checkpoint_path = CHECKPOINT_PATH  # Path to checkpoint file for resuming training
 
 class TrainingConfig:
-    def __init__(self, batch_size, learning_rate, include_sythtraining_data, num_epochs, device_choice='cpu', precision=None, fast_dev_run=None, train_from_checkpoint=None):
+    def __init__(self, batch_size, learning_rate, include_synthetic_training_data, num_epochs, device_choice='cpu', precision=None, fast_dev_run=None, train_from_checkpoint=None):
         if precision is None:
             precision = 32  # Default precision
         if fast_dev_run is None:
@@ -25,7 +25,7 @@ class TrainingConfig:
             train_from_checkpoint = False  # Default train_from_checkpoint
         self.batch_size = batch_size
         self.learning_rate = learning_rate
-        self.include_sythtraining_data = include_sythtraining_data
+        self.include_synthetic_training_data = include_synthetic_training_data
         self.max_epochs = num_epochs
         self.device_choice = device_choice
         self.precision = precision  # Moved here
@@ -60,7 +60,7 @@ output_dim = 30  # Number of features per output row
 learning_rate = 0.00007  # Learning rate
 batch_size = 50  # Batch size for DataLoader
 dropout_rate = 0.35  # Dropout rate for the model
-include_sythtraining_data = False  # Set to True to include sythtraining data
+include_synthetic_training_data = False  # Set to True to include synthetic training data
 synthetic_dir = 'sythtraining'
 CHECKPOINT_PATH = 'pretrained_checkpoint.ckpt'  # Update this path accordingly
 FAST_DEV_RUN = True  # Set to True to enable fast development run
