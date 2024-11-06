@@ -1,5 +1,5 @@
 # train.py
-from config import include_sythtraining_data
+from config import include_synthetic_training_data
 import logging
 import torch
 import torch.nn as nn
