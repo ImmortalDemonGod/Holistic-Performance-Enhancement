@@ -45,7 +45,7 @@ def setup_model_training(cfg):
             if checkpoint_file.is_file():
                 logger.info(f"Resuming from checkpoint: {checkpoint_path}")
                 model = create_transformer_trainer(
-                    config=cfg,
+                    config=cfg,  # Pass the config object
                     checkpoint_path=checkpoint_path
                 )
             else:

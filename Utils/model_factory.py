@@ -19,6 +19,7 @@ def create_transformer_trainer(
     """
     # Instantiate a new model with parameters from config
     return TransformerTrainer(
+        config=config,  # Pass config here
         input_dim=config.model.input_dim,
         d_model=config.model.d_model,
         encoder_layers=config.model.encoder_layers,
