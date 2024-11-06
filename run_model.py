@@ -6,7 +6,7 @@ import torch
 from train import TransformerTrainer
 from Utils.data_preparation import prepare_data
 from pathlib import Path
-import config
+from config import Config
 import torch.quantization
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
