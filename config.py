@@ -16,7 +16,13 @@ class ModelConfig:
         self.checkpoint_path = None  # Path to checkpoint file for resuming training
 
 class TrainingConfig:
-    def __init__(self, batch_size, learning_rate, include_sythtraining_data, num_epochs, device_choice='cpu', precision=precision, fast_dev_run=FAST_DEV_RUN, train_from_checkpoint=TRAIN_FROM_CHECKPOINT):
+    def __init__(self, batch_size, learning_rate, include_sythtraining_data, num_epochs, device_choice='cpu', precision=None, fast_dev_run=None, train_from_checkpoint=None):
+        if precision is None:
+            precision = 32  # Default precision
+        if fast_dev_run is None:
+            fast_dev_run = True  # Default fast_dev_run
+        if train_from_checkpoint is None:
+            train_from_checkpoint = False  # Default train_from_checkpoint
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.include_sythtraining_data = include_sythtraining_data
