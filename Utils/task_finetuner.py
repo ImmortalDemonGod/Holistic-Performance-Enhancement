@@ -333,7 +333,10 @@ def main(config):
 
         # Load the base model from checkpoint using config
         model_path = config.model.checkpoint_path
-        base_model = TransformerTrainer.load_from_checkpoint(model_path)
+        base_model = TransformerTrainer.load_from_checkpoint(
+            model_path,
+            include_synthetic_training_data=config.training.include_synthetic_training_data
+        )
         
         # Move the base model to the specified device
         base_model.to(device)  # Ensure model is on the correct device
