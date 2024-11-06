@@ -9,6 +9,7 @@ from Utils.data_preparation import prepare_data
 from train import TransformerTrainer
 from pytorch_lightning import Trainer, Callback
 from pytorch_lightning.callbacks import EarlyStopping
+from math import ceil
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
@@ -88,15 +89,15 @@ def create_trial_config(trial, base_config):
         )
         
         # Suggest d_ff, ensuring it's greater than d_model
-        min_d_ff = d_model + 64  # Constrain d_ff to be at least d_model + 64
-        if min_d_ff > 1024:    # Updated upper bound
+        min_d_ff = ceil((d_model + 64) / 64) * 64
+        if min_d_ff > base_config.optuna.param_ranges["d_ff"][1]:
             logger.warning(f"Cannot set d_ff > d_model={d_model} within the parameter range.")
             raise optuna.TrialPruned()
         
         model_config.d_ff = trial.suggest_int(
             "d_ff", 
             max(min_d_ff, 64),     # Updated lower bound
-            1024,                  # Updated upper bound
+            base_config.optuna.param_ranges["d_ff"][1],
             step=64                # Ensure 'step' is a keyword
         )
         
