@@ -32,6 +32,9 @@ class TransformerTrainer(pl.LightningModule):
         output_dim,
         learning_rate,
         include_synthetic_training_data,
+        dropout=0.1,  # Add dropout with a default value
+        context_encoder_d_model=128,  # Add context_encoder_d_model with a default value
+        context_encoder_heads=8,       # Add context_encoder_heads with a default value
     ):
         super(TransformerTrainer, self).__init__()
 
@@ -51,26 +54,29 @@ class TransformerTrainer(pl.LightningModule):
             raise ValueError(f"d_model ({d_model}) must be divisible by 4")
         if d_ff < d_model:
             raise ValueError(f"d_ff ({d_ff}) must be greater than d_model ({d_model})")
+        # Set the new attributes
+        self.context_encoder_d_model = context_encoder_d_model
+        self.context_encoder_heads = context_encoder_heads
         self.input_dim = input_dim
         self.d_model = d_model
         self.encoder_layers = encoder_layers
         self.decoder_layers = decoder_layers
-        self.heads = self.hparams.heads
-        self.d_ff = self.hparams.d_ff
-        self.output_dim = self.hparams.output_dim
-        self.learning_rate = self.hparams.learning_rate
+        self.heads = heads
+        self.d_ff = d_ff
+        self.output_dim = output_dim
+        self.learning_rate = learning_rate
         self.include_synthetic_training_data = include_synthetic_training_data
-        self.dropout = self.hparams.get('dropout', 0.1)  # Default to 0.1 if not provided
-        from config import context_encoder_d_model, context_encoder_heads
+        self.dropout = dropout  # Use the passed dropout value
 
+        # Pass the new parameters to TransformerModel
         self.model = TransformerModel(
-            input_dim=self.hparams['input_dim'],
-            d_model=self.hparams['d_model'],
-            encoder_layers=self.hparams['encoder_layers'],
-            decoder_layers=self.hparams['decoder_layers'],
-            heads=self.hparams['heads'],
-            d_ff=self.hparams['d_ff'],
-            output_dim=self.hparams['output_dim'],
+            input_dim=self.input_dim,
+            d_model=self.d_model,
+            encoder_layers=self.encoder_layers,
+            decoder_layers=self.decoder_layers,
+            heads=self.heads,
+            d_ff=self.d_ff,
+            output_dim=self.output_dim,
             dropout_rate=self.dropout,
             context_encoder_d_model=self.context_encoder_d_model,
             context_encoder_heads=self.context_encoder_heads,

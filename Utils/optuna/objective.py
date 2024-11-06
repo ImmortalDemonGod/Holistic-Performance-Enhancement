@@ -239,6 +239,22 @@ def create_objective(base_config, train_dataset, val_dataset):
                 learning_rate=trial_config.training.learning_rate,
                 include_synthetic_training_data=trial_config.training.include_synthetic_training_data,
             )
+        else:
+            logger.info("Initializing new model")
+            model = TransformerTrainer(
+                input_dim=cfg.model.input_dim,
+                d_model=cfg.model.d_model,
+                encoder_layers=cfg.model.encoder_layers,
+                decoder_layers=cfg.model.decoder_layers,
+                heads=cfg.model.heads,
+                d_ff=cfg.model.d_ff,
+                output_dim=cfg.model.output_dim,
+                learning_rate=cfg.training.learning_rate,
+                include_synthetic_training_data=cfg.training.include_synthetic_training_data,
+                dropout=cfg.model.dropout,
+                context_encoder_d_model=cfg.model.context_encoder_d_model,
+                context_encoder_heads=cfg.model.context_encoder_heads
+            )
 
             # **Create DataLoaders with the suggested batch_size from trial_config**
             batch_size = trial_config.training.batch_size
