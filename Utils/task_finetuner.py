@@ -303,7 +303,7 @@ class TaskFineTuner:
 
         return self.results
 
-def main(config: Config):
+def main():
     """Main entry point for fine-tuning process."""
     # Initialize configuration
     config = Config()

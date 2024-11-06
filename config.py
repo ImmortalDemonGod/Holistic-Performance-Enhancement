@@ -94,17 +94,33 @@ class FineTuningConfig:
 
 class ModelConfig:
     def __init__(self):
-        self.input_dim = 30  # Number of features per input row
-        self.d_model = 128  # Transformer model dimension
-        self.encoder_layers = 2  # Number of encoder layers
-        self.decoder_layers = 2   # Number of decoder layers
-        self.heads = 8  # Number of attention heads
-        self.d_ff = 256  # Feedforward network dimension
-        self.output_dim = 30  # Number of features per output row
-        self.dropout = 0.35  # Dropout rate for the model
-        self.context_encoder_d_model = 128  # Transformer model dimension for Context Encoder
-        self.context_encoder_heads = 8  # Number of attention heads for Context Encoder
-        self.checkpoint_path = 'pretrained_checkpoint.ckpt'  # Path to checkpoint file for resuming training
+        self.input_dim = input_dim
+        self.d_model = d_model
+        self.encoder_layers = encoder_layers
+        self.decoder_layers = decoder_layers
+        self.heads = heads
+        self.d_ff = d_ff
+        self.output_dim = output_dim
+        self.dropout = dropout_rate
+        self.context_encoder_d_model = context_encoder_d_model
+        self.context_encoder_heads = context_encoder_heads
+        self.checkpoint_path = None  # Path to checkpoint file for resuming training
+
+class TrainingConfig:
+    def __init__(self, batch_size, learning_rate, include_sythtraining_data, num_epochs, device_choice='cpu', precision=precision, fast_dev_run=FAST_DEV_RUN, train_from_checkpoint=TRAIN_FROM_CHECKPOINT):
+        self.batch_size = batch_size
+        self.learning_rate = learning_rate
+        self.include_sythtraining_data = include_sythtraining_data
+        self.max_epochs = num_epochs
+        self.device_choice = device_choice
+        self.precision = precision  # Moved here
+        self.train_from_checkpoint = train_from_checkpoint
+        assert self.device_choice in ['cpu', 'gpu'], "device_choice must be 'cpu' or 'gpu'"
+        assert self.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
+        self.gradient_clip_val = 1.0
+        self.FAST_DEV_RUN = fast_dev_run
+
+class Config:
     def __init__(self, model=None, training=None, device_choice=None):
         self.model = model if model is not None else ModelConfig()
         
@@ -115,15 +131,15 @@ class ModelConfig:
         if training is not None:
             self.training = training
         else:
-            self.training = self.TrainingConfig(
+            self.training = TrainingConfig(
                 batch_size=batch_size,
                 learning_rate=learning_rate,
                 include_sythtraining_data=include_sythtraining_data,
                 num_epochs=num_epochs,
-                device_choice=device_choice,  # Pass the corrected device_choice
+                device_choice=device_choice,
                 precision=precision,
                 fast_dev_run=FAST_DEV_RUN,
-                train_from_checkpoint=TRAIN_FROM_CHECKPOINT  # Ensure this parameter is included
+                train_from_checkpoint=TRAIN_FROM_CHECKPOINT
             )
         
         self.logging = LoggingConfig()
@@ -150,32 +166,3 @@ class ModelConfig:
         self.context_encoder_d_model = self.model.context_encoder_d_model
         self.context_encoder_heads = self.model.context_encoder_heads
         self.checkpoint_path = self.model.checkpoint_path  # Path to checkpoint file for resuming training
-class ModelConfig:
-    def __init__(self):
-        self.input_dim = input_dim
-        self.d_model = d_model
-        self.encoder_layers = encoder_layers
-        self.decoder_layers = decoder_layers
-        self.heads = heads
-        self.d_ff = d_ff
-        self.output_dim = output_dim
-        self.dropout = dropout_rate
-        self.context_encoder_d_model = context_encoder_d_model
-        self.context_encoder_heads = context_encoder_heads
-        
-        # New: Add checkpoint path
-        self.checkpoint_path = None  # Path to checkpoint file for resuming training
-    
-    class TrainingConfig:
-        def __init__(self, batch_size, learning_rate, include_sythtraining_data, num_epochs, device_choice='cpu', precision=precision, fast_dev_run=FAST_DEV_RUN, train_from_checkpoint=TRAIN_FROM_CHECKPOINT):
-            self.batch_size = batch_size
-            self.learning_rate = learning_rate
-            self.include_sythtraining_data = include_sythtraining_data
-            self.max_epochs = num_epochs
-            self.device_choice = device_choice
-            self.precision = precision  # Moved here
-            self.train_from_checkpoint = train_from_checkpoint
-            assert self.device_choice in ['cpu', 'gpu'], "device_choice must be 'cpu' or 'gpu'"
-            assert self.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
-            self.gradient_clip_val = 1.0
-            self.FAST_DEV_RUN = fast_dev_run
