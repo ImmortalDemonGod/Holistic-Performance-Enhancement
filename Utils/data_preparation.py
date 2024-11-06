@@ -1,6 +1,7 @@
 # Utils/data_preparation.py
 import os
 import json
+from tqdm import tqdm
 import logging
 
 logger = logging.getLogger(__name__)
@@ -183,7 +184,23 @@ def prepare_data(batch_size=None, return_datasets=False):
     if include_sythtraining_data:
         load_context_pairs(synthetic_dir, context_map)
 
-    # Load main dataset from 'training'
+    # Load main dataset from 'training' with progress bar
+    logger.info("Loading training data with progress bar...")
+    synthetic_data_source = os.listdir('training')
+    for filename in tqdm(synthetic_data_source, desc="Loading training data"):
+        if filename.endswith('.json'):
+            load_main_data(
+                directory='training',
+                context_map=context_map,
+                train_inputs=train_inputs,
+                train_outputs=train_outputs,
+                train_task_ids=train_task_ids,
+                train_context_pairs=train_context_pairs,
+                test_inputs=test_inputs,
+                test_outputs=test_outputs,
+                test_task_ids=test_task_ids,
+                test_context_pairs=test_context_pairs
+            )
     load_main_data(
         directory='training',
         context_map=context_map,
