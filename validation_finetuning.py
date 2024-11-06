@@ -33,7 +33,7 @@ def log_exception(e, context=""):
     print("\n")
 
 class ValidationFineTuner:
-    def __init__(self, base_model, checkpoint_path, device='cpu', patience=5, max_epochs=100):
+    def __init__(self, base_model, checkpoint_path, config, device='cpu', patience=5, max_epochs=100):
         # Setup logging
         logging.basicConfig(
             level=logging.INFO,
@@ -48,6 +48,7 @@ class ValidationFineTuner:
         # Store parameters
         self.base_model = base_model
         self.checkpoint_path = Path(checkpoint_path)
+        self.config = config
         self.device = device
         self.patience = patience
         self.max_epochs = max_epochs
@@ -128,7 +129,7 @@ class ValidationFineTuner:
         try:
             # **Create a task-specific model using the factory function**
             task_model = create_transformer_trainer(
-                config=task_config,
+                config=self.config,
                 checkpoint_path=None  # Instantiate without loading from checkpoint
             )
             task_model.load_state_dict(self.base_model.state_dict())
