@@ -162,7 +162,7 @@ class BestParamsManager:
             output_dim=config.model.output_dim,
             learning_rate=config.training.learning_rate,
             include_synthetic_training_data=config.training.include_synthetic_training_data,
-            dropout_rate=config.model.dropout,
+            dropout=config.model.dropout,
             context_encoder_d_model=config.model.context_encoder_d_model,
             context_encoder_heads=config.model.context_encoder_heads
         )
