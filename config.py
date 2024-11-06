@@ -141,7 +141,7 @@ class Config:
             self.training = TrainingConfig(
                 batch_size=batch_size,
                 learning_rate=learning_rate,
-                include_sythtraining_data=include_sythtraining_data,
+                include_synthetic_training_data=include_synthetic_training_data,
                 num_epochs=num_epochs,
                 device_choice=device_choice,
                 precision=precision,

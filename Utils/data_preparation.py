@@ -198,7 +198,7 @@ def prepare_data(batch_size=None, return_datasets=False):
             )
 
     # Conditionally load main dataset from synthetic_dir with progress bar
-    if include_sythtraining_data:
+    if include_synthetic_training_data:
         synthetic_data_files = os.listdir(synthetic_dir)
         logger.info("Loading synthetic data with progress bar...")
         for filename in tqdm(synthetic_data_files, desc="Loading synthetic data"):
