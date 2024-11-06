@@ -368,4 +368,5 @@ def main(config):
         raise
 
 if __name__ == "__main__":
+    config = Config()  # Initialize Config instance
     main(config)  # Pass Config instance to main
