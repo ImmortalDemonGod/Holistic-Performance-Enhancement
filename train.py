@@ -36,13 +36,15 @@ class TransformerTrainer(pl.LightningModule):
         context_encoder_d_model: Optional[int] = None,
         context_encoder_heads: Optional[int] = None,
         include_synthetic_training_data: Optional[bool] = None,
-        **kwargs  # Catch any extra parameters
+        config=None,  # Add config parameter
+        **kwargs
     ):
         super(TransformerTrainer, self).__init__()
 
         self.save_hyperparameters()
 
-        # Assign parameters from self.hparams
+        # Assign config if provided
+        self.config = config
         self.input_dim = self.hparams.input_dim
         self.d_model = self.hparams.d_model
         self.encoder_layers = self.hparams.encoder_layers
