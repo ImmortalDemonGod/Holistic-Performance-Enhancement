@@ -136,8 +136,9 @@ class TaskFineTuner:
 
         task_model = TransformerTrainer(
             **hparams,  # Unpack hyperparameters without learning_rate and device_choice
-            learning_rate=self.learning_rate,  # Add the desired learning_rate
-            dropout=self.base_model.dropout,
+            learning_rate=self.learning_rate,
+            include_synthetic_training_data=self.base_model.include_synthetic_training_data,
+            dropout_rate=self.base_model.dropout,
             context_encoder_d_model=self.base_model.context_encoder_d_model,
             context_encoder_heads=self.base_model.context_encoder_heads
         )
