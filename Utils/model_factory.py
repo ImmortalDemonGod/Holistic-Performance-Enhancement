@@ -18,11 +18,17 @@ def create_transformer_trainer(
         TransformerTrainer: An instance of TransformerTrainer.
     """
     if checkpoint_path:
+        # Copy the training hyperparameters
+        hparams = config.training.__dict__.copy()
+        
+        # Remove 'checkpoint_path' to prevent it from being passed via **hparams
+        hparams.pop('checkpoint_path', None)
+        
         # Load from checkpoint without modifying parameters
         return TransformerTrainer.load_from_checkpoint(
-            checkpoint_path,
+            checkpoint_path,  # Pass checkpoint_path positionally
             **config.model.__dict__,
-            **config.training.__dict__
+            **hparams        # Unpack the remaining hyperparameters
         )
     else:
         # Instantiate a new model with parameters from config
