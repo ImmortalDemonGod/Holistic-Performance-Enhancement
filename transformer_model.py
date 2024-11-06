@@ -10,7 +10,7 @@ from Utils.context_encoder import ContextEncoderModule
 from config import context_encoder_d_model, context_encoder_heads
 
 class TransformerModel(nn.Module):
-    def __init__(self, input_dim, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim):
+    def __init__(self, input_dim, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads):
         super(TransformerModel, self).__init__()
         self.input_fc = nn.Linear(input_dim, d_model)
         self.positional_encoding = Grid2DPositionalEncoding(d_model, max_height=30, max_width=30)

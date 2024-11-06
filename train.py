@@ -8,7 +8,6 @@ import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 from transformer_model import TransformerModel
-include_synthetic_training_data = False  # Set to True to include synthetic training data
 import torch.nn.functional as F
 import os
 import json
@@ -32,6 +31,7 @@ class TransformerTrainer(pl.LightningModule):
         d_ff,
         output_dim,
         learning_rate,
+        include_synthetic_training_data,
     ):
         super(TransformerTrainer, self).__init__()
 
@@ -59,6 +59,7 @@ class TransformerTrainer(pl.LightningModule):
         self.d_ff = self.hparams.d_ff
         self.output_dim = self.hparams.output_dim
         self.learning_rate = self.hparams.learning_rate
+        self.include_synthetic_training_data = include_synthetic_training_data
         self.dropout = self.hparams.get('dropout', 0.1)  # Default to 0.1 if not provided
         from config import context_encoder_d_model, context_encoder_heads
 

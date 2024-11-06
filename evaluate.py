@@ -12,7 +12,7 @@ import config
 
 import json
 import argparse
-from config import device_choice
+from config import Config
 
 # Add argument parser for command-line arguments
 parser = argparse.ArgumentParser(description='Evaluate the Transformer model with a specified checkpoint.')
@@ -52,7 +52,8 @@ model.eval()  # Set model to evaluation mode
 logger.info("Set model to evaluation mode.")
 
 # Set up the Trainer for evaluation
-accelerator = 'cuda' if device_choice == 'gpu' else device_choice
+cfg = Config()
+accelerator = 'cuda' if cfg.training.device_choice == 'gpu' else cfg.training.device_choice
 logger.info("Trainer initialized for evaluation.")
 trainer = Trainer(
     devices=1,              # Use a single device

@@ -39,10 +39,6 @@ def run_optimization(config, delete_study=False):
             logger.info(f"Deleting existing study '{config.optuna.study_name}'")
             optuna.delete_study(study_name=config.optuna.study_name, storage=config.optuna.storage_url)
             logger.info(f"Deleted study '{config.optuna.study_name}'")
-        if delete_study:
-            logger.info(f"Deleting existing study '{config.optuna.study_name}'")
-            optuna.delete_study(study_name=config.optuna.study_name, storage=config.optuna.storage_url)
-            logger.info(f"Deleted study '{config.optuna.study_name}'")
 
         # **Add: Load datasets once before defining the objective**
         logger.info("Loading datasets once for all trials.")

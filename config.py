@@ -123,8 +123,11 @@ class LoggingConfig:
 class FineTuningConfig:
     def __init__(self):
         self.mode = "all"  # "all" or "random"
-        self.num_random_tasks = 1  # Only used if mode is "random"
-        logging.debug("Initializing FineTuningConfig")  # Debugging statement
+        self.num_random_tasks = 1
+        self.save_dir = "finetuning_results"
+        self.max_epochs = 100
+        self.learning_rate = 1e-5
+        self.patience = 5
 
 
 class Config:
@@ -151,6 +154,7 @@ class Config:
         
         self.logging = LoggingConfig()
         self.finetuning = FineTuningConfig()
+        self.validate_config()
         self.optuna = OptunaConfig()
         
         # Control for using best parameters
@@ -173,3 +177,9 @@ class Config:
         self.context_encoder_d_model = self.model.context_encoder_d_model
         self.context_encoder_heads = self.model.context_encoder_heads
         self.checkpoint_path = self.model.checkpoint_path  # Path to checkpoint file for resuming training
+    def validate_config(self):
+        """Validate configuration values"""
+        assert self.training.batch_size > 0, "Batch size must be positive"
+        assert self.training.learning_rate > 0, "Learning rate must be positive"
+        assert self.training.device_choice in ['cpu', 'gpu'], "device_choice must be 'cpu' or 'gpu'"
+        assert self.training.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
