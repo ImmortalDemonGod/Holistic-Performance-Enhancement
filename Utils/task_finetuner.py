@@ -303,10 +303,8 @@ class TaskFineTuner:
 
         return self.results
 
-def main():
+def main(config):
     """Main entry point for fine-tuning process."""
-    # Initialize configuration
-    config = Config()
 
     # Configure logging based on LoggingConfig
     logging.basicConfig(level=getattr(logging, config.logging.level.upper(), logging.INFO))
@@ -347,7 +345,7 @@ def main():
             task_id_map = json.load(f)
 
         # Initialize fine-tuner
-        finetuner = TaskFineTuner(base_model, device=device)
+        finetuner = TaskFineTuner(base_model, config=config, device=device)
 
         # Determine fine-tuning mode from Config
         mode = config.finetuning.mode
@@ -370,4 +368,4 @@ def main():
         raise
 
 if __name__ == "__main__":
-    main()  # Call main without arguments
+    main(config)  # Pass Config instance to main
