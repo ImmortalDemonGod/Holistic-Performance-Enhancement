@@ -125,21 +125,21 @@ class Config:
         logging.debug(f"  - Logging level: {self.logging.level}")
         logging.debug(f"  - Fine-tuning mode: {self.finetuning.mode}")
         logging.debug(f"  - Device: {device_choice}")
-    class ModelConfig:
-        def __init__(self):
-            self.input_dim = input_dim
-            self.d_model = d_model
-            self.encoder_layers = encoder_layers
-            self.decoder_layers = decoder_layers
-            self.heads = heads
-            self.d_ff = d_ff
-            self.output_dim = output_dim
-            self.dropout = dropout_rate
-            self.context_encoder_d_model = context_encoder_d_model
-            self.context_encoder_heads = context_encoder_heads
-            
-            # New: Add checkpoint path
-            self.checkpoint_path = None  # Path to checkpoint file for resuming training
+class ModelConfig:
+    def __init__(self):
+        self.input_dim = input_dim
+        self.d_model = d_model
+        self.encoder_layers = encoder_layers
+        self.decoder_layers = decoder_layers
+        self.heads = heads
+        self.d_ff = d_ff
+        self.output_dim = output_dim
+        self.dropout = dropout_rate
+        self.context_encoder_d_model = context_encoder_d_model
+        self.context_encoder_heads = context_encoder_heads
+        
+        # New: Add checkpoint path
+        self.checkpoint_path = None  # Path to checkpoint file for resuming training
     
     class TrainingConfig:
         def __init__(self, batch_size, learning_rate, include_sythtraining_data, num_epochs, device_choice='cpu', precision=precision, fast_dev_run=FAST_DEV_RUN, train_from_checkpoint=TRAIN_FROM_CHECKPOINT):
