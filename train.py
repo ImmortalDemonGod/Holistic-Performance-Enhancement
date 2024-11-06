@@ -33,7 +33,7 @@ class TransformerTrainer(pl.LightningModule):
         d_ff,
         output_dim,
         learning_rate,
-        include_sythtraining_data,
+        include_synthetic_training_data,
     ):
         super(TransformerTrainer, self).__init__()
 
