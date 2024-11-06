@@ -29,7 +29,7 @@ dropout_rate = 0.35  # Dropout rate for the model
 include_sythtraining_data = False  # Set to True to include sythtraining data
 synthetic_dir = 'sythtraining'
 CHECKPOINT_PATH = 'pretrained_checkpoint.ckpt'  # Update this path accordingly
-FAST_DEV_RUN = False  # Set to True to enable fast development run
+FAST_DEV_RUN = True  # Set to True to enable fast development run
 
 # Context Encoder Configuration
 context_encoder_d_model = 128  # Transformer model dimension for Context Encoder
