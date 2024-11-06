@@ -73,10 +73,7 @@ class TransformerTrainer(pl.LightningModule):
             output_dim=self.hparams['output_dim'],
             dropout_rate=self.dropout,
             context_encoder_d_model=self.context_encoder_d_model,
-            context_encoder_heads=self.context_encoder_heads
-            dropout_rate=self.hparams['dropout'],
-            context_encoder_d_model=self.hparams['context_encoder_d_model'],
-            context_encoder_heads=self.hparams['context_encoder_heads'],
+            context_encoder_heads=self.context_encoder_heads,
         ).to(self.device)
         # Ensure the model is on the correct device
         self.learning_rate = self.hparams['learning_rate']
