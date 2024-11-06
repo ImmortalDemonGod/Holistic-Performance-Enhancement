@@ -315,7 +315,7 @@ def main(config):
         logging.debug("Debug mode is enabled in LoggingConfig.")
 
     try:
-        model_path = "/workspaces/JARC-Reactor/lightning_logs/version_0/checkpoints/epoch=epoch=15-val_loss=val_loss=0.4786.ckpt"  # Update this path
+        model_path = config.model.checkpoint_path
         checkpoint_file = Path(model_path)
         if not checkpoint_file.is_file():
             logger.error(f"Pretrained model checkpoint not found at {model_path}.")
