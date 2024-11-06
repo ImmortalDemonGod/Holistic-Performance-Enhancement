@@ -21,6 +21,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Run the transformer model')
     parser.add_argument('--override-epochs', type=int, help='Override number of epochs in config')
     parser.add_argument('--override-best-params', action='store_true', help='Override use_best_params in config')
+    parser.add_argument('--checkpoint-path', type=str, help='Path to the checkpoint file to resume training')
     return parser.parse_args()
 
 def setup_model_training(cfg, args=None):
@@ -34,7 +35,9 @@ def setup_model_training(cfg, args=None):
         logger.info("Overriding use_best_params from command line")
         cfg.use_best_params = True
 
-    # Apply best parameters if configured
+    if args and args.checkpoint_path:
+        logger.info(f"Overriding checkpoint_path from command line: {args.checkpoint_path}")
+        cfg.model.checkpoint_path = args.checkpoint_path
     if cfg.use_best_params:
         logger.info("Loading best parameters from Optuna study...")
         params_manager = BestParamsManager(
@@ -54,10 +57,22 @@ def setup_model_training(cfg, args=None):
     try:
         # Initialize model
         if cfg.training.train_from_checkpoint and cfg.model.checkpoint_path:
+            logger.debug(f"Attempting to load model from checkpoint: {cfg.model.checkpoint_path}")
             checkpoint_path = cfg.model.checkpoint_path
             if os.path.isfile(checkpoint_path):
                 logger.info(f"Resuming from checkpoint: {checkpoint_path}")
-                model = TransformerTrainer.load_from_checkpoint(checkpoint_path)
+                model = TransformerTrainer.load_from_checkpoint(
+                    checkpoint_path,
+                    input_dim=cfg.model.input_dim,
+                    d_model=cfg.model.d_model,
+                    encoder_layers=cfg.model.encoder_layers,
+                    decoder_layers=cfg.model.decoder_layers,
+                    heads=cfg.model.heads,
+                    d_ff=cfg.model.d_ff,
+                    output_dim=cfg.model.output_dim,
+                    learning_rate=cfg.training.learning_rate,
+                    include_sythtraining_data=cfg.training.include_sythtraining_data
+                )
             else:
                 raise FileNotFoundError(f"Checkpoint file not found at {checkpoint_path}")
         else:
