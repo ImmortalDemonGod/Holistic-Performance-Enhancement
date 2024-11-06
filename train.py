@@ -8,7 +8,7 @@ import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 from transformer_model import TransformerModel
-from config import *
+from config import Config
 import torch.nn.functional as F
 import os
 import json
