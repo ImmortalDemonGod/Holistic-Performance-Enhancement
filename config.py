@@ -94,7 +94,7 @@ class FineTuningConfig:
 
 class Config:
     def __init__(self, model=None, training=None, device_choice=None):
-        self.model = model if model is not None else self.ModelConfig()
+        self.model = model if model is not None else ModelConfig()
         
         # Update device_choice to use 'gpu' or 'cpu'
         if device_choice is None:
@@ -125,6 +125,7 @@ class Config:
         logging.debug(f"  - Logging level: {self.logging.level}")
         logging.debug(f"  - Fine-tuning mode: {self.finetuning.mode}")
         logging.debug(f"  - Device: {device_choice}")
+    class ModelConfig:
         def __init__(self):
             self.input_dim = input_dim
             self.d_model = d_model
