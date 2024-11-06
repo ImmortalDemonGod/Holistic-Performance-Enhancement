@@ -59,7 +59,8 @@ def setup_model_training(cfg, args=None):
         if cfg.training.train_from_checkpoint and cfg.model.checkpoint_path:
             logger.debug(f"Attempting to load model from checkpoint: {cfg.model.checkpoint_path}")
             checkpoint_path = cfg.model.checkpoint_path
-            if os.path.isfile(checkpoint_path):
+            checkpoint_file = Path(checkpoint_path)
+            if checkpoint_file.is_file():
                 logger.info(f"Resuming from checkpoint: {checkpoint_path}")
                 model = TransformerTrainer.load_from_checkpoint(
                     checkpoint_path,
