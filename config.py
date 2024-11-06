@@ -92,7 +92,19 @@ class FineTuningConfig:
         self.num_random_tasks = 1  # Only used if mode is "random"
         logging.debug("Initializing FineTuningConfig")  # Debugging statement
 
-class Config:
+class ModelConfig:
+    def __init__(self):
+        self.input_dim = 30  # Number of features per input row
+        self.d_model = 128  # Transformer model dimension
+        self.encoder_layers = 2  # Number of encoder layers
+        self.decoder_layers = 2   # Number of decoder layers
+        self.heads = 8  # Number of attention heads
+        self.d_ff = 256  # Feedforward network dimension
+        self.output_dim = 30  # Number of features per output row
+        self.dropout = 0.35  # Dropout rate for the model
+        self.context_encoder_d_model = 128  # Transformer model dimension for Context Encoder
+        self.context_encoder_heads = 8  # Number of attention heads for Context Encoder
+        self.checkpoint_path = 'pretrained_checkpoint.ckpt'  # Path to checkpoint file for resuming training
     def __init__(self, model=None, training=None, device_choice=None):
         self.model = model if model is not None else ModelConfig()
         
@@ -125,6 +137,19 @@ class Config:
         logging.debug(f"  - Logging level: {self.logging.level}")
         logging.debug(f"  - Fine-tuning mode: {self.finetuning.mode}")
         logging.debug(f"  - Device: {device_choice}")
+        
+        # Initialize model-specific attributes from ModelConfig
+        self.input_dim = self.model.input_dim
+        self.d_model = self.model.d_model
+        self.encoder_layers = self.model.encoder_layers
+        self.decoder_layers = self.model.decoder_layers
+        self.heads = self.model.heads
+        self.d_ff = self.model.d_ff
+        self.output_dim = self.model.output_dim
+        self.dropout = self.model.dropout
+        self.context_encoder_d_model = self.model.context_encoder_d_model
+        self.context_encoder_heads = self.model.context_encoder_heads
+        self.checkpoint_path = self.model.checkpoint_path  # Path to checkpoint file for resuming training
 class ModelConfig:
     def __init__(self):
         self.input_dim = input_dim
