@@ -48,7 +48,7 @@ def inspect_data_structure(filename, directory='training'):
 def load_context_pairs(directory, context_map):
     """Load context pairs from the specified directory into context_map"""
     logger.info(f"Loading context pairs from '{directory}'...")
-    for filename in os.listdir(directory):
+    for filename in tqdm(os.listdir(directory), desc=f"Loading context pairs from '{directory}'"):
         if not filename.endswith('.json'):
             continue
         task_id = os.path.splitext(filename)[0]
