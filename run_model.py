@@ -3,7 +3,7 @@ import argparse
 import logging
 import os
 import torch
-from train import TransformerTrainer
+from Utils.model_factory import create_transformer_trainer
 from Utils.data_preparation import prepare_data
 from pathlib import Path
 from Utils.model_factory import create_transformer_trainer
@@ -44,20 +44,9 @@ def setup_model_training(cfg):
             checkpoint_file = Path(checkpoint_path)
             if checkpoint_file.is_file():
                 logger.info(f"Resuming from checkpoint: {checkpoint_path}")
-                model = TransformerTrainer.load_from_checkpoint(
-                    checkpoint_path,
-                    input_dim=cfg.model.input_dim,
-                    d_model=cfg.model.d_model,
-                    encoder_layers=cfg.model.encoder_layers,
-                    decoder_layers=cfg.model.decoder_layers,
-                    heads=cfg.model.heads,
-                    d_ff=cfg.model.d_ff,
-                    output_dim=cfg.model.output_dim,
-                    learning_rate=cfg.training.learning_rate,
-                    include_synthetic_training_data=cfg.training.include_synthetic_training_data,
-                    dropout=cfg.model.dropout,
-                    context_encoder_d_model=cfg.model.context_encoder_d_model,
-                    context_encoder_heads=cfg.model.context_encoder_heads
+                model = create_transformer_trainer(
+                    config=cfg,
+                    checkpoint_path=checkpoint_path
                 )
             else:
                 logger.info("Initializing new model")

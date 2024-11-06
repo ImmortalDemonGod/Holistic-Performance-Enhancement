@@ -3,7 +3,8 @@ import config  # Imported config module
 import config
 import os
 import torch
-from train import TransformerTrainer, prepare_data
+from Utils.model_factory import create_transformer_trainer
+from Utils.data_preparation import prepare_data
 from pytorch_lightning import Trainer
 
 from Utils.metrics import compute_standard_accuracy, compute_differential_accuracy, TaskMetricsCollector
@@ -45,7 +46,7 @@ if checkpoint_path and not os.path.isfile(checkpoint_path):
         f"Checkpoint file not found at {checkpoint_path}. Please provide a valid path."
     )
 
-model = TransformerTrainer.load_from_checkpoint(checkpoint_path, strict=True)
+model = create_transformer_trainer(config=cfg, checkpoint_path=checkpoint_path)
 logger.info("Loaded model from checkpoint.")
 
 model.eval()  # Set model to evaluation mode

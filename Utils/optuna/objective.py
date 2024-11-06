@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import optuna
 from config import Config
 from Utils.data_preparation import prepare_data
-from train import TransformerTrainer
+from Utils.model_factory import create_transformer_trainer
 from pytorch_lightning import Trainer, Callback
 from pytorch_lightning.callbacks import EarlyStopping
 from math import ceil
