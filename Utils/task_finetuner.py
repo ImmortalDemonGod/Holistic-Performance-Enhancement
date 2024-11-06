@@ -20,6 +20,8 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader, TensorDataset
 
 from Utils.model_factory import create_transformer_trainer
+from copy import deepcopy
+from train import TransformerTrainer
 from pytorch_lightning.callbacks import EarlyStopping                                                  
 from Utils.data_preparation import prepare_data                                                        
 from Utils.metrics import TaskMetricsCollector                                                         
@@ -148,11 +150,6 @@ class TaskFineTuner:
         })
 
         # Use the factory function to create a task-specific model
-        task_model = create_transformer_trainer(
-            config=self.config,  # Assuming you have access to the config object
-            checkpoint_path=None  # Instantiate without loading from checkpoint
-        )
-        task_model.load_state_dict(self.base_model.state_dict())
         task_model = create_transformer_trainer(
             config=self.config,  # Assuming you have access to the config object
             checkpoint_path=None  # Instantiate without loading from checkpoint
@@ -347,11 +344,10 @@ def main(config):
 
         # Load the base model from checkpoint using config
         model_path = config.model.checkpoint_path
-        base_model = TransformerTrainer.load_from_checkpoint(
-            model_path,
-            include_synthetic_training_data=config.training.include_synthetic_training_data
+        base_model = create_transformer_trainer(
+            config=config,
+            checkpoint_path=model_path
         )
-        
         # Move the base model to the specified device
         base_model.to(device)  # Ensure model is on the correct device
 

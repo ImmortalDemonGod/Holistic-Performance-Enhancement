@@ -6,6 +6,7 @@ import logging
 from torch.utils.data import DataLoader, TensorDataset
 from copy import deepcopy
 import json
+from Utils.model_factory import create_transformer_trainer
 from pathlib import Path
 import sys
 import traceback
@@ -126,11 +127,6 @@ class ValidationFineTuner:
         
         try:
             # **Create a task-specific model using the factory function**
-            task_model = create_transformer_trainer(
-                config=self.config,
-                checkpoint_path=None  # Instantiate without loading from checkpoint
-            )
-            task_model.load_state_dict(self.base_model.state_dict())
             task_model = create_transformer_trainer(
                 config=task_config,
                 checkpoint_path=None  # Instantiate without loading from checkpoint
