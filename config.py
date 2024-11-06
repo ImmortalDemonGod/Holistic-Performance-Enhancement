@@ -1,5 +1,33 @@
 # Configuration and parameters for the transformer model
 # Precision setting for PyTorch Lightning Trainer
+
+class ModelConfig:
+    def __init__(self):
+        self.input_dim = input_dim
+        self.d_model = d_model
+        self.encoder_layers = encoder_layers
+        self.decoder_layers = decoder_layers
+        self.heads = heads
+        self.d_ff = d_ff
+        self.output_dim = output_dim
+        self.dropout = dropout_rate
+        self.context_encoder_d_model = context_encoder_d_model
+        self.context_encoder_heads = context_encoder_heads
+        self.checkpoint_path = None  # Path to checkpoint file for resuming training
+
+class TrainingConfig:
+    def __init__(self, batch_size, learning_rate, include_sythtraining_data, num_epochs, device_choice='cpu', precision=precision, fast_dev_run=FAST_DEV_RUN, train_from_checkpoint=TRAIN_FROM_CHECKPOINT):
+        self.batch_size = batch_size
+        self.learning_rate = learning_rate
+        self.include_sythtraining_data = include_sythtraining_data
+        self.max_epochs = num_epochs
+        self.device_choice = device_choice
+        self.precision = precision  # Moved here
+        self.train_from_checkpoint = train_from_checkpoint
+        assert self.device_choice in ['cpu', 'gpu'], "device_choice must be 'cpu' or 'gpu'"
+        assert self.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
+        self.gradient_clip_val = 1.0
+        self.FAST_DEV_RUN = fast_dev_run
 # Options:
 # - 16: Mixed precision (FP16) for reduced memory usage and faster training on supported GPUs
 # - 32: Full precision (FP32), the default for most training scenarios
