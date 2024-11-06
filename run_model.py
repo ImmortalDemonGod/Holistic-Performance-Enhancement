@@ -78,8 +78,6 @@ def setup_model_training(cfg):
                     context_encoder_d_model=cfg.model.context_encoder_d_model,
                     context_encoder_heads=cfg.model.context_encoder_heads
                 )
-            else:
-                raise FileNotFoundError(f"Checkpoint file not found at {checkpoint_path}")
         else:
             logger.info("Initializing new model")
             model = TransformerTrainer(
