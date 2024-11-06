@@ -27,7 +27,7 @@ from Utils.metrics import TaskMetricsCollector
 class TaskFineTuner:
     def __init__(self, base_model: TransformerTrainer, config: Config):
         """Initialize fine-tuner with base model and configuration."""
-        self.save_dir = Path(save_dir)
+        self.save_dir = Path(config.finetuning.save_dir)
         self.save_dir.mkdir(parents=True, exist_ok=True)
 
         # Setup logging
@@ -39,15 +39,11 @@ class TaskFineTuner:
 
         # Store configuration
         self.base_model = base_model
-        self.device = device
-        self.max_epochs = max_epochs
-        self.learning_rate = learning_rate
-        self.patience = patience
+        self.device = config.training.device_choice
+        self.max_epochs = config.finetuning.max_epochs
+        self.learning_rate = config.finetuning.learning_rate
+        self.patience = config.finetuning.patience
         self.base_model = base_model
-        self.device = device
-        self.max_epochs = max_epochs
-        self.learning_rate = learning_rate
-        self.patience = patience
 
         # Initialize metrics collector
         self.metrics_collector = TaskMetricsCollector()
