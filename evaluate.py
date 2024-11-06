@@ -3,7 +3,8 @@ import config  # Imported config module
 import config
 import os
 import torch
-from train import TransformerTrainer, prepare_data
+from Utils.model_factory import create_transformer_trainer
+from Utils.data_preparation import prepare_data
 from pytorch_lightning import Trainer
 
 from Utils.metrics import compute_standard_accuracy, compute_differential_accuracy, TaskMetricsCollector
@@ -12,7 +13,7 @@ import config
 
 import json
 import argparse
-from config import device_choice
+from config import Config
 
 # Add argument parser for command-line arguments
 parser = argparse.ArgumentParser(description='Evaluate the Transformer model with a specified checkpoint.')
@@ -45,14 +46,15 @@ if checkpoint_path and not os.path.isfile(checkpoint_path):
         f"Checkpoint file not found at {checkpoint_path}. Please provide a valid path."
     )
 
-model = TransformerTrainer.load_from_checkpoint(checkpoint_path, strict=True)
+model = create_transformer_trainer(config=cfg, checkpoint_path=checkpoint_path)
 logger.info("Loaded model from checkpoint.")
 
 model.eval()  # Set model to evaluation mode
 logger.info("Set model to evaluation mode.")
 
 # Set up the Trainer for evaluation
-accelerator = 'cuda' if device_choice == 'gpu' else device_choice
+cfg = Config()
+accelerator = 'cuda' if cfg.training.device_choice == 'gpu' else cfg.training.device_choice
 logger.info("Trainer initialized for evaluation.")
 trainer = Trainer(
     devices=1,              # Use a single device
@@ -68,7 +70,7 @@ metrics_collector = TaskMetricsCollector()
 # Perform evaluation
 logger.info("Starting evaluation...")
 for batch_idx, batch in enumerate(test_loader):
-    src, tgt, ctx_input, ctx_output, task_ids = batch  # Unpack all 5 elements
+    src, tgt, ctx_input, ctx_output, task_ids = batch
     with torch.no_grad():
         outputs = model(src, tgt, ctx_input, ctx_output)  # Pass context data
         predictions = outputs.argmax(dim=-1)  # Assuming output is logits

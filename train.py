@@ -1,6 +1,6 @@
 # train.py
-from config import include_sythtraining_data
 import logging
+from typing import Optional
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -9,7 +9,6 @@ import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 from transformer_model import TransformerModel
-from config import *
 import torch.nn.functional as F
 import os
 import json
@@ -33,25 +32,46 @@ class TransformerTrainer(pl.LightningModule):
         d_ff,
         output_dim,
         learning_rate,
-        include_sythtraining_data,
+        dropout: Optional[float] = None,
+        context_encoder_d_model: Optional[int] = None,
+        context_encoder_heads: Optional[int] = None,
+        include_synthetic_training_data: Optional[bool] = None,
+        config=None,  # Add config parameter
+        **kwargs
     ):
         super(TransformerTrainer, self).__init__()
-        self.save_hyperparameters()
-        from config import context_encoder_d_model, context_encoder_heads
 
+        self.save_hyperparameters()
+
+        # Assign config if provided
+        self.config = config
+        self.input_dim = self.hparams.input_dim
+        self.d_model = self.hparams.d_model
+        self.encoder_layers = self.hparams.encoder_layers
+        self.decoder_layers = self.hparams.decoder_layers
+        self.heads = self.hparams.heads
+        self.d_ff = self.hparams.d_ff
+        self.output_dim = self.hparams.output_dim
+        self.learning_rate = self.hparams.learning_rate
+        self.include_synthetic_training_data = self.hparams.include_synthetic_training_data
+        self.dropout = self.hparams.dropout
+        self.context_encoder_d_model = self.hparams.context_encoder_d_model
+        self.context_encoder_heads = self.hparams.context_encoder_heads
+
+        # Initialize the TransformerModel directly
         self.model = TransformerModel(
-            input_dim=self.hparams['input_dim'],
-            d_model=self.hparams['d_model'],
-            encoder_layers=self.hparams['encoder_layers'],
-            decoder_layers=self.hparams['decoder_layers'],
-            heads=self.hparams['heads'],
-            d_ff=self.hparams['d_ff'],
-            output_dim=self.hparams['output_dim'],
-            context_encoder_d_model=context_encoder_d_model,
-            context_encoder_heads=context_encoder_heads,
-        )
-        self.learning_rate = self.hparams['learning_rate']
-        self.device_choice = 'cpu'
+            input_dim=self.input_dim,
+            d_model=self.d_model,
+            encoder_layers=self.encoder_layers,
+            decoder_layers=self.decoder_layers,
+            heads=self.heads,
+            d_ff=self.d_ff,
+            output_dim=self.output_dim,
+            dropout_rate=self.dropout,
+            context_encoder_d_model=self.context_encoder_d_model,
+            context_encoder_heads=self.context_encoder_heads
+        ).to(self.device)
+
         self.criterion = nn.CrossEntropyLoss()
 
     def configure_optimizers(self):
@@ -59,10 +79,27 @@ class TransformerTrainer(pl.LightningModule):
         return optimizer
 
     def forward(self, src, tgt, ctx_input=None, ctx_output=None):
-        return self.model(src.to("cpu"), tgt.to("cpu"), ctx_input, ctx_output)
+        logger.debug(f"Forward pass input shapes:")
+        logger.debug(f"  src: {src.shape}")
+        logger.debug(f"  tgt: {tgt.shape}")
+        # Move tensors to the same device as the model
+        device = next(self.model.parameters()).device
+        logger.debug(f"Model is on device: {device}")
+        if ctx_input is not None:
+            logger.debug(f"  ctx_input: {ctx_input.shape}")
+        if ctx_output is not None:
+            logger.debug(f"  ctx_output: {ctx_output.shape}")
+        src = src.to(device)
+        tgt = tgt.to(device)
+        if ctx_input is not None:
+            ctx_input = ctx_input.to(device)
+        if ctx_output is not None:
+            ctx_output = ctx_output.to(device)
+
+        return self.model(src, tgt, ctx_input, ctx_output)
 
     def training_step(self, batch, batch_idx):
-        src, tgt, ctx_input, ctx_output, task_ids = batch  # Unpack all 5 elements
+        src, tgt, ctx_input, ctx_output, _ = batch
         y_hat = self(src, tgt, ctx_input, ctx_output)
 
         # Debugging: Print shapes of y_hat and tgt
@@ -82,7 +119,7 @@ class TransformerTrainer(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        src, tgt, ctx_input, ctx_output, task_ids = batch  # Unpack all 5 elements
+        src, tgt, ctx_input, ctx_output, task_ids = batch
         y_hat = self(src, tgt, ctx_input, ctx_output)
 
         # Debugging: Print shapes of y_hat and tgt
@@ -101,6 +138,7 @@ class TransformerTrainer(pl.LightningModule):
         return {'val_loss': loss, 'predictions': predictions, 'targets': tgt}
 
 
+
     def test_step(self, batch, batch_idx):
         src, tgt, ctx_input, ctx_output, task_ids = batch
         y_hat = self(src, tgt, ctx_input, ctx_output)
@@ -112,22 +150,3 @@ class TransformerTrainer(pl.LightningModule):
 
         self.log("test_accuracy", accuracy, prog_bar=True)
         return accuracy
-
-
-
-def test_positional_encoding():
-    d_model = 512
-    batch_size = 2
-    height = 30
-    width = 30
-    
-    pos_enc = Grid2DPositionalEncoding(d_model)
-    x = torch.randn(batch_size, height * width, d_model)
-    
-    output = pos_enc(x)
-    logger.info(f"Input shape: {x.shape}")
-    logger.info(f"Output shape: {output.shape}")
-    logger.info(f"Position encoding added successfully: {(output - x != 0).any()}")
-
-if __name__ == "__main__":
-    test_positional_encoding()

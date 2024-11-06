@@ -3,14 +3,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.quantization
-from config import dropout_rate, encoder_layers, decoder_layers
 from torch.nn import TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder
 from Utils.positional_encoding import Grid2DPositionalEncoding
 from Utils.context_encoder import ContextEncoderModule
-from config import context_encoder_d_model, context_encoder_heads
 
 class TransformerModel(nn.Module):
-    def __init__(self, input_dim, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim):
+    def __init__(self, input_dim, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads):
         super(TransformerModel, self).__init__()
         self.input_fc = nn.Linear(input_dim, d_model)
         self.positional_encoding = Grid2DPositionalEncoding(d_model, max_height=30, max_width=30)
@@ -29,15 +27,18 @@ class TransformerModel(nn.Module):
         else:
             self.decoder = None
         
-        # Add Context Encoder
+        # Add Context Encoder with optimized parameters
         self.context_encoder = ContextEncoderModule(
             d_model=context_encoder_d_model,
             heads=context_encoder_heads
         )
         
+        # Store context_encoder_d_model as an instance variable
+        self.context_encoder_d_model = context_encoder_d_model
+
         # Context Integration Layer
         self.context_integration = nn.Sequential(
-            nn.Linear(d_model * 2, d_model),
+            nn.Linear(d_model + context_encoder_d_model, d_model),
             nn.ReLU(),
             nn.LayerNorm(d_model)
         )

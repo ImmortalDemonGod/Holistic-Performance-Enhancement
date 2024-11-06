@@ -1,6 +1,7 @@
 # Utils/data_preparation.py
 import os
 import json
+from tqdm import tqdm
 import logging
 
 logger = logging.getLogger(__name__)
@@ -8,7 +9,7 @@ import torch
 import numpy as np
 import logging
 from torch.utils.data import DataLoader, TensorDataset
-from config import include_sythtraining_data, batch_size, synthetic_dir
+from config import include_synthetic_training_data, synthetic_dir
 from Utils.context_data import ContextPair
 from Utils.padding_utils import pad_to_fixed_size
 
@@ -47,7 +48,7 @@ def inspect_data_structure(filename, directory='training'):
 def load_context_pairs(directory, context_map):
     """Load context pairs from the specified directory into context_map"""
     logger.info(f"Loading context pairs from '{directory}'...")
-    for filename in os.listdir(directory):
+    for filename in tqdm(os.listdir(directory), desc=f"Loading context pairs from '{directory}'"):
         if not filename.endswith('.json'):
             continue
         task_id = os.path.splitext(filename)[0]
@@ -97,9 +98,6 @@ def load_main_data(directory, context_map, train_inputs, train_outputs, train_ta
         task_id = os.path.splitext(filename)[0]
         filepath = os.path.join(directory, filename)
 
-        if task_id not in context_map:
-            logger.warning(f"Skipping task '{task_id}' - no context pair available")
-            continue
 
         try:
             with open(filepath, 'r') as f:
@@ -145,8 +143,11 @@ def load_main_data(directory, context_map, train_inputs, train_outputs, train_ta
         except Exception as e:
             logger.error(f"Error processing file '{filepath}': {str(e)}")
 
-def prepare_data():
-    logger.info("Starting data preparation...")
+def prepare_data(batch_size=None, return_datasets=False):
+    import config  # Ensure config is accessible within the function
+    if batch_size is None:
+        batch_size = config.batch_size  # Use the default from config if not provided
+    logger.info(f"Starting data preparation with batch_size={batch_size}...")
     log_limit = 2
     successful_files = 0
     total_files = 0
@@ -175,38 +176,46 @@ def prepare_data():
     load_context_pairs('training', context_map)
 
     # Conditionally load context pairs from synthetic_dir
-    if include_sythtraining_data:
+    if include_synthetic_training_data:
         load_context_pairs(synthetic_dir, context_map)
 
-    # Load main dataset from 'training'
-    load_main_data(
-        directory='training',
-        context_map=context_map,
-        train_inputs=train_inputs,
-        train_outputs=train_outputs,
-        train_task_ids=train_task_ids,
-        train_context_pairs=train_context_pairs,
-        test_inputs=test_inputs,
-        test_outputs=test_outputs,
-        test_task_ids=test_task_ids,
-        test_context_pairs=test_context_pairs
-    )
+    # Load main dataset from 'training' with progress bar
+    logger.info("Loading training data with progress bar...")
+    synthetic_data_source = os.listdir('training')
+    for filename in tqdm(synthetic_data_source, desc="Loading training data"):
+        if filename.endswith('.json'):
+            load_main_data(
+                directory='training',
+                context_map=context_map,
+                train_inputs=train_inputs,
+                train_outputs=train_outputs,
+                train_task_ids=train_task_ids,
+                train_context_pairs=train_context_pairs,
+                test_inputs=test_inputs,
+                test_outputs=test_outputs,
+                test_task_ids=test_task_ids,
+                test_context_pairs=test_context_pairs
+            )
 
-    # Conditionally load main dataset from synthetic_dir
-    if include_sythtraining_data:
-        load_main_data(
-            directory=synthetic_dir,
-            context_map=context_map,
-            train_inputs=train_inputs,
-            train_outputs=train_outputs,
-            train_task_ids=train_task_ids,
-            train_context_pairs=train_context_pairs,
-            test_inputs=test_inputs,
-            test_outputs=test_outputs,
-            test_task_ids=test_task_ids,
-            test_context_pairs=test_context_pairs,
-            is_synthetic=True
-        )
+    # Conditionally load main dataset from synthetic_dir with progress bar
+    if include_synthetic_training_data:
+        synthetic_data_files = os.listdir(synthetic_dir)
+        logger.info("Loading synthetic data with progress bar...")
+        for filename in tqdm(synthetic_data_files, desc="Loading synthetic data"):
+            if filename.endswith('.json'):
+                load_main_data(
+                    directory=synthetic_dir,
+                    context_map=context_map,
+                    train_inputs=train_inputs,
+                    train_outputs=train_outputs,
+                    train_task_ids=train_task_ids,
+                    train_context_pairs=train_context_pairs,
+                    test_inputs=test_inputs,
+                    test_outputs=test_outputs,
+                    test_task_ids=test_task_ids,
+                    test_context_pairs=test_context_pairs,
+                    is_synthetic=True
+                )
 
     # Stack inputs and outputs
     train_inputs = torch.stack(train_inputs)
@@ -268,9 +277,13 @@ def prepare_data():
     except Exception as e:
         logger.error(f"Failed to save task_id_map.json: {str(e)}")
 
-    # Create DataLoaders
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
-    val_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
+    if return_datasets:
+        logger.info("Returning TensorDatasets instead of DataLoaders.")
+        return train_dataset, test_dataset
+    else:
+        # Create DataLoaders using the local batch_size variable
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+        val_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
 
-    logger.info("Data preparation completed successfully.")
-    return train_loader, val_loader
+        logger.info("Data preparation completed successfully.")
+        return train_loader, val_loader
