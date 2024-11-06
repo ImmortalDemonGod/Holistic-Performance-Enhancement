@@ -43,6 +43,11 @@ class TaskFineTuner:
         self.max_epochs = max_epochs
         self.learning_rate = learning_rate
         self.patience = patience
+        self.base_model = base_model
+        self.device = device
+        self.max_epochs = max_epochs
+        self.learning_rate = learning_rate
+        self.patience = patience
 
         # Initialize metrics collector
         self.metrics_collector = TaskMetricsCollector()
