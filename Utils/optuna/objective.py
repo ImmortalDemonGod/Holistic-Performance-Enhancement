@@ -230,6 +230,7 @@ def create_objective(base_config, train_dataset, val_dataset):
             logger.debug(f"Trial {trial.number} - max_epochs: {trial_config.training.max_epochs}")
             hparams = trial_config.training.__dict__.copy()
             hparams.pop('include_synthetic_training_data', None)  # Remove to prevent duplication
+            hparams.pop('learning_rate', None)  # Remove learning_rate to avoid duplication
 
             model = TransformerTrainer(
                 **hparams,  # Unpack hyperparameters without include_synthetic_training_data
