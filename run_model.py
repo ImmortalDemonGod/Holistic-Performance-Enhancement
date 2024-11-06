@@ -6,6 +6,7 @@ import torch
 from train import TransformerTrainer
 from Utils.data_preparation import prepare_data
 from pathlib import Path
+from Utils.model_factory import create_transformer_trainer
 from config import Config
 import torch.quantization
 from pytorch_lightning import Trainer
