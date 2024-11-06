@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader, TensorDataset
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
-from Utils.model_factory import create_transformer_trainer
+from transformer_model import TransformerModel
 import torch.nn.functional as F
 import os
 import json
@@ -56,10 +56,18 @@ class TransformerTrainer(pl.LightningModule):
         self.context_encoder_d_model = self.hparams.context_encoder_d_model
         self.context_encoder_heads = self.hparams.context_encoder_heads
 
-        # Initialize the TransformerModel with all parameters
-        self.model = create_transformer_trainer(
-            config=self.hparams,
-            checkpoint_path=None
+        # Initialize the TransformerModel directly
+        self.model = TransformerModel(
+            input_dim=self.input_dim,
+            d_model=self.d_model,
+            encoder_layers=self.encoder_layers,
+            decoder_layers=self.decoder_layers,
+            heads=self.heads,
+            d_ff=self.d_ff,
+            output_dim=self.output_dim,
+            dropout_rate=self.dropout,
+            context_encoder_d_model=self.context_encoder_d_model,
+            context_encoder_heads=self.context_encoder_heads
         ).to(self.device)
 
         self.criterion = nn.CrossEntropyLoss()
