@@ -8,7 +8,7 @@ parent_dir = current_dir.parent
 # Add the parent directory to sys.path
 sys.path.append(str(parent_dir))
 
-import argparse
+from config import Config
 import random
 import pytorch_lightning as pl
 import torch                                                                                           
@@ -311,19 +311,18 @@ class TaskFineTuner:
 
         return self.results
 
-def main():
+def main(config: Config):
     """Main entry point for fine-tuning process."""
-    parser = argparse.ArgumentParser(description="Task Fine-Tuner")
-    parser.add_argument(
-        '--mode',
-        type=str,
-        choices=['random', 'all'],
-        default='random',
-        help='Mode of fine-tuning: "random" for a single random task or "all" for all tasks.'
-    )
-    args = parser.parse_args()
-    logging.basicConfig(level=logging.INFO)
+    # Initialize configuration
+    config = Config()
+
+    # Configure logging based on LoggingConfig
+    logging.basicConfig(level=getattr(logging, config.logging.level.upper(), logging.INFO))
     logger = logging.getLogger("finetuning_main")
+    
+    if config.logging.debug_mode:
+        logger.setLevel(logging.DEBUG)
+        logging.debug("Debug mode is enabled in LoggingConfig.")
 
     try:
         model_path = "/workspaces/JARC-Reactor/lightning_logs/version_0/checkpoints/epoch=epoch=15-val_loss=val_loss=0.4786.ckpt"  # Update this path
@@ -332,11 +331,12 @@ def main():
             return
 
         logger.info(f"Loading pretrained model from {model_path}")
-        # Define the device based on availability
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+        # Define the device based on configuration
+        device = config.training.device_choice
         logger.info(f"Using device: {device}")
 
-        # Load the base model from checkpoint
+        # Load the base model from checkpoint using config
+        model_path = config.model.checkpoint_path
         base_model = TransformerTrainer.load_from_checkpoint(model_path)
         
         # Move the base model to the specified device
@@ -357,12 +357,13 @@ def main():
         # Initialize fine-tuner
         finetuner = TaskFineTuner(base_model, device=device)
 
-        # Select tasks based on the mode
-        if args.mode == 'random':
-            selected_task = random.choice(list(task_id_map.keys()))
-            selected_tasks = [selected_task]
-            logger.info(f"Fine-tuning will be performed on randomly selected task: {selected_task}")
-        elif args.mode == 'all':
+        # Determine fine-tuning mode from Config
+        mode = config.finetuning.mode
+        if mode == 'random':
+            num_tasks = config.finetuning.num_random_tasks
+            selected_tasks = random.sample(list(task_id_map.keys()), k=num_tasks)
+            logger.info(f"Fine-tuning will be performed on {num_tasks} randomly selected tasks: {selected_tasks}")
+        elif mode == 'all':
             selected_tasks = list(task_id_map.keys())
             logger.info(f"Fine-tuning will be performed on all {len(selected_tasks)} tasks.")
 
