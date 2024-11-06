@@ -354,7 +354,7 @@ def main(config):
             task_id_map = json.load(f)
 
         # Initialize fine-tuner
-        finetuner = TaskFineTuner(base_model, config=config, device=device)
+        finetuner = TaskFineTuner(base_model, config=config)
 
         # Determine fine-tuning mode from Config
         mode = config.finetuning.mode
