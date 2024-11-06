@@ -10,3 +10,4 @@ re_arc_50/*
 # Optuna
 jarc_optuna.db
 optuna_optimization.log
+training2/*
