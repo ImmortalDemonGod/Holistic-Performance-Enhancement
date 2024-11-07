@@ -1,17 +1,11 @@
 
-Cuda compat
-DONE [M]Normalization in layers
-DONE [M]Saving checkpoint
-DONE [M]Training from checkpoint
+fix training from checkpoint
+  -this also means the finetuning from checkpoint is also probably broken
 
-investigate Cross entropy loss
-DONE [J] investigate utilizing decoders
+fix the evaluate to utilize evaluation data in its proper form
 
-DONE [M] Accuracy logging w/ diff acc
+fix the finetuning to utilize evaluation data in its proper form
 
-Validation fine-tuning (probably q-lora based)
+grokfast
 
-[M]Context encoding
-[J]Mamba
-
-
+integrate a Combined Dice Loss and Hard Example Mining Loss into the existing cross entropy loss
