@@ -292,7 +292,7 @@ def prepare_data(batch_size=None, return_datasets=False):
     else:
         # Create DataLoaders using the local batch_size variable
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
-        val_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
+        val_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0)  # Set batch_size=1 for evaluation
 
         logger.info("Data preparation completed successfully.")
         return train_loader, val_loader

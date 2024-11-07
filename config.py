@@ -67,7 +67,7 @@ batch_size = 50  # Batch size for DataLoader
 dropout_rate = 0.15  # Dropout rate for the model
 synthetic_dir = 'sythtraining'
 include_synthetic_training_data = True  # Set to True to include synthetic data
-CHECKPOINT_PATH = ''  # Correct path
+CHECKPOINT_PATH = 'epoch=52-step=21783.ckpt'  # Correct path
 FAST_DEV_RUN = False  # Set to True to enable fast development run
 
 # Context Encoder Configuration

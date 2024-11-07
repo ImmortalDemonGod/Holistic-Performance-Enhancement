@@ -36,10 +36,17 @@ logger.info("Preparing data loaders...")
 train_loader, val_loader = prepare_data()
 logger.info("Data loaders prepared.")
 test_loader = val_loader  # Replace with a separate test loader if available
+logger.info(f"Test loader batch size: {test_loader.batch_size}")
+logger.info(f"Number of batches: {len(test_loader)}")
+train_loader, val_loader = prepare_data()
+logger.info("Data loaders prepared.")
+test_loader = val_loader  # Replace with a separate test loader if available
 
-# Instantiate the model and load the checkpoint
+# Instantiate the Config class
+cfg = Config()
+
 # Validate checkpoint path using the config
-checkpoint_path = config.CHECKPOINT_PATH
+checkpoint_path = cfg.model.checkpoint_path
 
 if checkpoint_path and not os.path.isfile(checkpoint_path):
     raise FileNotFoundError(
@@ -71,10 +78,12 @@ metrics_collector = TaskMetricsCollector()
 logger.info("Starting evaluation...")
 for batch_idx, batch in enumerate(test_loader):
     src, tgt, ctx_input, ctx_output, task_ids = batch
+    logger.debug(f"Batch {batch_idx} - src shape: {src.shape}, tgt shape: {tgt.shape}")
     with torch.no_grad():
         outputs = model(src, tgt, ctx_input, ctx_output)  # Pass context data
         predictions = outputs.argmax(dim=-1)  # Assuming output is logits
 
+    logger.debug(f"Predictions shape: {predictions.shape}")
     if (batch_idx + 1) % 10 == 0:
         logger.info(f"Processed {batch_idx + 1} batches...")
     for idx, task_id_int in enumerate(task_ids):
@@ -86,8 +95,9 @@ for batch_idx, batch in enumerate(test_loader):
         task_pred = predictions[idx : idx + 1]
 
         # Ensure task_pred and task_target have compatible shapes
-        task_pred = task_pred.view(-1, 30)[:, 0]  # Flatten to 1D
-        task_target = task_target.view(-1, 30)[:, 0]  # Flatten to 1D
+        # Ensure task_pred and task_target have compatible shapes
+        task_pred = task_pred.view(-1, 30)  # Adjusted reshape to match actual data structure
+        task_target = task_target.view(-1, 30)  # Adjusted reshape to match actual data structure
 
         # Calculate metrics
         std_acc = compute_standard_accuracy(task_pred, task_target)
