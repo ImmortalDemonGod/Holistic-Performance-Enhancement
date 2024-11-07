@@ -1,4 +1,12 @@
 from Utils.optuna.best_params_manager import BestParamsManager
+import signal
+import sys
+
+def signal_handler(sig, frame):
+    print("KeyboardInterrupt received. Exiting immediately.")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
 import argparse
 import logging
 import os
@@ -107,8 +115,11 @@ if __name__ == '__main__':
         ],
         precision=cfg.training.precision,
         log_every_n_steps=50,
-        detect_anomaly=True  # Use detect_anomaly to catch NaNs
+        detect_anomaly=True,  # Use detect_anomaly to catch NaNs
     )
 
-    trainer.fit(model, data_module)
-    trainer.test(model, data_module)
+    try:
+        trainer.fit(model, data_module)
+        trainer.test(model, data_module)
+    except KeyboardInterrupt:
+        print("Training interrupted by user. Exiting gracefully.")

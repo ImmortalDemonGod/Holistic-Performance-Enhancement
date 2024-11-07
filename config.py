@@ -49,7 +49,7 @@ TRAIN_FROM_CHECKPOINT = False  # Set to True to resume training from a checkpoin
 device_choice = 'gpu' if torch.cuda.is_available() else 'cpu'  # Auto-select device
 calculate_parameters = True  # Whether to calculate and print the total parameter size before training
 run_for_100_epochs = True  # Whether to only run for 100 epochs and estimate time for 20,000 epochs
-num_epochs = 100  # Number of training epochs
+num_epochs = 45  # Number of training epochs
 input_dim = 30  # Number of features per input row
 d_model = 128  # Transformer model dimension
 encoder_layers = 4  # Number of encoder layers
@@ -130,7 +130,38 @@ class FineTuningConfig:
         self.patience = 5
 
 
+class SchedulerConfig:
+    def __init__(self):
+        self.use_cosine_annealing = True  # Set to True to enable CosineAnnealingWarmRestarts
+        self.T_0 = 10  # Number of epochs for the first restart
+        self.T_mult = 2  # Multiplicative factor to increase T_0 after each restart
+        self.eta_min = 6e-7  # Minimum learning rate during annealing
 class Config:
+    def __init__(self):
+        self.model = ModelConfig()
+        self.training = TrainingConfig(
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            include_synthetic_training_data=include_synthetic_training_data,
+            num_epochs=num_epochs,
+            device_choice=device_choice,
+            precision=precision,
+            fast_dev_run=FAST_DEV_RUN,
+            train_from_checkpoint=TRAIN_FROM_CHECKPOINT
+        )
+        self.logging = LoggingConfig()
+        self.finetuning = FineTuningConfig()
+        self.optuna = OptunaConfig()
+        self.scheduler = SchedulerConfig()
+        self.use_best_params = False  # Whether to load and use best parameters from Optuna study
+
+    def validate_config(self):
+        """Validate configuration values"""
+        assert self.training.batch_size > 0, "Batch size must be positive"
+        assert self.training.learning_rate > 0, "Learning rate must be positive"
+        assert self.training.device_choice in ['cpu', 'gpu'], "device_choice must be 'cpu' or 'gpu'"
+        assert self.training.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
+
     def __init__(self, model=None, training=None, device_choice=None):
         self.model = model if model is not None else ModelConfig()
         
@@ -156,6 +187,7 @@ class Config:
         self.finetuning = FineTuningConfig()
         self.validate_config()
         self.optuna = OptunaConfig()
+        self.scheduler = SchedulerConfig()  # Add scheduler configuration
         
         # Control for using best parameters
         self.use_best_params = False  # Whether to load and use best parameters from Optuna study

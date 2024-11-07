@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 class TransformerTrainer(pl.LightningModule):
     def __init__(self, config):
         super().__init__()
+        self.config = config  # Store the config object
         self.model = TransformerModel(
             input_dim=config.input_dim,
             d_model=config.d_model,
@@ -62,8 +63,8 @@ class TransformerTrainer(pl.LightningModule):
         y_hat = self(src, tgt, ctx_input, ctx_output)
         
         # Ensure y_hat and tgt have compatible shapes
-        y_hat = y_hat.view(-1, 30, 11)  # Reshape y_hat to match the target shape
-        tgt = tgt.view(-1, 30)[:, 0].long()  # Ensure tgt is correctly shaped
+        y_hat = y_hat.view(-1, 11)  # Reshape y_hat to match the target shape
+        tgt = tgt.view(-1).long()  # Flatten tgt to match y_hat's shape
         
         # Calculate accuracy
         predicted = torch.argmax(y_hat, dim=-1)
@@ -73,4 +74,15 @@ class TransformerTrainer(pl.LightningModule):
         return accuracy
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        
+        if self.config.scheduler.use_cosine_annealing:
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+                optimizer,
+                T_0=self.config.scheduler.T_0,
+                T_mult=self.config.scheduler.T_mult,
+                eta_min=self.config.scheduler.eta_min
+            )
+            return [optimizer], [scheduler]
+        else:
+            return optimizer
