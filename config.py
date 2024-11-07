@@ -56,14 +56,14 @@ run_for_100_epochs = True  # Whether to only run for 100 epochs and estimate tim
 num_epochs = 100  # Number of training epochs
 seq_len = 30  # Sequence length
 input_dim = 30  # Number of features per input row
-d_model = 128  # Transformer model dimension
-encoder_layers = 6  # Number of encoder layers
-decoder_layers = 11   # Number of decoder layers
+d_model = 256  # Transformer model dimension
+encoder_layers = 11  # Number of encoder layers
+decoder_layers = 2   # Number of decoder layers
 heads = 8  # Reduced number of attention heads for efficiency
-d_ff = 256  # Feedforward network dimension
+d_ff = 512  # Feedforward network dimension
 output_dim = 30  # Number of features per output row
-learning_rate = 0.000041  # Learning rate
-batch_size = 50  # Batch size for DataLoader
+learning_rate = 0.00002009  # Learning rate
+batch_size = 47  # Batch size for DataLoader
 dropout_rate = 0.15  # Dropout rate for the model
 synthetic_dir = 'sythtraining'
 include_synthetic_training_data = True  # Set to True to include synthetic data
@@ -71,7 +71,7 @@ CHECKPOINT_PATH = 'epoch=52-step=21783.ckpt'  # Correct path
 FAST_DEV_RUN = False  # Set to True to enable fast development run
 
 # Context Encoder Configuration
-context_encoder_d_model = 512  # Transformer model dimension for Context Encoder
+context_encoder_d_model = 1024  # Transformer model dimension for Context Encoder
 context_encoder_heads = 16       # Number of attention heads for Context Encoder
 # Fine-Tuning Configurations
 finetuning_patience = 5
@@ -138,9 +138,9 @@ class FineTuningConfig:
 class SchedulerConfig:
     def __init__(self):
         self.use_cosine_annealing = True  # Set to True to enable CosineAnnealingWarmRestarts
-        self.T_0 = 10  # Number of epochs for the first restart
+        self.T_0 = 4  # Number of epochs for the first restart
         self.T_mult = 2  # Multiplicative factor to increase T_0 after each restart
-        self.eta_min = 6e-7  # Minimum learning rate during annealing
+        self.eta_min = 4e-7  # Minimum learning rate during annealing
 class Config:
     def __init__(self):
         self.model = ModelConfig()
@@ -168,9 +168,9 @@ class Config:
         assert self.training.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
 
     def __init__(self, model=None, training=None, device_choice=None):
-        context_dropout_rate = 0.05  # Example value for context encoder dropout
-        encoder_dropout_rate = 0.55  # Example value for encoder dropout
-        decoder_dropout_rate = 0.17  # Example value for decoder dropout
+        context_dropout_rate = 0.12  # Example value for context encoder dropout
+        encoder_dropout_rate = 0.61  # Example value for encoder dropout
+        decoder_dropout_rate = 0.12  # Example value for decoder dropout
 
         self.model = model if model is not None else ModelConfig(
             input_dim=input_dim,

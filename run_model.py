@@ -111,7 +111,7 @@ if __name__ == '__main__':
         gpus=1 if cfg.training.device_choice == 'gpu' else 0,
         callbacks=[
             ModelCheckpoint(monitor='val_loss', save_top_k=1, mode='min'),
-            EarlyStopping(monitor='val_loss', patience=10, mode='min')
+            EarlyStopping(monitor='val_loss', patience=35, mode='min')
         ],
         precision=cfg.training.precision,
         log_every_n_steps=50,
