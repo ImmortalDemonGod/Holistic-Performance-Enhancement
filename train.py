@@ -89,17 +89,17 @@ class TransformerTrainer(pl.LightningModule):
             logger.debug(f"  ctx_input: {ctx_input.shape}")
         if ctx_output is not None:
             logger.debug(f"  ctx_output: {ctx_output.shape}")
-        src = src.to(device)
-        tgt = tgt.to(device)
+        src = src.float().to(device)
+        tgt = tgt.float().to(device)
         if ctx_input is not None:
-            ctx_input = ctx_input.to(device)
+            ctx_input = ctx_input.float().to(device)
         if ctx_output is not None:
-            ctx_output = ctx_output.to(device)
+            ctx_output = ctx_output.float().to(device)
 
         return self.model(src, tgt, ctx_input, ctx_output)
 
     def training_step(self, batch, batch_idx):
-        src, tgt, ctx_input, ctx_output, _ = batch
+        src, tgt, ctx_input, ctx_output, task_ids = batch
         y_hat = self(src, tgt, ctx_input, ctx_output)
 
         # Debugging: Print shapes of y_hat and tgt
