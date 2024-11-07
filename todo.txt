@@ -2,9 +2,9 @@
 fix training from checkpoint
   -this also means the finetuning from checkpoint is also probably broken
 
-fix the evaluate to utilize evaluation data in its proper form
+fix the evaluate to utilize evaluation data in its proper form (only use eval_data_prep for data)
 
-fix the finetuning to utilize evaluation data in its proper form
+fix the finetuning to utilize evaluation data in its proper form (only use eval_data_prep for data)
 
 grokfast
 
