@@ -2,8 +2,9 @@
 # Precision setting for PyTorch Lightning Trainer
 
 class ModelConfig:
-    def __init__(self):
+    def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads, CHECKPOINT_PATH):
         self.input_dim = input_dim
+        self.seq_len = seq_len
         self.d_model = d_model
         self.encoder_layers = encoder_layers
         self.decoder_layers = decoder_layers
@@ -50,6 +51,7 @@ device_choice = 'gpu' if torch.cuda.is_available() else 'cpu'  # Auto-select dev
 calculate_parameters = True  # Whether to calculate and print the total parameter size before training
 run_for_100_epochs = True  # Whether to only run for 100 epochs and estimate time for 20,000 epochs
 num_epochs = 45  # Number of training epochs
+seq_len = 30  # Sequence length
 input_dim = 30  # Number of features per input row
 d_model = 128  # Transformer model dimension
 encoder_layers = 4  # Number of encoder layers
@@ -163,7 +165,20 @@ class Config:
         assert self.training.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
 
     def __init__(self, model=None, training=None, device_choice=None):
-        self.model = model if model is not None else ModelConfig()
+        self.model = model if model is not None else ModelConfig(
+            input_dim=input_dim,
+            seq_len=seq_len,
+            d_model=d_model,
+            encoder_layers=encoder_layers,
+            decoder_layers=decoder_layers,
+            heads=heads,
+            d_ff=d_ff,
+            output_dim=output_dim,
+            dropout_rate=dropout_rate,
+            context_encoder_d_model=context_encoder_d_model,
+            context_encoder_heads=context_encoder_heads,
+            CHECKPOINT_PATH=CHECKPOINT_PATH
+        )
         
         # Update device_choice to use 'gpu' or 'cpu'
         if device_choice is None:

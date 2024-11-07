@@ -8,10 +8,11 @@ from Utils.positional_encoding import Grid2DPositionalEncoding
 from Utils.context_encoder import ContextEncoderModule
 
 class TransformerModel(nn.Module):
-    def __init__(self, input_dim, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads):
+    def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads):
         super(TransformerModel, self).__init__()
-        self.input_fc = nn.Linear(input_dim, d_model)
-        self.positional_encoding = Grid2DPositionalEncoding(d_model, max_height=30, max_width=30)
+        self.input_fc_dim = nn.Linear(input_dim, d_model)
+        self.input_fc_seq = nn.Linear(seq_len, d_model)  # Ensure consistent output dimension
+        self.positional_encoding = Grid2DPositionalEncoding(d_model, max_height=seq_len, max_width=input_dim)
         # Conditionally create the encoder
         if encoder_layers > 0:
             encoder_layer = TransformerEncoderLayer(d_model, heads, d_ff, batch_first=True)
@@ -73,8 +74,16 @@ class TransformerModel(nn.Module):
         #print(f"src dtype after dequant: {src.dtype}, tgt dtype after dequant: {tgt.dtype}")
 
         # Process main input
-        x = self.input_fc(src)
-        # print(f"After input_fc (Linear layer: {src.shape[-1]} → {self.input_fc.out_features}), x shape: {x.shape}")
+        # Project both dimensions
+        x_dim = self.input_fc_dim(src)
+        x_seq = self.input_fc_seq(src)
+
+        # Ensure both projections have the same shape
+        if x_dim.size(2) != x_seq.size(2):
+            raise ValueError(f"Dimension mismatch: x_dim has {x_dim.size(2)} and x_seq has {x_seq.size(2)}")
+
+        # Combine the projections
+        x = x_dim + x_seq
         x = self.positional_encoding(x)
         # print(f"After positional_encoding (adds positional information), x shape: {x.shape}")
 
@@ -97,7 +106,7 @@ class TransformerModel(nn.Module):
             memory = x
 
         if self.decoder is not None:
-            tgt = self.input_fc(tgt)
+            tgt = self.input_fc_dim(tgt)
             tgt = self.positional_encoding(tgt)
             tgt = self.dropout(tgt)
             tgt = tgt.transpose(0, 1)

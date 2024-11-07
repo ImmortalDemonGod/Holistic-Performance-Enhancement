@@ -27,7 +27,8 @@ class TransformerTrainer(pl.LightningModule):
         super().__init__()
         self.config = config  # Store the config object
         self.model = TransformerModel(
-            input_dim=config.input_dim,
+            input_dim=config.model.input_dim,  # Access input_dim through config.model
+            seq_len=config.model.seq_len,  # Access seq_len through config.model
             d_model=config.d_model,
             encoder_layers=config.encoder_layers,
             decoder_layers=config.decoder_layers,
