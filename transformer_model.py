@@ -6,21 +6,26 @@ import torch.quantization
 from torch.nn import TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder
 from Utils.positional_encoding import Grid2DPositionalEncoding
 from Utils.context_encoder import ContextEncoderModule
+from config import Config  # Import the Config class
 
 class TransformerModel(nn.Module):
     def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads):
         super(TransformerModel, self).__init__()
+        # Create a config instance to access dropout rates
+        config = Config()
+        
         self.input_fc_dim = nn.Linear(input_dim, d_model)
         self.input_fc_seq = nn.Linear(seq_len, d_model)  # Ensure consistent output dimension
         self.positional_encoding = Grid2DPositionalEncoding(d_model, max_height=seq_len, max_width=input_dim)
+        self.dropout = nn.Dropout(p=dropout_rate)  # Initialize dropout layer
+
         # Conditionally create the encoder
         if encoder_layers > 0:
             encoder_layer = TransformerEncoderLayer(d_model, heads, d_ff, batch_first=True)
             self.encoder = TransformerEncoder(encoder_layer, num_layers=encoder_layers)
         else:
-            print("No context embedding available.")  # Indicate absence of context embedding
             self.encoder = None
-        
+            
         # Conditionally create the decoder
         if decoder_layers > 0:
             decoder_layer = TransformerDecoderLayer(d_model, heads, d_ff, batch_first=True)
@@ -44,7 +49,10 @@ class TransformerModel(nn.Module):
             nn.LayerNorm(d_model)
         )
         self.output_fc = nn.Linear(d_model, 11)
-        self.dropout = nn.Dropout(p=dropout_rate)
+        # Initialize dropout layers using config
+        self.context_dropout = nn.Dropout(p=config.model.context_dropout_rate)
+        self.encoder_dropout = nn.Dropout(p=config.model.encoder_dropout_rate)
+        self.decoder_dropout = nn.Dropout(p=config.model.decoder_dropout_rate)
 
 
 
@@ -63,8 +71,6 @@ class TransformerModel(nn.Module):
             ctx_input = self.quant(ctx_input)
             ctx_output = self.quant(ctx_output)
             context_embedding = self.context_encoder(ctx_input, ctx_output)
-        else:
-            context_embedding = None
 
         # Dequantize before passing to linear layers and ensure float type
         src = self.dequant(src).float()
@@ -95,9 +101,7 @@ class TransformerModel(nn.Module):
             x = self.context_integration(
                 torch.cat([x, context_expanded], dim=-1)
             )
-            # print(f"After context_integration (Concatenated with context_embedding and transformed from {x.shape[-1] * 2} → {x.shape[-1]}), x shape: {x.shape}")
-        # Rest of the processing remains the same
-        x = self.dropout(x)
+            x = self.context_dropout(x)  # Apply context dropout here
         x = x.transpose(0, 1)
 
         if self.encoder is not None:
@@ -108,7 +112,6 @@ class TransformerModel(nn.Module):
         if self.decoder is not None:
             tgt = self.input_fc_dim(tgt)
             tgt = self.positional_encoding(tgt)
-            tgt = self.dropout(tgt)
             tgt = tgt.transpose(0, 1)
             output = self.decoder(tgt, memory)
         else:

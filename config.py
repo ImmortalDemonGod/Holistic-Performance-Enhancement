@@ -2,7 +2,7 @@
 # Precision setting for PyTorch Lightning Trainer
 
 class ModelConfig:
-    def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads, CHECKPOINT_PATH):
+    def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads, CHECKPOINT_PATH, context_dropout_rate, encoder_dropout_rate, decoder_dropout_rate):
         self.input_dim = input_dim
         self.seq_len = seq_len
         self.d_model = d_model
@@ -13,6 +13,9 @@ class ModelConfig:
         self.output_dim = output_dim
         self.dropout = dropout_rate
         self.context_encoder_d_model = context_encoder_d_model
+        self.context_dropout_rate = context_dropout_rate
+        self.encoder_dropout_rate = encoder_dropout_rate
+        self.decoder_dropout_rate = decoder_dropout_rate
         self.context_encoder_heads = context_encoder_heads
         self.checkpoint_path = CHECKPOINT_PATH  # Path to checkpoint file for resuming training
 
@@ -50,16 +53,16 @@ TRAIN_FROM_CHECKPOINT = False  # Set to True to resume training from a checkpoin
 device_choice = 'gpu' if torch.cuda.is_available() else 'cpu'  # Auto-select device
 calculate_parameters = True  # Whether to calculate and print the total parameter size before training
 run_for_100_epochs = True  # Whether to only run for 100 epochs and estimate time for 20,000 epochs
-num_epochs = 45  # Number of training epochs
+num_epochs = 100  # Number of training epochs
 seq_len = 30  # Sequence length
 input_dim = 30  # Number of features per input row
 d_model = 128  # Transformer model dimension
-encoder_layers = 4  # Number of encoder layers
-decoder_layers = 6   # Number of decoder layers
+encoder_layers = 6  # Number of encoder layers
+decoder_layers = 11   # Number of decoder layers
 heads = 8  # Reduced number of attention heads for efficiency
 d_ff = 256  # Feedforward network dimension
 output_dim = 30  # Number of features per output row
-learning_rate = 0.00003  # Learning rate
+learning_rate = 0.000041  # Learning rate
 batch_size = 50  # Batch size for DataLoader
 dropout_rate = 0.15  # Dropout rate for the model
 synthetic_dir = 'sythtraining'
@@ -68,8 +71,8 @@ CHECKPOINT_PATH = ''  # Correct path
 FAST_DEV_RUN = False  # Set to True to enable fast development run
 
 # Context Encoder Configuration
-context_encoder_d_model = 128  # Transformer model dimension for Context Encoder
-context_encoder_heads = 8       # Number of attention heads for Context Encoder
+context_encoder_d_model = 512  # Transformer model dimension for Context Encoder
+context_encoder_heads = 16       # Number of attention heads for Context Encoder
 # Fine-Tuning Configurations
 finetuning_patience = 5
 finetuning_max_epochs = 100
@@ -110,7 +113,7 @@ class OptunaConfig:
         self.pruning = {
             "n_warmup_steps": 5,           # Number of trials before pruning starts
             "n_startup_trials": 10,        # Number of trials before using pruning
-            "patience": 2,                 # Number of epochs without improvement before pruning
+            "patience": 20,                 # Number of epochs without improvement before pruning
             "pruning_percentile": 25,      # Percentile for pruning
         }
         
@@ -165,6 +168,10 @@ class Config:
         assert self.training.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
 
     def __init__(self, model=None, training=None, device_choice=None):
+        context_dropout_rate = 0.05  # Example value for context encoder dropout
+        encoder_dropout_rate = 0.55  # Example value for encoder dropout
+        decoder_dropout_rate = 0.17  # Example value for decoder dropout
+
         self.model = model if model is not None else ModelConfig(
             input_dim=input_dim,
             seq_len=seq_len,
@@ -177,7 +184,10 @@ class Config:
             dropout_rate=dropout_rate,
             context_encoder_d_model=context_encoder_d_model,
             context_encoder_heads=context_encoder_heads,
-            CHECKPOINT_PATH=CHECKPOINT_PATH
+            CHECKPOINT_PATH=CHECKPOINT_PATH,
+            context_dropout_rate=context_dropout_rate,
+            encoder_dropout_rate=encoder_dropout_rate,
+            decoder_dropout_rate=decoder_dropout_rate
         )
         
         # Update device_choice to use 'gpu' or 'cpu'
