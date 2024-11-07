@@ -9,3 +9,5 @@ fix the finetuning to utilize evaluation data in its proper form (only use eval_
 grokfast
 
 integrate a Combined Dice Loss and Hard Example Mining Loss into the existing cross entropy loss
+
+im also pretty sure config file is an absolute mess but im not sure i care
