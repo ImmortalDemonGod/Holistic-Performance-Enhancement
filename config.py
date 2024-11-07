@@ -2,7 +2,7 @@
 # Precision setting for PyTorch Lightning Trainer
 
 class ModelConfig:
-    def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads, CHECKPOINT_PATH, context_dropout_rate, encoder_dropout_rate, decoder_dropout_rate):
+    def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads, context_dropout_rate, encoder_dropout_rate, decoder_dropout_rate, lora_rank, use_lora, checkpoint_path):
         self.input_dim = input_dim
         self.seq_len = seq_len
         self.d_model = d_model
@@ -17,7 +17,8 @@ class ModelConfig:
         self.encoder_dropout_rate = encoder_dropout_rate
         self.decoder_dropout_rate = decoder_dropout_rate
         self.context_encoder_heads = context_encoder_heads
-        self.checkpoint_path = CHECKPOINT_PATH  # Path to checkpoint file for resuming training
+        self.lora_rank = lora_rank  # Rank for Low-Rank Adaptation
+        self.use_lora = use_lora  # Ensure use_lora is initialized
 
 class TrainingConfig:
     def __init__(self, batch_size, learning_rate, include_synthetic_training_data, num_epochs, device_choice='cpu', precision=None, fast_dev_run=None, train_from_checkpoint=None):
@@ -50,6 +51,15 @@ precision = 32  # Set to 16 for mixed precision, 32 for full precision, etc.
 TRAIN_FROM_CHECKPOINT = False  # Set to True to resume training from a checkpoint
 # These parameters should be treated as modifiable from the main run_model.py script
 
+lora_rank = 16  # Commonly used values: 1, 2, 4, 8, 16
+# Explanation:
+# - The `lora_rank` parameter determines the rank of the low-rank matrices used in LoRA.
+# - Commonly used values are typically small integers like 1, 2, 4, 8, or 16.
+# - A lower rank (e.g., 1 or 2) means fewer parameters are added, which can lead to faster training and less memory usage.
+# - A higher rank (e.g., 8 or 16) allows for more expressive power, potentially capturing more complex task-specific adaptations.
+# - The choice of rank depends on the trade-off between computational efficiency and the complexity of the task.
+# - In practice, a rank of 4 or 8 is often used as a balance between efficiency and performance.
+use_lora = True
 device_choice = 'gpu' if torch.cuda.is_available() else 'cpu'  # Auto-select device
 calculate_parameters = True  # Whether to calculate and print the total parameter size before training
 run_for_100_epochs = True  # Whether to only run for 100 epochs and estimate time for 20,000 epochs
@@ -67,7 +77,10 @@ batch_size = 47  # Batch size for DataLoader
 dropout_rate = 0.15  # Dropout rate for the model
 synthetic_dir = 'sythtraining'
 include_synthetic_training_data = True  # Set to True to include synthetic data
-CHECKPOINT_PATH = 'epoch=52-step=21783.ckpt'  # Correct path
+CHECKPOINT_PATH = ''  # Correct path
+CHECKPOINT_PATH = ''  # Correct path
+checkpoint_path = CHECKPOINT_PATH  # Ensure this is defined before use
+
 FAST_DEV_RUN = False  # Set to True to enable fast development run
 
 # Context Encoder Configuration
@@ -172,6 +185,7 @@ class Config:
         encoder_dropout_rate = 0.61  # Example value for encoder dropout
         decoder_dropout_rate = 0.12  # Example value for decoder dropout
 
+        # Initialize model attribute
         self.model = model if model is not None else ModelConfig(
             input_dim=input_dim,
             seq_len=seq_len,
@@ -184,29 +198,32 @@ class Config:
             dropout_rate=dropout_rate,
             context_encoder_d_model=context_encoder_d_model,
             context_encoder_heads=context_encoder_heads,
-            CHECKPOINT_PATH=CHECKPOINT_PATH,
             context_dropout_rate=context_dropout_rate,
             encoder_dropout_rate=encoder_dropout_rate,
-            decoder_dropout_rate=decoder_dropout_rate
+            decoder_dropout_rate=decoder_dropout_rate,
+            lora_rank=lora_rank,
+            use_lora=use_lora,
+            checkpoint_path=CHECKPOINT_PATH  # Pass checkpoint_path here
         )
+
+        # Set checkpoint_path after initializing the model
+        self.model.checkpoint_path = CHECKPOINT_PATH
         
-        # Update device_choice to use 'gpu' or 'cpu'
+        # Determine device choice
         if device_choice is None:
             device_choice = 'gpu' if torch.cuda.is_available() else 'cpu'
         
-        if training is not None:
-            self.training = training
-        else:
-            self.training = TrainingConfig(
-                batch_size=batch_size,
-                learning_rate=learning_rate,
-                include_synthetic_training_data=include_synthetic_training_data,
-                num_epochs=num_epochs,
-                device_choice=device_choice,
-                precision=precision,
-                fast_dev_run=FAST_DEV_RUN,
-                train_from_checkpoint=TRAIN_FROM_CHECKPOINT
-            )
+        # Initialize training attribute
+        self.training = training if training is not None else TrainingConfig(
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            include_synthetic_training_data=include_synthetic_training_data,
+            num_epochs=num_epochs,
+            device_choice=device_choice,
+            precision=precision,
+            fast_dev_run=FAST_DEV_RUN,
+            train_from_checkpoint=TRAIN_FROM_CHECKPOINT
+        )
         
         self.logging = LoggingConfig()
         self.finetuning = FineTuningConfig()
@@ -233,7 +250,7 @@ class Config:
         self.dropout = self.model.dropout
         self.context_encoder_d_model = self.model.context_encoder_d_model
         self.context_encoder_heads = self.model.context_encoder_heads
-        self.checkpoint_path = self.model.checkpoint_path  # Path to checkpoint file for resuming training
+        self.checkpoint_path = CHECKPOINT_PATH  # Set checkpoint_path here
     def validate_config(self):
         """Validate configuration values"""
         assert self.training.batch_size > 0, "Batch size must be positive"

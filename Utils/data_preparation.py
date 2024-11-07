@@ -225,7 +225,7 @@ def prepare_data(batch_size=None, return_datasets=False):
             is_synthetic=True
         )
 
-    # Convert lists to tensors
+    # Ensure data types are compatible with quantized operations
     train_inputs = torch.stack(train_inputs)
     train_outputs = torch.stack(train_outputs)
     test_inputs = torch.stack(test_inputs)

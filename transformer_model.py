@@ -3,13 +3,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.quantization
-from torch.nn import TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder
+from torch.nn import TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder, Parameter
 from Utils.positional_encoding import Grid2DPositionalEncoding
 from Utils.context_encoder import ContextEncoderModule
 from config import Config  # Import the Config class
 
 class TransformerModel(nn.Module):
-    def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads):
+    def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads, checkpoint_path, use_lora=False, lora_rank=None):
         super(TransformerModel, self).__init__()
         # Create a config instance to access dropout rates
         config = Config()
@@ -33,7 +33,13 @@ class TransformerModel(nn.Module):
         else:
             self.decoder = None
         
-        # Add Context Encoder with optimized parameters
+        self.use_lora = use_lora
+        self.lora_rank = lora_rank  # Initialize lora_rank
+        self.checkpoint_path = checkpoint_path
+        if self.use_lora:
+            # LoRA parameters
+            self.lora_A = Parameter(torch.randn(d_model, self.lora_rank))
+            self.lora_B = Parameter(torch.randn(self.lora_rank, d_model))
         self.context_encoder = ContextEncoderModule(
             d_model=context_encoder_d_model,
             heads=context_encoder_heads
@@ -79,10 +85,26 @@ class TransformerModel(nn.Module):
         # Debugging: Check data types after dequantization
         #print(f"src dtype after dequant: {src.dtype}, tgt dtype after dequant: {tgt.dtype}")
 
-        # Process main input
         # Project both dimensions
         x_dim = self.input_fc_dim(src)
         x_seq = self.input_fc_seq(src)
+
+        # Ensure both projections have the same shape
+        if x_dim.size(2) != x_seq.size(2):
+            raise ValueError(f"Dimension mismatch: x_dim has {x_dim.size(2)} and x_seq has {x_seq.size(2)}")
+
+        # Combine the projections
+        x = x_dim + x_seq
+        x = self.positional_encoding(x)
+
+        # Apply LoRA to the attention mechanism
+        if self.encoder is not None:
+            memory = self.encoder(x)
+            if self.use_lora:
+                # Apply LoRA
+                memory = memory + torch.matmul(torch.matmul(memory, self.lora_A), self.lora_B)
+        else:
+            memory = x
 
         # Ensure both projections have the same shape
         if x_dim.size(2) != x_seq.size(2):

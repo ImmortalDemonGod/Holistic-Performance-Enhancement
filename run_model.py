@@ -59,7 +59,7 @@ def setup_model_training(cfg):
                     checkpoint_path=checkpoint_path
                 )
             else:
-                logger.info("Initializing new model")
+                logger.info("Checkpoint not found, initializing new model")
                 model = create_transformer_trainer(
                     config=cfg,
                     checkpoint_path=None

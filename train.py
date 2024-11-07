@@ -26,6 +26,8 @@ class TransformerTrainer(pl.LightningModule):
     def __init__(self, config):
         super().__init__()
         self.config = config  # Store the config object
+
+        # Initialize the model first
         self.model = TransformerModel(
             input_dim=config.model.input_dim,  # Access input_dim through config.model
             seq_len=config.model.seq_len,  # Access seq_len through config.model
@@ -37,8 +39,16 @@ class TransformerTrainer(pl.LightningModule):
             output_dim=config.output_dim,
             dropout_rate=config.dropout,
             context_encoder_d_model=config.context_encoder_d_model,
-            context_encoder_heads=config.context_encoder_heads
+            context_encoder_heads=config.context_encoder_heads,
+            checkpoint_path=config.model.checkpoint_path,  # Ensure checkpoint_path is passed
+            use_lora=config.model.use_lora,  # Ensure use_lora is passed
+            lora_rank=config.model.lora_rank  # Pass lora_rank here
         )
+
+        # Enable QAT
+        self.model.train()  # Ensure model is in training mode for QAT
+        self.model = torch.quantization.prepare_qat(self.model)  # Prepare model for QAT
+
         self.criterion = nn.CrossEntropyLoss()
         self.learning_rate = config.training.learning_rate  # Access learning_rate from config.training
 
@@ -48,6 +58,7 @@ class TransformerTrainer(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         src, tgt, ctx_input, ctx_output, task_ids = batch
         y_hat = self(src, tgt, ctx_input, ctx_output)
+        y_hat = self.model.dequant(y_hat)  # Dequantize outputs before computing metrics
         loss = self.criterion(y_hat.view(-1, 11), tgt.view(-1, 30)[:, 0].long())
         self.log('train_loss', loss, prog_bar=True)
         return loss
