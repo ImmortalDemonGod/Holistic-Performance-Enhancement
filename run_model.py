@@ -4,7 +4,9 @@ import logging
 import os
 import torch
 from Utils.model_factory import create_transformer_trainer
-from Utils.data_preparation import prepare_data
+from data_module import MyDataModule
+from train import TransformerTrainer
+import pytorch_lightning as pl
 from pathlib import Path
 from Utils.model_factory import create_transformer_trainer
 from config import Config
@@ -93,60 +95,23 @@ def setup_model_training(cfg):
 
 if __name__ == '__main__':
     cfg = Config()  # Load config
-    model = setup_model_training(cfg)
-    
-    # Prepare data
-    train_loader, val_loader = prepare_data(batch_size=cfg.training.batch_size)
+    model = TransformerTrainer(cfg)  # Pass the config object
+    data_module = MyDataModule(batch_size=cfg.training.batch_size)
 
-    # Calculate logging frequency
-    num_training_batches = len(train_loader)
-    log_every_n_steps = min(50, num_training_batches) if num_training_batches > 0 else 1
-
-    # Setup callbacks
-    callbacks = [
-        ModelCheckpoint(
-            monitor="val_loss",
-            save_top_k=1,
-            mode="min",
-            filename="epoch={epoch}-val_loss={val_loss:.4f}",
-            save_last=True
-        ),
-        EarlyStopping(
-            monitor="val_loss", 
-            patience=10, 
-            mode="min"
-        )
-    ]
-
-    # Configure trainer with resume_from_checkpoint
-    trainer_kwargs = {
-        "max_epochs": cfg.training.max_epochs,
-        "callbacks": callbacks,
-        "devices": 1,
-        "accelerator": cfg.training.device_choice,
-        "precision": cfg.training.precision,
-        "fast_dev_run": cfg.training.FAST_DEV_RUN,
-        "log_every_n_steps": log_every_n_steps,
-        "gradient_clip_val": cfg.training.gradient_clip_val
-    }
-
-
-    trainer = Trainer(**trainer_kwargs)
-    
-    # Add device memory logging before training
-    if torch.cuda.is_available():
-        logger.info("Starting training on GPU...")
-        logger.info(f"GPU Memory before training: {torch.cuda.memory_allocated()/1e9:.2f} GB")
-    else:
-        logger.info("Starting training on CPU...")
-
-    # Train model
-    trainer.fit(
-        model, 
-        train_loader, 
-        val_loader
+    trainer = pl.Trainer(
+        max_epochs=cfg.training.max_epochs,
+        gpus=1 if cfg.training.device_choice == 'gpu' else 0,
+        callbacks=[
+            ModelCheckpoint(monitor='val_loss', save_top_k=1, mode='min'),
+            EarlyStopping(monitor='val_loss', patience=10, mode='min')
+        ],
+        precision=cfg.training.precision,
+        log_every_n_steps=50,
+        detect_anomaly=True  # Use detect_anomaly to catch NaNs
     )
 
-    # Add device memory logging after training
-    if torch.cuda.is_available():
-        logger.info(f"GPU Memory after training: {torch.cuda.memory_allocated()/1e9:.2f} GB")
+    try:
+        trainer.fit(model, data_module)
+        trainer.test(model, data_module)
+    except KeyboardInterrupt:
+        print("Training interrupted by user. Exiting gracefully.")

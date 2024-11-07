@@ -65,6 +65,13 @@ class TransformerModel(nn.Module):
         else:
             context_embedding = None
 
+        # Dequantize before passing to linear layers and ensure float type
+        src = self.dequant(src).float()
+        tgt = self.dequant(tgt).float()
+
+        # Debugging: Check data types after dequantization
+        #print(f"src dtype after dequant: {src.dtype}, tgt dtype after dequant: {tgt.dtype}")
+
         # Process main input
         x = self.input_fc(src)
         # print(f"After input_fc (Linear layer: {src.shape[-1]} → {self.input_fc.out_features}), x shape: {x.shape}")
@@ -80,25 +87,15 @@ class TransformerModel(nn.Module):
                 torch.cat([x, context_expanded], dim=-1)
             )
             # print(f"After context_integration (Concatenated with context_embedding and transformed from {x.shape[-1] * 2} → {x.shape[-1]}), x shape: {x.shape}")
-        # Reshape input for 2D positional encoding
-        batch_size, seq_len, _ = src.shape
-        x = self.input_fc(src)
-        x = self.positional_encoding(x)  # Now uses 2D positional encoding
-        
-        # Context integration
-        if context_embedding is not None:
-            context_expanded = context_embedding.unsqueeze(1).expand(-1, x.size(1), -1)
-            x = self.context_integration(torch.cat([x, context_expanded], dim=-1))
-        
         # Rest of the processing remains the same
         x = self.dropout(x)
         x = x.transpose(0, 1)
-        
+
         if self.encoder is not None:
             memory = self.encoder(x)
         else:
             memory = x
-        
+
         if self.decoder is not None:
             tgt = self.input_fc(tgt)
             tgt = self.positional_encoding(tgt)
@@ -107,7 +104,7 @@ class TransformerModel(nn.Module):
             output = self.decoder(tgt, memory)
         else:
             output = memory
-        
+
         output = output.transpose(0, 1)
         output = self.output_fc(output)
         return self.dequant(output)
