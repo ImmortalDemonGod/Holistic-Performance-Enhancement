@@ -60,7 +60,15 @@ class TransformerTrainer(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         src, tgt, ctx_input, ctx_output, task_ids = batch
         y_hat = self(src, tgt, ctx_input, ctx_output)
-        accuracy = (torch.argmax(y_hat, dim=-1) == tgt.view(-1, 30)[:, 0].long()).float().mean()
+        
+        # Ensure y_hat and tgt have compatible shapes
+        y_hat = y_hat.view(-1, 30, 11)  # Reshape y_hat to match the target shape
+        tgt = tgt.view(-1, 30)[:, 0].long()  # Ensure tgt is correctly shaped
+        
+        # Calculate accuracy
+        predicted = torch.argmax(y_hat, dim=-1)
+        accuracy = (predicted == tgt).float().mean()
+        
         self.log('test_accuracy', accuracy, prog_bar=True)
         return accuracy
 

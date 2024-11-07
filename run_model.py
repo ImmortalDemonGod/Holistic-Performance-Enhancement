@@ -110,8 +110,5 @@ if __name__ == '__main__':
         detect_anomaly=True  # Use detect_anomaly to catch NaNs
     )
 
-    try:
-        trainer.fit(model, data_module)
-        trainer.test(model, data_module)
-    except KeyboardInterrupt:
-        print("Training interrupted by user. Exiting gracefully.")
+    trainer.fit(model, data_module)
+    trainer.test(model, data_module)

@@ -4,7 +4,7 @@ import orjson
 import json
 from tqdm import tqdm
 import logging
-import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 logger = logging.getLogger(__name__)
 import torch
@@ -47,48 +47,41 @@ def inspect_data_structure(filename, directory='training'):
         logger.error(f"Error inspecting {filepath}: {str(e)}")
         return False
 
-def load_context_pairs(directory, context_map):
-    """Load context pairs from the specified directory into context_map"""
-    logger.info(f"Loading context pairs from '{directory}'...")
-    for filename in tqdm(os.listdir(directory), desc=f"Loading context pairs from '{directory}'"):
-        if not filename.endswith('.json'):
-            continue
-        task_id = os.path.splitext(filename)[0]
-        filepath = os.path.join(directory, filename)
-        try:
-            with open(filepath, 'rb') as f:
-                data = orjson.loads(f.read())
-            
-            # Determine data structure based on directory
-            if directory == 'training':
-                examples = data.get('train', [])
-            else:  # Assuming 'sythtraining' has a flat list
-                examples = data
-                
-            if not examples:
-                logger.warning(f"No examples found in {filepath}. Skipping.")
-                continue
-            
-            # For 'training', use the first train example; for 'sythtraining', use the first example
-            context_example = examples[0]
-            input_key = 'input' if 'input' in context_example else 'input_data'
-            output_key = 'output' if 'output' in context_example else 'output_data'
+def load_context_pair(filepath, task_id, context_map):
+    try:
+        with open(filepath, 'rb') as f:
+            data = orjson.loads(f.read())
+        examples = data.get('train', []) if 'train' in data else data
+        if not examples:
+            return
+        context_example = examples[0]
+        input_key = 'input' if 'input' in context_example else 'input_data'
+        output_key = 'output' if 'output' in context_example else 'output_data'
+        context_input = pad_to_fixed_size(
+            torch.tensor(context_example[input_key], dtype=torch.float32),
+            target_shape=(30, 30)
+        )
+        context_output = pad_to_fixed_size(
+            torch.tensor(context_example[output_key], dtype=torch.float32),
+            target_shape=(30, 30)
+        )
+        context_map[task_id] = ContextPair(
+            context_input=context_input,
+            context_output=context_output
+        )
+    except Exception as e:
+        logger.error(f"Error loading context for task '{task_id}' from '{filepath}': {str(e)}")
 
-            context_input = pad_to_fixed_size(
-                torch.tensor(context_example[input_key], dtype=torch.float32),
-                target_shape=(30, 30)
-            )
-            context_output = pad_to_fixed_size(
-                torch.tensor(context_example[output_key], dtype=torch.float32),
-                target_shape=(30, 30)
-            )
-            context_map[task_id] = ContextPair(
-                context_input=context_input,
-                context_output=context_output
-            )
-            # logger.debug(f"Created context pair for task '{task_id}' from '{directory}'")
-        except Exception as e:
-            logger.error(f"Error loading context for task '{task_id}' from '{filepath}': {str(e)}")
+def load_context_pairs(directory, context_map):
+    logger.info(f"Loading context pairs from '{directory}'...")
+    json_files = [f for f in os.listdir(directory) if f.endswith('.json')]
+    with ThreadPoolExecutor() as executor:
+        futures = {
+            executor.submit(load_context_pair, os.path.join(directory, filename), os.path.splitext(filename)[0], context_map): filename
+            for filename in json_files
+        }
+        for future in tqdm(as_completed(futures), total=len(futures), desc="Loading context pairs"):
+            future.result()  # Ensure any exceptions are raised
 
 def load_main_data_concurrently(directory, context_map, train_inputs, train_outputs, train_task_ids, train_context_pairs,
                                 test_inputs, test_outputs, test_task_ids, test_context_pairs, is_synthetic=False):
@@ -143,7 +136,7 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
     json_files = [f for f in os.listdir(directory) if f.endswith('.json')]
 
     # Use ThreadPoolExecutor to load files concurrently
-    with concurrent.futures.ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor() as executor:
         # Submit tasks and collect futures
         futures = {
             executor.submit(load_single_file, os.path.join(directory, filename), os.path.splitext(filename)[0]): filename
@@ -151,7 +144,7 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
         }
 
         # Use tqdm to display progress
-        for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures), desc="Loading data"):
+        for future in tqdm(as_completed(futures), total=len(futures), desc="Loading data"):
             train_results, test_results = future.result()
             for input_tensor, output_tensor, task_id, context_pair in train_results:
                 train_inputs.append(input_tensor)
