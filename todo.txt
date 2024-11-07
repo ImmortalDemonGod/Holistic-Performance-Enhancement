@@ -6,6 +6,8 @@ fix the evaluate to utilize evaluation data in its proper form (only use eval_da
 
 fix the finetuning to utilize evaluation data in its proper form (only use eval_data_prep for data)
 
+integrate the (built by J) Q-Lora System into finetuning
+
 grokfast
 
 integrate a Combined Dice Loss and Hard Example Mining Loss into the existing cross entropy loss
