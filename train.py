@@ -80,61 +80,11 @@ class TransformerTrainer(pl.LightningModule):
         return loss
 
     def test_step(self, batch, batch_idx):
-        """
-        Test step with shape debugging and proper reshaping
-        """
         src, tgt, ctx_input, ctx_output, task_ids = batch
-        
-        # Debug input shapes
-        logging.debug(f"Test step input shapes:")
-        logging.debug(f"src: {src.shape}")
-        logging.debug(f"tgt: {tgt.shape}")
-        logging.debug(f"ctx_input: {ctx_input.shape}")
-        logging.debug(f"ctx_output: {ctx_output.shape}")
-        
-        try:
-            # Forward pass
-            y_hat = self(src, tgt, ctx_input, ctx_output)
-            logging.debug(f"Model output (y_hat) shape: {y_hat.shape}")
-            
-            # Get predictions
-            predictions = y_hat.argmax(dim=-1)  # [batch_size, seq_len]
-            logging.debug(f"Raw predictions shape: {predictions.shape}")
-            
-            # Reshape target to match predictions
-            batch_size = tgt.size(0)
-            tgt_flat = tgt.reshape(batch_size, -1)  # Flatten height and width dimensions
-            predictions = predictions.reshape(batch_size, -1)  # Ensure predictions match target shape
-            
-            logging.debug(f"Reshaped tensors:")
-            logging.debug(f"tgt_flat shape: {tgt_flat.shape}")
-            logging.debug(f"predictions shape: {predictions.shape}")
-            
-            # Create mask for valid (non-padding) elements
-            valid_mask = tgt_flat != 10  # Assuming 10 is padding value
-            valid_preds = predictions[valid_mask]
-            valid_targets = tgt_flat[valid_mask]
-            
-            logging.debug(f"Number of valid elements: {valid_mask.sum().item()}")
-            
-            # Calculate accuracy
-            accuracy = (valid_preds == valid_targets).float().mean()
-            logging.debug(f"Calculated accuracy: {accuracy.item():.4f}")
-            
-            # Log metrics
-            self.log('test_accuracy', accuracy, prog_bar=True)
-            return accuracy
-            
-        except Exception as e:
-            logging.error(f"Error in test_step:")
-            logging.error(f"Input shapes - src: {src.shape}, tgt: {tgt.shape}")
-            if 'y_hat' in locals():
-                logging.error(f"Model output shape: {y_hat.shape}")
-            if 'predictions' in locals():
-                logging.error(f"Predictions shape: {predictions.shape}")
-            logging.error(f"Error message: {str(e)}")
-            raise
-    
+        y_hat = self(src, tgt, ctx_input, ctx_output)
+        accuracy = (torch.argmax(y_hat, dim=-1) == tgt.view(-1, 30)[:, 0].long()).float().mean()
+        self.log('test_accuracy', accuracy, prog_bar=True)
+        return accuracy
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         
