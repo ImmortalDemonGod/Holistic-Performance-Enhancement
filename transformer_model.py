@@ -85,9 +85,16 @@ class TransformerModel(nn.Module):
         # Debugging: Check data types after dequantization
         #print(f"src dtype after dequant: {src.dtype}, tgt dtype after dequant: {tgt.dtype}")
 
-        # Project both dimensions
-        x_dim = self.input_fc_dim(src)
-        x_seq = self.input_fc_seq(src)
+        # Project both dimensions - ensure output dimension matches d_model
+        x_dim = self.input_fc_dim(src)  # [batch, seq_len, d_model]
+        x_seq = self.input_fc_seq(src)  # [batch, seq_len, d_model]
+        
+        # Debug dimension info
+        # print(f"x_dim shape: {x_dim.shape}")
+        # print(f"x_seq shape: {x_seq.shape}")
+
+        # Ensure both projections match d_model dimension
+        x_seq = nn.Linear(x_seq.size(2), x_dim.size(2)).to(x_seq.device)(x_seq)
 
         # Ensure both projections have the same shape
         if x_dim.size(2) != x_seq.size(2):
