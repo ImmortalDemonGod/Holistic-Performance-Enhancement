@@ -1,13 +1,22 @@
 
 (done J)fix training from checkpoint
 
-fix the evaluate to utilize evaluation data in its proper form (only use eval_data_prep for data)
+re-implement current avg loss in training (this should reset every epoc)
 
+fix the evaluate to utilize evaluation data in its proper form (only use eval_data_prep for data)
+fix the evaluate to utilize training data in its proper form (only use data_preparation.py for data)
+fix the evaluate to perform accuracy evaluation on Training validation data in its proper form (only use data_preparation.py for data)
+add to the evaluate to perform accuracy evaluation on Training training data in its proper form (only use data_preparation.py for data)
+verify the evaluate.py to perform accuracy evaluation on evaluation validation data only.
+(each of the different kinds of evaluations you can do should have different mode options and not just always do all of them)
+    (-you also could make each mode or type into its own file for a similar effect)
+
+verify that the finetuner loads from checkpoint
 fix the finetuning to utilize evaluation data in its proper form (only use eval_data_prep for data)
-implement custom finetuning dropout values (if you just make these like 1.75* bigger than what the model was trained on it should be more effective than the norm)
+implement custom finetuning dropout values
 
 grokfast
 
-integrate a Combined Dice Loss and Hard Example Mining Loss into the existing cross entropy loss
+integrate Hard Example Mining Loss into the existing cross entropy loss
 
-im also pretty sure config file is an absolute mess but im not sure i care
+
