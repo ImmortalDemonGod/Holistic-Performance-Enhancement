@@ -11,3 +11,8 @@ re_arc_50/*
 jarc_optuna.db
 optuna_optimization.log
 training2/*
+evaluation/*
+finetuning_results/*
+sythtraining/*
+training2/*
+*.log
