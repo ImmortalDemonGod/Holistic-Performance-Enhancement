@@ -50,7 +50,7 @@ import torch
 import logging
 
 precision = 32  # Set to 16 for mixed precision, 32 for full precision, etc.
-TRAIN_FROM_CHECKPOINT = True  # Set to True to resume training from a checkpoint
+TRAIN_FROM_CHECKPOINT = False  # Set to True to resume training from a checkpoint
 # These parameters should be treated as modifiable from the main run_model.py script
 
 lora_rank = 128  # Commonly used values: 1, 2, 4, 8, 16
