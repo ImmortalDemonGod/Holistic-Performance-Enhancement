@@ -33,13 +33,13 @@ class TransformerModel(nn.Module):
         else:
             self.decoder = None
         
-        self.use_lora = use_lora
-        self.lora_rank = lora_rank  # Initialize lora_rank
+        #self.use_lora = use_lora
+        #self.lora_rank = lora_rank  # Initialize lora_rank
         self.checkpoint_path = checkpoint_path
-        if self.use_lora:
-            # LoRA parameters
-            self.lora_A = Parameter(torch.randn(d_model, self.lora_rank))
-            self.lora_B = Parameter(torch.randn(self.lora_rank, d_model))
+        #if self.use_lora:
+        #    # LoRA parameters
+        #    self.lora_A = Parameter(torch.randn(d_model, self.lora_rank))
+        #    self.lora_B = Parameter(torch.randn(self.lora_rank, d_model))
         self.context_encoder = ContextEncoderModule(
             d_model=context_encoder_d_model,
             heads=context_encoder_heads
@@ -67,85 +67,74 @@ class TransformerModel(nn.Module):
         self.dequant = torch.quantization.DeQuantStub()
 
     def forward(self, src, tgt, ctx_input=None, ctx_output=None):
-        src = self.quant(src)  # Quantize input
-        # print(f"Quantized src shape: {src.shape} (Batch Size: {src.shape[0]}, Sequence Length: {src.shape[1]}, Feature Size: {src.shape[2]})")
-        tgt = self.quant(tgt)  # Quantize target
-        # print(f"Quantized tgt shape: {tgt.shape} (Batch Size: {tgt.shape[0]}, Sequence Length: {tgt.shape[1]}, Feature Size: {tgt.shape[2]})")
-
+        # Quantization
+        src = self.quant(src).float()  # [batch, seq_len, input_dim]
+        tgt = self.quant(tgt).float()
+        
         # Process context if available
         if ctx_input is not None and ctx_output is not None:
             ctx_input = self.quant(ctx_input)
             ctx_output = self.quant(ctx_output)
             context_embedding = self.context_encoder(ctx_input, ctx_output)
-
-        # Dequantize before passing to linear layers and ensure float type
-        src = self.dequant(src).float()
-        tgt = self.dequant(tgt).float()
-
-        # Debugging: Check data types after dequantization
-        #print(f"src dtype after dequant: {src.dtype}, tgt dtype after dequant: {tgt.dtype}")
-
-        # Project both dimensions - ensure output dimension matches d_model
-        x_dim = self.input_fc_dim(src)  # [batch, seq_len, d_model]
-        x_seq = self.input_fc_seq(src)  # [batch, seq_len, d_model]
-        
-        # Debug dimension info
-        # print(f"x_dim shape: {x_dim.shape}")
-        # print(f"x_seq shape: {x_seq.shape}")
-
-        # Ensure both projections match d_model dimension
-        x_seq = nn.Linear(x_seq.size(2), x_dim.size(2)).to(x_seq.device)(x_seq)
-
-        # Ensure both projections have the same shape
-        if x_dim.size(2) != x_seq.size(2):
-            raise ValueError(f"Dimension mismatch: x_dim has {x_dim.size(2)} and x_seq has {x_seq.size(2)}")
-
-        # Combine the projections
-        x = x_dim + x_seq
-        x = self.positional_encoding(x)
-
-        # Apply LoRA to the attention mechanism
-        if self.encoder is not None:
-            memory = self.encoder(x)
-            if self.use_lora:
-                # Apply LoRA
-                memory = memory + torch.matmul(torch.matmul(memory, self.lora_A), self.lora_B)
         else:
-            memory = x
-
-        # Ensure both projections have the same shape
-        if x_dim.size(2) != x_seq.size(2):
-            raise ValueError(f"Dimension mismatch: x_dim has {x_dim.size(2)} and x_seq has {x_seq.size(2)}")
-
-        # Combine the projections
-        x = x_dim + x_seq
-        x = self.positional_encoding(x)
-        # print(f"After positional_encoding (adds positional information), x shape: {x.shape}")
-
+            context_embedding = None
+        
+        # Debug shapes
+        print(f"src shape: {src.shape}")  # Should be [batch, seq_len, input_dim]
+        
+        # Project input along both dimensions
+        x_dim = self.input_fc_dim(src)  # [batch, seq_len, d_model]
+        x_seq = src.transpose(-1, -2)    # [batch, input_dim, seq_len]
+        x_seq = self.input_fc_seq(x_seq) # [batch, input_dim, d_model]
+        x_seq = x_seq.transpose(-1, -2)  # [batch, d_model, input_dim]
+        
+        # Add positional encoding
+        x = self.positional_encoding(x_dim)  # Use only x_dim for positional encoding
+        x = self.dropout(x)
+        
         # Integrate context if available
         if context_embedding is not None:
-            # Expand context to match input dimensions
             context_expanded = context_embedding.unsqueeze(1).expand(-1, x.size(1), -1)
-            # print(f"Context expanded shape: {context_expanded.shape}")  # Print shape of context_expanded
             x = self.context_integration(
                 torch.cat([x, context_expanded], dim=-1)
             )
-            x = self.context_dropout(x)  # Apply context dropout here
-        x = x.transpose(0, 1)
-
+            x = self.context_dropout(x)
+        
+        # Encoder
         if self.encoder is not None:
             memory = self.encoder(x)
+            memory = self.encoder_dropout(memory)
+            #if self.use_lora:
+            #    lora_output = torch.matmul(torch.matmul(memory, self.lora_A), self.lora_B)
+            #    memory = memory + self.dropout(lora_output)
         else:
             memory = x
-
+        
+        # Decoder
         if self.decoder is not None:
             tgt = self.input_fc_dim(tgt)
             tgt = self.positional_encoding(tgt)
-            tgt = tgt.transpose(0, 1)
+            tgt = self.dropout(tgt)
             output = self.decoder(tgt, memory)
+            output = self.decoder_dropout(output)
         else:
             output = memory
-
-        output = output.transpose(0, 1)
+        
+        # Final output processing
         output = self.output_fc(output)
+        output = output * 5.0  # Scale logits
+        
         return self.dequant(output)
+    
+    @staticmethod
+    def create_src_mask(src):
+        """Create padding mask for source sequence"""
+        src_mask = (src != 0).float()
+        return src_mask.unsqueeze(-2)
+
+    @staticmethod
+    def create_tgt_mask(tgt):
+        """Create causal mask for target sequence"""
+        sz = tgt.size(1)
+        mask = torch.triu(torch.ones(sz, sz), diagonal=1) == 0
+        return mask
