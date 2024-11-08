@@ -38,8 +38,8 @@ class TransformerTrainer(pl.LightningModule):
 
         # Initialize the model first
         # Initialize LoRA modules
-        self.lora_A = nn.Linear(config.model.lora_in_features, config.model.lora_out_features)
-        self.lora_B = nn.Linear(config.model.lora_in_features, config.model.lora_out_features)
+        #self.lora_A = nn.Linear(config.model.lora_in_features, config.model.lora_out_features)
+        #self.lora_B = nn.Linear(config.model.lora_in_features, config.model.lora_out_features)
 
         self.model = TransformerModel(
             input_dim=config.model.input_dim,  # Access input_dim through config.model
