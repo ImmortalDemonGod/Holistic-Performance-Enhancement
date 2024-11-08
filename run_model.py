@@ -97,8 +97,7 @@ def setup_model_training(cfg):
         logger.error(f"Error in setup_model_training: {str(e)}")
         raise
 
-    return model
-
+"""
 import os
 
 # Check if the checkpoint file exists
@@ -114,6 +113,7 @@ else:
     for file in os.listdir(checkpoint_dir):
         print(file)
 
+"""
 # Ensure the checkpoint path is correct
 cfg = Config()  # Load config
 model = setup_model_training(cfg)  # Use the setup function
@@ -129,12 +129,12 @@ trainer = Trainer(
     ],
     precision=cfg.training.precision,
     log_every_n_steps=50,
-    detect_anomaly=True,
+    detect_anomaly=False,
 )
 
 # Start training and testing
 try:
     trainer.fit(model, data_module)
-    trainer.test(model, data_module)
+    #trainer.test(model, data_module)
 except KeyboardInterrupt:
     print("Training interrupted by user. Exiting gracefully.")
