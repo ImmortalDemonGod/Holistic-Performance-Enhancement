@@ -4,8 +4,7 @@
 fix the evaluate to utilize evaluation data in its proper form (only use eval_data_prep for data)
 
 fix the finetuning to utilize evaluation data in its proper form (only use eval_data_prep for data)
-
-integrate the (built by J) Q-Lora System into finetuning
+implement custom finetuning dropout values (if you just make these like 1.75* bigger than what the model was trained on it should be more effective than the norm)
 
 grokfast
 
