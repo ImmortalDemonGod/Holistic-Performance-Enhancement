@@ -17,6 +17,8 @@ class ModelConfig:
         self.encoder_dropout_rate = encoder_dropout_rate
         self.decoder_dropout_rate = decoder_dropout_rate
         self.context_encoder_heads = context_encoder_heads
+        self.lora_in_features = 128  # Example value; set appropriately
+        self.lora_out_features = 128  # Example value; set appropriately
         self.lora_rank = lora_rank  # Rank for Low-Rank Adaptation
         self.use_lora = use_lora  # Ensure use_lora is initialized
 

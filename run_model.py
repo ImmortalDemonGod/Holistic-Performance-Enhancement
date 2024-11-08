@@ -59,16 +59,6 @@ def setup_model_training(cfg):
                 model = TransformerTrainer(config=cfg)  # Fallback to initializing a new model
         else:
             model = TransformerTrainer(config=cfg)
-        logger.info(f"Attempting to load model from checkpoint: {cfg.model.checkpoint_path}")
-        if cfg.training.train_from_checkpoint and cfg.model.checkpoint_path:
-            try:
-                model = TransformerTrainer.load_from_checkpoint(cfg.model.checkpoint_path, config=cfg)
-                logger.info("Model loaded successfully from checkpoint.")
-            except Exception as e:
-                logger.error(f"Failed to load model from checkpoint: {str(e)}")
-                model = TransformerTrainer(config=cfg)  # Fallback to initializing a new model
-        else:
-            model = TransformerTrainer(config=cfg)
 
         # Verify checkpoint content
         if cfg.training.train_from_checkpoint and cfg.model.checkpoint_path:
