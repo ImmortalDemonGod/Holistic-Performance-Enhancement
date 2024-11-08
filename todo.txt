@@ -1,6 +1,5 @@
 
-fix training from checkpoint
-  -this also means the finetuning from checkpoint is also probably broken
+(done J)fix training from checkpoint
 
 fix the evaluate to utilize evaluation data in its proper form (only use eval_data_prep for data)
 
