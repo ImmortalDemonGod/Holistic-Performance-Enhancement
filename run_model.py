@@ -122,7 +122,7 @@ data_module = MyDataModule(batch_size=cfg.training.batch_size)
 # Initialize the Trainer
 trainer = Trainer(
     max_epochs=cfg.training.max_epochs,
-    gpus=1 if cfg.training.device_choice == 'gpu' else 0,
+    #gpus=1 if cfg.training.device_choice == 'gpu' else 0,
     callbacks=[
         ModelCheckpoint(monitor='val_loss', save_top_k=1, mode='min'),
         EarlyStopping(monitor='val_loss', patience=35, mode='min')
