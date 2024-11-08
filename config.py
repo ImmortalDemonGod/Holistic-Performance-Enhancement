@@ -59,15 +59,15 @@ lora_rank = 128  # Commonly used values: 1, 2, 4, 8, 16
 # - A higher rank (e.g., 8 or 16) allows for more expressive power, potentially capturing more complex task-specific adaptations.
 # - The choice of rank depends on the trade-off between computational efficiency and the complexity of the task.
 # - In practice, a rank of 4 or 8 is often used as a balance between efficiency and performance.
-use_lora = True
+use_lora = False
 device_choice = 'gpu' if torch.cuda.is_available() else 'cpu'  # Auto-select device
 calculate_parameters = True  # Whether to calculate and print the total parameter size before training
 run_for_100_epochs = True  # Whether to only run for 100 epochs and estimate time for 20,000 epochs
-num_epochs = 100  # Number of training epochs
+num_epochs = 2  # Number of training epochs
 seq_len = 30  # Sequence length
 input_dim = 30  # Number of features per input row
 d_model = 256  # Transformer model dimension
-encoder_layers = 11  # Number of encoder layers
+encoder_layers = 2  # Number of encoder layers
 decoder_layers = 2   # Number of decoder layers
 heads = 8  # Reduced number of attention heads for efficiency
 d_ff = 512  # Feedforward network dimension
@@ -76,9 +76,9 @@ learning_rate = 0.00002009  # Learning rate
 batch_size = 47  # Batch size for DataLoader
 dropout_rate = 0.15  # Dropout rate for the model
 synthetic_dir = 'sythtraining'
-include_synthetic_training_data = True  # Set to True to include synthetic data
+include_synthetic_training_data = False  # Set to True to include synthetic data
 
-CHECKPOINT_PATH = '/Users/larryf/Desktop/Jarc_Cur/epoch=97-step=42826.ckpt'  # Ensure this path is correct
+CHECKPOINT_PATH = '/workspaces/JARC-Reactor/epoch=58-4.7333e-5.ckpt'  # Ensure this path is correct
 checkpoint_path = CHECKPOINT_PATH  # Ensure this is defined before use
 
 FAST_DEV_RUN = False  # Set to True to enable fast development run
@@ -172,7 +172,8 @@ class Config:
         self.optuna = OptunaConfig()
         self.scheduler = SchedulerConfig()
         self.use_best_params = False  # Whether to load and use best parameters from Optuna study
-
+        self.evaluation = EvaluationConfig()  # Add this line
+        
     def validate_config(self):
         """Validate configuration values"""
         assert self.training.batch_size > 0, "Batch size must be positive"
@@ -257,3 +258,10 @@ class Config:
         assert self.training.learning_rate > 0, "Learning rate must be positive"
         assert self.training.device_choice in ['cpu', 'gpu'], "device_choice must be 'cpu' or 'gpu'"
         assert self.training.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
+class EvaluationConfig:
+    def __init__(self):
+        # Mode can be: 'training-validation', 'training-train', 'evaluation-only', 'all'
+        self.mode = 'all'  
+        self.output_dir = 'evaluation_results'
+        self.debug_mode = True  # Enable extensive debugging
+        self.save_predictions = True  # Save model predictions for analysis
