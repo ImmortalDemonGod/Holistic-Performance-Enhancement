@@ -178,13 +178,24 @@ class EvaluationManager:
             
             with torch.no_grad():
                 outputs = self.model(src, tgt, ctx_input, ctx_output)
-                
+            
             # Log raw model outputs
             self.logger.debug(f"\nModel outputs:")
             self.logger.debug(f"shape: {outputs.shape}")
             self.logger.debug(f"type: {outputs.dtype}")
             self.logger.debug(f"range: [{outputs.min():.1f}, {outputs.max():.1f}]")
-            self.logger.debug(f"output unique values before argmax: {torch.unique(outputs).tolist()[:10]}...")
+            
+            # Analyze logits distribution
+            self.logger.debug("\nLogits Distribution:")
+            logits_flat = outputs.view(-1, outputs.size(-1))
+            for i in range(outputs.size(-1)):  # For each class
+                class_logits = logits_flat[:, i]
+                self.logger.debug(
+                    f"Class {i} logits - "
+                    f"mean: {class_logits.mean():.3f}, "
+                    f"std: {class_logits.std():.3f}, "
+                    f"range: [{class_logits.min():.3f}, {class_logits.max():.3f}]"
+                )
             
             # Get predictions
             predictions = outputs.argmax(dim=-1)  # Shape: [batch, seq_len]
@@ -194,56 +205,54 @@ class EvaluationManager:
                 task_id = int_to_task[task_id_int.item()]
                 
                 # Get individual tensors
-                task_input = src[idx:idx + 1]  # Keep batch dimension
-                task_target = tgt[idx:idx + 1, :, 0]  # Take first channel
+                task_input = src[idx:idx + 1]
+                task_target = tgt[idx:idx + 1, :, 0]
                 task_pred = predictions[idx:idx + 1]
-                task_raw_outputs = outputs[idx]  # Raw logits for this example
+                task_raw_outputs = outputs[idx]
                 
                 # Convert types for consistency
                 task_target = task_target.to(torch.long)
                 task_pred = task_pred.to(torch.long)
                 
-                # Log tensor details
-                self.logger.debug(f"\nProcessed tensors for task {task_id}:")
-                self.logger.debug(f"task_input shape: {task_input.shape}, type: {task_input.dtype}")
-                self.logger.debug(f"task_target shape: {task_target.shape}, type: {task_target.dtype}")
-                self.logger.debug(f"task_pred shape: {task_pred.shape}, type: {task_pred.dtype}")
-                self.logger.debug(f"target unique values: {torch.unique(task_target).tolist()}")
-                self.logger.debug(f"pred unique values: {torch.unique(task_pred).tolist()}")
+                # Analyze output distribution for this task
+                analysis = self.analyze_outputs_distribution(
+                    task_raw_outputs,
+                    task_pred,
+                    task_target,
+                    task_id
+                )
                 
-                # Create prediction record
+                # Calculate probabilities and confidence
+                probs = torch.softmax(task_raw_outputs, dim=-1)
+                confidence, _ = probs.max(dim=-1)
+                
+                # Create prediction record with enhanced information
                 pred_record = PredictionRecord(
                     input_grid=task_input.squeeze(0).cpu().tolist(),
                     target_grid=task_target.squeeze(0).cpu().tolist(),
                     predicted_grid=task_pred.squeeze(0).cpu().tolist(),
                     raw_logits=task_raw_outputs.cpu().tolist(),
                     position_metrics={
-                        'output_probabilities': torch.softmax(task_raw_outputs, dim=-1).cpu().tolist(),
-                        'output_classes': torch.argmax(task_raw_outputs, dim=-1).cpu().tolist(),
-                        'output_confidences': torch.max(torch.softmax(task_raw_outputs, dim=-1), dim=-1)[0].cpu().tolist()
+                        'output_probabilities': probs.cpu().tolist(),
+                        'output_classes': task_pred.squeeze(0).cpu().tolist(),
+                        'output_confidences': confidence.cpu().tolist(),
+                        'distribution_analysis': analysis
                     }
                 )
                 
-                # Calculate metrics with detailed info
+                # Calculate metrics
                 std_acc, std_details = compute_standard_accuracy(
-                    task_pred.flatten(),  # Remove batch dimension
-                    task_target.flatten(),  # Remove batch dimension
+                    task_pred.flatten(),
+                    task_target.flatten(),
                 )
                 
                 diff_acc, diff_details = compute_differential_accuracy(
-                    task_input.squeeze(0),  # Remove batch dimension
-                    task_target.squeeze(0),  # Remove batch dimension
-                    task_pred.squeeze(0),   # Remove batch dimension
+                    task_input.squeeze(0),
+                    task_target.squeeze(0),
+                    task_pred.squeeze(0),
                 )
                 
-                # Log detailed metrics
-                self.logger.debug(f"\nMetrics for task {task_id}:")
-                self.logger.debug(f"Standard accuracy: {std_acc:.4f}")
-                self.logger.debug(f"Differential accuracy: {diff_acc:.4f}")
-                self.logger.debug(f"Standard accuracy details: correct={std_details['correct_count']}/{std_details['valid_count']}")
-                self.logger.debug(f"Differential accuracy details: correct={diff_details['correct_count']}/{diff_details['changing_count']}")
-                
-                # Store metrics and predictions
+                # Enhanced metrics dictionary
                 metrics_dict = {
                     'standard_accuracy': std_acc,
                     'differential_accuracy': diff_acc,
@@ -260,11 +269,18 @@ class EvaluationManager:
                             'std': float(task_raw_outputs.std()),
                             'min': float(task_raw_outputs.min()),
                             'max': float(task_raw_outputs.max())
-                        }
+                        },
+                        'confidence_stats': {
+                            'mean': float(confidence.mean()),
+                            'std': float(confidence.std()),
+                            'min': float(confidence.min()),
+                            'max': float(confidence.max())
+                        },
+                        'distribution_analysis': analysis
                     }
                 }
                 
-                # Add results to collector
+                # Store results
                 self.metrics_collectors[mode].add_result(
                     task_id,
                     metrics_dict,
@@ -622,7 +638,65 @@ class EvaluationManager:
         except Exception as e:
             self.logger.error("Evaluation failed:", exc_info=True)
             raise
-
+    
+    def analyze_outputs_distribution(self, outputs, predictions, targets, task_id):
+        """Analyze distribution of outputs, predictions, and targets"""
+        with torch.no_grad():
+            # Convert outputs to probabilities
+            probs = torch.softmax(outputs, dim=-1)
+            confidence, predicted_classes = probs.max(dim=-1)
+            
+            # Get distributions
+            target_counts = torch.bincount(targets.flatten(), minlength=11)
+            pred_counts = torch.bincount(predictions.flatten(), minlength=11)
+            
+            # Calculate average confidence per class
+            class_confidences = {i: [] for i in range(11)}
+            for idx, pred in enumerate(predicted_classes.flatten()):
+                class_confidences[pred.item()].append(confidence[idx].item())
+            
+            avg_confidences = {
+                cls: sum(confs)/len(confs) if confs else 0 
+                for cls, confs in class_confidences.items()
+            }
+            
+            self.logger.debug(f"\nDetailed Analysis for Task {task_id}:")
+            self.logger.debug("Target Distribution:")
+            for cls, count in enumerate(target_counts):
+                if count > 0:
+                    self.logger.debug(f"  Class {cls}: {count} instances ({count/len(targets.flatten())*100:.1f}%)")
+            
+            self.logger.debug("\nPrediction Distribution:")
+            for cls, count in enumerate(pred_counts):
+                if count > 0:
+                    self.logger.debug(
+                        f"  Class {cls}: {count} predictions "
+                        f"({count/len(predictions.flatten())*100:.1f}%) "
+                        f"[avg conf: {avg_confidences[cls]:.3f}]"
+                    )
+            
+            # Analyze worst mistakes
+            mistakes = []
+            for i, (pred, target) in enumerate(zip(predictions.flatten(), targets.flatten())):
+                if pred != target:
+                    conf = confidence.flatten()[i]
+                    mistakes.append((i, pred.item(), target.item(), conf.item()))
+            
+            if mistakes:
+                self.logger.debug("\nWorst Mistakes (highest confidence errors):")
+                for pos, pred, target, conf in sorted(mistakes, key=lambda x: x[3], reverse=True)[:5]:
+                    self.logger.debug(
+                        f"  Position {pos}: Predicted {pred} (conf: {conf:.3f}) "
+                        f"but was {target}"
+                    )
+            
+            return {
+                'target_distribution': target_counts.tolist(),
+                'prediction_distribution': pred_counts.tolist(),
+                'average_confidences': avg_confidences,
+                'mistakes': mistakes[:5]  # Store top 5 mistakes
+            }
+    
 def main():
     """Main entry point with error handling"""
     try:
