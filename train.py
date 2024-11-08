@@ -54,6 +54,8 @@ class TransformerTrainer(pl.LightningModule):
             lora_rank=config.model.lora_rank  # Pass lora_rank here
         )
 
+        self.dropout = self.model.dropout  # Expose dropout attribute
+
         # Enable QAT
         self.model.train()  # Ensure model is in training mode for QAT
         self.model = torch.quantization.prepare_qat(self.model)  # Prepare model for QAT
