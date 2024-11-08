@@ -48,10 +48,10 @@ import torch
 import logging
 
 precision = 32  # Set to 16 for mixed precision, 32 for full precision, etc.
-TRAIN_FROM_CHECKPOINT = False  # Set to True to resume training from a checkpoint
+TRAIN_FROM_CHECKPOINT = True  # Set to True to resume training from a checkpoint
 # These parameters should be treated as modifiable from the main run_model.py script
 
-lora_rank = 16  # Commonly used values: 1, 2, 4, 8, 16
+lora_rank = 128  # Commonly used values: 1, 2, 4, 8, 16
 # Explanation:
 # - The `lora_rank` parameter determines the rank of the low-rank matrices used in LoRA.
 # - Commonly used values are typically small integers like 1, 2, 4, 8, or 16.
@@ -77,8 +77,8 @@ batch_size = 47  # Batch size for DataLoader
 dropout_rate = 0.15  # Dropout rate for the model
 synthetic_dir = 'sythtraining'
 include_synthetic_training_data = True  # Set to True to include synthetic data
-CHECKPOINT_PATH = ''  # Correct path
-CHECKPOINT_PATH = ''  # Correct path
+
+CHECKPOINT_PATH = '/Users/larryf/Desktop/Jarc_Cur/epoch=97-step=42826.ckpt'  # Ensure this path is correct
 checkpoint_path = CHECKPOINT_PATH  # Ensure this is defined before use
 
 FAST_DEV_RUN = False  # Set to True to enable fast development run
@@ -250,7 +250,7 @@ class Config:
         self.dropout = self.model.dropout
         self.context_encoder_d_model = self.model.context_encoder_d_model
         self.context_encoder_heads = self.model.context_encoder_heads
-        self.checkpoint_path = CHECKPOINT_PATH  # Set checkpoint_path here
+        self.checkpoint_path = CHECKPOINT_PATH  # Ensure this path is correct
     def validate_config(self):
         """Validate configuration values"""
         assert self.training.batch_size > 0, "Batch size must be positive"
