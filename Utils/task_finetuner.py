@@ -297,40 +297,102 @@ class TaskFineTuner:
             self.logger.error(f"Tensor validation failed for {name}: {str(e)}")
             raise
 
-    def _evaluate_finetuned_model(self, model, src, tgt, ctx_input, ctx_output, base_metrics, trainer):
-        """Evaluate fine-tuned model with comprehensive metrics."""
-        try:
-            model.eval()
-            with torch.no_grad():
-                # Prepare inputs
-                src = src.unsqueeze(0).to(self.device)
-                tgt = tgt.unsqueeze(0).to(self.device)
-                ctx_input = ctx_input.unsqueeze(0).to(self.device)
-                ctx_output = ctx_output.unsqueeze(0).to(self.device)
-                
-                # Get prediction
-                prediction = model(src, tgt, ctx_input, ctx_output)
-                prediction = prediction.argmax(dim=-1)
-                
-                # Calculate metrics
-                final_acc = (prediction.cpu() == tgt.cpu().long()).float().mean().item()
-                accuracy_improvement = final_acc - base_metrics['accuracy']
-                
-                return {
-                    'val_loss': trainer.callback_metrics.get('val_loss', float('inf')).item(),
-                    'base_accuracy': base_metrics['accuracy'],
-                    'base_prediction': base_metrics['prediction'].flatten().tolist(),
-                    'target': tgt.cpu().flatten().tolist(),
-                    'final_prediction': prediction.cpu().flatten().tolist(),
-                    'final_accuracy': final_acc,
-                    'improvement': accuracy_improvement,
-                    'converged_epoch': trainer.current_epoch,
-                    'prediction_distribution': prediction.cpu().unique(return_counts=True)
+    def run_all_tasks(self, train_loader, val_loader, task_id_map, selected_task_ids=None):
+        """Fine-tune and evaluate specified tasks. If no tasks are specified, fine-tune all tasks."""
+        self.logger.info("Starting fine-tuning for all tasks")
+
+        # Create a reverse mapping from index to task_id
+        idx_to_task_id = {idx: task_id for task_id, idx in task_id_map.items()}
+
+        # Get test examples for each task
+        test_examples = {}
+        for batch in val_loader:
+            src, tgt, ctx_input, ctx_output, task_ids = batch
+            # Iterate through the batch to find a test example for each task_id
+            for i, task_id_idx in enumerate(task_ids):
+                task_id = idx_to_task_id[task_id_idx.item()]
+                if selected_task_ids and task_id not in selected_task_ids:
+                    continue  # Skip tasks not selected
+                if task_id not in test_examples:
+                    test_examples[task_id] = (
+                        src[i], 
+                        tgt[i], 
+                        ctx_input[i], 
+                        ctx_output[i], 
+                        task_ids[i]
+                    )
+            # Optionally, break early if all selected tasks have been assigned
+            if selected_task_ids and len(test_examples) >= len(selected_task_ids):
+                break
+
+        if not test_examples:
+            self.logger.error("No test examples found for any tasks.")
+            raise ValueError("No test examples found for any tasks.")
+
+        # Determine the list of tasks to process
+        if selected_task_ids:
+            tasks_to_process = selected_task_ids
+        else:
+            tasks_to_process = list(task_id_map.keys())
+
+        # Process each task with a progress bar
+        for task_id in tqdm(tasks_to_process, desc="Fine-tuning Tasks", unit="task"):
+            try:
+                if task_id not in test_examples:
+                    self.logger.error(f"No test example found for task {task_id}. Skipping.")
+                    self.results[task_id] = {'error': 'No test example found.'}
+                    self.metrics_collector.add_result(task_id, {'error': 'No test example found.'})
+                    continue
+
+                # Prepare task data
+                task_train_loader, task_val_loader = self.prepare_task_data(
+                    train_loader, val_loader, task_id, task_id_map
+                )
+
+                # Fine-tune and evaluate
+                metrics = self.finetune_task(
+                    task_id,
+                    task_train_loader,
+                    task_val_loader,
+                    test_examples[task_id]
+                )
+
+                self.logger.info(f"Completed task {task_id} - Val Loss: {metrics['val_loss']:.4f}")
+
+            except Exception as e:
+                self.logger.error(f"Failed processing task {task_id}: {str(e)}")
+                self.results[task_id] = {'error': str(e)}
+                self.metrics_collector.add_result(task_id, {'error': str(e)})
+
+        # **Update the JSON Structure before saving**
+        for task_id in list(self.results.keys()):
+            if 'error' not in self.results[task_id]:
+                formatted_results = {
+                    'test_details': {
+                        'target': self.results[task_id]['target'],
+                        'input_shape': list(test_examples[task_id][0].shape)
+                    },
+                    'base_model': {
+                        'prediction': self.results[task_id]['base_prediction'],
+                        'accuracy': self.results[task_id]['base_accuracy']
+                    },
+                    'fine_tuned_model': {
+                        'prediction': self.results[task_id]['final_prediction'],
+                        'accuracy': self.results[task_id]['final_accuracy'],
+                        'val_loss': self.results[task_id]['val_loss'],
+                        'converged_epoch': self.results[task_id]['converged_epoch']
+                    },
+                    'improvement': self.results[task_id]['accuracy_improvement']
                 }
-                
-        except Exception as e:
-            self.logger.error(f"Fine-tuned model evaluation failed: {str(e)}")
-            raise
+                self.results[task_id] = formatted_results
+
+        # Then save as before:
+        results_file = self.save_dir / 'final_results.json'
+        with open(results_file, 'w') as f:
+            json.dump(self.results, f, indent=2)
+        self.logger.info(f"Saved final results to {results_file}")
+
+        return self.results
         """Fine-tune and evaluate specified tasks. If no tasks are specified, fine-tune all tasks."""
         self.logger.info("Starting fine-tuning for all tasks")
 
