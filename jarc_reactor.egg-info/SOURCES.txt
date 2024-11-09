@@ -1,8 +1,0 @@
-README.md
-setup.py
-jarc_reactor.egg-info/PKG-INFO
-jarc_reactor.egg-info/SOURCES.txt
-jarc_reactor.egg-info/dependency_links.txt
-jarc_reactor.egg-info/entry_points.txt
-jarc_reactor.egg-info/requires.txt
-jarc_reactor.egg-info/top_level.txt

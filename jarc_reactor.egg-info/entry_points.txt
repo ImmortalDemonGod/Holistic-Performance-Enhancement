@@ -1,4 +1,0 @@
-[console_scripts]
-jarc-evaluate = jarc_reactor.evaluate:main
-jarc-optimize = jarc_reactor.optuna.optimize:main
-jarc-train = jarc_reactor.run_model:main
