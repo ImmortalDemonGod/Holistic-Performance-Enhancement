@@ -181,32 +181,6 @@ class SchedulerConfig:
         self.T_mult = 2  # Multiplicative factor to increase T_0 after each restart
         self.eta_min = 4e-7  # Minimum learning rate during annealing
 class Config:
-    def __init__(self):
-        self.model = ModelConfig()
-        self.training = TrainingConfig(
-            batch_size=batch_size,
-            learning_rate=learning_rate,
-            include_synthetic_training_data=include_synthetic_training_data,
-            num_epochs=num_epochs,
-            device_choice=device_choice,
-            precision=precision,
-            fast_dev_run=FAST_DEV_RUN,
-            train_from_checkpoint=TRAIN_FROM_CHECKPOINT
-        )
-        self.logging = LoggingConfig()
-        self.finetuning = FineTuningConfig()
-        self.optuna = OptunaConfig()
-        self.scheduler = SchedulerConfig()
-        self.use_best_params = False  # Whether to load and use best parameters from Optuna study
-        self.evaluation = EvaluationConfig()  # Add this line
-        
-    def validate_config(self):
-        """Validate configuration values"""
-        assert self.training.batch_size > 0, "Batch size must be positive"
-        assert self.training.learning_rate > 0, "Learning rate must be positive"
-        assert self.training.device_choice in ['cpu', 'gpu'], "device_choice must be 'cpu' or 'gpu'"
-        assert self.training.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
-
     def __init__(self, model=None, training=None, device_choice=None):
         context_dropout_rate = 0.12  # Example value for context encoder dropout
         encoder_dropout_rate = 0.61  # Example value for encoder dropout
@@ -277,6 +251,7 @@ class Config:
         self.context_encoder_d_model = self.model.context_encoder_d_model
         self.context_encoder_heads = self.model.context_encoder_heads
         self.checkpoint_path = CHECKPOINT_PATH  # Ensure this path is correct
+
     def validate_config(self):
         """Validate configuration values"""
         assert self.training.batch_size > 0, "Batch size must be positive"
