@@ -49,7 +49,7 @@ class TrainingConfig:
 import torch
 import logging
 
-precision = 32  # Set to 16 for mixed precision, 32 for full precision, etc.
+precision = 16  # Set to 16 for mixed precision, 32 for full precision, etc.
 TRAIN_FROM_CHECKPOINT = False  # Set to True to resume training from a checkpoint
 # These parameters should be treated as modifiable from the main run_model.py script
 
@@ -65,7 +65,7 @@ use_lora = False
 device_choice = 'gpu' if torch.cuda.is_available() else 'cpu'  # Auto-select device
 calculate_parameters = True  # Whether to calculate and print the total parameter size before training
 run_for_100_epochs = True  # Whether to only run for 100 epochs and estimate time for 20,000 epochs
-num_epochs = 1  # Number of training epochs
+num_epochs = 100  # Number of training epochs
 seq_len = 30  # Sequence length
 input_dim = 30  # Number of features per input row
 d_model = 256  # Transformer model dimension
@@ -75,10 +75,10 @@ heads = 8  # Reduced number of attention heads for efficiency
 d_ff = 512  # Feedforward network dimension
 output_dim = 30  # Number of features per output row
 learning_rate = 0.00002009  # Learning rate
-batch_size = 47  # Batch size for DataLoader
+batch_size = 1  # Batch size for DataLoader
 dropout_rate = 0.15  # Dropout rate for the model
 synthetic_dir = 'sythtraining'
-include_synthetic_training_data = False  # Set to True to include synthetic data
+include_synthetic_training_data = True  # Set to True to include synthetic data
 
 CHECKPOINT_PATH = '/workspaces/JARC-Reactor/lightning_logs/version_20/checkpoints/epoch=0-step=1.ckpt'  # Ensure this path is correct
 checkpoint_path = CHECKPOINT_PATH  # Ensure this is defined before use

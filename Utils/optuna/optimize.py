@@ -28,11 +28,15 @@ logging.basicConfig(
 )                                                                                                      
 logger = logging.getLogger(__name__)                                                                   
                                                                                                     
-def run_optimization(config, delete_study=False):                                                                          
+def run_optimization(config, delete_study=False):
     """Main optimization entry point"""
     try:
         logger.info("Starting optimization")
         logger.debug(f"Using config: {vars(config.optuna)}")
+
+        # Enable synthetic data for optimization
+        config.training.include_synthetic_training_data = True
+        logger.info("Using synthetic data for hyperparameter optimization")
 
         # Optionally delete existing study
         if delete_study:
@@ -40,9 +44,14 @@ def run_optimization(config, delete_study=False):
             optuna.delete_study(study_name=config.optuna.study_name, storage=config.optuna.storage_url)
             logger.info(f"Deleted study '{config.optuna.study_name}'")
 
-        # **Add: Load datasets once before defining the objective**
+        # Load datasets once before defining the objective
         logger.info("Loading datasets once for all trials.")
         train_dataset, val_dataset = prepare_data(return_datasets=True)
+        
+        # Log dataset sizes
+        logger.info(f"Loaded {len(train_dataset)} training examples")
+        logger.info(f"Loaded {len(val_dataset)} validation examples")
+
         study = optuna.create_study(
             study_name=config.optuna.study_name,
             storage=config.optuna.storage_url,
@@ -50,14 +59,14 @@ def run_optimization(config, delete_study=False):
             load_if_exists=True
         )
 
-        # **Modify: Pass preloaded datasets to create_objective**
+        # Pass preloaded datasets to create_objective
         objective = create_objective(config, train_dataset, val_dataset)
 
         # Run optimization
         logger.info(f"Running {config.optuna.n_trials} trials")
         study.optimize(objective, n_trials=config.optuna.n_trials)
 
-        # **Add logging for optimization results**
+        # Add logging for optimization results
         logger.info("Optimization completed")
         best_trial = study.best_trial
         logger.info(f"Best trial: {best_trial.number}")

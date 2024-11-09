@@ -34,138 +34,86 @@ def create_trial_config(trial, base_config):
     """Create a new config with trial-suggested values"""
     try:
         logger.debug("Creating trial config")
-        ranges = base_config.optuna.param_ranges
         
-        # Create new config objects with trial-suggested values
-        batch_size = trial.suggest_int("batch_size", 8, 256, step=8)
-        learning_rate = trial.suggest_float("learning_rate", 1e-6, 1e-1, log=True)
-        include_synthetic_training_data = base_config.training.include_synthetic_training_data
-        num_epochs = trial.suggest_int("max_epochs", 4, 5, step=1)
-        device_choice = base_config.training.device_choice
-        precision = base_config.training.precision
-        model_config = base_config.model.__class__()
-        training_config = base_config.training.__class__(
-            batch_size=batch_size,
-            learning_rate=learning_rate,
-            include_synthetic_training_data=include_synthetic_training_data,
-            num_epochs=num_epochs,
-            device_choice=device_choice,
-            precision=precision,
-            fast_dev_run=base_config.training.FAST_DEV_RUN
+        # First suggest number of heads (power of 2)
+        heads = trial.suggest_categorical("heads", [2, 4, 8, 16, 32])
+        
+        # Then suggest d_model ensuring it's divisible by heads
+        d_model_min = ((32 + heads - 1) // heads) * heads  # Round up to nearest multiple of heads
+        d_model_max = (2048 // heads) * heads  # Round down to nearest multiple of heads
+        d_model = trial.suggest_int("d_model", d_model_min, d_model_max, step=heads)
+        
+        logger.debug(f"Selected heads={heads}, d_model={d_model}")
+        assert d_model % heads == 0, f"d_model ({d_model}) must be divisible by heads ({heads})"
+        
+        # Ensure d_ff is larger than d_model
+        d_ff_min = max(64, d_model)
+        d_ff = trial.suggest_int("d_ff", d_ff_min, 2048, step=64)
+        
+        # Other parameters
+        encoder_layers = trial.suggest_int("encoder_layers", 1, 12)
+        decoder_layers = trial.suggest_int("decoder_layers", 1, 12)
+        dropout = trial.suggest_float("dropout", 0.01, 0.7)
+        
+        # Context encoder parameters
+        context_encoder_heads = trial.suggest_categorical("context_encoder_heads", [2, 4, 8])
+        context_encoder_d_model = trial.suggest_int(
+            "context_encoder_d_model",
+            context_encoder_heads * 16,  # Minimum size that's divisible by heads
+            512,
+            step=context_encoder_heads
         )
         
-        # First determine core architecture parameters
-        model_config.heads = trial.suggest_categorical("heads", [2, 4, 8, 16])
+        # Create new model config
+        model_config = base_config.model.__class__(
+            input_dim=base_config.model.input_dim,
+            seq_len=base_config.model.seq_len,
+            d_model=d_model,
+            encoder_layers=encoder_layers,
+            decoder_layers=decoder_layers,
+            heads=heads,
+            d_ff=d_ff,
+            output_dim=base_config.model.output_dim,
+            dropout_rate=dropout,
+            context_encoder_d_model=context_encoder_d_model,
+            context_encoder_heads=context_encoder_heads,
+            context_dropout_rate=base_config.model.context_dropout_rate,
+            encoder_dropout_rate=base_config.model.encoder_dropout_rate,
+            decoder_dropout_rate=base_config.model.decoder_dropout_rate,
+            lora_rank=base_config.model.lora_rank,
+            use_lora=base_config.model.use_lora,
+            checkpoint_path=base_config.model.checkpoint_path
+        )
         
-        # Ensure d_model is divisible by both heads and 4
-        d_model = trial.suggest_int(
-            "d_model", 
-            32,                # Updated lower bound
-            512,               # Updated upper bound
-            step=16            # Ensure 'step' is a keyword
+        # Create training config
+        training_config = base_config.training.__class__(
+            batch_size=trial.suggest_int("batch_size", 8, 512, step=8),
+            learning_rate=trial.suggest_float("learning_rate", 1e-6, 1e-1, log=True),
+            include_synthetic_training_data=base_config.training.include_synthetic_training_data,
+            num_epochs=trial.suggest_int("max_epochs", 4, 5, step=1),
+            device_choice=base_config.training.device_choice,
+            precision=base_config.training.precision,
+            fast_dev_run=base_config.training.FAST_DEV_RUN,
+            train_from_checkpoint=base_config.training.train_from_checkpoint
+        )
+        
+        # Create a new config instance
+        new_config = Config(
+            model=model_config,
+            training=training_config
         )
         
         # Validate dimensions
-        if d_model % model_config.heads != 0 or d_model % 4 != 0:
-            logger.warning(f"Invalid dimension combination: d_model={d_model}, heads={model_config.heads}")
-            raise optuna.TrialPruned()
-            
-        model_config.d_model = d_model
-        
-        # Layer configuration
-        low, high = base_config.optuna.param_ranges["encoder_layers"]
-        model_config.encoder_layers = trial.suggest_int(
-            "encoder_layers",
-            low=low,
-            high=high,
-            step=1
-        )
-        low, high = base_config.optuna.param_ranges["decoder_layers"]
-        model_config.decoder_layers = trial.suggest_int(
-            "decoder_layers",
-            low=low,
-            high=high,
-            step=1
-        )
-        
-        # Suggest d_ff, ensuring it's greater than d_model
-        min_d_ff = ceil((d_model + 64) / 64) * 64
-        if min_d_ff > base_config.optuna.param_ranges["d_ff"][1]:
-            logger.warning(f"Cannot set d_ff > d_model={d_model} within the parameter range.")
-            raise optuna.TrialPruned()
-        
-        model_config.d_ff = trial.suggest_int(
-            "d_ff", 
-            max(min_d_ff, 64),     # Updated lower bound
-            base_config.optuna.param_ranges["d_ff"][1],
-            step=64                # Ensure 'step' is a keyword
-        )
-        
-        # Dropout
-        model_config.dropout = trial.suggest_float(
-            "dropout",
-            0.05,                  # Updated lower bound
-            0.7,                   # Updated upper bound
-            step=None,             # Continuous range
-            log=False               # Linear scale
-        )
-        
-        # Context encoder parameters
-        model_config.context_encoder_d_model = trial.suggest_int(
-            "context_encoder_d_model",
-            32,                    # Updated lower bound
-            512,                   # Updated upper bound
-            step=32
-        )
-        model_config.context_encoder_heads = trial.suggest_categorical(
-            "context_encoder_heads",
-            [2, 4, 8]          # Fixed list of choices
-        )
-        
-        # Training parameters
-        training_config.batch_size = trial.suggest_int(
-            "batch_size",
-            8,                      # Updated lower bound
-            256,                    # Updated upper bound
-            step=8                  # Ensure 'step' is a keyword
-        )
-        training_config.learning_rate = trial.suggest_float(
-            "learning_rate",
-            1e-6,                   # Updated lower bound
-            1e-1,                   # Updated upper bound
-            log=True                # Log scale remains for learning rates
-        )
-        
-        # Suggest gradient_clip_val
-        training_config.gradient_clip_val = trial.suggest_float(
-            "gradient_clip_val",
-            0.0,       # Minimum value
-            5.0,       # Maximum value
-            step=0.1   # Ensure 'step' is a keyword
-        )
-        low, high, step = base_config.optuna.param_ranges["max_epochs"]
-        low, high, step = base_config.optuna.param_ranges["max_epochs"]
-        training_config.max_epochs = trial.suggest_int(
-            "max_epochs",
-            low=low,
-            high=high,
-            step=step
-        )
-        logger.debug(f"Set max_epochs to {training_config.max_epochs}")
-        
-        logger.debug(f"Model dimensions:")
-        logger.debug(f"  d_model: {model_config.d_model}")
-        logger.debug(f"  heads: {model_config.heads}")
-        logger.debug(f"  head_dim: {model_config.d_model // model_config.heads}")
-        logger.debug(f"  d_ff: {model_config.d_ff}")
-        logger.debug(f"  context_encoder_d_model: {model_config.context_encoder_d_model}")
+        if not validate_dimensions(model_config):
+            raise ValueError("Invalid model dimensions")
         
         logger.debug(f"Trial config created with params: {trial.params}")
-        return Config(model=model_config, training=training_config)
+        return new_config
         
     except Exception as e:
         logger.error(f"Error creating trial config: {str(e)}")
         raise
+
 
 def validate_dimensions(model):
     """Validate model dimensions before training"""
@@ -220,21 +168,21 @@ def validate_dimensions(model):
 from torch.utils.data import DataLoader  # Ensure DataLoader is imported
 
 def create_objective(base_config, train_dataset, val_dataset):
-    """Creates an objective function with closure over base_config"""
+    """Creates an objective function with closure over base_config and datasets"""
 
     def objective(trial):
         logger.debug(f"\nStarting trial {trial.number}")
         try:
-            # Create config and model using the factory function
+            # Create config for this trial
             trial_config = create_trial_config(trial, base_config)
         
-            # Use the factory function to create the model
+            # Create model
             model = create_transformer_trainer(
                 config=trial_config,
                 checkpoint_path=None
             )
 
-            # **Create DataLoaders with the suggested batch_size from trial_config**
+            # Create DataLoaders from existing datasets
             batch_size = trial_config.training.batch_size
             train_loader = DataLoader(
                 train_dataset, 
@@ -282,8 +230,7 @@ def create_objective(base_config, train_dataset, val_dataset):
                 log_every_n_steps=10  # Set log_every_n_steps to 10 to avoid warnings
             )
             
-            # Prepare data loaders based on trial_config.training.batch_size
-            train_loader, val_loader = prepare_data(batch_size=trial_config.training.batch_size)
+            # Remove redundant data loading - we already have the loaders
             
             # Log memory usage before training
             if torch.cuda.is_available():
@@ -295,7 +242,7 @@ def create_objective(base_config, train_dataset, val_dataset):
             logger.debug("Starting training")
             trainer.fit(model, train_loader, val_loader)
             
-            # Retrieve metrics
+            # Rest of the code remains the same...
             def get_metric(metric_name, default):
                 metric = trainer.callback_metrics.get(metric_name, default)
                 return metric.item() if isinstance(metric, torch.Tensor) else metric
@@ -306,16 +253,13 @@ def create_objective(base_config, train_dataset, val_dataset):
                 val_accuracy=get_metric("val_accuracy", 0.0)
             )
             
-            # Log memory usage after training
             if torch.cuda.is_available():
                 memory_after = torch.cuda.memory_allocated() / 1e9
                 metrics.memory_used = memory_after - memory_before
                 logger.debug(f"GPU memory used: {metrics.memory_used:.2f} GB")
             
-            # Log metrics
             metrics.log_metrics()
             
-            # Prune trial if validation loss is invalid
             if not metrics.val_loss or torch.isnan(torch.tensor(metrics.val_loss)):
                 logger.warning("Invalid validation loss detected")
                 raise optuna.TrialPruned()
