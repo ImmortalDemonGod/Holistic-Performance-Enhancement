@@ -5,6 +5,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 import torch
+import math
 from tqdm import tqdm
 from jarc_reactor.config import Config
 from jarc_reactor.utils.model_factory import create_transformer_trainer
