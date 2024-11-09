@@ -111,51 +111,51 @@ class TransformerModel(nn.Module):
         """
         # 1. Initial Setup and Input Processing
         src = self.quant(src).float()
-        self.debug_shape(src, "1. Initial input")
+        #self.debug_shape(src, "1. Initial input")
         
         # Get batch size from input
         batch_size = src.size(0)
-        print(f"\nProcessing batch of size: {batch_size}")
+        #print(f"\nProcessing batch of size: {batch_size}")
         
         # 2. Reshape input from [batch, seq_len, input_dim] to [batch, grid_size, 1]
         src_flat = src.view(batch_size, -1, 1)  # Flatten the grid to a sequence
-        self.debug_shape(src_flat, "2. After flattening to sequence")
+        #self.debug_shape(src_flat, "2. After flattening to sequence")
         
         # 3. Project each grid cell to d_model dimensions
         x = self.input_fc(src_flat)  # Shape: [batch, grid_size, d_model]
-        self.debug_shape(x, "3. After initial projection")
+        #self.debug_shape(x, "3. After initial projection")
         
         # 4. Add positional encoding
         x = self.positional_encoding(x)
-        self.debug_shape(x, "4. After positional encoding")
+       # self.debug_shape(x, "4. After positional encoding")
         x = self.dropout(x)
-        self.debug_shape(x, "4b. After dropout")
+        #self.debug_shape(x, "4b. After dropout")
         
         # 5. Process context if available
         if ctx_input is not None and ctx_output is not None:
             ctx_input = self.quant(ctx_input)
             ctx_output = self.quant(ctx_output)
-            print("\nProcessing context:")
-            self.debug_shape(ctx_input, "5. Context input")
-            self.debug_shape(ctx_output, "5. Context output")
+            #print("\nProcessing context:")
+           # self.debug_shape(ctx_input, "5. Context input")
+            #self.debug_shape(ctx_output, "5. Context output")
             
             context_embedding = self.context_encoder(ctx_input, ctx_output)
-            self.debug_shape(context_embedding, "5a. Context embedding")
+            #self.debug_shape(context_embedding, "5a. Context embedding")
             
             context_expanded = context_embedding.unsqueeze(1).expand(-1, x.size(1), -1)
-            self.debug_shape(context_expanded, "5b. Expanded context")
+            #self.debug_shape(context_expanded, "5b. Expanded context")
             
             x = self.context_integration(torch.cat([x, context_expanded], dim=-1))
-            self.debug_shape(x, "5c. After context integration")
+            #self.debug_shape(x, "5c. After context integration")
             x = self.context_dropout(x)
-            self.debug_shape(x, "5d. After context dropout")
+            #self.debug_shape(x, "5d. After context dropout")
         
         # 6. Encoder
         if self.encoder is not None:
             memory = self.encoder(x)
-            self.debug_shape(memory, "6a. After encoder")
+            #self.debug_shape(memory, "6a. After encoder")
             memory = self.encoder_dropout(memory)
-            self.debug_shape(memory, "6b. After encoder dropout")
+            #self.debug_shape(memory, "6b. After encoder dropout")
         else:
             memory = x
         
@@ -163,37 +163,37 @@ class TransformerModel(nn.Module):
         if self.decoder is not None:
             # Process target similarly to source
             tgt = self.quant(tgt).float()
-            self.debug_shape(tgt, "7a. Initial target")
+            #self.debug_shape(tgt, "7a. Initial target")
             
             tgt_flat = tgt.view(batch_size, -1, 1)
-            self.debug_shape(tgt_flat, "7b. Flattened target")
+            #self.debug_shape(tgt_flat, "7b. Flattened target")
             
             tgt_proj = self.input_fc(tgt_flat)
-            self.debug_shape(tgt_proj, "7c. Projected target")
+            #self.debug_shape(tgt_proj, "7c. Projected target")
             
             tgt_proj = self.positional_encoding(tgt_proj)
-            self.debug_shape(tgt_proj, "7d. Target with positional encoding")
+            #self.debug_shape(tgt_proj, "7d. Target with positional encoding")
             
             tgt_proj = self.dropout(tgt_proj)
             
             output = self.decoder(tgt_proj, memory)
-            self.debug_shape(output, "7e. After decoder")
+            #self.debug_shape(output, "7e. After decoder")
             output = self.decoder_dropout(output)
-            self.debug_shape(output, "7f. After decoder dropout")
+            #self.debug_shape(output, "7f. After decoder dropout")
         else:
             output = memory
         
         # 8. Final projections
         output = self.output_projection(output)
-        self.debug_shape(output, "8a. After output projection")
+        #self.debug_shape(output, "8a. After output projection")
         
         output = self.output_fc(output)
-        self.debug_shape(output, "8b. After final linear layer")
+        #self.debug_shape(output, "8b. After final linear layer")
         
         # 9. Reshape back to grid structure
         try:
             output = output.view(batch_size, self.seq_len, self.seq_len, -1)
-            self.debug_shape(output, "9. Final output (grid structure)")
+            #self.debug_shape(output, "9. Final output (grid structure)")
         except RuntimeError as e:
             print("\nERROR during final reshape:")
             print(f"Attempted to reshape tensor of size {output.shape}")
