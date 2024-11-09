@@ -45,7 +45,7 @@ def run_optimization(config, delete_study=False):
 
         # Load datasets once before defining the objective
         logger.info("Loading datasets once for all trials.")
-        train_dataset, val_dataset = prepare_data(return_datasets=True)
+        train_dataset, val_dataset = prepare_data(directory=config.training.training_data_dir, return_datasets=True)
         
         # Log dataset sizes
         logger.info(f"Loaded {len(train_dataset)} training examples")
