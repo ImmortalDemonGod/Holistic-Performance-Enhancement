@@ -193,12 +193,12 @@ data_module = MyDataModule(batch_size=cfg.training.batch_size)
 checkpoint_callback = ModelCheckpoint(
     dirpath='lightning_logs/checkpoints/',  # Updated directory path
     filename='model-step={step}-val_loss={val_loss:.4f}',
-    save_top_k=2,                        # Keep only the 2 best models
+    save_top_k=1,                        # Keep only the 2 best models
     monitor='val_loss',
     mode='min',
-    save_weights_only=True,              # Only save weights to reduce file size and save time
+    save_weights_only=False,              # Only save weights to reduce file size and save time
     every_n_epochs=1,                    # Save once per epoch instead of every step
-    save_last=False,                     # Don't save the last checkpoint
+    save_last=True,                     # Don't save the last checkpoint
     verbose=True
 )
 
