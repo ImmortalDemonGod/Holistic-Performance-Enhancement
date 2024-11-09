@@ -11,12 +11,15 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
 checkpoint_callback = ModelCheckpoint(
-    monitor='val_loss',
-    dirpath='checkpoints/',
-    filename='model-{epoch:02d}-{val_loss:.2f}',
+    dirpath='lightning_logs/checkpoints/',
+    filename='model-{epoch:02d}-{val_loss:.4f}',
     save_top_k=1,
+    monitor='val_loss',
     mode='min',
-    save_weights_only=False  # Ensure full model state is saved
+    save_weights_only=False,
+    every_n_epochs=1,
+    save_last=True,
+    verbose=True
 )
 from transformer_model import TransformerModel
 import torch.nn.functional as F
@@ -62,9 +65,11 @@ class TransformerTrainer(pl.LightningModule):
 
         self.dropout = self.model.dropout  # Expose dropout attribute
 
-        # Enable QAT
-        self.model.train()  # Ensure model is in training mode for QAT
-        self.model = torch.quantization.prepare_qat(self.model)  # Prepare model for QAT
+        # Enable QAT if configured
+        if hasattr(config.training, 'use_qat') and config.training.use_qat:
+            self.model.train()  # Ensure model is in training mode for QAT
+            self.model = torch.quantization.prepare_qat(self.model)
+            logger.info("Model prepared for Quantization-Aware Training")
 
         # Modified criterion to handle padding separately
         self.criterion = nn.CrossEntropyLoss(ignore_index=10)  # Ignore padding tokens
@@ -196,7 +201,7 @@ class TransformerTrainer(pl.LightningModule):
         accuracies = self._compute_accuracy(y_hat, tgt)
         
         # Log metrics
-        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
+        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True, batch_size=tgt.size(0))
         self.log('val_cell_accuracy', accuracies['cell_accuracy'], prog_bar=True)
         self.log('val_grid_accuracy', accuracies['grid_accuracy'], prog_bar=True)
         
@@ -232,5 +237,15 @@ class TransformerTrainer(pl.LightningModule):
                 eta_min=self.config.scheduler.eta_min
             )
             return [optimizer], [scheduler]
-        else:
-            return optimizer
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, 
+            mode='min', 
+            factor=0.5,
+            patience=5,
+            verbose=True
+        )
+        return {
+            'optimizer': optimizer,
+            'lr_scheduler': scheduler,
+            'monitor': 'val_loss'
+        }

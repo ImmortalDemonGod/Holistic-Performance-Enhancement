@@ -212,6 +212,8 @@ trainer = Trainer(
     precision=cfg.training.precision,
     log_every_n_steps=50,
     detect_anomaly=False,
+    enable_checkpointing=True,
+    default_root_dir="lightning_logs"
 )
 
 # Start training and testing
