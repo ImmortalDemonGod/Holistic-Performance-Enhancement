@@ -73,12 +73,12 @@ class TransformerTrainer(pl.LightningModule):
     def debug_batch(self, batch, name=""):
         """Helper function to debug batch data"""
         src, tgt, ctx_input, ctx_output, task_ids = batch
-        logger.info(f"\nDEBUG - Batch {name}:")
-        logger.info(f"Source shape: {src.shape}, dtype: {src.dtype}")
-        logger.info(f"Target shape: {tgt.shape}, dtype: {tgt.dtype}")
-        logger.info(f"Context input shape: {ctx_input.shape if ctx_input is not None else None}")
-        logger.info(f"Context output shape: {ctx_output.shape if ctx_output is not None else None}")
-        logger.info(f"Task IDs: {task_ids}")
+        #logger.info(f"\nDEBUG - Batch {name}:")
+        #logger.info(f"Source shape: {src.shape}, dtype: {src.dtype}")
+        #logger.info(f"Target shape: {tgt.shape}, dtype: {tgt.dtype}")
+        #logger.info(f"Context input shape: {ctx_input.shape if ctx_input is not None else None}")
+        #logger.info(f"Context output shape: {ctx_output.shape if ctx_output is not None else None}")
+        #logger.info(f"Task IDs: {task_ids}")
         return batch
 
     def forward(self, src, tgt, ctx_input=None, ctx_output=None):
@@ -97,19 +97,19 @@ class TransformerTrainer(pl.LightningModule):
         H = W = self.config.model.seq_len
 
         # Debug shapes and dtypes before reshaping
-        logger.info(f"\nDEBUG - Loss computation input:")
-        logger.info(f"y_hat shape: {y_hat.shape}, dtype: {y_hat.dtype}")
-        logger.info(f"target shape: {tgt.shape}, dtype: {tgt.dtype}")
+        #logger.info(f"\nDEBUG - Loss computation input:")
+        #logger.info(f"y_hat shape: {y_hat.shape}, dtype: {y_hat.dtype}")
+        #logger.info(f"target shape: {tgt.shape}, dtype: {tgt.dtype}")
 
         # Reshape while maintaining grid structure
         y_hat_flat = y_hat.reshape(-1, y_hat.size(-1))  # [batch*H*W, num_classes]
         tgt_flat = tgt.reshape(-1).long()  # Convert to long type for CrossEntropyLoss
 
         # Debug shapes after reshaping
-        logger.info(f"\nDEBUG - After reshaping:")
-        logger.info(f"y_hat_flat shape: {y_hat_flat.shape}, dtype: {y_hat_flat.dtype}")
-        logger.info(f"tgt_flat shape: {tgt_flat.shape}, dtype: {tgt_flat.dtype}")
-        logger.info(f"Target value range: min={tgt_flat.min().item()}, max={tgt_flat.max().item()}")
+        #logger.info(f"\nDEBUG - After reshaping:")
+        #logger.info(f"y_hat_flat shape: {y_hat_flat.shape}, dtype: {y_hat_flat.dtype}")
+        #logger.info(f"tgt_flat shape: {tgt_flat.shape}, dtype: {tgt_flat.dtype}")
+        #logger.info(f"Target value range: min={tgt_flat.min().item()}, max={tgt_flat.max().item()}")
 
         return self.criterion(y_hat_flat, tgt_flat)
 
@@ -127,9 +127,9 @@ class TransformerTrainer(pl.LightningModule):
             predictions = torch.argmax(y_hat, dim=-1)  # [batch, H, W]
             
             # Debug predictions
-            logger.info(f"\nDEBUG - Accuracy computation:")
-            logger.info(f"Predictions shape: {predictions.shape}, dtype: {predictions.dtype}")
-            logger.info(f"Target shape: {tgt.shape}, dtype: {tgt.dtype}")
+            #logger.info(f"\nDEBUG - Accuracy computation:")
+            #logger.info(f"Predictions shape: {predictions.shape}, dtype: {predictions.dtype}")
+            #logger.info(f"Target shape: {tgt.shape}, dtype: {tgt.dtype}")
             
             # Create mask for non-padding elements
             valid_mask = (tgt != 10)
@@ -143,8 +143,8 @@ class TransformerTrainer(pl.LightningModule):
             grid_accuracy = grid_matches.float().mean()
             
             # Debug accuracy metrics
-            logger.info(f"Cell accuracy: {cell_accuracy.item():.4f}")
-            logger.info(f"Grid accuracy: {grid_accuracy.item():.4f}")
+            #logger.info(f"Cell accuracy: {cell_accuracy.item():.4f}")
+            #logger.info(f"Grid accuracy: {grid_accuracy.item():.4f}")
             
             return {
                 'cell_accuracy': cell_accuracy,
@@ -153,7 +153,7 @@ class TransformerTrainer(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         # Debug incoming batch
-        batch = self.debug_batch(batch, "training")
+        #batch = self.debug_batch(batch, "training")
         src, tgt, ctx_input, ctx_output, task_ids = batch
         
         # Convert target to long type
@@ -177,7 +177,7 @@ class TransformerTrainer(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         # Debug incoming batch
-        batch = self.debug_batch(batch, "validation")
+        #batch = self.debug_batch(batch, "validation")
         src, tgt, ctx_input, ctx_output, task_ids = batch
         
         # Convert target to long type
@@ -200,7 +200,7 @@ class TransformerTrainer(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         # Debug incoming batch
-        batch = self.debug_batch(batch, "test")
+        #batch = self.debug_batch(batch, "test")
         src, tgt, ctx_input, ctx_output, task_ids = batch
         
         # Convert target to long type
