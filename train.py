@@ -37,6 +37,8 @@ class TransformerTrainer(pl.LightningModule):
         self.config = config  # Store the config object
         
         logger.info("Initializing TransformerTrainer")
+        # Ensure logger propagates to root logger
+        self.logger.propagate = True
 
         # Initialize the model first
         # Initialize LoRA modules
