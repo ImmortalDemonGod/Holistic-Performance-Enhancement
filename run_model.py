@@ -1,3 +1,47 @@
+import logging
+import sys
+
+# Initialize logging before importing other modules
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+# Create console handler for stdout
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.INFO)
+
+# Create file handler for logging to a file
+file_handler = logging.FileHandler('training.log')
+file_handler.setLevel(logging.INFO)
+
+# Define logging format
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+# Add handlers to the root logger
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+
+# Redirect stdout and stderr to the logger
+class StreamToLogger(object):
+    """
+    Redirect writes to a logger.
+    """
+    def __init__(self, logger, log_level=logging.INFO):
+        self.logger = logger
+        self.log_level = log_level
+        self.linebuf = ''
+
+    def write(self, buf):
+        for line in buf.rstrip().splitlines():
+            self.logger.log(self.log_level, line.rstrip())
+
+    def flush(self):
+        pass
+
+sys.stdout = StreamToLogger(logger, logging.INFO)
+sys.stderr = StreamToLogger(logger, logging.ERROR)
+
 from Utils.optuna.best_params_manager import BestParamsManager
 import signal
 import sys

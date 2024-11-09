@@ -27,7 +27,6 @@ import torch
 from Utils.data_preparation import prepare_data
 
 # Initialize logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -37,8 +36,7 @@ class TransformerTrainer(pl.LightningModule):
         self.config = config  # Store the config object
         
         logger.info("Initializing TransformerTrainer")
-        # Ensure logger propagates to root logger
-        logger.propagate = True
+        logger.propagate = True  # Ensure logger propagates to root logger
 
         # Initialize the model first
         # Initialize LoRA modules
