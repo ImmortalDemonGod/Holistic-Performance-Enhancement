@@ -190,18 +190,15 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
     successful_files = 0
     total_files = 0
 
-    # Inspect data structure for a limited number of files
-    for dir_name in ['training']:
-        for filename in os.listdir(dir_name):
-            if filename.endswith('.json'):
-                total_files += 1
-                if successful_files < log_limit:
-                    if inspect_data_structure(filename, dir_name):
-                        successful_files += 1
-                else:
-                    break
-        if successful_files >= log_limit:
-            break
+    # Inspect data structure for a limited number of files in the provided directory
+    for filename in os.listdir(directory):
+        if filename.endswith('.json'):
+            total_files += 1
+            if successful_files < log_limit:
+                if inspect_data_structure(filename, directory):
+                    successful_files += 1
+            else:
+                break
 
     logger.info(f"Successfully inspected {successful_files}/{total_files} files for structure.")
 
