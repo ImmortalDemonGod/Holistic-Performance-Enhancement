@@ -1,4 +1,5 @@
 # transformer_model.py
+# transformer_model.py
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -14,8 +15,22 @@ class TransformerModel(nn.Module):
         # Create a config instance to access dropout rates
         config = Config()
         
-        self.input_fc_dim = nn.Linear(input_dim, d_model)
-        self.input_fc_seq = nn.Linear(seq_len, d_model)  # Ensure consistent output dimension
+        # Store all dimension-related parameters
+        self.input_dim = input_dim
+        self.seq_len = seq_len
+        self.d_model = d_model
+        self.grid_size = seq_len * seq_len  # Total elements in grid (e.g., 900 for 30x30)
+        
+        # DEBUG: Print initialization dimensions
+        print(f"\nInitializing TransformerModel with dimensions:")
+        print(f"input_dim: {input_dim}, seq_len: {seq_len}, d_model: {d_model}")
+        print(f"grid_size (seq_len * seq_len): {self.grid_size}")
+        
+        # Modified input projections for grid structure
+        self.input_fc = nn.Linear(1, d_model)  # Project each grid cell to d_model dimensions
+        print(f"Input projection will convert each element from 1 → {d_model} dimensions")
+        
+        # Positional encoding and dropout
         self.positional_encoding = Grid2DPositionalEncoding(d_model, max_height=seq_len, max_width=input_dim)
         self.dropout = nn.Dropout(p=dropout_rate)  # Initialize dropout layer
 
@@ -40,6 +55,7 @@ class TransformerModel(nn.Module):
         #    # LoRA parameters
         #    self.lora_A = Parameter(torch.randn(d_model, self.lora_rank))
         #    self.lora_B = Parameter(torch.randn(self.lora_rank, d_model))
+        
         self.context_encoder = ContextEncoderModule(
             d_model=context_encoder_d_model,
             heads=context_encoder_heads
@@ -54,78 +70,143 @@ class TransformerModel(nn.Module):
             nn.ReLU(),
             nn.LayerNorm(d_model)
         )
-        self.output_fc = nn.Linear(d_model, 11)
+        
+        # Modified output layers
+        self.output_projection = nn.Linear(d_model, d_model)
+        self.output_fc = nn.Linear(d_model, 11)  # Still 11 classes for padding handling
+        
         # Initialize dropout layers using config
         self.context_dropout = nn.Dropout(p=config.model.context_dropout_rate)
         self.encoder_dropout = nn.Dropout(p=config.model.encoder_dropout_rate)
         self.decoder_dropout = nn.Dropout(p=config.model.decoder_dropout_rate)
 
-
-
         # Add quantization stubs
         self.quant = torch.quantization.QuantStub()
         self.dequant = torch.quantization.DeQuantStub()
 
+    def debug_shape(self, tensor, name):
+        """Helper function to debug tensor shapes and content"""
+        print(f"\nDEBUG - {name}:")
+        print(f"Shape: {tensor.shape}")
+        print(f"Total elements: {tensor.numel()}")
+        if len(tensor.shape) >= 2:
+            print(f"Elements per batch: {tensor.shape[1] * (tensor.shape[2] if len(tensor.shape) > 2 else 1)}")
+        print(f"Tensor type: {tensor.dtype}")
+        print(f"Min value: {tensor.min().item():.6f}")
+        print(f"Max value: {tensor.max().item():.6f}")
+        print(f"Mean value: {tensor.mean().item():.6f}")
+        print("-" * 50)
+        return tensor
+
     def forward(self, src, tgt, ctx_input=None, ctx_output=None):
-        # Quantization
-        src = self.quant(src).float()  # [batch, seq_len, input_dim]
-        tgt = self.quant(tgt).float()
+        """
+        Forward pass with detailed shape tracking
+        Args:
+            src: Input tensor [batch, seq_len, input_dim]
+            tgt: Target tensor [batch, seq_len, input_dim]
+            ctx_input: Optional context input
+            ctx_output: Optional context output
+        Returns:
+            output: Output tensor [batch, seq_len, seq_len, 11]
+        """
+        # 1. Initial Setup and Input Processing
+        src = self.quant(src).float()
+        self.debug_shape(src, "1. Initial input")
         
-        # Process context if available
+        # Get batch size from input
+        batch_size = src.size(0)
+        print(f"\nProcessing batch of size: {batch_size}")
+        
+        # 2. Reshape input from [batch, seq_len, input_dim] to [batch, grid_size, 1]
+        src_flat = src.view(batch_size, -1, 1)  # Flatten the grid to a sequence
+        self.debug_shape(src_flat, "2. After flattening to sequence")
+        
+        # 3. Project each grid cell to d_model dimensions
+        x = self.input_fc(src_flat)  # Shape: [batch, grid_size, d_model]
+        self.debug_shape(x, "3. After initial projection")
+        
+        # 4. Add positional encoding
+        x = self.positional_encoding(x)
+        self.debug_shape(x, "4. After positional encoding")
+        x = self.dropout(x)
+        self.debug_shape(x, "4b. After dropout")
+        
+        # 5. Process context if available
         if ctx_input is not None and ctx_output is not None:
             ctx_input = self.quant(ctx_input)
             ctx_output = self.quant(ctx_output)
+            print("\nProcessing context:")
+            self.debug_shape(ctx_input, "5. Context input")
+            self.debug_shape(ctx_output, "5. Context output")
+            
             context_embedding = self.context_encoder(ctx_input, ctx_output)
-        else:
-            context_embedding = None
-        
-        # Debug shapes
-        print(f"src shape: {src.shape}")  # Should be [batch, seq_len, input_dim]
-        
-        # Project input along both dimensions
-        x_dim = self.input_fc_dim(src)  # [batch, seq_len, d_model]
-        x_seq = src.transpose(-1, -2)    # [batch, input_dim, seq_len]
-        x_seq = self.input_fc_seq(x_seq) # [batch, input_dim, d_model]
-        x_seq = x_seq.transpose(-1, -2)  # [batch, d_model, input_dim]
-        
-        # Add positional encoding
-        x = self.positional_encoding(x_dim)  # Use only x_dim for positional encoding
-        x = self.dropout(x)
-        
-        # Integrate context if available
-        if context_embedding is not None:
+            self.debug_shape(context_embedding, "5a. Context embedding")
+            
             context_expanded = context_embedding.unsqueeze(1).expand(-1, x.size(1), -1)
-            x = self.context_integration(
-                torch.cat([x, context_expanded], dim=-1)
-            )
+            self.debug_shape(context_expanded, "5b. Expanded context")
+            
+            x = self.context_integration(torch.cat([x, context_expanded], dim=-1))
+            self.debug_shape(x, "5c. After context integration")
             x = self.context_dropout(x)
+            self.debug_shape(x, "5d. After context dropout")
         
-        # Encoder
+        # 6. Encoder
         if self.encoder is not None:
             memory = self.encoder(x)
+            self.debug_shape(memory, "6a. After encoder")
             memory = self.encoder_dropout(memory)
-            #if self.use_lora:
-            #    lora_output = torch.matmul(torch.matmul(memory, self.lora_A), self.lora_B)
-            #    memory = memory + self.dropout(lora_output)
+            self.debug_shape(memory, "6b. After encoder dropout")
         else:
             memory = x
         
-        # Decoder
+        # 7. Decoder
         if self.decoder is not None:
-            tgt = self.input_fc_dim(tgt)
-            tgt = self.positional_encoding(tgt)
-            tgt = self.dropout(tgt)
-            output = self.decoder(tgt, memory)
+            # Process target similarly to source
+            tgt = self.quant(tgt).float()
+            self.debug_shape(tgt, "7a. Initial target")
+            
+            tgt_flat = tgt.view(batch_size, -1, 1)
+            self.debug_shape(tgt_flat, "7b. Flattened target")
+            
+            tgt_proj = self.input_fc(tgt_flat)
+            self.debug_shape(tgt_proj, "7c. Projected target")
+            
+            tgt_proj = self.positional_encoding(tgt_proj)
+            self.debug_shape(tgt_proj, "7d. Target with positional encoding")
+            
+            tgt_proj = self.dropout(tgt_proj)
+            
+            output = self.decoder(tgt_proj, memory)
+            self.debug_shape(output, "7e. After decoder")
             output = self.decoder_dropout(output)
+            self.debug_shape(output, "7f. After decoder dropout")
         else:
             output = memory
         
-        # Final output processing
-        output = self.output_fc(output)
-        output = output * 5.0  # Scale logits
+        # 8. Final projections
+        output = self.output_projection(output)
+        self.debug_shape(output, "8a. After output projection")
         
+        output = self.output_fc(output)
+        self.debug_shape(output, "8b. After final linear layer")
+        
+        # 9. Reshape back to grid structure
+        try:
+            output = output.view(batch_size, self.seq_len, self.seq_len, -1)
+            self.debug_shape(output, "9. Final output (grid structure)")
+        except RuntimeError as e:
+            print("\nERROR during final reshape:")
+            print(f"Attempted to reshape tensor of size {output.shape}")
+            print(f"Total elements: {output.numel()}")
+            print(f"Target shape: [{batch_size}, {self.seq_len}, {self.seq_len}, -1]")
+            print(f"This would require total elements to be divisible by {batch_size * self.seq_len * self.seq_len}")
+            print(f"Current elements per grid cell: {output.numel() / (batch_size * self.seq_len * self.seq_len)}")
+            raise e
+        
+        # 10. Scale and return
+        output = output * 5.0
         return self.dequant(output)
-    
+        
     @staticmethod
     def create_src_mask(src):
         """Create padding mask for source sequence"""
