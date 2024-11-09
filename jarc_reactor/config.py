@@ -64,6 +64,7 @@ class TrainingConfig:
         assert self.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
         self.gradient_clip_val = 1.0
         self.FAST_DEV_RUN = fast_dev_run
+        self.training_data_dir = 'jarc_reactor/data/training_data/training'
 # Options:
 # - 16: Mixed precision (FP16) for reduced memory usage and faster training on supported GPUs
 # - 32: Full precision (FP32), the default for most training scenarios
