@@ -168,21 +168,21 @@ def validate_dimensions(model):
 from torch.utils.data import DataLoader  # Ensure DataLoader is imported
 
 def create_objective(base_config, train_dataset, val_dataset):
-    """Creates an objective function with closure over base_config"""
+    """Creates an objective function with closure over base_config and datasets"""
 
     def objective(trial):
         logger.debug(f"\nStarting trial {trial.number}")
         try:
-            # Create config and model using the factory function
+            # Create config for this trial
             trial_config = create_trial_config(trial, base_config)
         
-            # Use the factory function to create the model
+            # Create model
             model = create_transformer_trainer(
                 config=trial_config,
                 checkpoint_path=None
             )
 
-            # **Create DataLoaders with the suggested batch_size from trial_config**
+            # Create DataLoaders from existing datasets
             batch_size = trial_config.training.batch_size
             train_loader = DataLoader(
                 train_dataset, 
@@ -230,8 +230,7 @@ def create_objective(base_config, train_dataset, val_dataset):
                 log_every_n_steps=10  # Set log_every_n_steps to 10 to avoid warnings
             )
             
-            # Prepare data loaders based on trial_config.training.batch_size
-            train_loader, val_loader = prepare_data(batch_size=trial_config.training.batch_size)
+            # Remove redundant data loading - we already have the loaders
             
             # Log memory usage before training
             if torch.cuda.is_available():
@@ -243,7 +242,7 @@ def create_objective(base_config, train_dataset, val_dataset):
             logger.debug("Starting training")
             trainer.fit(model, train_loader, val_loader)
             
-            # Retrieve metrics
+            # Rest of the code remains the same...
             def get_metric(metric_name, default):
                 metric = trainer.callback_metrics.get(metric_name, default)
                 return metric.item() if isinstance(metric, torch.Tensor) else metric
@@ -254,16 +253,13 @@ def create_objective(base_config, train_dataset, val_dataset):
                 val_accuracy=get_metric("val_accuracy", 0.0)
             )
             
-            # Log memory usage after training
             if torch.cuda.is_available():
                 memory_after = torch.cuda.memory_allocated() / 1e9
                 metrics.memory_used = memory_after - memory_before
                 logger.debug(f"GPU memory used: {metrics.memory_used:.2f} GB")
             
-            # Log metrics
             metrics.log_metrics()
             
-            # Prune trial if validation loss is invalid
             if not metrics.val_loss or torch.isnan(torch.tensor(metrics.val_loss)):
                 logger.warning("Invalid validation loss detected")
                 raise optuna.TrialPruned()
