@@ -1,6 +1,28 @@
 # Configuration and parameters for the transformer model
 # Precision setting for PyTorch Lightning Trainer
+# Add near the top of config.py, after imports
+import torch
+import logging
 
+logger = logging.getLogger(__name__)
+
+# Setup CUDA optimizations globally
+def setup_cuda_optimizations():
+    if torch.cuda.is_available():
+        if torch.cuda.get_device_properties(0).major >= 7:  # Volta or newer
+            # Enable Tensor Core operations for faster performance
+            torch.set_float32_matmul_precision('medium')
+            logger.info("Enabled Tensor Core optimizations for faster matrix operations")
+            
+            # Optional: Additional CUDA optimizations
+            torch.backends.cuda.matmul.allow_tf32 = True  # Enable TF32 for faster training
+            torch.backends.cudnn.benchmark = True  # Enable cudnn autotuner
+            logger.info("Enabled additional CUDA optimizations")
+
+# Call this early in initialization
+setup_cuda_optimizations()
+
+# Rest of your config.py code...
 class ModelConfig:
     def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads, context_dropout_rate, encoder_dropout_rate, decoder_dropout_rate, lora_rank, use_lora, checkpoint_path):
         self.input_dim = input_dim
@@ -49,7 +71,7 @@ class TrainingConfig:
 import torch
 import logging
 
-precision = 16  # Set to 16 for mixed precision, 32 for full precision, etc.
+precision = 32  # Set to 16 for mixed precision, 32 for full precision, etc.
 TRAIN_FROM_CHECKPOINT = False  # Set to True to resume training from a checkpoint
 # These parameters should be treated as modifiable from the main run_model.py script
 
@@ -233,8 +255,7 @@ class Config:
         self.validate_config()
         self.optuna = OptunaConfig()
         self.scheduler = SchedulerConfig()  # Add scheduler configuration
-        
-        # Control for using best parameters
+        self.use_best_params = False  # Ensure this attribute exists
         self.use_best_params = False  # Whether to load and use best parameters from Optuna study
     
         logging.debug("Config initialized with:")

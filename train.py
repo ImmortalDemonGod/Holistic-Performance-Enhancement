@@ -27,7 +27,6 @@ import torch
 from Utils.data_preparation import prepare_data
 
 # Initialize logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -37,6 +36,7 @@ class TransformerTrainer(pl.LightningModule):
         self.config = config  # Store the config object
         
         logger.info("Initializing TransformerTrainer")
+        logger.propagate = True  # Ensure logger propagates to root logger
 
         # Initialize the model first
         # Initialize LoRA modules
@@ -46,15 +46,15 @@ class TransformerTrainer(pl.LightningModule):
         self.model = TransformerModel(
             input_dim=config.model.input_dim,  # Access input_dim through config.model
             seq_len=config.model.seq_len,  # Access seq_len through config.model
-            d_model=config.d_model,
-            encoder_layers=config.encoder_layers,
-            decoder_layers=config.decoder_layers,
-            heads=config.heads,
-            d_ff=config.d_ff,
-            output_dim=config.output_dim,
-            dropout_rate=config.dropout,
-            context_encoder_d_model=config.context_encoder_d_model,
-            context_encoder_heads=config.context_encoder_heads,
+            d_model=config.model.d_model,
+            encoder_layers=config.model.encoder_layers,
+            decoder_layers=config.model.decoder_layers,
+            heads=config.model.heads,
+            d_ff=config.model.d_ff,
+            output_dim=config.model.output_dim,
+            dropout_rate=config.model.dropout,
+            context_encoder_d_model=config.model.context_encoder_d_model,
+            context_encoder_heads=config.model.context_encoder_heads,
             checkpoint_path=config.model.checkpoint_path,  # Ensure checkpoint_path is passed
             use_lora=config.model.use_lora,  # Ensure use_lora is passed
             lora_rank=config.model.lora_rank  # Pass lora_rank here
