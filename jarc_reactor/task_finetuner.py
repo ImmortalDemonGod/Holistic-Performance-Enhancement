@@ -24,7 +24,7 @@ from copy import deepcopy
 from jarc_reactor.utils.train import TransformerTrainer
 from pytorch_lightning.callbacks import EarlyStopping                                                  
 from jarc_reactor.data.data_preparation import prepare_data                                                        
-from Utils.metrics import TaskMetricsCollector                                                         
+from jarc_reactor.utils.metrics import TaskMetricsCollector
                                                                                                         
 class TaskFineTuner:
     def __init__(self, base_model: TransformerTrainer, config: Config):
