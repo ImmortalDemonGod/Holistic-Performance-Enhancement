@@ -62,7 +62,7 @@ from jarc_reactor.train import TransformerTrainer
 from pytorch_lightning import Trainer
 import pytorch_lightning as pl
 from pathlib import Path
-from Utils.model_factory import create_transformer_trainer
+from jarc_reactor.utils.model_factory import create_transformer_trainer
 from jarc_reactor.config import Config
 import torch.quantization
 from pytorch_lightning import Trainer
