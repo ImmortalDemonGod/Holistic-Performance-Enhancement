@@ -43,6 +43,7 @@ class ModelConfig:
         self.lora_out_features = 128  # Example value; set appropriately
         self.lora_rank = lora_rank  # Rank for Low-Rank Adaptation
         self.use_lora = use_lora  # Ensure use_lora is initialized
+        self.checkpoint_path = checkpoint_path  # New field for checkpoint path
 
 class TrainingConfig:
     def __init__(self, batch_size, learning_rate, include_synthetic_training_data, num_epochs, device_choice='cpu', precision=None, fast_dev_run=None, train_from_checkpoint=None):
@@ -160,6 +161,7 @@ class LoggingConfig:
     def __init__(self):
         self.level = "INFO"  # Default logging level
         self.debug_mode = False
+        self.log_dir = "jarc_reactor/logs"  # New field for log directory
         logging.debug("Initializing LoggingConfig")  # Debugging statement
 
 class FineTuningConfig:
