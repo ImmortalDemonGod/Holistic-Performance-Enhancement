@@ -2,7 +2,7 @@ import torch
 from tqdm import tqdm
 import logging
 from torch.utils.data import DataLoader
-from Utils.metrics import TaskMetricsCollector
+from jarc_reactor.utils.metrics import TaskMetricsCollector
 
 class ModelEvaluator:
     def __init__(self, model, config, data_manager, results_manager, debug_logger):

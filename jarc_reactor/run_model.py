@@ -42,8 +42,7 @@ class StreamToLogger(object):
 
 sys.stdout = StreamToLogger(logger, logging.INFO)
 sys.stderr = StreamToLogger(logger, logging.ERROR)
-
-from jarc_reactor.optimization.best_params_manager import BestParamsManager
+from jarc_reactor.optuna.best_params_manager import BestParamsManager
 import signal
 import sys
 

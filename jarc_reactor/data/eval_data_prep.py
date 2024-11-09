@@ -12,7 +12,8 @@ import logging
 from torch.utils.data import DataLoader, TensorDataset
 from jarc_reactor.config import include_synthetic_training_data, synthetic_dir
 from jarc_reactor.data.context_data import ContextPair
-from Utils.padding_utils import pad_to_fixed_size
+from jarc_reactor.utils.padding_utils import pad_to_fixed_size
+
 
 # Initialize logging
 logging.basicConfig(
