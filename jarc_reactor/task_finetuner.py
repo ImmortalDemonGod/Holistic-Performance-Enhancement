@@ -31,8 +31,8 @@ class TaskFineTuner:
     def __init__(self, base_model: TransformerTrainer, config: Config):
         """Initialize fine-tuner with base model and configuration."""
         from pathlib import Path
-        # Set up log directory
-        self.log_dir = Path("jarc_reactor/logs")
+        # Set up log directory using config
+        self.log_dir = Path(config.logging.log_dir)
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
         # Setup logging
@@ -478,32 +478,31 @@ def main(config):
     from pathlib import Path
 
     # Ensure the logs directory exists
-    Path('jarc_reactor/logs').mkdir(parents=True, exist_ok=True)
+    Path(config.logging.log_dir).mkdir(parents=True, exist_ok=True)
 
     # Configure logging with both file and console output
     logging.basicConfig(
         level=getattr(logging, config.logging.level.upper(), logging.INFO),
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler('jarc_reactor/logs/finetuning_debug.log'),
+            logging.FileHandler(Path(config.logging.log_dir) / "finetuning_debug.log"),
             logging.StreamHandler()
         ]
     )
     logger = logging.getLogger("finetuning_main")
     
     try:
-        # Hardcode the correct checkpoint path for Colab
-        model_path = "/content/drive/MyDrive/JARC/lightning_logs/version_4775/checkpoints/epoch=3-step=10252.ckpt"
-        config.model.checkpoint_path = model_path
-        
-        checkpoint_file = Path(model_path)
-        logger.info(f"Looking for checkpoint at: {model_path}")
-        
+        from pathlib import Path
+
+        # Use the checkpoint path from config
+        checkpoint_file = Path(config.model.checkpoint_path)
+        logger.info(f"Looking for checkpoint at: {config.model.checkpoint_path}")
+
         if not checkpoint_file.is_file():
-            logger.error(f"Pretrained model checkpoint not found at {model_path}")
+            logger.error(f"Pretrained model checkpoint not found at {config.model.checkpoint_path}")
             return
 
-        logger.info(f"Loading pretrained model from {model_path}")
+        logger.info(f"Loading pretrained model from {config.model.checkpoint_path}")
         
         # Set device to cuda if available
         device = "cuda" if torch.cuda.is_available() else "cpu"

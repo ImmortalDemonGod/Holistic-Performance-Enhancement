@@ -22,6 +22,7 @@ from jarc_reactor.data.data_preparation import prepare_data
 
 # Initialize logging
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class TransformerTrainer(pl.LightningModule):
@@ -32,7 +33,10 @@ class TransformerTrainer(pl.LightningModule):
         logger.info("Initializing TransformerTrainer")
         logger.propagate = True  # Ensure logger propagates to root logger
 
-        # Initialize the model first
+        # Initialize logging if necessary
+        fh = logging.FileHandler(Path(self.config.logging.log_dir) / "train.log")
+        fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        logger.addHandler(fh)
         # Initialize LoRA modules
         #self.lora_A = nn.Linear(config.model.lora_in_features, config.model.lora_out_features)
         #self.lora_B = nn.Linear(config.model.lora_in_features, config.model.lora_out_features)
