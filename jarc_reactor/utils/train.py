@@ -14,7 +14,6 @@ from jarc_reactor.models.transformer_model import TransformerModel
 import torch.nn.functional as F
 import os
 import json
-from jarc_reactor.utils.padding_utils import pad_to_fixed_size
 import torch
 from jarc_reactor.data.data_preparation import prepare_data
 
