@@ -65,7 +65,7 @@ use_lora = False
 device_choice = 'gpu' if torch.cuda.is_available() else 'cpu'  # Auto-select device
 calculate_parameters = True  # Whether to calculate and print the total parameter size before training
 run_for_100_epochs = True  # Whether to only run for 100 epochs and estimate time for 20,000 epochs
-num_epochs = 2  # Number of training epochs
+num_epochs = 1  # Number of training epochs
 seq_len = 30  # Sequence length
 input_dim = 30  # Number of features per input row
 d_model = 256  # Transformer model dimension
@@ -80,7 +80,7 @@ dropout_rate = 0.15  # Dropout rate for the model
 synthetic_dir = 'sythtraining'
 include_synthetic_training_data = False  # Set to True to include synthetic data
 
-CHECKPOINT_PATH = '/workspaces/JARC-Reactor/epoch=58-4.7333e-5.ckpt'  # Ensure this path is correct
+CHECKPOINT_PATH = '/workspaces/JARC-Reactor/lightning_logs/version_20/checkpoints/epoch=0-step=1.ckpt'  # Ensure this path is correct
 checkpoint_path = CHECKPOINT_PATH  # Ensure this is defined before use
 
 FAST_DEV_RUN = False  # Set to True to enable fast development run
