@@ -9,7 +9,7 @@ from tqdm import tqdm
 import kagglehub
 import os
 
-from jarc_reactor.optuna_utils.best_params_manager import BestParamsManager
+from jarc_reactor.optimization.best_params_manager import BestParamsManager
 from jarc_reactor.utils.padding_utils import pad_to_fixed_size
 from jarc_reactor.data.context_data import ContextPair
 from jarc_reactor.config import Config
