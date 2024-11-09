@@ -13,7 +13,7 @@ from jarc_reactor.config import Config
 from jarc_reactor.optuna.objective import TrialMetrics
 from jarc_reactor.utils.train import TransformerTrainer
 from pytorch_lightning import Trainer
-from Utils.optuna.objective import create_objective
+from jarc_reactor.optuna.objective import create_objective
 from jarc_reactor.data.data_preparation import prepare_data
 from pytorch_lightning.callbacks import EarlyStopping
                                                                                                     
