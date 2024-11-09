@@ -223,6 +223,7 @@ class TaskFineTuner:
             self.logger.error(f"Failed fine-tuning task {task_id}: {str(e)}")
             raise
 
+
     def run_all_tasks(self, train_loader, val_loader, task_id_map, selected_task_ids=None):
         """Fine-tune and evaluate specified tasks. If no tasks are specified, fine-tune all tasks."""
         self.logger.info("Starting fine-tuning for all tasks")
