@@ -10,7 +10,7 @@ project_root = Path(__file__).resolve().parents[2]  # Navigate two levels up to 
 sys.path.append(str(project_root))                                                                     
                                                                                                     
 from jarc_reactor.config import Config
-from Utils.optuna.objective import TrialMetrics
+from jarc_reactor.optuna.objective import TrialMetrics
 from jarc_reactor.utils.train import TransformerTrainer
 from pytorch_lightning import Trainer
 from Utils.optuna.objective import create_objective
