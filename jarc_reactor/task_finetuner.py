@@ -19,7 +19,7 @@ import json
 from tqdm import tqdm
 from torch.utils.data import DataLoader, TensorDataset
 
-from Utils.model_factory import create_transformer_trainer
+from jarc_reactor.utils.model_factory import create_transformer_trainer
 from copy import deepcopy
 from jarc_reactor.utils.train import TransformerTrainer
 from pytorch_lightning.callbacks import EarlyStopping                                                  
