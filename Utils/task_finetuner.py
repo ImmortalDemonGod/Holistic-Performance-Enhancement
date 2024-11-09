@@ -103,128 +103,234 @@ class TaskFineTuner:
         return TensorDataset(src, tgt, ctx_input, ctx_output, task_ids)  # Now includes task_ids
 
     def finetune_task(self, task_id: str, train_loader, val_loader, test_example):
-        """Fine-tune model for specific task and evaluate."""
-        self.logger.info(f"\n{'='*50}\nFine-tuning task {task_id}\n{'='*50}")
-        
-        # Unpack test example
-        src, tgt, ctx_input, ctx_output, _ = test_example
-        
-        # Log test example details
-        self.logger.info("\nTest Example:")
-        self.logger.info(f"Input shape: {src.shape}")
-        self.logger.info(f"Target shape: {tgt.shape}")
-        self.logger.info(f"Target values (first 20): {tgt.flatten()[:20].tolist()}")  # Show first 20 values
-        
-        # Get base model prediction before fine-tuning
+        """Fine-tune model for specific task and evaluate with enhanced debugging."""
+        try:
+            self.logger.info(f"\n{'='*50}\nFine-tuning task {task_id}\n{'='*50}")
+            
+            # Debug memory usage at start
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                initial_memory = torch.cuda.memory_allocated()
+                self.logger.debug(f"Initial GPU memory: {initial_memory / 1e6:.2f} MB")
+            
+            # Unpack and validate test example
+            try:
+                src, tgt, ctx_input, ctx_output, _ = test_example
+                self.logger.debug(f"Test example shapes - src: {src.shape}, tgt: {tgt.shape}")
+                self.logger.debug(f"Context shapes - input: {ctx_input.shape}, output: {ctx_output.shape}")
+            except Exception as e:
+                self.logger.error(f"Failed to unpack test example: {str(e)}")
+                raise ValueError("Invalid test example format") from e
+            
+            # Base model evaluation with error catching
+            try:
+                base_metrics = self._evaluate_base_model(
+                    src, tgt, ctx_input, ctx_output
+                )
+                self.logger.info(f"Base model accuracy: {base_metrics['accuracy']:.4f}")
+            except Exception as e:
+                self.logger.error(f"Base model evaluation failed: {str(e)}")
+                raise
+            
+            # Create task-specific model with validation
+            try:
+                task_model = self._create_task_model()
+                self.logger.debug("Task model created successfully")
+            except Exception as e:
+                self.logger.error(f"Failed to create task model: {str(e)}")
+                raise
+            
+            # Setup training with proper error handling
+            try:
+                trainer, callbacks = self._setup_training(task_id)
+                self.logger.debug("Training setup complete")
+            except Exception as e:
+                self.logger.error(f"Failed to setup training: {str(e)}")
+                raise
+            
+            # Training with enhanced monitoring
+            try:
+                self.logger.info("Starting model training")
+                trainer.fit(task_model, train_loader, val_loader)
+                self.logger.info(f"Training completed at epoch {trainer.current_epoch}")
+            except Exception as e:
+                self.logger.error(f"Training failed: {str(e)}")
+                raise
+            
+            # Final evaluation with detailed metrics
+            try:
+                metrics = self._evaluate_finetuned_model(
+                    task_model, src, tgt, ctx_input, ctx_output,
+                    base_metrics, trainer
+                )
+                self.logger.info("\nFinal Results:")
+                self.logger.info(f"Base Accuracy: {metrics['base_accuracy']:.4f}")
+                self.logger.info(f"Final Accuracy: {metrics['final_accuracy']:.4f}")
+                self.logger.info(f"Improvement: {metrics['improvement']:.4f}")
+            except Exception as e:
+                self.logger.error(f"Final evaluation failed: {str(e)}")
+                raise
+            
+            # Memory cleanup
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                final_memory = torch.cuda.memory_allocated()
+                self.logger.debug(f"Final GPU memory: {final_memory / 1e6:.2f} MB")
+            
+            return metrics
+                
+        except Exception as e:
+            self.logger.error(f"Task {task_id} fine-tuning failed: {str(e)}")
+            # Attempt cleanup
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            raise
+
+
+    def _evaluate_base_model(self, src, tgt, ctx_input, ctx_output):
+        """Evaluate base model with detailed error checking."""
         self.base_model.eval()
         with torch.no_grad():
-            src_b = src.unsqueeze(0).to(self.device)
-            tgt_b = tgt.unsqueeze(0).to(self.device)
-            ctx_input_b = ctx_input.unsqueeze(0).to(self.device)
-            ctx_output_b = ctx_output.unsqueeze(0).to(self.device)
-            
-            base_prediction = self.base_model(src_b, tgt_b, ctx_input_b, ctx_output_b)
-            base_prediction = base_prediction.argmax(dim=-1)
-            
-            # Calculate base accuracy
-            base_acc = (base_prediction.cpu() == tgt.long()).float().mean().item()
-            self.logger.info(f"\nBase Model Accuracy: {base_acc:.4f}")
-            self.logger.info(f"Base Model Prediction (first 20): {base_prediction.cpu().flatten()[:20].tolist()}")
+            try:
+                # Move tensors to device with validation
+                src_b = self._validate_and_move_tensor(src.unsqueeze(0), "src")
+                tgt_b = self._validate_and_move_tensor(tgt.unsqueeze(0), "tgt")
+                ctx_input_b = self._validate_and_move_tensor(ctx_input.unsqueeze(0), "ctx_input")
+                ctx_output_b = self._validate_and_move_tensor(ctx_output.unsqueeze(0), "ctx_output")
+                
+                # Get prediction
+                base_prediction = self.base_model(src_b, tgt_b, ctx_input_b, ctx_output_b)
+                if torch.isnan(base_prediction).any():
+                    raise ValueError("NaN values in base model prediction")
+                    
+                base_prediction = base_prediction.argmax(dim=-1)
+                
+                # Calculate accuracy
+                base_acc = (base_prediction.cpu() == tgt.long()).float().mean().item()
+                
+                return {
+                    'accuracy': base_acc,
+                    'prediction': base_prediction.cpu(),
+                    'prediction_distribution': base_prediction.cpu().unique(return_counts=True)
+                }
+                
+            except Exception as e:
+                self.logger.error(f"Base model evaluation error: {str(e)}")
+                raise
 
-        # Proceed with fine-tuning using the factory function
-        hparams = self.base_model.hparams.copy()
-        # Remove parameters that need to be overridden
-        hparams.pop('learning_rate', None)
-        hparams.pop('device_choice', None)
-        hparams.pop('dropout', None)
-        hparams.pop('context_encoder_d_model', None)
-        hparams.pop('context_encoder_heads', None)
-        hparams.pop('include_synthetic_training_data', None)
-
-        # Create a new config with overridden parameters
-        new_config = deepcopy(self.base_model)
-        new_config.hparams.update({
-            'learning_rate': self.learning_rate,
-            'dropout': self.base_model.dropout,  # Ensure dropout is set correctly
-            'context_encoder_d_model': self.base_model.context_encoder_d_model,
-            'context_encoder_heads': self.base_model.context_encoder_heads
-        })
-
-        # Use the factory function to create a task-specific model
-        task_model = create_transformer_trainer(
-            config=self.config,  # Assuming you have access to the config object
-            checkpoint_path=None  # Instantiate without loading from checkpoint
-        )
-        task_model.load_state_dict(self.base_model.state_dict())
-
-        # Setup callbacks
-        callbacks = [
-            EarlyStopping(
-                monitor='val_loss',
-                patience=self.patience,
-                mode='min'
-            )
-        ]
-
-        # Configure trainer
-        trainer = pl.Trainer(
-            max_epochs=self.max_epochs,
-            callbacks=callbacks,
-            accelerator=self.device,
-            devices=1,
-            enable_progress_bar=True,
-            enable_checkpointing=False,
-            default_root_dir=self.save_dir / f"task_{task_id}"
-        )
-
-        # Train model
+    def _create_task_model(self):
+        """Create task-specific model with validation."""
         try:
-            trainer.fit(task_model, train_loader, val_loader)
+            # Create new model instance
+            task_model = create_transformer_trainer(
+                config=self.config,
+                checkpoint_path=None
+            )
+            
+            # Load state dict with validation
+            state_dict = self.base_model.state_dict()
+            missing_keys, unexpected_keys = task_model.load_state_dict(state_dict)
+            
+            if missing_keys:
+                self.logger.warning(f"Missing keys in state dict: {missing_keys}")
+            if unexpected_keys:
+                self.logger.warning(f"Unexpected keys in state dict: {unexpected_keys}")
+            
+            # Move to device
+            task_model = task_model.to(self.device)
+            
+            return task_model
+            
+        except Exception as e:
+            self.logger.error(f"Task model creation failed: {str(e)}")
+            raise
 
-            # Evaluate on test example
-            task_model.eval()
+    def _setup_training(self, task_id):
+        """Setup training with proper configuration validation."""
+        try:
+            # Validate training parameters
+            if self.max_epochs <= 0:
+                raise ValueError(f"Invalid max_epochs: {self.max_epochs}")
+            if self.patience <= 0:
+                raise ValueError(f"Invalid patience: {self.patience}")
+            
+            # Create callbacks with validation
+            callbacks = [
+                EarlyStopping(
+                    monitor='val_loss',
+                    patience=self.patience,
+                    mode='min'
+                )
+            ]
+            
+            # Configure trainer with detailed logging
+            trainer = pl.Trainer(
+                max_epochs=self.max_epochs,
+                callbacks=callbacks,
+                accelerator=self.device,
+                devices=1,
+                enable_progress_bar=True,
+                enable_checkpointing=False,
+                default_root_dir=self.save_dir / f"task_{task_id}",
+                logger=True
+            )
+            
+            return trainer, callbacks
+            
+        except Exception as e:
+            self.logger.error(f"Training setup failed: {str(e)}")
+            raise
+
+    def _validate_and_move_tensor(self, tensor, name):
+        """Validate tensor and move to device with error checking."""
+        try:
+            if not isinstance(tensor, torch.Tensor):
+                raise TypeError(f"{name} must be a tensor")
+            if torch.isnan(tensor).any():
+                raise ValueError(f"NaN values in {name}")
+            if torch.isinf(tensor).any():
+                raise ValueError(f"Inf values in {name}")
+                
+            return tensor.to(self.device)
+            
+        except Exception as e:
+            self.logger.error(f"Tensor validation failed for {name}: {str(e)}")
+            raise
+
+    def _evaluate_finetuned_model(self, model, src, tgt, ctx_input, ctx_output, base_metrics, trainer):
+        """Evaluate fine-tuned model with comprehensive metrics."""
+        try:
+            model.eval()
             with torch.no_grad():
-                src, tgt, ctx_input, ctx_output, _ = test_example
+                # Prepare inputs
                 src = src.unsqueeze(0).to(self.device)
                 tgt = tgt.unsqueeze(0).to(self.device)
                 ctx_input = ctx_input.unsqueeze(0).to(self.device)
                 ctx_output = ctx_output.unsqueeze(0).to(self.device)
-
-                prediction = task_model(src, tgt, ctx_input, ctx_output)
+                
+                # Get prediction
+                prediction = model(src, tgt, ctx_input, ctx_output)
                 prediction = prediction.argmax(dim=-1)
-
-            # Calculate metrics
-            final_acc = (prediction.cpu() == tgt.long()).float().mean().item()
-            accuracy_improvement = final_acc - base_acc
-
-            metrics = {
-                'val_loss': trainer.callback_metrics.get('val_loss', float('inf')).item(),
-                'base_accuracy': base_acc,
-                'base_prediction': base_prediction.cpu().flatten().tolist(),
-                'target': tgt.cpu().flatten().tolist(),
-                'final_prediction': prediction.cpu().flatten().tolist(),
-                'final_accuracy': final_acc,
-                'accuracy_improvement': accuracy_improvement,
-                'converged_epoch': trainer.current_epoch
-            }
-
-            self.logger.info(f"\nResults for task {task_id}:")
-            self.logger.info(f"Base Accuracy: {metrics['base_accuracy']:.4f}")
-            self.logger.info(f"Final Accuracy: {metrics['final_accuracy']:.4f}")
-            self.logger.info(f"Improvement: {metrics['accuracy_improvement']:.4f}")
-            self.logger.info(f"Final Prediction (first 20): {metrics['final_prediction'][:20]}")
-
-            # Save task results
-            self.results[task_id] = metrics
-            self.metrics_collector.add_result(task_id, metrics)
-            return metrics
-
+                
+                # Calculate metrics
+                final_acc = (prediction.cpu() == tgt.cpu().long()).float().mean().item()
+                accuracy_improvement = final_acc - base_metrics['accuracy']
+                
+                return {
+                    'val_loss': trainer.callback_metrics.get('val_loss', float('inf')).item(),
+                    'base_accuracy': base_metrics['accuracy'],
+                    'base_prediction': base_metrics['prediction'].flatten().tolist(),
+                    'target': tgt.cpu().flatten().tolist(),
+                    'final_prediction': prediction.cpu().flatten().tolist(),
+                    'final_accuracy': final_acc,
+                    'improvement': accuracy_improvement,
+                    'converged_epoch': trainer.current_epoch,
+                    'prediction_distribution': prediction.cpu().unique(return_counts=True)
+                }
+                
         except Exception as e:
-            self.logger.error(f"Failed fine-tuning task {task_id}: {str(e)}")
+            self.logger.error(f"Fine-tuned model evaluation failed: {str(e)}")
             raise
-
-
-    def run_all_tasks(self, train_loader, val_loader, task_id_map, selected_task_ids=None):
         """Fine-tune and evaluate specified tasks. If no tasks are specified, fine-tune all tasks."""
         self.logger.info("Starting fine-tuning for all tasks")
 
@@ -326,11 +432,19 @@ def main(config):
 
     # Configure logging based on LoggingConfig
     logging.basicConfig(level=getattr(logging, config.logging.level.upper(), logging.INFO))
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler('finetuning.log'),
+            logging.StreamHandler()
+        ]
+    )
     logger = logging.getLogger("finetuning_main")
     
     if config.logging.debug_mode:
         logger.setLevel(logging.DEBUG)
-        logging.debug("Debug mode is enabled in LoggingConfig.")
+        logger.debug("Debug mode is enabled in LoggingConfig.")
 
     try:
         model_path = config.model.checkpoint_path
@@ -385,8 +499,10 @@ def main(config):
         logger.info(f"Results saved to {finetuner.save_dir}/final_results.json")
 
     except Exception as e:
-        logger.error(f"Fine-tuning failed: {str(e)}")
-        raise
+        logger.error(f"Fine-tuning failed: {str(e)}", exc_info=True)
+        # Cleanup
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
 if __name__ == "__main__":
     config = Config()  # Initialize Config instance
