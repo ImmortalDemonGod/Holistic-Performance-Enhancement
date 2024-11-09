@@ -1,5 +1,6 @@
 import logging
 import sys
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 # Initialize logging before importing other modules
 logger = logging.getLogger()
@@ -167,26 +168,66 @@ else:
 
 """
 # Ensure the checkpoint path is correct
+import os
+
+# Define the checkpoint directory
+checkpoint_dir = 'checkpoints'
+
+# Check if the checkpoint directory exists
+if not os.path.exists(checkpoint_dir):
+    try:
+        os.makedirs(checkpoint_dir)
+        logger.info(f"Created checkpoint directory: {checkpoint_dir}")
+    except Exception as e:
+        logger.error(f"Failed to create checkpoint directory: {str(e)}")
+
+# Verify that the checkpoint directory is writable
+if not os.access(checkpoint_dir, os.W_OK):
+    logger.error(f"Checkpoint directory '{checkpoint_dir}' is not writable")
+
 cfg = Config()  # Load config
 model = setup_model_training(cfg)  # Use the setup function
 data_module = MyDataModule(batch_size=cfg.training.batch_size)
 
+# Set up the ModelCheckpoint callback
+checkpoint_callback = ModelCheckpoint(
+    dirpath='lightning_logs/checkpoints/',  # Updated directory path
+    filename='model-step={step}-val_loss={val_loss:.4f}',
+    save_top_k=1,                        # Keep only the 2 best models
+    monitor='val_loss',
+    mode='min',
+    save_weights_only=False,              # Only save weights to reduce file size and save time
+    every_n_epochs=1,                    # Save once per epoch instead of every step
+    save_last=True,                     # Don't save the last checkpoint
+    verbose=True
+)
+
+# Add debug logging for checkpoint configuration
+logger.info(f"Checkpoint callback configured to save to: {checkpoint_callback.dirpath}")
+
 # Initialize the Trainer
 trainer = Trainer(
     max_epochs=cfg.training.max_epochs,
-    #gpus=1 if cfg.training.device_choice == 'gpu' else 0,
-    callbacks=[
-        ModelCheckpoint(monitor='val_loss', save_top_k=1, mode='min'),
-        EarlyStopping(monitor='val_loss', patience=35, mode='min')
-    ],
+    enable_progress_bar=True,  # Added to maintain progress visualization
+    callbacks=[checkpoint_callback, EarlyStopping(monitor='val_loss', patience=35, mode='min')],
     precision=cfg.training.precision,
     log_every_n_steps=50,
     detect_anomaly=False,
+    enable_checkpointing=True,
+    default_root_dir="lightning_logs"
 )
 
 # Start training and testing
 try:
     trainer.fit(model, data_module)
+    
+    # Debug logging for checkpoints
+    if trainer.checkpoint_callback.best_model_path:
+        logger.info(f"Best model saved to: {trainer.checkpoint_callback.best_model_path}")
+    else:
+        logger.warning("No checkpoint was saved during training")
+        logger.info(f"Current val_loss: {trainer.callback_metrics.get('val_loss', None)}")
+    
     trainer.test(model, data_module)
 except KeyboardInterrupt:
     print("Training interrupted by user. Exiting gracefully.")
