@@ -160,7 +160,7 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
 from pathlib import Path
 
 def prepare_data(directory=None, batch_size=None, return_datasets=False):
-    import jarc_reactor.config as config
+    from jarc_reactor.config import config
     import logging
 
     logger = logging.getLogger(__name__)
@@ -214,8 +214,8 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
     load_context_pairs('training', context_map)
 
     # Conditionally load context pairs from synthetic_dir
-    if include_synthetic_training_data:
-        load_context_pairs(synthetic_dir, context_map)
+    if config.training.include_synthetic_training_data:
+        load_context_pairs(config.training.synthetic_dir, context_map)
 
     # Load main dataset from 'training' with progress bar
     logger.info("Loading training data with progress bar...")
@@ -233,10 +233,10 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
     )
 
     # Conditionally load main dataset from synthetic_dir with progress bar
-    if include_synthetic_training_data:
+    if config.training.include_synthetic_training_data:
         logger.info("Loading synthetic data with progress bar...")
         load_main_data_concurrently(
-            directory=synthetic_dir,
+            directory=config.training.synthetic_dir,
             context_map=context_map,
             train_inputs=train_inputs,
             train_outputs=train_outputs,
