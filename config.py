@@ -255,8 +255,7 @@ class Config:
         self.validate_config()
         self.optuna = OptunaConfig()
         self.scheduler = SchedulerConfig()  # Add scheduler configuration
-        
-        # Control for using best parameters
+        self.use_best_params = False  # Ensure this attribute exists
         self.use_best_params = False  # Whether to load and use best parameters from Optuna study
     
         logging.debug("Config initialized with:")
