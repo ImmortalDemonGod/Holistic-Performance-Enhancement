@@ -15,6 +15,8 @@ from jarc_reactor.models.transformer_model import TransformerModel
 import torch.nn.functional as F
 import os
 import json
+from typing import Optional
+from optuna import Trial
 import torch
 from jarc_reactor.data.data_preparation import prepare_data
 

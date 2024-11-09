@@ -26,7 +26,7 @@ class BestParamsManager:
         logger.debug(f"Study name: {study_name}")
         logger.debug(f"Save path: {save_path}")
 
-    def load_best_trial(self) -> Optional[optuna.Trial]:
+    def load_best_trial(self) -> Optional[Trial]:
         """Load the best trial from the Optuna study."""
         try:
             study = optuna.load_study(
