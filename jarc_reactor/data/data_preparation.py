@@ -157,8 +157,31 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 test_task_ids.append(task_id)
                 test_context_pairs.append(context_pair)
 
-def prepare_data(directory='training', batch_size=None, return_datasets=False):
-    import jarc_reactor.config as config  # Ensure config is accessible within the function
+from pathlib import Path
+
+def prepare_data(directory=None, batch_size=None, return_datasets=False):
+    import jarc_reactor.config as config
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+    if directory is None:
+        directory = config.training.training_data_dir
+    logger.info(f"Preparing data from directory: {directory}")
+
+    data_path = Path(directory)
+    if not data_path.exists():
+        logger.error(f"Data directory does not exist: {directory}")
+        raise FileNotFoundError(f"Data directory does not exist: {directory}")
+    
+    if not data_path.is_dir():
+        logger.error(f"Provided path is not a directory: {directory}")
+        raise NotADirectoryError(f"Provided path is not a directory: {directory}")
+
+    logger.info(f"Listing files in {directory}:")
+    for file in data_path.iterdir():
+        logger.info(f" - {file.name}")
+
     if batch_size is None:
         batch_size = config.batch_size  # Use the default from config if not provided
     logger.info(f"Starting data preparation with batch_size={batch_size}...")
