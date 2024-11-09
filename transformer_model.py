@@ -1,5 +1,4 @@
 # transformer_model.py
-# transformer_model.py
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -84,6 +83,32 @@ class TransformerModel(nn.Module):
         self.quant = torch.quantization.QuantStub()
         self.dequant = torch.quantization.DeQuantStub()
 
+    def to(self, *args, **kwargs):
+        """Override to() to properly handle device movement of quantization stubs and all components"""
+        # First move the entire model using parent's to()
+        model = super().to(*args, **kwargs)
+        
+        # Explicitly move quantization stubs to the target device
+        device = torch.device(args[0]) if args else \
+                 kwargs.get('device', next(model.parameters()).device)
+        
+        model.quant = model.quant.to(device)
+        model.dequant = model.dequant.to(device)
+        
+        # Ensure all components are on the correct device
+        model.input_fc = model.input_fc.to(device)
+        model.positional_encoding = model.positional_encoding.to(device)
+        if model.encoder is not None:
+            model.encoder = model.encoder.to(device)
+        if model.decoder is not None:
+            model.decoder = model.decoder.to(device)
+        model.context_encoder = model.context_encoder.to(device)
+        model.context_integration = model.context_integration.to(device)
+        model.output_projection = model.output_projection.to(device)
+        model.output_fc = model.output_fc.to(device)
+        
+        return model
+
     def debug_shape(self, tensor, name):
         """Helper function to debug tensor shapes and content"""
         print(f"\nDEBUG - {name}:")
@@ -109,6 +134,16 @@ class TransformerModel(nn.Module):
         Returns:
             output: Output tensor [batch, seq_len, seq_len, 11]
         """
+        # Get model device and ensure quantization stubs are on it
+        model_device = next(self.parameters()).device
+        self.quant = self.quant.to(model_device)
+        self.dequant = self.dequant.to(model_device)
+
+        # Ensure inputs are on correct device
+        src = src.to(model_device)
+        if tgt is not None:
+            tgt = tgt.to(model_device)
+        
         # 1. Initial Setup and Input Processing
         src = self.quant(src).float()
         #self.debug_shape(src, "1. Initial input")
@@ -127,16 +162,20 @@ class TransformerModel(nn.Module):
         
         # 4. Add positional encoding
         x = self.positional_encoding(x)
-       # self.debug_shape(x, "4. After positional encoding")
+        # self.debug_shape(x, "4. After positional encoding")
         x = self.dropout(x)
         #self.debug_shape(x, "4b. After dropout")
         
         # 5. Process context if available
         if ctx_input is not None and ctx_output is not None:
+            # Move context inputs to correct device
+            ctx_input = ctx_input.to(model_device)
+            ctx_output = ctx_output.to(model_device)
+            
             ctx_input = self.quant(ctx_input)
             ctx_output = self.quant(ctx_output)
             #print("\nProcessing context:")
-           # self.debug_shape(ctx_input, "5. Context input")
+            #self.debug_shape(ctx_input, "5. Context input")
             #self.debug_shape(ctx_output, "5. Context output")
             
             context_embedding = self.context_encoder(ctx_input, ctx_output)
@@ -205,8 +244,10 @@ class TransformerModel(nn.Module):
         
         # 10. Scale and return
         output = output * 5.0
-        return self.dequant(output)
-        
+        output = self.dequant(output)
+        return output.to(model_device)  # Ensure final output is on correct device
+
+            
     @staticmethod
     def create_src_mask(src):
         """Create padding mask for source sequence"""
