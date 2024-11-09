@@ -11,7 +11,7 @@ sys.path.append(str(project_root))
                                                                                                     
 from jarc_reactor.config import Config
 from Utils.optuna.objective import TrialMetrics
-from jarc_reactor.train import TransformerTrainer
+from jarc_reactor.utils.train import TransformerTrainer
 from pytorch_lightning import Trainer
 from Utils.optuna.objective import create_objective
 from jarc_reactor.data.data_preparation import prepare_data

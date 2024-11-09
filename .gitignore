@@ -19,3 +19,5 @@ training2/*
 training3/*
 evaluation3/*
 ARC-AGI/*
+build/*
+jarc_reactor.egg-info/*

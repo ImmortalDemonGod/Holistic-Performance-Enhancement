@@ -1,7 +1,7 @@
 import json
 import logging
 import optuna
-from jarc_reactor.train import TransformerTrainer
+from jarc_reactor.utils.train import TransformerTrainer
 from pathlib import Path
 from typing import Dict, Any, Optional
 from dataclasses import dataclass

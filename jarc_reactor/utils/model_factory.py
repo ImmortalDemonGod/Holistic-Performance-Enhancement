@@ -1,4 +1,4 @@
-from jarc_reactor.train import TransformerTrainer
+from jarc_reactor.utils.train import TransformerTrainer
 from typing import Union
 from jarc_reactor.config import Config
 
