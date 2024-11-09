@@ -266,3 +266,6 @@ class EvaluationConfig:
         self.output_dir = 'evaluation_results'
         self.debug_mode = True  # Enable extensive debugging
         self.save_predictions = True  # Save model predictions for analysis
+
+# Instantiate the Config object so it can be accessed globally
+config = Config()

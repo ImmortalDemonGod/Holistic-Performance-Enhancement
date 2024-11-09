@@ -11,7 +11,7 @@ import torch
 import numpy as np
 import logging
 from torch.utils.data import DataLoader, TensorDataset
-from jarc_reactor.config import include_synthetic_training_data, synthetic_dir
+from jarc_reactor.config import config
 from jarc_reactor.data.context_data import ContextPair
 from jarc_reactor.utils.padding_utils import pad_to_fixed_size
 
@@ -183,7 +183,7 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
         logger.info(f" - {file.name}")
 
     if batch_size is None:
-        batch_size = config.batch_size  # Use the default from config if not provided
+        batch_size = config.training.batch_size  # Use the default from config if not provided
     logger.info(f"Data will be loaded from directory: {directory}")
     logger.info(f"Starting data preparation with batch_size={batch_size}...")
     log_limit = 2
