@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.quantization
 from torch.nn import TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder, Parameter
-from Utils.positional_encoding import Grid2DPositionalEncoding
+from jarc_reactor.utils.positional_encoding import Grid2DPositionalEncoding
 from jarc_reactor.models.context_encoder import ContextEncoderModule
 from jarc_reactor.config import Config  # Import the Config class
 
