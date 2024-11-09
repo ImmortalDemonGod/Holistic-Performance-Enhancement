@@ -197,8 +197,7 @@ checkpoint_callback = ModelCheckpoint(
     monitor='val_loss',
     mode='min',
     save_weights_only=False,
-    every_n_steps=1,               # Save every step
-    save_on_train_epoch_end=False, # Disable saving at epoch end
+    every_n_train_steps=1,         # Correct parameter to save every training step
     verbose=True
 )
 
