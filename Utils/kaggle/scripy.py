@@ -17,7 +17,7 @@ def main():
         
         # Install required packages
         logger.info("Installing dependencies...")
-        os.system('pip install pytorch-lightning orjson tqdm')
+        #os.system('pip install pytorch-lightning orjson tqdm')
         
         # Import and run submission
         from kaggle_submission import load_model_and_create_submission
