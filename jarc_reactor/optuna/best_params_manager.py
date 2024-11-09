@@ -3,7 +3,7 @@ import logging
 import optuna
 from jarc_reactor.utils.train import TransformerTrainer
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ class BestParamsManager:
         logger.debug(f"Study name: {study_name}")
         logger.debug(f"Save path: {save_path}")
 
-    def load_best_trial(self) -> Optional[Trial]:
+    def load_best_trial(self) -> Optional[Union[Trial, None]]:
         """Load the best trial from the Optuna study."""
         try:
             study = optuna.load_study(
