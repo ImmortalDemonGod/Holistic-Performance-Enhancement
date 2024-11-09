@@ -191,14 +191,15 @@ data_module = MyDataModule(batch_size=cfg.training.batch_size)
 
 # Set up the ModelCheckpoint callback
 checkpoint_callback = ModelCheckpoint(
-    dirpath='checkpoints/',
-    filename='model-{epoch:02d}-{val_loss:.2f}',
+    dirpath='checkpoints/',  # Relative to 'lightning_logs/version_X/'
+    filename='model-step={step:05d}-val_loss={val_loss:.4f}',
     save_top_k=1,
     monitor='val_loss',
     mode='min',
     save_weights_only=False,
-    every_n_epochs=1,  # Save every epoch
-    verbose=True  # Enable verbosity for debugging
+    every_n_steps=1,               # Save every step
+    save_on_train_epoch_end=False, # Disable saving at epoch end
+    verbose=True
 )
 
 # Add debug logging for checkpoint configuration

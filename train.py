@@ -10,17 +10,6 @@ import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
-checkpoint_callback = ModelCheckpoint(
-    dirpath='lightning_logs/checkpoints/',
-    filename='model-{epoch:02d}-{val_loss:.4f}',
-    save_top_k=1,
-    monitor='val_loss',
-    mode='min',
-    save_weights_only=False,
-    every_n_epochs=1,
-    save_last=True,
-    verbose=True
-)
 from transformer_model import TransformerModel
 import torch.nn.functional as F
 import os
@@ -201,7 +190,7 @@ class TransformerTrainer(pl.LightningModule):
         accuracies = self._compute_accuracy(y_hat, tgt)
         
         # Log metrics
-        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True, batch_size=tgt.size(0))
+        self.log('val_loss', loss, on_step=True, on_epoch=True, prog_bar=True, sync_dist=True, batch_size=tgt.size(0))
         self.log('val_cell_accuracy', accuracies['cell_accuracy'], prog_bar=True)
         self.log('val_grid_accuracy', accuracies['grid_accuracy'], prog_bar=True)
         
