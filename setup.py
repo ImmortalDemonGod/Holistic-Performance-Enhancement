@@ -32,7 +32,7 @@ setup(
         "console_scripts": [
             "jarc-train=jarc_reactor.run_model:main",
             "jarc-evaluate=jarc_reactor.evaluate:main",
-            "jarc-optimize=jarc_reactor.optuna.optimize:main",
+            "jarc-optimize=jarc_reactor.optimization.optimize:main",
         ],
     },
 )
