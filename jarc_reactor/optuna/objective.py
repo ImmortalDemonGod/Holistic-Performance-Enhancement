@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import optuna
 from jarc_reactor.config import Config
 from jarc_reactor.data.data_preparation import prepare_data
-from Utils.model_factory import create_transformer_trainer
+from jarc_reactor.utils.model_factory import create_transformer_trainer
 from pytorch_lightning import Trainer, Callback
 from pytorch_lightning.callbacks import EarlyStopping
 from math import ceil
