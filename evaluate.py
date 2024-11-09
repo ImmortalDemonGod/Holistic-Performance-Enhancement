@@ -175,6 +175,8 @@ class EvaluationManager:
             self.logger.debug("\nInitial tensor information:")
             self.logger.debug(f"src type: {src.dtype}, range: [{src.min():.1f}, {src.max():.1f}]")
             self.logger.debug(f"tgt type: {tgt.dtype}, range: [{tgt.min():.1f}, {tgt.max():.1f}]")
+            self.logger.debug(f"src shape: {src.shape}")
+            self.logger.debug(f"tgt shape: {tgt.shape}")
             
             with torch.no_grad():
                 outputs = self.model(src, tgt, ctx_input, ctx_output)
@@ -204,11 +206,18 @@ class EvaluationManager:
             for idx, task_id_int in enumerate(task_ids):
                 task_id = int_to_task[task_id_int.item()]
                 
-                # Get individual tensors
-                task_input = src[idx:idx + 1]
-                task_target = tgt[idx:idx + 1, :, 0]
-                task_pred = predictions[idx:idx + 1]
-                task_raw_outputs = outputs[idx]
+                # Get individual tensors - FIXED: Maintain target dimensions
+                task_input = src[idx:idx + 1]  # [1, 30, 30]
+                task_target = tgt[idx:idx + 1]  # [1, 30, 30] - Keeping all dimensions
+                task_pred = predictions[idx:idx + 1]  # [1, 30, 30]
+                task_raw_outputs = outputs[idx]  # [30, 30, 11]
+                
+                # Debug task tensor shapes
+                self.logger.debug(f"\nTask tensor shapes:")
+                self.logger.debug(f"task_input: {task_input.shape}")
+                self.logger.debug(f"task_target: {task_target.shape}")
+                self.logger.debug(f"task_pred: {task_pred.shape}")
+                self.logger.debug(f"task_raw_outputs: {task_raw_outputs.shape}")
                 
                 # Convert types for consistency
                 task_target = task_target.to(torch.long)
@@ -640,63 +649,55 @@ class EvaluationManager:
             raise
     
     def analyze_outputs_distribution(self, outputs, predictions, targets, task_id):
-        """Analyze distribution of outputs, predictions, and targets"""
+        """
+        Analyze distribution of outputs, predictions, and targets
+        
+        Args:
+            outputs: [batch, H, W, num_classes] or [H, W, num_classes]
+            predictions: [batch, H, W] or [H, W]
+            targets: [batch, H, W] or [H, W]
+            task_id: Task identifier
+        """
         with torch.no_grad():
-            # Convert outputs to probabilities
-            probs = torch.softmax(outputs, dim=-1)
-            confidence, predicted_classes = probs.max(dim=-1)
+            # Debug original shapes
+            self.logger.debug(f"\nOriginal shapes before processing:")
+            self.logger.debug(f"outputs: {outputs.shape}")
+            self.logger.debug(f"predictions: {predictions.shape}")
+            self.logger.debug(f"targets: {targets.shape}")
             
-            # Get distributions
-            target_counts = torch.bincount(targets.flatten(), minlength=11)
-            pred_counts = torch.bincount(predictions.flatten(), minlength=11)
+            # Handle batch dimension properly for all tensors
+            if outputs.dim() == 4:
+                outputs = outputs[0]  # [H, W, num_classes]
+            if predictions.dim() == 3:
+                predictions = predictions[0]  # [H, W]
+                
+            # Special handling for targets to ensure grid structure
+            if targets.dim() == 3:
+                targets = targets[0]  # Remove batch dimension if present
+            if targets.dim() == 1:
+                # Reshape to match grid structure using known dimensions
+                H = W = int(math.sqrt(targets.size(0)))  # Should be 30
+                targets = targets.view(H, W)
+                
+            # Extra validation
+            if targets.dim() != 2:
+                raise ValueError(f"Expected 2D targets after processing, got {targets.dim()}D with shape {targets.shape}")
+                
+            # Verify shapes after processing
+            self.logger.debug(f"\nShapes after processing:")
+            self.logger.debug(f"outputs: {outputs.shape}")
+            self.logger.debug(f"predictions: {predictions.shape}")
+            self.logger.debug(f"targets: {targets.shape}")
             
-            # Calculate average confidence per class
-            class_confidences = {i: [] for i in range(11)}
-            for idx, pred in enumerate(predicted_classes.flatten()):
-                class_confidences[pred.item()].append(confidence[idx].item())
-            
-            avg_confidences = {
-                cls: sum(confs)/len(confs) if confs else 0 
-                for cls, confs in class_confidences.items()
-            }
-            
-            self.logger.debug(f"\nDetailed Analysis for Task {task_id}:")
-            self.logger.debug("Target Distribution:")
-            for cls, count in enumerate(target_counts):
-                if count > 0:
-                    self.logger.debug(f"  Class {cls}: {count} instances ({count/len(targets.flatten())*100:.1f}%)")
-            
-            self.logger.debug("\nPrediction Distribution:")
-            for cls, count in enumerate(pred_counts):
-                if count > 0:
-                    self.logger.debug(
-                        f"  Class {cls}: {count} predictions "
-                        f"({count/len(predictions.flatten())*100:.1f}%) "
-                        f"[avg conf: {avg_confidences[cls]:.3f}]"
-                    )
-            
-            # Analyze worst mistakes
-            mistakes = []
-            for i, (pred, target) in enumerate(zip(predictions.flatten(), targets.flatten())):
-                if pred != target:
-                    conf = confidence.flatten()[i]
-                    mistakes.append((i, pred.item(), target.item(), conf.item()))
-            
-            if mistakes:
-                self.logger.debug("\nWorst Mistakes (highest confidence errors):")
-                for pos, pred, target, conf in sorted(mistakes, key=lambda x: x[3], reverse=True)[:5]:
-                    self.logger.debug(
-                        f"  Position {pos}: Predicted {pred} (conf: {conf:.3f}) "
-                        f"but was {target}"
-                    )
-            
-            return {
-                'target_distribution': target_counts.tolist(),
-                'prediction_distribution': pred_counts.tolist(),
-                'average_confidences': avg_confidences,
-                'mistakes': mistakes[:5]  # Store top 5 mistakes
-            }
-    
+            # Assert correct dimensions
+            assert outputs.dim() == 3, f"Expected outputs to be 3D after processing, got {outputs.dim()}D"
+            assert predictions.dim() == 2, f"Expected predictions to be 2D after processing, got {predictions.dim()}D"
+            assert targets.dim() == 2, f"Expected targets to be 2D after processing, got {targets.dim()}D"
+            assert predictions.shape == targets.shape, (
+                f"Predictions shape {predictions.shape} doesn't match targets shape {targets.shape}. "
+                f"Original target shape was {targets.shape}"
+            )
+
 def main():
     """Main entry point with error handling"""
     try:
