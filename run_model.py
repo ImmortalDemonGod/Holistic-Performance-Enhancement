@@ -191,13 +191,14 @@ data_module = MyDataModule(batch_size=cfg.training.batch_size)
 
 # Set up the ModelCheckpoint callback
 checkpoint_callback = ModelCheckpoint(
-    dirpath='checkpoints/',  # Relative to 'lightning_logs/version_X/'
-    filename='model-step={step:05d}-val_loss={val_loss:.4f}',
-    save_top_k=1,
+    dirpath='lightning_logs/checkpoints/',  # Updated directory path
+    filename='model-step={step}-val_loss={val_loss:.4f}',
+    save_top_k=2,                        # Keep only the 2 best models
     monitor='val_loss',
     mode='min',
-    save_weights_only=False,
-    every_n_train_steps=1,         # Correct parameter to save every training step
+    save_weights_only=True,              # Only save weights to reduce file size and save time
+    every_n_epochs=1,                    # Save once per epoch instead of every step
+    save_last=False,                     # Don't save the last checkpoint
     verbose=True
 )
 
@@ -207,7 +208,7 @@ logger.info(f"Checkpoint callback configured to save to: {checkpoint_callback.di
 # Initialize the Trainer
 trainer = Trainer(
     max_epochs=cfg.training.max_epochs,
-    #gpus=1 if cfg.training.device_choice == 'gpu' else 0,
+    enable_progress_bar=True,  # Added to maintain progress visualization
     callbacks=[checkpoint_callback, EarlyStopping(monitor='val_loss', patience=35, mode='min')],
     precision=cfg.training.precision,
     log_every_n_steps=50,
