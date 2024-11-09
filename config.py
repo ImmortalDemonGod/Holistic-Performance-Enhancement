@@ -93,14 +93,14 @@ input_dim = 30  # Number of features per input row
 d_model = 256  # Transformer model dimension
 encoder_layers = 2  # Number of encoder layers
 decoder_layers = 2   # Number of decoder layers
-heads = 8  # Reduced number of attention heads for efficiency
-d_ff = 512  # Feedforward network dimension
+heads = 4  # Reduced number of attention heads for efficiency
+d_ff = 128  # Feedforward network dimension
 output_dim = 30  # Number of features per output row
 learning_rate = 0.00002009  # Learning rate
 batch_size = 1  # Batch size for DataLoader
 dropout_rate = 0.15  # Dropout rate for the model
 synthetic_dir = 'sythtraining'
-include_synthetic_training_data = True  # Set to True to include synthetic data
+include_synthetic_training_data = False  # Set to True to include synthetic data
 
 CHECKPOINT_PATH = '/workspaces/JARC-Reactor/lightning_logs/version_20/checkpoints/epoch=0-step=1.ckpt'  # Ensure this path is correct
 checkpoint_path = CHECKPOINT_PATH  # Ensure this is defined before use
