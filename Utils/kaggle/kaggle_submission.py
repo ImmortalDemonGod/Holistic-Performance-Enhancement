@@ -1,19 +1,19 @@
+# kaggle_submission.py
+
 import json
 import torch
 from pathlib import Path
 from typing import Dict, List, Any
 import logging
 from tqdm import tqdm
+import kagglehub
+import os
+
 from Utils.padding_utils import pad_to_fixed_size
 from Utils.context_data import ContextPair
-import kagglehub
-import json
-import torch
 from config import Config
 from train import TransformerTrainer
 from Utils.model_factory import create_transformer_trainer
-import os
-from pathlib import Path
 
 class KaggleSubmissionHandler:
     def __init__(self, model, config, output_dir: str = "/kaggle/working"):
@@ -212,7 +212,6 @@ class KaggleSubmissionHandler:
             raise
 
 
-
 def load_model_and_create_submission():
     try:
         # Initialize configuration
@@ -245,7 +244,6 @@ def load_model_and_create_submission():
         print("Model loaded successfully")
         
         # Initialize submission handler
-        from kaggle_submission import KaggleSubmissionHandler
         submission_handler = KaggleSubmissionHandler(
             model=model,
             config=config,
@@ -277,6 +275,7 @@ def load_model_and_create_submission():
     except Exception as e:
         print(f"Error: {str(e)}")
         raise
+
 
 if __name__ == "__main__":
     # Login to Kaggle
