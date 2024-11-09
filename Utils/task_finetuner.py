@@ -11,7 +11,7 @@ sys.path.append(str(parent_dir))
 
 # Change working directory to project root
 os.chdir(parent_dir)
-self.logger.info(f"Working directory changed to: {parent_dir}")
+print(f"Working directory changed to: {parent_dir}")
 
 from config import Config
 import random
