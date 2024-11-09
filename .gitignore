@@ -18,3 +18,4 @@ training2/*
 *.log
 training3/*
 evaluation3/*
+ARC-AGI/*
