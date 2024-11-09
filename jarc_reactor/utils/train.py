@@ -16,9 +16,9 @@ import torch.nn.functional as F
 import os
 import json
 from typing import Optional
+import torch
 from pathlib import Path
 from optuna import Trial
-import torch
 from jarc_reactor.data.data_preparation import prepare_data
 
 # Initialize logging
