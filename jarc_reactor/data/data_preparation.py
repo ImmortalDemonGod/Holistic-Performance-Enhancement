@@ -184,18 +184,19 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
 
     if batch_size is None:
         batch_size = config.batch_size  # Use the default from config if not provided
+    logger.info(f"Data will be loaded from directory: {directory}")
     logger.info(f"Starting data preparation with batch_size={batch_size}...")
     log_limit = 2
     successful_files = 0
     total_files = 0
 
     # Inspect data structure for a limited number of files
-    for directory in ['training']:
-        for filename in os.listdir(directory):
+    for dir_name in ['training']:
+        for filename in os.listdir(dir_name):
             if filename.endswith('.json'):
                 total_files += 1
                 if successful_files < log_limit:
-                    if inspect_data_structure(filename, directory):
+                    if inspect_data_structure(filename, dir_name):
                         successful_files += 1
                 else:
                     break
