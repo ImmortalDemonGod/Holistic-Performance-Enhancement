@@ -125,6 +125,6 @@ trainer = Trainer(
 # Start training and testing
 try:
     trainer.fit(model, data_module)
-    #trainer.test(model, data_module)
+    trainer.test(model, data_module)
 except KeyboardInterrupt:
     print("Training interrupted by user. Exiting gracefully.")
