@@ -1,6 +1,5 @@
 import json
 import logging
-import optuna
 from optuna import Trial
 from jarc_reactor.utils.train import TransformerTrainer
 from pathlib import Path
