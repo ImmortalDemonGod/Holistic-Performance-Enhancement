@@ -139,7 +139,7 @@ class TransformerTrainer(pl.LightningModule):
             cell_accuracy = correct_cells.float().sum() / valid_mask.float().sum()
             
             # Full grid accuracy (only count grid as correct if all non-padded cells match)
-            grid_matches = torch.all(correct_cells | ~valid_mask, dim=(1,2))
+            grid_matches = torch.all(torch.all(correct_cells | ~valid_mask, dim=1), dim=1)
             grid_accuracy = grid_matches.float().mean()
             
             # Debug accuracy metrics
