@@ -1,6 +1,5 @@
 import sys
 from pathlib import Path
-import os
 
 # Determine the current directory and the parent directory
 current_dir = Path(__file__).resolve().parent
@@ -8,10 +7,6 @@ parent_dir = current_dir.parent
 
 # Add the parent directory to sys.path
 sys.path.append(str(parent_dir))
-
-# Change working directory to project root
-os.chdir(parent_dir)
-print(f"Working directory changed to: {parent_dir}")
 
 from config import Config
 import random
@@ -34,12 +29,17 @@ from Utils.metrics import TaskMetricsCollector
 class TaskFineTuner:
     def __init__(self, base_model: TransformerTrainer, config: Config):
         """Initialize fine-tuner with base model and configuration."""
-        self.save_dir = Path(config.finetuning.save_dir)
+        # Set up result and log directories
+        self.save_dir = Path("/content/drive/MyDrive/JARC/finetuning_results")
+        self.log_dir = self.save_dir / "logs"
+        
+        # Create directories
         self.save_dir.mkdir(parents=True, exist_ok=True)
+        self.log_dir.mkdir(parents=True, exist_ok=True)
 
         # Setup logging
         self.logger = logging.getLogger("task_finetuner")
-        fh = logging.FileHandler(self.save_dir / "finetuning.log")
+        fh = logging.FileHandler(self.log_dir / "finetuning.log")
         fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
         self.logger.addHandler(fh)
         self.logger.setLevel(logging.INFO)
@@ -51,13 +51,21 @@ class TaskFineTuner:
         self.max_epochs = config.finetuning.max_epochs
         self.learning_rate = config.finetuning.learning_rate
         self.patience = config.finetuning.patience
-        self.base_model = base_model
 
         # Initialize metrics collector
         self.metrics_collector = TaskMetricsCollector()
 
         # Store results
         self.results: Dict[str, Any] = {}
+        
+        # Log initialization
+        self.logger.info(f"TaskFineTuner initialized:")
+        self.logger.info(f"Save directory: {self.save_dir}")
+        self.logger.info(f"Log directory: {self.log_dir}")
+        self.logger.info(f"Device: {self.device}")
+        self.logger.info(f"Max epochs: {self.max_epochs}")
+        self.logger.info(f"Learning rate: {self.learning_rate}")
+        self.logger.info(f"Patience: {self.patience}")
 
     def prepare_task_data(self, train_loader, val_loader, task_id, task_id_map):
         """Extract task-specific data from loaders."""
@@ -166,7 +174,7 @@ class TaskFineTuner:
             try:
                 metrics = self._evaluate_finetuned_model(
                     task_model, src, tgt, ctx_input, ctx_output,
-                    base_metrics, trainer
+                    base_metrics, trainer, task_id  # Add task_id here
                 )
                 self.logger.info("\nFinal Results:")
                 self.logger.info(f"Base Accuracy: {metrics['base_accuracy']:.4f}")
@@ -175,8 +183,8 @@ class TaskFineTuner:
             except Exception as e:
                 self.logger.error(f"Final evaluation failed: {str(e)}")
                 raise
-            
-            # Memory cleanup
+                    
+           # Memory cleanup
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
                 final_memory = torch.cuda.memory_allocated()
@@ -190,39 +198,101 @@ class TaskFineTuner:
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
             raise
-
+ 
 
     def _evaluate_base_model(self, src, tgt, ctx_input, ctx_output):
-        """Evaluate base model with detailed error checking."""
+        """Evaluate base model with consistent device handling."""
         self.base_model.eval()
         with torch.no_grad():
             try:
-                # Move tensors to device with validation
-                src_b = self._validate_and_move_tensor(src.unsqueeze(0), "src")
-                tgt_b = self._validate_and_move_tensor(tgt.unsqueeze(0), "tgt")
-                ctx_input_b = self._validate_and_move_tensor(ctx_input.unsqueeze(0), "ctx_input")
-                ctx_output_b = self._validate_and_move_tensor(ctx_output.unsqueeze(0), "ctx_output")
+                # First make sure all input tensors are on CPU
+                src = src.cpu()
+                tgt = tgt.cpu()
+                ctx_input = ctx_input.cpu()
+                ctx_output = ctx_output.cpu()
+                
+                # Then move everything to the target device together
+                src_b = src.unsqueeze(0).to(self.device)
+                tgt_b = tgt.unsqueeze(0).to(self.device)
+                ctx_input_b = ctx_input.unsqueeze(0).to(self.device)
+                ctx_output_b = ctx_output.unsqueeze(0).to(self.device)
                 
                 # Get prediction
                 base_prediction = self.base_model(src_b, tgt_b, ctx_input_b, ctx_output_b)
                 if torch.isnan(base_prediction).any():
                     raise ValueError("NaN values in base model prediction")
                     
+                # Move prediction to CPU for comparison
+                base_prediction = base_prediction.cpu()
                 base_prediction = base_prediction.argmax(dim=-1)
                 
-                # Calculate accuracy
-                base_acc = (base_prediction.cpu() == tgt.long()).float().mean().item()
+                # Calculate accuracy on CPU
+                base_acc = (base_prediction == tgt.long()).float().mean().item()
                 
                 return {
                     'accuracy': base_acc,
-                    'prediction': base_prediction.cpu(),
-                    'prediction_distribution': base_prediction.cpu().unique(return_counts=True)
+                    'prediction': base_prediction,
+                    'prediction_distribution': base_prediction.unique(return_counts=True)
                 }
                 
             except Exception as e:
                 self.logger.error(f"Base model evaluation error: {str(e)}")
                 raise
+    
+    def _evaluate_finetuned_model(self, task_model, src, tgt, ctx_input, ctx_output, base_metrics, trainer, task_id):
+        """Evaluate fine-tuned model with consistent device handling."""
+        try:
+            # Explicitly move model and ensure it's in eval mode
+            task_model = task_model.to(self.device)
+            task_model.eval()
 
+            with torch.no_grad():
+                # Move all inputs to the correct device first
+                src_b = src.unsqueeze(0).to(self.device)
+                tgt_b = tgt.unsqueeze(0).to(self.device)
+                ctx_input_b = ctx_input.unsqueeze(0).to(self.device)
+                ctx_output_b = ctx_output.unsqueeze(0).to(self.device)
+                
+                # Get prediction and ensure it's on the correct device
+                final_prediction = task_model(src_b, tgt_b, ctx_input_b, ctx_output_b)
+                final_prediction = final_prediction.to(self.device)
+                
+                # Move everything to CPU for metrics calculation
+                final_prediction = final_prediction.cpu()
+                final_prediction = final_prediction.argmax(dim=-1)
+                tgt_cpu = tgt.cpu()
+                
+                # Calculate accuracy on CPU
+                final_acc = (final_prediction == tgt_cpu.long()).float().mean().item()
+                
+                # Get validation loss (ensure it's on CPU)
+                val_loss = trainer.callback_metrics.get('val_loss_epoch', 0.0)
+                if torch.is_tensor(val_loss):
+                    val_loss = val_loss.cpu().item()
+                else:
+                    val_loss = float(val_loss)
+                
+                metrics = {
+                    'base_accuracy': base_metrics['accuracy'],
+                    'final_accuracy': final_acc,
+                    'improvement': final_acc - base_metrics['accuracy'],
+                    'val_loss': val_loss,
+                    'converged_epoch': trainer.current_epoch,
+                    'target': tgt_cpu.tolist(),
+                    'base_prediction': base_metrics['prediction'].tolist(),
+                    'final_prediction': final_prediction.tolist()
+                }
+                
+                # Store the results
+                self.metrics_collector.add_result(task_id, metrics)
+                self.results[task_id] = metrics
+                
+                return metrics
+                
+        except Exception as e:
+            self.logger.error(f"Fine-tuned model evaluation error: {str(e)}")
+            raise
+    
     def _create_task_model(self):
         """Create task-specific model with validation."""
         try:
@@ -296,11 +366,15 @@ class TaskFineTuner:
             if torch.isinf(tensor).any():
                 raise ValueError(f"Inf values in {name}")
                 
+            # First ensure tensor is on CPU
+            tensor = tensor.cpu()
+            # Then move to target device
             return tensor.to(self.device)
-            
+                
         except Exception as e:
             self.logger.error(f"Tensor validation failed for {name}: {str(e)}")
             raise
+
 
     def run_all_tasks(self, train_loader, val_loader, task_id_map, selected_task_ids=None):
         """Fine-tune and evaluate specified tasks. If no tasks are specified, fine-tune all tasks."""
@@ -372,22 +446,23 @@ class TaskFineTuner:
         # **Update the JSON Structure before saving**
         for task_id in list(self.results.keys()):
             if 'error' not in self.results[task_id]:
+                task_metrics = self.results[task_id]
                 formatted_results = {
                     'test_details': {
-                        'target': self.results[task_id]['target'],
+                        'target': task_metrics['target'],
                         'input_shape': list(test_examples[task_id][0].shape)
                     },
                     'base_model': {
-                        'prediction': self.results[task_id]['base_prediction'],
-                        'accuracy': self.results[task_id]['base_accuracy']
+                        'prediction': task_metrics['base_prediction'],
+                        'accuracy': task_metrics['base_accuracy']
                     },
                     'fine_tuned_model': {
-                        'prediction': self.results[task_id]['final_prediction'],
-                        'accuracy': self.results[task_id]['final_accuracy'],
-                        'val_loss': self.results[task_id]['val_loss'],
-                        'converged_epoch': self.results[task_id]['converged_epoch']
+                        'prediction': task_metrics['final_prediction'],
+                        'accuracy': task_metrics['final_accuracy'],
+                        'val_loss': task_metrics['val_loss'],
+                        'converged_epoch': task_metrics['converged_epoch']
                     },
-                    'improvement': self.results[task_id]['accuracy_improvement']
+                    'improvement': task_metrics['improvement']  # Use improvement directly
                 }
                 self.results[task_id] = formatted_results
 
@@ -401,46 +476,49 @@ class TaskFineTuner:
 
 def main(config):
     """Main entry point for fine-tuning process."""
-
-    # Configure logging based on LoggingConfig
-    logging.basicConfig(level=getattr(logging, config.logging.level.upper(), logging.INFO))
+    
+    # Configure logging with both file and console output
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=getattr(logging, config.logging.level.upper(), logging.INFO),
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler('finetuning.log'),
+            logging.FileHandler('/content/drive/MyDrive/JARC/finetuning_debug.log'),
             logging.StreamHandler()
         ]
     )
     logger = logging.getLogger("finetuning_main")
     
-    if config.logging.debug_mode:
-        logger.setLevel(logging.DEBUG)
-        logger.debug("Debug mode is enabled in LoggingConfig.")
-
     try:
-        model_path = config.model.checkpoint_path
+        # Hardcode the correct checkpoint path for Colab
+        model_path = "/content/drive/MyDrive/JARC/lightning_logs/version_4775/checkpoints/epoch=3-step=10252.ckpt"
+        config.model.checkpoint_path = model_path
+        
         checkpoint_file = Path(model_path)
+        logger.info(f"Looking for checkpoint at: {model_path}")
+        
         if not checkpoint_file.is_file():
-            logger.error(f"Pretrained model checkpoint not found at {model_path}.")
+            logger.error(f"Pretrained model checkpoint not found at {model_path}")
             return
 
         logger.info(f"Loading pretrained model from {model_path}")
-        # Define the device based on configuration
-        device = config.training.device_choice
+        
+        # Set device to cuda if available
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        config.training.device_choice = device
         logger.info(f"Using device: {device}")
 
-        # Load the base model from checkpoint using config
-        model_path = config.model.checkpoint_path
+        # Load the base model
         base_model = create_transformer_trainer(
             config=config,
             checkpoint_path=model_path
         )
-        # Move the base model to the specified device
-        base_model.to(device)  # Ensure model is on the correct device
+        base_model = base_model.to(device)
+        logger.info("Base model loaded and moved to device")
 
         # Prepare data
+        logger.info("Preparing data...")
         train_loader, val_loader = prepare_data()
+        logger.info("Data preparation complete")
 
         # Load task mapping
         task_map_path = 'task_id_map.json'
@@ -450,19 +528,14 @@ def main(config):
 
         with open(task_map_path, 'r') as f:
             task_id_map = json.load(f)
+            logger.info(f"Loaded task map with {len(task_id_map)} tasks")
 
         # Initialize fine-tuner
         finetuner = TaskFineTuner(base_model, config=config)
 
-        # Determine fine-tuning mode from Config
-        mode = config.finetuning.mode
-        if mode == 'random':
-            num_tasks = config.finetuning.num_random_tasks
-            selected_tasks = random.sample(list(task_id_map.keys()), k=num_tasks)
-            logger.info(f"Fine-tuning will be performed on {num_tasks} randomly selected tasks: {selected_tasks}")
-        elif mode == 'all':
-            selected_tasks = list(task_id_map.keys())
-            logger.info(f"Fine-tuning will be performed on all {len(selected_tasks)} tasks.")
+        # Select just one task for testing
+        selected_tasks = [list(task_id_map.keys())[0]]  # Get the first task
+        logger.info(f"Testing with single task: {selected_tasks[0]}")
 
         # Run fine-tuning
         results = finetuner.run_all_tasks(train_loader, val_loader, task_id_map, selected_tasks)
@@ -477,5 +550,5 @@ def main(config):
             torch.cuda.empty_cache()
 
 if __name__ == "__main__":
-    config = Config()  # Initialize Config instance
-    main(config)  # Pass Config instance to main
+    config = Config()
+    main(config)
