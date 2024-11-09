@@ -35,6 +35,8 @@ class TransformerTrainer(pl.LightningModule):
     def __init__(self, config):
         super().__init__()
         self.config = config  # Store the config object
+        
+        logger.info("Initializing TransformerTrainer")
 
         # Initialize the model first
         # Initialize LoRA modules
@@ -64,33 +66,157 @@ class TransformerTrainer(pl.LightningModule):
         self.model.train()  # Ensure model is in training mode for QAT
         self.model = torch.quantization.prepare_qat(self.model)  # Prepare model for QAT
 
-        self.criterion = nn.CrossEntropyLoss()
+        # Modified criterion to handle padding separately
+        self.criterion = nn.CrossEntropyLoss(ignore_index=10)  # Ignore padding tokens
         self.learning_rate = config.training.learning_rate  # Access learning_rate from config.training
+
+    def debug_batch(self, batch, name=""):
+        """Helper function to debug batch data"""
+        src, tgt, ctx_input, ctx_output, task_ids = batch
+        logger.info(f"\nDEBUG - Batch {name}:")
+        logger.info(f"Source shape: {src.shape}, dtype: {src.dtype}")
+        logger.info(f"Target shape: {tgt.shape}, dtype: {tgt.dtype}")
+        logger.info(f"Context input shape: {ctx_input.shape if ctx_input is not None else None}")
+        logger.info(f"Context output shape: {ctx_output.shape if ctx_output is not None else None}")
+        logger.info(f"Task IDs: {task_ids}")
+        return batch
 
     def forward(self, src, tgt, ctx_input=None, ctx_output=None):
         return self.model(src, tgt, ctx_input, ctx_output)
 
+    def _compute_loss(self, y_hat, tgt):
+        """
+        Compute loss while maintaining 2D grid structure
+        Args:
+            y_hat: [batch, H, W, num_classes] - Model predictions
+            tgt: [batch, H, W] - Target grid
+        Returns:
+            loss: scalar loss value
+        """
+        batch_size = y_hat.size(0)
+        H = W = self.config.model.seq_len
+
+        # Debug shapes and dtypes before reshaping
+        logger.info(f"\nDEBUG - Loss computation input:")
+        logger.info(f"y_hat shape: {y_hat.shape}, dtype: {y_hat.dtype}")
+        logger.info(f"target shape: {tgt.shape}, dtype: {tgt.dtype}")
+
+        # Reshape while maintaining grid structure
+        y_hat_flat = y_hat.reshape(-1, y_hat.size(-1))  # [batch*H*W, num_classes]
+        tgt_flat = tgt.reshape(-1).long()  # Convert to long type for CrossEntropyLoss
+
+        # Debug shapes after reshaping
+        logger.info(f"\nDEBUG - After reshaping:")
+        logger.info(f"y_hat_flat shape: {y_hat_flat.shape}, dtype: {y_hat_flat.dtype}")
+        logger.info(f"tgt_flat shape: {tgt_flat.shape}, dtype: {tgt_flat.dtype}")
+        logger.info(f"Target value range: min={tgt_flat.min().item()}, max={tgt_flat.max().item()}")
+
+        return self.criterion(y_hat_flat, tgt_flat)
+
+    def _compute_accuracy(self, y_hat, tgt):
+        """
+        Compute grid accuracy metrics
+        Args:
+            y_hat: [batch, H, W, num_classes] - Model predictions
+            tgt: [batch, H, W] - Target grid
+        Returns:
+            dict containing accuracy metrics
+        """
+        with torch.no_grad():
+            # Get predicted classes
+            predictions = torch.argmax(y_hat, dim=-1)  # [batch, H, W]
+            
+            # Debug predictions
+            logger.info(f"\nDEBUG - Accuracy computation:")
+            logger.info(f"Predictions shape: {predictions.shape}, dtype: {predictions.dtype}")
+            logger.info(f"Target shape: {tgt.shape}, dtype: {tgt.dtype}")
+            
+            # Create mask for non-padding elements
+            valid_mask = (tgt != 10)
+            
+            # Cell-wise accuracy
+            correct_cells = (predictions == tgt) & valid_mask
+            cell_accuracy = correct_cells.float().sum() / valid_mask.float().sum()
+            
+            # Full grid accuracy (only count grid as correct if all non-padded cells match)
+            grid_matches = torch.all(correct_cells | ~valid_mask, dim=(1,2))
+            grid_accuracy = grid_matches.float().mean()
+            
+            # Debug accuracy metrics
+            logger.info(f"Cell accuracy: {cell_accuracy.item():.4f}")
+            logger.info(f"Grid accuracy: {grid_accuracy.item():.4f}")
+            
+            return {
+                'cell_accuracy': cell_accuracy,
+                'grid_accuracy': grid_accuracy
+            }
+
     def training_step(self, batch, batch_idx):
+        # Debug incoming batch
+        batch = self.debug_batch(batch, "training")
         src, tgt, ctx_input, ctx_output, task_ids = batch
+        
+        # Convert target to long type
+        tgt = tgt.long()
+        
         y_hat = self(src, tgt, ctx_input, ctx_output)
         y_hat = self.model.dequant(y_hat)  # Dequantize outputs before computing metrics
-        loss = self.criterion(y_hat.view(-1, 11), tgt.view(-1, 30)[:, 0].long())
+        
+        # Compute loss maintaining grid structure
+        loss = self._compute_loss(y_hat, tgt)
+        
+        # Compute and log accuracies
+        accuracies = self._compute_accuracy(y_hat, tgt)
+        
+        # Log metrics
         self.log('train_loss', loss, prog_bar=True)
+        self.log('train_cell_accuracy', accuracies['cell_accuracy'], prog_bar=True)
+        self.log('train_grid_accuracy', accuracies['grid_accuracy'], prog_bar=True)
+        
         return loss
 
     def validation_step(self, batch, batch_idx):
+        # Debug incoming batch
+        batch = self.debug_batch(batch, "validation")
         src, tgt, ctx_input, ctx_output, task_ids = batch
+        
+        # Convert target to long type
+        tgt = tgt.long()
+        
         y_hat = self(src, tgt, ctx_input, ctx_output)
-        loss = self.criterion(y_hat.view(-1, 11), tgt.view(-1, 30)[:, 0].long())
+        
+        # Compute loss maintaining grid structure
+        loss = self._compute_loss(y_hat, tgt)
+        
+        # Compute and log accuracies
+        accuracies = self._compute_accuracy(y_hat, tgt)
+        
+        # Log metrics
         self.log('val_loss', loss, prog_bar=True)
+        self.log('val_cell_accuracy', accuracies['cell_accuracy'], prog_bar=True)
+        self.log('val_grid_accuracy', accuracies['grid_accuracy'], prog_bar=True)
+        
         return loss
 
     def test_step(self, batch, batch_idx):
+        # Debug incoming batch
+        batch = self.debug_batch(batch, "test")
         src, tgt, ctx_input, ctx_output, task_ids = batch
+        
+        # Convert target to long type
+        tgt = tgt.long()
+        
         y_hat = self(src, tgt, ctx_input, ctx_output)
-        accuracy = (torch.argmax(y_hat, dim=-1) == tgt.view(-1, 30)[:, 0].long()).float().mean()
-        self.log('test_accuracy', accuracy, prog_bar=True)
-        return accuracy
+        
+        # Compute and log accuracies
+        accuracies = self._compute_accuracy(y_hat, tgt)
+        
+        # Log metrics
+        self.log('test_cell_accuracy', accuracies['cell_accuracy'], prog_bar=True)
+        self.log('test_grid_accuracy', accuracies['grid_accuracy'], prog_bar=True)
+        
+        return accuracies['grid_accuracy']
+
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         
