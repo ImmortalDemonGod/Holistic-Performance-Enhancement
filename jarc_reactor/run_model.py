@@ -56,7 +56,6 @@ import torch
 import logging
 import os
 import torch
-from jarc_reactor.utils.model_factory import create_transformer_trainer
 from jarc_reactor.data.data_module import MyDataModule
 from jarc_reactor.train import TransformerTrainer
 from pytorch_lightning import Trainer
