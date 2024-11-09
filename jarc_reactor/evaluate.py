@@ -7,10 +7,10 @@ from pathlib import Path
 import torch
 from tqdm import tqdm
 from jarc_reactor.config import Config
-from Utils.model_factory import create_transformer_trainer
+from jarc_reactor.utils.model_factory import create_transformer_trainer
 from jarc_reactor.data.data_preparation import prepare_data as prepare_training_data
 from jarc_reactor.data.eval_data_prep import prepare_data as prepare_eval_data
-from Utils.metrics import (
+from jarc_reactor.utils.metrics import (
     compute_standard_accuracy,
     compute_differential_accuracy,
     TaskMetricsCollector,
