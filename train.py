@@ -173,6 +173,10 @@ class TransformerTrainer(pl.LightningModule):
         self.log('train_cell_accuracy', accuracies['cell_accuracy'], prog_bar=True)
         self.log('train_grid_accuracy', accuracies['grid_accuracy'], prog_bar=True)
         
+        # Add debug logging for the first batch
+        if batch_idx == 0:
+            logger.debug(f"Validation loss: {loss.item()}")
+        
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -192,7 +196,7 @@ class TransformerTrainer(pl.LightningModule):
         accuracies = self._compute_accuracy(y_hat, tgt)
         
         # Log metrics
-        self.log('val_loss', loss, prog_bar=True)
+        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
         self.log('val_cell_accuracy', accuracies['cell_accuracy'], prog_bar=True)
         self.log('val_grid_accuracy', accuracies['grid_accuracy'], prog_bar=True)
         
