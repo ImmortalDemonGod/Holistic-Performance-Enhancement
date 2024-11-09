@@ -15,7 +15,7 @@ class DebugLogger:
         
         # Create unique log file for this run
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        fh = logging.FileHandler(self.output_dir / f'debug_{timestamp}.log')
+        fh = logging.FileHandler('jarc_reactor/logs' / f'debug_{timestamp}.log')
         fh.setFormatter(logging.Formatter(
             '%(asctime)s - %(levelname)s - %(message)s'
         ))

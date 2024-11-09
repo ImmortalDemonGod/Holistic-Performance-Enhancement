@@ -30,12 +30,9 @@ from jarc_reactor.utils.metrics import TaskMetricsCollector
 class TaskFineTuner:
     def __init__(self, base_model: TransformerTrainer, config: Config):
         """Initialize fine-tuner with base model and configuration."""
-        # Set up result and log directories
-        self.save_dir = Path("/content/drive/MyDrive/JARC/finetuning_results")
-        self.log_dir = self.save_dir / "logs"
-        
-        # Create directories
-        self.save_dir.mkdir(parents=True, exist_ok=True)
+        from pathlib import Path
+        # Set up log directory
+        self.log_dir = Path("jarc_reactor/logs")
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
         # Setup logging
@@ -478,12 +475,17 @@ class TaskFineTuner:
 def main(config):
     """Main entry point for fine-tuning process."""
     
+    from pathlib import Path
+
+    # Ensure the logs directory exists
+    Path('jarc_reactor/logs').mkdir(parents=True, exist_ok=True)
+
     # Configure logging with both file and console output
     logging.basicConfig(
         level=getattr(logging, config.logging.level.upper(), logging.INFO),
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler('/content/drive/MyDrive/JARC/finetuning_debug.log'),
+            logging.FileHandler('jarc_reactor/logs/finetuning_debug.log'),
             logging.StreamHandler()
         ]
     )
