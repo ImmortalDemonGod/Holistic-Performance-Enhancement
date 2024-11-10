@@ -1,3 +1,4 @@
+# jarc_reactor/data/eval_data_prep.py
 import os
 import orjson
 import json
@@ -144,30 +145,6 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
             for input_tensor, output_tensor, task_id, context_pair in train_results:
                 train_inputs.append(input_tensor)
                 train_outputs.append(output_tensor)
-        train_task_ids.append(task_id)
-        train_context_pairs.append(context_pair)
-        test_inputs.append(input_tensor)
-        test_outputs.append(output_tensor)
-        test_task_ids.append(task_id)
-        test_context_pairs.append(context_pair)
-
-    # List all JSON files in the directory
-    json_files = [f for f in os.listdir(directory) if f.endswith('.json')]
-
-    # Use ThreadPoolExecutor to load files concurrently
-    with ThreadPoolExecutor() as executor:
-        # Submit tasks and collect futures
-        futures = {
-            executor.submit(load_single_file, os.path.join(directory, filename), os.path.splitext(filename)[0]): filename
-            for filename in json_files
-        }
-
-        # Use tqdm to display progress
-        for future in tqdm(as_completed(futures), total=len(futures), desc="Loading data"):
-            train_results, test_results = future.result()
-            for input_tensor, output_tensor, task_id, context_pair in train_results:
-                train_inputs.append(input_tensor)
-                train_outputs.append(output_tensor)
                 train_task_ids.append(task_id)
                 train_context_pairs.append(context_pair)
             for input_tensor, output_tensor, task_id, context_pair in test_results:
@@ -176,116 +153,155 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 test_task_ids.append(task_id)
                 test_context_pairs.append(context_pair)
 
-def prepare_data(batch_size=None, return_datasets=False):
-    import jarc_reactor.config as config  # Ensure config is accessible within the function
+def prepare_data(batch_size=None, return_datasets=False, config=None):
+    """Prepare evaluation data with robust error handling."""
+    from jarc_reactor.config import Config
+    
+    # Use passed config or create new one
+    if config is None:
+        config = Config()
+        
+    logger = logging.getLogger(__name__)
+
     if batch_size is None:
-        batch_size = config.batch_size  # Use the default from config if not provided
+        batch_size = config.training.batch_size
+
     directory = config.evaluation.data_dir
-    logger.info(f"Starting data preparation with batch_size={batch_size} from directory {directory}...")
+    logger.info(f"Starting data preparation with batch_size={batch_size} from directory {directory}")
+
+    # Validate directory
+    if not os.path.exists(directory):
+        raise FileNotFoundError(f"Data directory does not exist: {directory}")
+    if not os.path.isdir(directory):
+        raise NotADirectoryError(f"Path is not a directory: {directory}")
+
+    # Initialize counters before using them
+    total_files = 0
+    successful_files = 0
     log_limit = 2
+    
+    # Get list of JSON files first
+    json_files = [f for f in os.listdir(directory) if f.endswith('.json')]
+    if not json_files:
+        raise ValueError(f"No JSON files found in {directory}")
+    
     # Inspect data structure for a limited number of files
-    for filename in os.listdir(directory):
-        if filename.endswith('.json'):
-            total_files += 1
-            if successful_files < log_limit:
-                if inspect_data_structure(filename, directory):
-                    successful_files += 1
-                else:
-                    break
+    for filename in json_files:
+        total_files += 1
+        if successful_files < log_limit:
+            if inspect_data_structure(filename, directory):
+                successful_files += 1
 
-    logger.info(f"Successfully inspected {successful_files}/{total_files} files for structure.")
+    logger.info(f"Found {total_files} JSON files, successfully inspected {successful_files}")
+    if successful_files == 0:
+        raise ValueError("No valid data files found in directory")
 
+    # Initialize data containers
     train_inputs, train_outputs, train_task_ids = [], [], []
     test_inputs, test_outputs, test_task_ids = [], [], []
     context_map = {}
-    train_context_pairs, test_context_pairs = [], []
+    train_context_pairs, test_context_pairs = [], [], 
 
-    # Load context pairs from the provided directory
-    load_context_pairs(directory, context_map)
-
-    # Load main dataset from the provided directory with progress bar
-    logger.info("Loading evaluation data with progress bar...")
-    load_main_data_concurrently(
-        directory=directory,
-        context_map=context_map,
-        train_inputs=train_inputs,
-        train_outputs=train_outputs,
-        train_task_ids=train_task_ids,
-        train_context_pairs=train_context_pairs,
-        test_inputs=test_inputs,
-        test_outputs=test_outputs,
-        test_task_ids=test_task_ids,
-        test_context_pairs=test_context_pairs
-    )
-
-    # Convert lists to tensors
-    train_inputs = torch.stack(train_inputs)
-    train_outputs = torch.stack(train_outputs)
-    test_inputs = torch.stack(test_inputs)
-    test_outputs = torch.stack(test_outputs)
-
-    
-    
-    # Create a sorted list of unique task_ids
-    unique_task_ids = sorted(set(train_task_ids + test_task_ids))
-    task_id_map = {task_id: idx for idx, task_id in enumerate(unique_task_ids)}
-
-    # Convert task_ids to tensors
-    train_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in train_task_ids], dtype=torch.long)
-    test_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in test_task_ids], dtype=torch.long)
-    unique_task_ids = sorted(set(train_task_ids + test_task_ids))
-    logger.info(f"Total unique task_ids (including synthetic if any): {len(unique_task_ids)}")
-    
-    # Check for overlapping task_ids between training and test datasets
-    if len(unique_task_ids) != len(set(train_task_ids)) + len(set(test_task_ids)):
-        logger.warning("There are overlapping task_ids between training and test datasets.")
-
-    task_id_map = {task_id: idx for idx, task_id in enumerate(unique_task_ids)}
-
-    # Convert task_ids to tensors
-    # Convert task_ids to tensors using the task_id_map
-    train_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in train_task_ids], dtype=torch.long)
-    test_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in test_task_ids], dtype=torch.long)
-
-    # Add Diagnostic Logging
-    logger.debug(f"Test Data Sizes - test_inputs: {len(test_inputs)}, "
-                 f"test_outputs: {len(test_outputs)}, "
-                 f"test_task_ids: {len(test_task_ids_tensor)}")
-
-    # Assertions to ensure data consistency
-    assert train_inputs.size(0) == train_outputs.size(0) == train_task_ids_tensor.size(0), "Mismatch in training data tensor sizes."
-    assert test_inputs.size(0) == test_outputs.size(0) == test_task_ids_tensor.size(0), (
-        f"Mismatch in testing data tensor sizes: "
-        f"test_inputs={test_inputs.size(0)}, "
-        f"test_outputs={test_outputs.size(0)}, "
-        f"test_task_ids={test_task_ids_tensor.size(0)}"
-    )
-
-    # Convert context pairs to tensors
-    train_ctx_inputs = torch.stack([pair.context_input for pair in train_context_pairs])
-    train_ctx_outputs = torch.stack([pair.context_output for pair in train_context_pairs])
-    test_ctx_inputs = torch.stack([pair.context_input for pair in test_context_pairs])
-    test_ctx_outputs = torch.stack([pair.context_output for pair in test_context_pairs])
-
-    # Create TensorDatasets
-    train_dataset = TensorDataset(train_inputs, train_outputs, train_ctx_inputs, train_ctx_outputs, train_task_ids_tensor)
-    test_dataset = TensorDataset(test_inputs, test_outputs, test_ctx_inputs, test_ctx_outputs, test_task_ids_tensor)
-
-    # Optional: Save the task_id_map
-    logger.info("Saving eval_id_map.json with the current task mappings.")
     try:
-        with open('eval_id_map.json', 'w') as f:
-            json.dump(task_id_map, f)
+        # Load context pairs
+        logger.info("Loading context pairs...")
+        load_context_pairs(directory, context_map)
+        if not context_map:
+            raise ValueError("No context pairs loaded")
+
+        # Load main dataset
+        logger.info("Loading main dataset...")
+        load_main_data_concurrently(
+            directory=directory,
+            context_map=context_map,
+            train_inputs=train_inputs,
+            train_outputs=train_outputs,
+            train_task_ids=train_task_ids,
+            train_context_pairs=train_context_pairs,
+            test_inputs=test_inputs,
+            test_outputs=test_outputs,
+            test_task_ids=test_task_ids,
+            test_context_pairs=test_context_pairs
+        )
+
+        # Validate data was loaded
+        if not train_inputs or not test_inputs:
+            raise ValueError("No data loaded from files")
+
+        # Convert lists to tensors with validation
+        try:
+            train_inputs = torch.stack(train_inputs)
+            train_outputs = torch.stack(train_outputs)
+            test_inputs = torch.stack(test_inputs)
+            test_outputs = torch.stack(test_outputs)
+        except Exception as e:
+            raise ValueError(f"Failed to convert data to tensors: {str(e)}")
+
+        # Create task mapping
+        unique_task_ids = sorted(set(train_task_ids + test_task_ids))
+        if not unique_task_ids:
+            raise ValueError("No task IDs found in data")
+            
+        task_id_map = {task_id: idx for idx, task_id in enumerate(unique_task_ids)}
+        logger.info(f"Created mapping for {len(unique_task_ids)} unique tasks")
+
+        # Convert task IDs to tensors
+        train_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in train_task_ids], dtype=torch.long)
+        test_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in test_task_ids], dtype=torch.long)
+
+        # Validate tensor shapes match
+        if not (train_inputs.size(0) == train_outputs.size(0) == train_task_ids_tensor.size(0)):
+            raise ValueError(
+                f"Mismatched training tensor sizes: inputs={train_inputs.size(0)}, "
+                f"outputs={train_outputs.size(0)}, task_ids={train_task_ids_tensor.size(0)}"
+            )
+        if not (test_inputs.size(0) == test_outputs.size(0) == test_task_ids_tensor.size(0)):
+            raise ValueError(
+                f"Mismatched test tensor sizes: inputs={test_inputs.size(0)}, "
+                f"outputs={test_outputs.size(0)}, task_ids={test_task_ids_tensor.size(0)}"
+            )
+
+        # Convert context pairs to tensors
+        try:
+            train_ctx_inputs = torch.stack([pair.context_input for pair in train_context_pairs])
+            train_ctx_outputs = torch.stack([pair.context_output for pair in train_context_pairs])
+            test_ctx_inputs = torch.stack([pair.context_input for pair in test_context_pairs])
+            test_ctx_outputs = torch.stack([pair.context_output for pair in test_context_pairs])
+        except Exception as e:
+            raise ValueError(f"Failed to process context pairs: {str(e)}")
+
+        # Create datasets
+        train_dataset = TensorDataset(
+            train_inputs, train_outputs, 
+            train_ctx_inputs, train_ctx_outputs, 
+            train_task_ids_tensor
+        )
+        test_dataset = TensorDataset(
+            test_inputs, test_outputs,
+            test_ctx_inputs, test_ctx_outputs, 
+            test_task_ids_tensor
+        )
+
+        # Save task mapping for future use
+        try:
+            with open('eval_id_map.json', 'w') as f:
+                json.dump(task_id_map, f, indent=2)
+            logger.info("Saved task mapping to eval_id_map.json")
+        except Exception as e:
+            logger.warning(f"Failed to save task mapping: {str(e)}")
+            # Continue anyway - this isn't critical
+
+        # Return appropriate format
+        if return_datasets:
+            logger.info(f"Returning datasets with {len(train_dataset)} training and {len(test_dataset)} test examples")
+            return train_dataset, test_dataset
+        else:
+            # Create DataLoaders
+            train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+            test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0)
+            logger.info("Created data loaders successfully")
+            return train_loader, test_loader
+
     except Exception as e:
-        logger.error(f"Failed to save eval_id_map.json: {str(e)}")
-
-    if return_datasets:
-        logger.info("Returning TensorDatasets instead of DataLoaders.")
-        return train_dataset, test_dataset
-    else:
-        # Create DataLoaders using the local batch_size variable
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
-        val_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0)  # Set batch_size=1 for evaluation
-
-        logger.info("Data preparation completed successfully.")
-        return train_loader, val_loader
+        logger.error(f"Failed to prepare data: {str(e)}")
+        raise

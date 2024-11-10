@@ -1,3 +1,4 @@
+# jarc_reactor/config.py
 # Configuration and parameters for the transformer model
 # Precision setting for PyTorch Lightning Trainer
 # Add near the top of config.py, after imports
@@ -105,7 +106,7 @@ dropout_rate = 0.15  # Dropout rate for the model
 synthetic_dir = 'sythtraining'
 include_synthetic_training_data = False  # Set to True to include synthetic data
 
-CHECKPOINT_PATH = "/workspaces/JARC-Reactor/lightning_logs/checkpoints/model-step=step=40-val_loss=val_loss=1.7084.ckpt"
+CHECKPOINT_PATH = "/kaggle/input/arc_checkpoint_test/pytorch/default/1/epoch3-step1748.ckpt"
 checkpoint_path = CHECKPOINT_PATH  # Ensure this is defined before use
 
 FAST_DEV_RUN = False  # Set to True to enable fast development run
@@ -206,9 +207,9 @@ class Config:
             decoder_dropout_rate=decoder_dropout_rate,
             lora_rank=lora_rank,
             use_lora=use_lora,
-            checkpoint_path=CHECKPOINT_PATH  # Pass checkpoint_path here
+            checkpoint_path=CHECKPOINT_PATH
         )
-
+        
         # Set checkpoint_path after initializing the model
         self.model.checkpoint_path = CHECKPOINT_PATH
         
@@ -232,28 +233,10 @@ class Config:
         self.finetuning = FineTuningConfig()
         self.validate_config()
         self.optuna = OptunaConfig()
+        # Initialize the evaluation configuration
         self.evaluation = EvaluationConfig()  # Add this line
-        self.scheduler = SchedulerConfig()  # Add scheduler configuration
-        self.use_best_params = False  # Ensure this attribute exists
-        self.use_best_params = False  # Whether to load and use best parameters from Optuna study
-    
-        logging.debug("Config initialized with:")
-        logging.debug(f"  - Logging level: {self.logging.level}")
-        logging.debug(f"  - Fine-tuning mode: {self.finetuning.mode}")
-        logging.debug(f"  - Device: {device_choice}")
-        
-        # Initialize model-specific attributes from ModelConfig
-        self.input_dim = self.model.input_dim
-        self.d_model = self.model.d_model
-        self.encoder_layers = self.model.encoder_layers
-        self.decoder_layers = self.model.decoder_layers
-        self.heads = self.model.heads
-        self.d_ff = self.model.d_ff
-        self.output_dim = self.model.output_dim
-        self.dropout = self.model.dropout
-        self.context_encoder_d_model = self.model.context_encoder_d_model
-        self.context_encoder_heads = self.model.context_encoder_heads
-        self.checkpoint_path = CHECKPOINT_PATH  # Ensure this path is correct
+        self.scheduler = SchedulerConfig()
+        self.use_best_params = False
 
     def validate_config(self):
         """Validate configuration values"""
@@ -261,6 +244,8 @@ class Config:
         assert self.training.learning_rate > 0, "Learning rate must be positive"
         assert self.training.device_choice in ['cpu', 'gpu'], "device_choice must be 'cpu' or 'gpu'"
         assert self.training.precision in [16, 32, 64, 'bf16'], "Invalid precision value"
+
+
 class EvaluationConfig:
     def __init__(self):
         # Mode can be: 'training-validation', 'training-train', 'evaluation-only', 'all'

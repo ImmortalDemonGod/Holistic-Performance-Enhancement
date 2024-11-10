@@ -1,4 +1,4 @@
-# evaluate.py
+# jarc_reactor/evaluate.py
 import logging
 import os
 import json
@@ -132,13 +132,17 @@ class EvaluationManager:
             try:
                 with open("eval_id_map.json", "r") as f:
                     self.eval_task_map = json.load(f)
-                self.logger.info(f"Loaded {len(self.eval_task_map)} evaluation tasks")
+                    self.logger.info(f"Loaded {len(self.eval_task_map)} evaluation tasks")
             except FileNotFoundError:
                 self.logger.info("eval_id_map.json not found - creating from evaluation data...")
                 
                 # Load evaluation data to get task IDs
                 try:
-                    _, eval_dataset = prepare_eval_data(return_datasets=True)
+                    # Pass config to prepare_eval_data
+                    _, eval_dataset = prepare_eval_data(
+                        return_datasets=True,
+                        config=self.config  # Pass the config instance
+                    )
                     
                     # Extract unique task IDs
                     unique_task_ids = set()
@@ -147,6 +151,9 @@ class EvaluationManager:
                         task_id = task_ids[0].item()
                         unique_task_ids.add(str(task_id))
                     
+                    if not unique_task_ids:
+                        raise ValueError("No task IDs found in evaluation dataset")
+                    
                     # Create task map
                     self.eval_task_map = {
                         task_id: idx 
@@ -154,26 +161,44 @@ class EvaluationManager:
                     }
                     
                     # Save the map
-                    with open("eval_id_map.json", "w") as f:
-                        json.dump(self.eval_task_map, f, indent=2)
-                    self.logger.info(
-                        f"Created and saved eval_id_map.json with {len(self.eval_task_map)} tasks"
-                    )
+                    try:
+                        with open("eval_id_map.json", "w") as f:
+                            json.dump(self.eval_task_map, f, indent=2)
+                        self.logger.info(
+                            f"Created and saved eval_id_map.json with {len(self.eval_task_map)} tasks"
+                        )
+                    except Exception as e:
+                        self.logger.error(f"Error saving eval_id_map.json: {str(e)}")
+                        # Continue even if save fails - we still have the map in memory
+                    
                 except Exception as e:
                     self.logger.error(f"Error creating eval_id_map.json: {str(e)}")
                     self.has_eval_data = False
                     raise
                     
-            self.eval_int_to_task = {v: k for k, v in self.eval_task_map.items()}
-            self.has_eval_data = True
+            # Create reverse mapping if we have a valid task map
+            if hasattr(self, 'eval_task_map') and self.eval_task_map:
+                self.eval_int_to_task = {v: k for k, v in self.eval_task_map.items()}
+                self.has_eval_data = True
+                self.logger.debug(
+                    f"Created reverse mapping with {len(self.eval_int_to_task)} entries"
+                )
+            else:
+                raise ValueError("No evaluation task map created")
             
         except Exception as e:
             self.logger.error(f"Error handling evaluation task map: {str(e)}")
             self.has_eval_data = False
 
+        # Final validation
         if not (self.has_training_data or self.has_eval_data):
+            self.logger.error("Neither training nor evaluation data maps are available")
             raise ValueError("No task maps found or created - cannot perform any evaluation")
 
+        self.logger.info(
+            f"Task maps loaded - Training: {self.has_training_data}, "
+            f"Evaluation: {self.has_eval_data}"
+        )
     def _validate_shapes(self, src, tgt, ctx_input, ctx_output, outputs, mode):
         """Validate tensor shapes and log details"""
         self.logger.debug(f"\nShape validation for {mode}:")
@@ -744,8 +769,8 @@ class EvaluationManager:
                 self.logger.debug(f"\nProcessing task {task_id}:")
                 prediction_obj = {}
                 
-                # Get predictions from training modes (limit to 2 attempts)
-                predictions = task_data.get('training_train', {}).get('predictions', [])[:2]
+                # Get predictions from evaluation mode (limit to 2 attempts)
+                predictions = task_data.get('evaluation', {}).get('predictions', [])[:2]
                 self.logger.debug(f"Found {len(predictions)} predictions for task")
                 
                 for idx, pred in enumerate(predictions, 1):
@@ -754,7 +779,8 @@ class EvaluationManager:
                     # Get predicted grid
                     grid = pred.get('predicted_grid', [])
                     self.logger.debug(f"Original grid shape: {len(grid)}x{len(grid[0]) if grid else 0}")
-                    self.logger.debug("First row sample: " + str(grid[0][:5]) + "...")
+                    if grid:
+                        self.logger.debug("First row sample: " + str(grid[0][:5]) + "...")
                     
                     # Remove padding values (10) and get actual grid dimensions
                     cleaned_grid = []
@@ -797,11 +823,15 @@ class EvaluationManager:
                     if final_grid:
                         prediction_obj[f'attempt_{idx}'] = final_grid
                         self.logger.debug(f"Added attempt_{idx} to prediction object")
+                    else:
+                        self.logger.debug(f"No valid grid generated for attempt {idx} of task {task_id}.")
                 
                 # Only add tasks that have predictions and wrap in list
                 if prediction_obj:
                     submission[task_id] = [prediction_obj]
                     self.logger.debug(f"Added task {task_id} to submission")
+                else:
+                    self.logger.debug(f"No predictions to add for task {task_id}.")
             
             # Save submission
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -818,14 +848,13 @@ class EvaluationManager:
                         self.logger.debug(f"{attempt_id}: {len(grid)}x{len(grid[0]) if grid else 0} grid")
             
             with open(submission_file, 'w') as f:
-                json.dump(submission, f)  # Remove indent to avoid truncation
+                json.dump(submission, f)
                 
             self.logger.info(f"Created submission file: {submission_file}")
             return submission_file
         except Exception as e:
             self.logger.error(f"Failed to create submission: {str(e)}", exc_info=True)
             raise
-
 def main():
     """Main entry point with error handling"""
     try:
