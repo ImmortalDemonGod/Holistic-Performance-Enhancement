@@ -46,6 +46,13 @@ class EvaluationManager:
         self.model = self.model.to(self.device)
         self.model.eval()
         
+        self.eval_dir = self.config.evaluation.data_dir
+        if not os.path.exists(self.eval_dir):
+            self.logger.error(f"Evaluation directory not found: {self.eval_dir}")
+            raise FileNotFoundError(f"Evaluation directory not found: {self.eval_dir}")
+        
+        self.logger.info(f"Using evaluation data from: {self.eval_dir}")
+
         # Initialize metrics collector for each mode
         self.metrics_collectors = {
             'training_train': TaskMetricsCollector(),

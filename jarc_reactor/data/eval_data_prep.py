@@ -132,6 +132,31 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
             logger.error(f"Error processing file '{filepath}': {str(e)}")
             return [], []
 
+    from jarc_reactor.config import config
+    import os
+    
+    eval_dir = config.evaluation.data_dir
+
+    if not os.path.exists(eval_dir):
+        raise FileNotFoundError(f"Evaluation directory not found: {eval_dir}")
+    if not os.path.isdir(eval_dir):
+        raise NotADirectoryError(f"Evaluation path is not a directory: {eval_dir}")
+    
+    logger.info(f"Preparing evaluation data from: {eval_dir}")
+
+    load_main_data_concurrently(
+        directory=eval_dir,
+        context_map=context_map,
+        train_inputs=train_inputs,
+        train_outputs=train_outputs,
+        train_task_ids=train_task_ids,
+        train_context_pairs=train_context_pairs,
+        test_inputs=test_inputs,
+        test_outputs=test_outputs,
+        test_task_ids=test_task_ids,
+        test_context_pairs=test_context_pairs
+    )
+
     # List all JSON files in the directory
     json_files = [f for f in os.listdir(directory) if f.endswith('.json')]
 
