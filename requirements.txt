@@ -1,7 +1,6 @@
 torch
 pytorch-lightning
 numpy
-aider-chat
 optuna
 orjson
 tqdm
