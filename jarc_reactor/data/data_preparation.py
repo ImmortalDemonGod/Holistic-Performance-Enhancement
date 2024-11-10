@@ -169,8 +169,9 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
 
     logger = logging.getLogger(__name__)
 
+    # Set directory path - use training data directory by default
     if directory is None:
-        directory = config.evaluation.data_dir
+        directory = config.training.training_data_dir
     logger.info(f"Preparing data from directory: {directory}")
 
     # Validate directory using Path
@@ -188,7 +189,7 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
         logger.info(f" - {file.name}")
 
     if batch_size is None:
-        batch_size = config.batch_size  # Use the default from config if not provided
+        batch_size = config.training.batch_size  # Use training batch size from config
     
     logger.info(f"Starting data preparation with batch_size={batch_size}...")
     log_limit = 2
@@ -281,12 +282,12 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
     test_dataset = TensorDataset(test_inputs, test_outputs, test_ctx_inputs, test_ctx_outputs, test_task_ids_tensor)
 
     # Optional: Save the task_id_map
-    logger.info("Saving eval_id_map.json with the current task mappings.")
+    logger.info("Saving task_id_map.json with the current task mappings.")
     try:
-        with open('eval_id_map.json', 'w') as f:
+        with open('task_id_map.json', 'w') as f:
             json.dump(task_id_map, f)
     except Exception as e:
-        logger.error(f"Failed to save eval_id_map.json: {str(e)}")
+        logger.error(f"Failed to save task_id_map.json: {str(e)}")
 
     if return_datasets:
         logger.info("Returning TensorDatasets instead of DataLoaders.")

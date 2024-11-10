@@ -106,7 +106,9 @@ dropout_rate = 0.15  # Dropout rate for the model
 synthetic_dir = 'sythtraining'
 include_synthetic_training_data = False  # Set to True to include synthetic data
 
-CHECKPOINT_PATH = "/kaggle/input/arc_checkpoint_test/pytorch/default/1/epoch3-step1748.ckpt"
+#CHECKPOINT_PATH = "/kaggle/input/arc_checkpoint_test/pytorch/default/1/epoch3-step1748.ckpt"
+CHECKPOINT_PATH = "/workspaces/JARC-Reactor/lightning_logs/checkpoints/model-step=step=40-val_loss=val_loss=1.7084.ckpt"
+
 checkpoint_path = CHECKPOINT_PATH  # Ensure this is defined before use
 
 FAST_DEV_RUN = False  # Set to True to enable fast development run
