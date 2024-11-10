@@ -162,15 +162,18 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
 from pathlib import Path
 
 def prepare_data(directory=None, batch_size=None, return_datasets=False):
+    """Prepare evaluation data with configurable directory"""
     from jarc_reactor.config import config
     import logging
+    from pathlib import Path
 
     logger = logging.getLogger(__name__)
 
     if directory is None:
-        directory = config.training.training_data_dir
+        directory = config.evaluation.data_dir
     logger.info(f"Preparing data from directory: {directory}")
 
+    # Validate directory using Path
     data_path = Path(directory)
     if not data_path.exists():
         logger.error(f"Data directory does not exist: {directory}")
@@ -185,16 +188,14 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
         logger.info(f" - {file.name}")
 
     if batch_size is None:
-        batch_size = config.training.batch_size  # Use the default from config if not provided
-    logger.info(f"Data will be loaded from directory: {directory}")
-    if directory is None:
-        directory = config.evaluation.data_dir
-    logger.info(f"Starting data preparation with batch_size={batch_size} from directory {directory}...")
+        batch_size = config.batch_size  # Use the default from config if not provided
+    
+    logger.info(f"Starting data preparation with batch_size={batch_size}...")
     log_limit = 2
     successful_files = 0
     total_files = 0
 
-    # Inspect data structure for a limited number of files in the provided directory
+    # Inspect data structure for a limited number of files
     for filename in os.listdir(directory):
         if filename.endswith('.json'):
             total_files += 1
@@ -211,15 +212,11 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
     context_map = {}
     train_context_pairs, test_context_pairs = [], []
 
-    # Load context pairs from directory (not hardcoded 'training')
+    # Load context pairs from directory
     load_context_pairs(directory, context_map)
 
-    # Conditionally load context pairs from synthetic_dir
-    if config.training.include_synthetic_training_data:
-        load_context_pairs(config.training.synthetic_dir, context_map)
-
-    # Load main dataset from directory (not hardcoded 'training')
-    logger.info("Loading training data with progress bar...")
+    # Load main dataset with progress bar
+    logger.info("Loading evaluation data with progress bar...")
     load_main_data_concurrently(
         directory=directory,
         context_map=context_map,
@@ -233,24 +230,7 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
         test_context_pairs=test_context_pairs
     )
 
-    # Conditionally load main dataset from synthetic_dir with progress bar
-    if config.training.include_synthetic_training_data:
-        logger.info("Loading synthetic data with progress bar...")
-        load_main_data_concurrently(
-            directory=config.training.synthetic_dir,
-            context_map=context_map,
-            train_inputs=train_inputs,
-            train_outputs=train_outputs,
-            train_task_ids=train_task_ids,
-            train_context_pairs=train_context_pairs,
-            test_inputs=test_inputs,
-            test_outputs=test_outputs,
-            test_task_ids=test_task_ids,
-            test_context_pairs=test_context_pairs,
-            is_synthetic=True
-        )
-
-    # Ensure data types are compatible with quantized operations
+    # Convert lists to tensors
     train_inputs = torch.stack(train_inputs)
     train_outputs = torch.stack(train_outputs)
     test_inputs = torch.stack(test_inputs)
@@ -264,7 +244,7 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
     train_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in train_task_ids], dtype=torch.long)
     test_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in test_task_ids], dtype=torch.long)
     unique_task_ids = sorted(set(train_task_ids + test_task_ids))
-    logger.info(f"Total unique task_ids (including synthetic if any): {len(unique_task_ids)}")
+    logger.info(f"Total unique task_ids: {len(unique_task_ids)}")
     
     # Check for overlapping task_ids between training and test datasets
     if len(unique_task_ids) != len(set(train_task_ids)) + len(set(test_task_ids)):
@@ -272,7 +252,6 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
 
     task_id_map = {task_id: idx for idx, task_id in enumerate(unique_task_ids)}
 
-    # Convert task_ids to tensors
     # Convert task_ids to tensors using the task_id_map
     train_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in train_task_ids], dtype=torch.long)
     test_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in test_task_ids], dtype=torch.long)
@@ -302,12 +281,12 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
     test_dataset = TensorDataset(test_inputs, test_outputs, test_ctx_inputs, test_ctx_outputs, test_task_ids_tensor)
 
     # Optional: Save the task_id_map
-    logger.info("Saving task_id_map.json with the current task mappings.")
+    logger.info("Saving eval_id_map.json with the current task mappings.")
     try:
-        with open('task_id_map.json', 'w') as f:
+        with open('eval_id_map.json', 'w') as f:
             json.dump(task_id_map, f)
     except Exception as e:
-        logger.error(f"Failed to save task_id_map.json: {str(e)}")
+        logger.error(f"Failed to save eval_id_map.json: {str(e)}")
 
     if return_datasets:
         logger.info("Returning TensorDatasets instead of DataLoaders.")
