@@ -31,9 +31,13 @@ class TaskFineTuner:
     def __init__(self, base_model: TransformerTrainer, config: Config):
         """Initialize fine-tuner with base model and configuration."""
         from pathlib import Path
-        # Set up log directory using config
+        # Set up directories using config
         self.log_dir = Path(config.logging.log_dir)
+        self.save_dir = Path(config.finetuning.save_dir)  # Add this line
+        
+        # Create directories
         self.log_dir.mkdir(parents=True, exist_ok=True)
+        self.save_dir.mkdir(parents=True, exist_ok=True)  # Add this line
 
         # Setup logging
         self.logger = logging.getLogger("task_finetuner")
@@ -474,7 +478,6 @@ class TaskFineTuner:
 
 def main(config):
     """Main entry point for fine-tuning process."""
-    
     from pathlib import Path
 
     # Ensure the logs directory exists
@@ -512,7 +515,7 @@ def main(config):
         # Load the base model
         base_model = create_transformer_trainer(
             config=config,
-            checkpoint_path=model_path
+            checkpoint_path=config.model.checkpoint_path  # Changed from model_path
         )
         base_model = base_model.to(device)
         logger.info("Base model loaded and moved to device")
@@ -550,7 +553,6 @@ def main(config):
         # Cleanup
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
-
 if __name__ == "__main__":
     config = Config()
     main(config)
