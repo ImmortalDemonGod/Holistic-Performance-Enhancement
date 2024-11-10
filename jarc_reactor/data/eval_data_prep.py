@@ -142,13 +142,12 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
             for input_tensor, output_tensor, task_id, context_pair in train_results:
                 train_inputs.append(input_tensor)
                 train_outputs.append(output_tensor)
-        train_task_ids=train_task_ids,
-        train_context_pairs=train_context_pairs,
-        test_inputs=test_inputs,
-        test_outputs=test_outputs,
-        test_task_ids=test_task_ids,
-        test_context_pairs=test_context_pairs
-    )
+        train_task_ids.append(task_id)
+        train_context_pairs.append(context_pair)
+        test_inputs.append(input_tensor)
+        test_outputs.append(output_tensor)
+        test_task_ids.append(task_id)
+        test_context_pairs.append(context_pair)
 
     # List all JSON files in the directory
     json_files = [f for f in os.listdir(directory) if f.endswith('.json')]
