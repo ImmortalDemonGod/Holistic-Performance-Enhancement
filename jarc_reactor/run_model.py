@@ -101,15 +101,25 @@ def setup_model_training(cfg):
         else:
             logger.warning("Failed to load best parameters, using existing configuration")
 
-    # Print final configuration after attempting to load best parameters
-    logger.info("Final configuration after attempting to load best parameters:")
-    logger.info(f"Model parameters: {cfg.model.__dict__}")
-    logger.info(f"Training parameters: {cfg.training.__dict__}")
+    # Print final configuration
     logger.info("Final configuration:")
     logger.info(f"Model parameters: {cfg.model.__dict__}")
     logger.info(f"Training parameters: {cfg.training.__dict__}")
 
     try:
+        # Create log directory based on environment
+        if os.path.exists('/kaggle'):
+            log_dir = Path('/kaggle/working/logs')
+        else:
+            log_dir = Path('logs')
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        # Configure file handler for logging
+        log_file = log_dir / 'train.log'
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        logger.addHandler(file_handler)
+        
         # Log the checkpoint path and attempt to load the model
         logger.info(f"Attempting to load model from checkpoint: {cfg.model.checkpoint_path}")
         if cfg.training.train_from_checkpoint and cfg.model.checkpoint_path:
@@ -129,16 +139,11 @@ def setup_model_training(cfg):
                 logger.info(f"Checkpoint keys: {checkpoint.keys()}")
             except Exception as e:
                 logger.error(f"Error loading checkpoint: {str(e)}")
-        if cfg.training.train_from_checkpoint and cfg.model.checkpoint_path:
-            try:
-                checkpoint = torch.load(cfg.model.checkpoint_path)
-                logger.info(f"Checkpoint keys: {checkpoint.keys()}")
-            except Exception as e:
-                logger.error(f"Error loading checkpoint: {str(e)}")
 
         # Log device information
         logger.info(f"CUDA available: {torch.cuda.is_available()}")
         if torch.cuda.is_available():
+            logger.info(f"CUDA device: {torch.cuda.get_device_name(0)}")
             logger.info(f"CUDA device count: {torch.cuda.device_count()}")
         logger.info(f"Selected device: {cfg.training.device_choice}")
 
@@ -147,7 +152,6 @@ def setup_model_training(cfg):
     except Exception as e:
         logger.error(f"Error in setup_model_training: {str(e)}")
         raise
-
 """
 import os
 
