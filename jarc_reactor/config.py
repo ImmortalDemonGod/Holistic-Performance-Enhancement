@@ -1,6 +1,7 @@
 # Configuration and parameters for the transformer model
 # Precision setting for PyTorch Lightning Trainer
 # Add near the top of config.py, after imports
+import os
 import torch
 import logging
 
@@ -268,7 +269,14 @@ class EvaluationConfig:
         self.debug_mode = True  # Enable extensive debugging
         self.save_predictions = True  # Save model predictions for analysis
         self.create_submission = True
-        self.data_dir = os.path.join('jarc_reactor', 'data', 'evaluation_data')
+        # Allow setting via environment variable, fallback to default path
+        self.data_dir = os.getenv('EVALUATION_DATA_DIR', os.path.abspath(os.path.join('jarc_reactor', 'data', 'evaluation_data')))
+        
+        # Ensure the directory exists
+        os.makedirs(self.data_dir, exist_ok=True)
+        
+        # Log the evaluation data directory path
+        logger.debug(f"Evaluation data directory set to: {self.data_dir}")
 
 # Instantiate the Config object so it can be accessed globally
 config = Config()

@@ -22,7 +22,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def inspect_data_structure(filename, directory='training'):
+def inspect_data_structure(filename, directory=None):
+    if directory is None:
+        directory = config.evaluation.data_dir
     """Debug helper to examine JSON structure"""
     filepath = os.path.join(directory, filename)
     try:
