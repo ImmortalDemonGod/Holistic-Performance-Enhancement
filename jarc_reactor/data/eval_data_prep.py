@@ -10,7 +10,7 @@ import torch
 import numpy as np
 import logging
 from torch.utils.data import DataLoader, TensorDataset
-from jarc_reactor.config import include_synthetic_training_data, synthetic_dir
+from jarc_reactor.config import config, include_synthetic_training_data, synthetic_dir
 from jarc_reactor.data.context_data import ContextPair
 from jarc_reactor.utils.padding_utils import pad_to_fixed_size
 
