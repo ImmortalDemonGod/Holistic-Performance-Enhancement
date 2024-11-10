@@ -176,27 +176,30 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 test_task_ids.append(task_id)
                 test_context_pairs.append(context_pair)
 
-def prepare_data(batch_size=None, return_datasets=False):
+def prepare_data(directory=None, batch_size=None, return_datasets=False):
     import jarc_reactor.config as config  # Ensure config is accessible within the function
     if batch_size is None:
         batch_size = config.batch_size  # Use the default from config if not provided
-    logger.info(f"Starting data preparation with batch_size={batch_size}...")
+    if directory is None:
+        directory = config.evaluation.data_dir
+    logger.info(f"Starting data preparation with batch_size={batch_size} from directory {directory}...")
     log_limit = 2
     successful_files = 0
     total_files = 0
 
-    # Inspect data structure for a limited number of files
-    for directory in ['evaluation']:
-        for filename in os.listdir(directory):
-            if filename.endswith('.json'):
-                total_files += 1
-                if successful_files < log_limit:
-                    if inspect_data_structure(filename, directory):
-                        successful_files += 1
-                else:
-                    break
-        if successful_files >= log_limit:
-            break
+    # Validate directory existence
+    if not os.path.exists(directory):
+        raise FileNotFoundError(f"Directory not found: {directory}")
+
+    # Inspect data structure
+    for filename in os.listdir(directory):
+        if filename.endswith('.json'):
+            total_files += 1
+            if successful_files < log_limit:
+                if inspect_data_structure(filename, directory):
+                    successful_files += 1
+            else:
+                break
 
     logger.info(f"Successfully inspected {successful_files}/{total_files} files for structure.")
 
@@ -205,13 +208,13 @@ def prepare_data(batch_size=None, return_datasets=False):
     context_map = {}
     train_context_pairs, test_context_pairs = [], []
 
-    # Load context pairs from 'evaluation'
-    load_context_pairs('evaluation', context_map)
+    # Load context pairs from the provided directory
+    load_context_pairs(directory, context_map)
 
-    # Load main dataset from 'evaluation' with progress bar
+    # Load main dataset from the provided directory with progress bar
     logger.info("Loading evaluation data with progress bar...")
     load_main_data_concurrently(
-        directory='evaluation',
+        directory=directory,
         context_map=context_map,
         train_inputs=train_inputs,
         train_outputs=train_outputs,

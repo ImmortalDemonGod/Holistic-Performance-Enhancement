@@ -187,7 +187,9 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
     if batch_size is None:
         batch_size = config.training.batch_size  # Use the default from config if not provided
     logger.info(f"Data will be loaded from directory: {directory}")
-    logger.info(f"Starting data preparation with batch_size={batch_size}...")
+    if directory is None:
+        directory = config.evaluation.data_dir
+    logger.info(f"Starting data preparation with batch_size={batch_size} from directory {directory}...")
     log_limit = 2
     successful_files = 0
     total_files = 0
