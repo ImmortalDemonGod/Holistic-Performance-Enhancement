@@ -267,7 +267,8 @@ class EvaluationConfig:
         self.output_dir = 'evaluation_results'
         self.debug_mode = True  # Enable extensive debugging
         self.save_predictions = True  # Save model predictions for analysis
-        self.create_submission = True  # Add this line
+        self.create_submission = True
+        self.data_dir = os.path.join('jarc_reactor', 'data', 'evaluation_data')
 
 # Instantiate the Config object so it can be accessed globally
 config = Config()
