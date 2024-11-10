@@ -94,7 +94,7 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 data = orjson.loads(f.read())
 
             # Determine data structure based on directory
-            if directory == 'training':
+            if not is_synthetic:  # Use is_synthetic flag instead of directory string comparison
                 train_data = data.get('train', [])[1:]  # Skip the first example (used for context)
                 test_data = data.get('test', [])
             else:  # 'sythtraining' assumed to have a flat list
@@ -156,7 +156,7 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 test_outputs.append(output_tensor)
                 test_task_ids.append(task_id)
                 test_context_pairs.append(context_pair)
-
+        
 from pathlib import Path
 
 def prepare_data(directory=None, batch_size=None, return_datasets=False):
@@ -207,17 +207,17 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
     context_map = {}
     train_context_pairs, test_context_pairs = [], []
 
-    # Load context pairs from 'training'
-    load_context_pairs('training', context_map)
+    # Load context pairs from directory (not hardcoded 'training')
+    load_context_pairs(directory, context_map)
 
     # Conditionally load context pairs from synthetic_dir
     if config.training.include_synthetic_training_data:
         load_context_pairs(config.training.synthetic_dir, context_map)
 
-    # Load main dataset from 'training' with progress bar
+    # Load main dataset from directory (not hardcoded 'training')
     logger.info("Loading training data with progress bar...")
     load_main_data_concurrently(
-        directory='training',
+        directory=directory,
         context_map=context_map,
         train_inputs=train_inputs,
         train_outputs=train_outputs,
@@ -251,8 +251,6 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
     train_outputs = torch.stack(train_outputs)
     test_inputs = torch.stack(test_inputs)
     test_outputs = torch.stack(test_outputs)
-
-    
     
     # Create a sorted list of unique task_ids
     unique_task_ids = sorted(set(train_task_ids + test_task_ids))
