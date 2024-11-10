@@ -17,7 +17,7 @@ from jarc_reactor.utils.metrics import (
     TaskMetricsCollector,
     PredictionRecord  # Add this import
 )
-
+from jarc_reactor.kaggle.submission_handler import create_submission_from_evaluation
 
 
 class EvaluationManager:
@@ -29,6 +29,17 @@ class EvaluationManager:
         self.results_dir = Path('evaluation_results')
         self.results_dir.mkdir(exist_ok=True)
         
+        # Initialize results dictionary
+        self.results = {
+            'task_summaries': {},
+            'metadata': {
+                'timestamp': datetime.now().isoformat(),
+                'config': {
+                    'model': vars(config.model),
+                    'training': vars(config.training)
+                }
+            }
+        }
         # Load model
         self.model = self._load_model()
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -337,27 +348,39 @@ class EvaluationManager:
                 overall_std_acc += std_acc
                 overall_diff_acc += diff_acc
                 
-                # **Add 'debug_info' to the task summaries**
-                results['task_summaries'][task_id] = {
+                # Create task summary with all information
+                task_summary = {
                     'standard_accuracy': std_acc,
                     'differential_accuracy': diff_acc,
                     'predictions': metrics.get('predictions', []),
-                    'debug_info': metrics.get('debug_info', {})  # <--- Added line
+                    'debug_info': metrics.get('debug_info', {})
                 }
+                
+                # Add to both results and main results storage
+                results['task_summaries'][task_id] = task_summary
+                if task_id not in self.results['task_summaries']:
+                    self.results['task_summaries'][task_id] = {}
+                self.results['task_summaries'][task_id][mode] = task_summary
             
             # Calculate averages
             if total_tasks > 0:
-                results['overall_metrics'] = {
+                overall_metrics = {
                     'standard_accuracy': overall_std_acc / total_tasks,
                     'differential_accuracy': overall_diff_acc / total_tasks
                 }
             else:
-                results['overall_metrics'] = {
+                overall_metrics = {
                     'standard_accuracy': 0.0,
                     'differential_accuracy': 0.0
                 }
             
-            # Save results
+            # Add overall metrics to both results
+            results['overall_metrics'] = overall_metrics
+            if 'overall_metrics' not in self.results:
+                self.results['overall_metrics'] = {}
+            self.results['overall_metrics'][mode] = overall_metrics
+            
+            # Save mode-specific results
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             result_file = self.results_dir / f'{mode}_results_{timestamp}.json'
             
@@ -645,6 +668,8 @@ class EvaluationManager:
                 summary_file = self.generate_summary(all_results)
                 self.logger.info(f"Evaluation summary saved to {summary_file}")
             
+            if self.config.evaluation.create_submission:
+                self.create_submission()
         except Exception as e:
             self.logger.error("Evaluation failed:", exc_info=True)
             raise
@@ -698,6 +723,101 @@ class EvaluationManager:
                 f"Predictions shape {predictions.shape} doesn't match targets shape {targets.shape}. "
                 f"Original target shape was {targets.shape}"
             )
+        
+    def create_submission(self):
+        """Create submission file from evaluation results"""
+        try:
+            output_dir = str(self.results_dir / "submissions")
+            submission = {}
+            
+            self.logger.debug("\nStarting submission creation...")
+            
+            # Process each task's predictions
+            for task_id, task_data in self.results['task_summaries'].items():
+                self.logger.debug(f"\nProcessing task {task_id}:")
+                prediction_obj = {}
+                
+                # Get predictions from training modes (limit to 2 attempts)
+                predictions = task_data.get('training_train', {}).get('predictions', [])[:2]
+                self.logger.debug(f"Found {len(predictions)} predictions for task")
+                
+                for idx, pred in enumerate(predictions, 1):
+                    self.logger.debug(f"\nProcessing attempt {idx}:")
+                    
+                    # Get predicted grid
+                    grid = pred.get('predicted_grid', [])
+                    self.logger.debug(f"Original grid shape: {len(grid)}x{len(grid[0]) if grid else 0}")
+                    self.logger.debug("First row sample: " + str(grid[0][:5]) + "...")
+                    
+                    # Remove padding values (10) and get actual grid dimensions
+                    cleaned_grid = []
+                    max_cols = 0
+                    
+                    # First pass - determine actual grid dimensions
+                    self.logger.debug("\nFirst pass - finding dimensions:")
+                    for row_idx, row in enumerate(grid):
+                        valid_row = []
+                        for col_idx, val in enumerate(row):
+                            if val == 10:  # Found padding
+                                self.logger.debug(f"Found padding at position [{row_idx}, {col_idx}]")
+                                break
+                            valid_row.append(val)
+                        if valid_row:  # Only track non-empty rows
+                            max_cols = max(max_cols, len(valid_row))
+                            cleaned_grid.append(valid_row)
+                            self.logger.debug(f"Row {row_idx}: found {len(valid_row)} valid columns")
+                    
+                    self.logger.debug(f"After first pass:")
+                    self.logger.debug(f"Max columns: {max_cols}")
+                    self.logger.debug(f"Valid rows: {len(cleaned_grid)}")
+                    
+                    # Second pass - ensure rectangular grid
+                    final_grid = []
+                    if cleaned_grid:
+                        self.logger.debug("\nSecond pass - creating rectangular grid:")
+                        for row_idx, row in enumerate(cleaned_grid):
+                            if row:  # Only add non-empty rows
+                                final_grid.append(row[:max_cols])
+                                self.logger.debug(f"Row {row_idx} length: {len(row[:max_cols])}")
+                    
+                    self.logger.debug(f"\nFinal grid dimensions: {len(final_grid)}x{len(final_grid[0]) if final_grid else 0}")
+                    if final_grid:
+                        self.logger.debug("Sample of final grid:")
+                        for i in range(min(3, len(final_grid))):
+                            self.logger.debug(f"Row {i}: {final_grid[i][:5]}...")
+                    
+                    # Add attempt if we have a valid grid
+                    if final_grid:
+                        prediction_obj[f'attempt_{idx}'] = final_grid
+                        self.logger.debug(f"Added attempt_{idx} to prediction object")
+                
+                # Only add tasks that have predictions and wrap in list
+                if prediction_obj:
+                    submission[task_id] = [prediction_obj]
+                    self.logger.debug(f"Added task {task_id} to submission")
+            
+            # Save submission
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            submission_file = Path(output_dir) / f'submission_{timestamp}.json'
+            submission_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Debug final submission structure
+            self.logger.debug("\nFinal submission structure:")
+            self.logger.debug(f"Number of tasks: {len(submission)}")
+            for task_id, task_preds in submission.items():
+                self.logger.debug(f"\nTask {task_id}:")
+                for pred_obj in task_preds:
+                    for attempt_id, grid in pred_obj.items():
+                        self.logger.debug(f"{attempt_id}: {len(grid)}x{len(grid[0]) if grid else 0} grid")
+            
+            with open(submission_file, 'w') as f:
+                json.dump(submission, f)  # Remove indent to avoid truncation
+                
+            self.logger.info(f"Created submission file: {submission_file}")
+            return submission_file
+        except Exception as e:
+            self.logger.error(f"Failed to create submission: {str(e)}", exc_info=True)
+            raise
 
 def main():
     """Main entry point with error handling"""

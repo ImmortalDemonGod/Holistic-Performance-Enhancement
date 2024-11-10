@@ -231,6 +231,7 @@ class Config:
         self.finetuning = FineTuningConfig()
         self.validate_config()
         self.optuna = OptunaConfig()
+        self.evaluation = EvaluationConfig()  # Add this line
         self.scheduler = SchedulerConfig()  # Add scheduler configuration
         self.use_best_params = False  # Ensure this attribute exists
         self.use_best_params = False  # Whether to load and use best parameters from Optuna study
@@ -266,6 +267,7 @@ class EvaluationConfig:
         self.output_dir = 'evaluation_results'
         self.debug_mode = True  # Enable extensive debugging
         self.save_predictions = True  # Save model predictions for analysis
+        self.create_submission = True  # Add this line
 
 # Instantiate the Config object so it can be accessed globally
 config = Config()

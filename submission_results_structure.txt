@@ -1,0 +1,288 @@
+
+Structure of 'submission_20241110_013751':
+{
+  "0a938d79": [
+    {
+      "attempt_1": [
+        [
+          1,
+          1,
+          1,
+          "... and 27 more items"
+        ],
+        [
+          1,
+          1,
+          1,
+          "... and 27 more items"
+        ],
+        [
+          1,
+          1,
+          1,
+          "... and 27 more items"
+        ],
+        "... and 27 more items"
+      ],
+      "attempt_2": [
+        [
+          1,
+          1,
+          1,
+          "... and 27 more items"
+        ],
+        [
+          1,
+          1,
+          1,
+          "... and 27 more items"
+        ],
+        [
+          1,
+          1,
+          1,
+          "... and 27 more items"
+        ],
+        "... and 27 more items"
+      ]
+    }
+  ],
+  "0b148d64": [
+    {
+      "attempt_1": [
+        [
+          1,
+          1,
+          1,
+          "... and 27 more items"
+        ],
+        [
+          1,
+          1,
+          1,
+          "... and 27 more items"
+        ],
+        [
+          1,
+          1,
+          1,
+          "... and 27 more items"
+        ],
+        "... and 27 more items"
+      ],
+      "attempt_2": [
+        [
+          1,
+          1,
+          1,
+          "... and 27 more items"
+        ],
+        [
+          1,
+          1,
+          1,
+          "... and 27 more items"
+        ],
+        [
+          1,
+          1,
+          1,
+          "... and 27 more items"
+        ],
+        "... and 27 more items"
+      ]
+    }
+  ]
+}
+
+Structure of 'submission_20241110_014118':
+{
+  "0b148d64": [
+    {
+      "attempt_1": [
+        [
+          5,
+          5,
+          5,
+          "... and 27 more items"
+        ],
+        [
+          5,
+          5,
+          5,
+          "... and 27 more items"
+        ],
+        [
+          5,
+          5,
+          5,
+          "... and 27 more items"
+        ],
+        "... and 27 more items"
+      ],
+      "attempt_2": [
+        [
+          5,
+          5,
+          5,
+          "... and 27 more items"
+        ],
+        [
+          5,
+          5,
+          5,
+          "... and 27 more items"
+        ],
+        [
+          5,
+          5,
+          5,
+          "... and 27 more items"
+        ],
+        "... and 27 more items"
+      ]
+    }
+  ],
+  "0a938d79": [
+    {
+      "attempt_1": [
+        [
+          5,
+          5,
+          5,
+          "... and 27 more items"
+        ],
+        [
+          5,
+          5,
+          5,
+          "... and 27 more items"
+        ],
+        [
+          5,
+          5,
+          5,
+          "... and 27 more items"
+        ],
+        "... and 27 more items"
+      ],
+      "attempt_2": [
+        [
+          5,
+          5,
+          5,
+          "... and 27 more items"
+        ],
+        [
+          5,
+          5,
+          5,
+          "... and 27 more items"
+        ],
+        [
+          5,
+          5,
+          5,
+          "... and 27 more items"
+        ],
+        "... and 27 more items"
+      ]
+    }
+  ]
+}
+
+Structure of 'submission_20241110_014800':
+{
+  "0a938d79": [
+    {
+      "attempt_1": [
+        [
+          7,
+          7,
+          7,
+          "... and 27 more items"
+        ],
+        [
+          7,
+          7,
+          7,
+          "... and 27 more items"
+        ],
+        [
+          7,
+          7,
+          7,
+          "... and 27 more items"
+        ],
+        "... and 27 more items"
+      ],
+      "attempt_2": [
+        [
+          7,
+          7,
+          7,
+          "... and 27 more items"
+        ],
+        [
+          7,
+          7,
+          7,
+          "... and 27 more items"
+        ],
+        [
+          7,
+          7,
+          7,
+          "... and 27 more items"
+        ],
+        "... and 27 more items"
+      ]
+    }
+  ],
+  "0b148d64": [
+    {
+      "attempt_1": [
+        [
+          7,
+          7,
+          7,
+          "... and 27 more items"
+        ],
+        [
+          7,
+          7,
+          7,
+          "... and 27 more items"
+        ],
+        [
+          7,
+          7,
+          7,
+          "... and 27 more items"
+        ],
+        "... and 27 more items"
+      ],
+      "attempt_2": [
+        [
+          7,
+          7,
+          7,
+          "... and 27 more items"
+        ],
+        [
+          7,
+          7,
+          7,
+          "... and 27 more items"
+        ],
+        [
+          7,
+          7,
+          7,
+          "... and 27 more items"
+        ],
+        "... and 27 more items"
+      ]
+    }
+  ]
+}
