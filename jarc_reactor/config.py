@@ -104,7 +104,7 @@ dropout_rate = 0.15  # Dropout rate for the model
 synthetic_dir = 'sythtraining'
 include_synthetic_training_data = False  # Set to True to include synthetic data
 
-CHECKPOINT_PATH = "/content/drive/MyDrive/JARC/lightning_logs/version_4775/checkpoints/epoch=3-step=10252.ckpt"
+CHECKPOINT_PATH = "/workspaces/JARC-Reactor/lightning_logs/checkpoints/model-step=step=40-val_loss=val_loss=1.7084.ckpt"
 checkpoint_path = CHECKPOINT_PATH  # Ensure this is defined before use
 
 FAST_DEV_RUN = False  # Set to True to enable fast development run
