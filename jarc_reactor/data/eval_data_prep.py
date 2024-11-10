@@ -93,15 +93,13 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
             with open(filepath, 'rb') as f:
                 data = orjson.loads(f.read())
 
-            # Determine data structure based on directory
-            if directory == 'evaluation':
-                train_data = data.get('train', [])[1:]  # Skip the first example (used for context)
+            if not is_synthetic:
+                train_data = data.get('train', [])[1:]
                 test_data = data.get('test', [])
-            else:  # 'sythtraining' assumed to have a flat list
-                train_data = data[1:]  # Skip the first example if needed
-                test_data = []  # Synthetic data may not have a separate test set
+            else:
+                train_data = data
+                test_data = []
 
-            # Process training data
             train_results = []
             for item in train_data:
                 input_tensor = pad_to_fixed_size(
@@ -114,7 +112,6 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 )
                 train_results.append((input_tensor, output_tensor, task_id, context_map[task_id]))
 
-            # Process test data
             test_results = []
             for item in test_data:
                 input_tensor = pad_to_fixed_size(
@@ -132,23 +129,19 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
             logger.error(f"Error processing file '{filepath}': {str(e)}")
             return [], []
 
-    from jarc_reactor.config import config
-    import os
-    
-    eval_dir = config.evaluation.data_dir
+    json_files = [f for f in os.listdir(directory) if f.endswith('.json')]
 
-    if not os.path.exists(eval_dir):
-        raise FileNotFoundError(f"Evaluation directory not found: {eval_dir}")
-    if not os.path.isdir(eval_dir):
-        raise NotADirectoryError(f"Evaluation path is not a directory: {eval_dir}")
-    
-    logger.info(f"Preparing evaluation data from: {eval_dir}")
+    with ThreadPoolExecutor() as executor:
+        futures = {
+            executor.submit(load_single_file, os.path.join(directory, filename), os.path.splitext(filename)[0]): filename
+            for filename in json_files
+        }
 
-    load_main_data_concurrently(
-        directory=eval_dir,
-        context_map=context_map,
-        train_inputs=train_inputs,
-        train_outputs=train_outputs,
+        for future in tqdm(as_completed(futures), total=len(futures), desc="Loading data"):
+            train_results, test_results = future.result()
+            for input_tensor, output_tensor, task_id, context_pair in train_results:
+                train_inputs.append(input_tensor)
+                train_outputs.append(output_tensor)
         train_task_ids=train_task_ids,
         train_context_pairs=train_context_pairs,
         test_inputs=test_inputs,
