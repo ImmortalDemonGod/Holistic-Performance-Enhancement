@@ -113,7 +113,7 @@ class BatchProcessor:
                 f"range: [{class_logits.min():.3f}, {class_logits.max():.3f}]"
             )
 
-    def _process_single_task(self, batch_data: BatchData, task_context: TaskContext):
+    def _process_single_task(self, batch_data: BatchData, task_context: TaskContext, confidence):
         """Process an individual task within the batch."""
         idx = task_context.idx
         task_id = task_context.int_to_task[task_context.task_id_int.item()]
