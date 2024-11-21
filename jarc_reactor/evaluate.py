@@ -17,7 +17,6 @@ from jarc_reactor.utils.metrics import (
     TaskMetricsCollector,
     PredictionRecord  # Add this import
 )
-from jarc_reactor.kaggle.submission_handler import create_submission_from_evaluation
 
 
 class EvaluationManager:
@@ -111,7 +110,16 @@ class EvaluationManager:
 
     def _load_task_maps(self):
         """Load or create task ID mappings"""
-        # Try loading training task map
+        self._load_training_task_map()
+        self._load_evaluation_task_map()
+        self._validate_task_maps()
+        self.logger.info(
+            f"Task maps loaded - Training: {self.has_training_data}, "
+            f"Evaluation: {self.has_eval_data}"
+        )
+
+    def _load_training_task_map(self):
+        """Load the training task map from JSON"""
         try:
             self.logger.debug("Loading task_id_map.json...")
             with open("task_id_map.json", "r") as f:
@@ -126,79 +134,82 @@ class EvaluationManager:
             self.logger.error(f"Error loading training task map: {str(e)}")
             self.has_training_data = False
 
-        # Try loading or creating evaluation task map
+    def _load_evaluation_task_map(self):
+        """Load or create the evaluation task map"""
         try:
             self.logger.debug("Loading eval_id_map.json...")
-            try:
-                with open("eval_id_map.json", "r") as f:
-                    self.eval_task_map = json.load(f)
-                    self.logger.info(f"Loaded {len(self.eval_task_map)} evaluation tasks")
-            except FileNotFoundError:
-                self.logger.info("eval_id_map.json not found - creating from evaluation data...")
-                
-                # Load evaluation data to get task IDs
-                try:
-                    # Pass config to prepare_eval_data
-                    _, eval_dataset = prepare_eval_data(
-                        return_datasets=True,
-                        config=self.config  # Pass the config instance
-                    )
-                    
-                    # Extract unique task IDs
-                    unique_task_ids = set()
-                    eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=1)
-                    for _, _, _, _, task_ids in eval_loader:
-                        task_id = task_ids[0].item()
-                        unique_task_ids.add(str(task_id))
-                    
-                    if not unique_task_ids:
-                        raise ValueError("No task IDs found in evaluation dataset")
-                    
-                    # Create task map
-                    self.eval_task_map = {
-                        task_id: idx 
-                        for idx, task_id in enumerate(sorted(unique_task_ids))
-                    }
-                    
-                    # Save the map
-                    try:
-                        with open("eval_id_map.json", "w") as f:
-                            json.dump(self.eval_task_map, f, indent=2)
-                        self.logger.info(
-                            f"Created and saved eval_id_map.json with {len(self.eval_task_map)} tasks"
-                        )
-                    except Exception as e:
-                        self.logger.error(f"Error saving eval_id_map.json: {str(e)}")
-                        # Continue even if save fails - we still have the map in memory
-                    
-                except Exception as e:
-                    self.logger.error(f"Error creating eval_id_map.json: {str(e)}")
-                    self.has_eval_data = False
-                    raise
-                    
-            # Create reverse mapping if we have a valid task map
-            if hasattr(self, 'eval_task_map') and self.eval_task_map:
-                self.eval_int_to_task = {v: k for k, v in self.eval_task_map.items()}
-                self.has_eval_data = True
-                self.logger.debug(
-                    f"Created reverse mapping with {len(self.eval_int_to_task)} entries"
-                )
-            else:
-                raise ValueError("No evaluation task map created")
-            
-        except Exception as e:
-            self.logger.error(f"Error handling evaluation task map: {str(e)}")
+            self.eval_task_map = self._load_eval_map_from_file()
+        except FileNotFoundError:
+            self.logger.info("eval_id_map.json not found - creating from evaluation data...")
+            self.eval_task_map = self._create_eval_map()
+        
+        if self.eval_task_map:
+            self.eval_int_to_task = {v: k for k, v in self.eval_task_map.items()}
+            self.has_eval_data = True
+            self.logger.debug(
+                f"Created reverse mapping with {len(self.eval_int_to_task)} entries"
+            )
+        else:
+            self.logger.error("No evaluation task map created")
             self.has_eval_data = False
+    def _load_eval_map_from_file(self):
+        """Load evaluation task map from eval_id_map.json"""
+        with open("eval_id_map.json", "r") as f:
+            eval_task_map = json.load(f)
+        self.logger.info(f"Loaded {len(eval_task_map)} evaluation tasks")
+        return eval_task_map
 
-        # Final validation
+    def _create_eval_map(self):
+        """Create evaluation task map from evaluation data"""
+        try:
+            _, eval_dataset = prepare_eval_data(
+                return_datasets=True,
+                config=self.config  # Pass the config instance
+            )
+            unique_task_ids = self._extract_unique_task_ids(eval_dataset)
+            if not unique_task_ids:
+                raise ValueError("No task IDs found in evaluation dataset")
+            
+            eval_task_map = {
+                task_id: idx 
+                for idx, task_id in enumerate(sorted(unique_task_ids))
+            }
+            
+            self._save_eval_map(eval_task_map)
+            return eval_task_map
+        except Exception as e:
+            self.logger.error(f"Error creating eval_id_map.json: {str(e)}")
+            self.has_eval_data = False
+            raise
+
+    def _extract_unique_task_ids(self, eval_dataset):
+        """Extract unique task IDs from the evaluation dataset"""
+        unique_task_ids = set()
+        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=1)
+        for _, _, _, _, task_ids in eval_loader:
+            task_id = task_ids[0].item()
+            unique_task_ids.add(str(task_id))
+        return unique_task_ids
+
+    def _save_eval_map(self, eval_task_map):
+        """Save the evaluation task map to eval_id_map.json"""
+        try:
+            with open("eval_id_map.json", "w") as f:
+                json.dump(eval_task_map, f, indent=2)
+            self.logger.info(
+                f"Created and saved eval_id_map.json with {len(eval_task_map)} tasks"
+            )
+        except Exception as e:
+            self.logger.error(f"Error saving eval_id_map.json: {str(e)}")
+            # Continue even if save fails - we still have the map in memory
+
+    def _validate_task_maps(self):
+        """Validate that at least one task map is available"""
         if not (self.has_training_data or self.has_eval_data):
             self.logger.error("Neither training nor evaluation data maps are available")
             raise ValueError("No task maps found or created - cannot perform any evaluation")
 
-        self.logger.info(
-            f"Task maps loaded - Training: {self.has_training_data}, "
-            f"Evaluation: {self.has_eval_data}"
-        )
+    
     def _validate_shapes(self, src, tgt, ctx_input, ctx_output, outputs, mode):
         """Validate tensor shapes and log details"""
         self.logger.debug(f"\nShape validation for {mode}:")
@@ -226,7 +237,7 @@ class EvaluationManager:
                 outputs = self.model(src, tgt, ctx_input, ctx_output)
             
             # Log raw model outputs
-            self.logger.debug(f"\nModel outputs:")
+            self.logger.debug("\nModel outputs:")
             self.logger.debug(f"shape: {outputs.shape}")
             self.logger.debug(f"type: {outputs.dtype}")
             self.logger.debug(f"range: [{outputs.min():.1f}, {outputs.max():.1f}]")
@@ -257,7 +268,7 @@ class EvaluationManager:
                 task_raw_outputs = outputs[idx]  # [30, 30, 11]
                 
                 # Debug task tensor shapes
-                self.logger.debug(f"\nTask tensor shapes:")
+                self.logger.debug("\nTask tensor shapes:")
                 self.logger.debug(f"task_input: {task_input.shape}")
                 self.logger.debug(f"task_target: {task_target.shape}")
                 self.logger.debug(f"task_pred: {task_pred.shape}")
@@ -588,7 +599,7 @@ class EvaluationManager:
                             if 'target_unique' in debug:
                                 all_targets.update(debug['target_unique'])
                 
-                write(f"\n1. Model Prediction Range:")
+                write("\n1. Model Prediction Range:")
                 write(f"   - Model predicts values in range: {sorted(all_preds)}")
                 write(f"   - Expected value range: {sorted(all_targets)}")
                 if len(all_preds) < len(all_targets):
@@ -598,7 +609,7 @@ class EvaluationManager:
                 pred_mean = sum(all_preds) / len(all_preds) if all_preds else 0
                 target_mean = sum(all_targets) / len(all_targets) if all_targets else 0
                 if abs(pred_mean - target_mean) > 1:
-                    write(f"\n2. Prediction Bias:")
+                    write("\n2. Prediction Bias:")
                     write(f"   - Average prediction: {pred_mean:.2f}")
                     write(f"   - Average target: {target_mean:.2f}")
                     write("   ! Model shows significant bias in predictions")
@@ -702,7 +713,7 @@ class EvaluationManager:
             
             if self.config.evaluation.create_submission:
                 self.create_submission()
-        except Exception as e:
+        except Exception:
             self.logger.error("Evaluation failed:", exc_info=True)
             raise
     
@@ -718,7 +729,7 @@ class EvaluationManager:
         """
         with torch.no_grad():
             # Debug original shapes
-            self.logger.debug(f"\nOriginal shapes before processing:")
+            self.logger.debug("\nOriginal shapes before processing:")
             self.logger.debug(f"outputs: {outputs.shape}")
             self.logger.debug(f"predictions: {predictions.shape}")
             self.logger.debug(f"targets: {targets.shape}")
@@ -742,7 +753,7 @@ class EvaluationManager:
                 raise ValueError(f"Expected 2D targets after processing, got {targets.dim()}D with shape {targets.shape}")
                 
             # Verify shapes after processing
-            self.logger.debug(f"\nShapes after processing:")
+            self.logger.debug("\nShapes after processing:")
             self.logger.debug(f"outputs: {outputs.shape}")
             self.logger.debug(f"predictions: {predictions.shape}")
             self.logger.debug(f"targets: {targets.shape}")
@@ -800,7 +811,7 @@ class EvaluationManager:
                             cleaned_grid.append(valid_row)
                             self.logger.debug(f"Row {row_idx}: found {len(valid_row)} valid columns")
                     
-                    self.logger.debug(f"After first pass:")
+                    self.logger.debug("After first pass:")
                     self.logger.debug(f"Max columns: {max_cols}")
                     self.logger.debug(f"Valid rows: {len(cleaned_grid)}")
                     
@@ -855,6 +866,8 @@ class EvaluationManager:
         except Exception as e:
             self.logger.error(f"Failed to create submission: {str(e)}", exc_info=True)
             raise
+
+
 def main():
     """Main entry point with error handling"""
     try:
@@ -862,7 +875,7 @@ def main():
         evaluator = EvaluationManager(cfg)
         evaluator.run_evaluation()
         
-    except Exception as e:
+    except Exception:
         logging.error("Evaluation failed:", exc_info=True)
         raise
 
