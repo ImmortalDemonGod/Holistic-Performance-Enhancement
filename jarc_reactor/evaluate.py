@@ -11,6 +11,7 @@ from jarc_reactor.config import Config
 from jarc_reactor.utils.model_factory import create_transformer_trainer
 from jarc_reactor.data.data_preparation import prepare_data as prepare_training_data
 from jarc_reactor.data.eval_data_prep import prepare_data as prepare_eval_data
+from jarc_reactor.utils.task_mapping import TaskMapper
 from jarc_reactor.utils.metrics import (
     compute_standard_accuracy,
     compute_differential_accuracy,
@@ -59,9 +60,8 @@ class EvaluationManager:
             'evaluation': TaskMetricsCollector()
         }
         
-        # Initialize flags for available data
-        self.has_training_data = False
-        self.has_eval_data = False
+        # Initialize TaskMapper
+        self.task_mapper = TaskMapper(self.logger, self.config)
 
     def setup_logging(self):
         """Setup detailed logging configuration"""
@@ -108,108 +108,6 @@ class EvaluationManager:
             self.logger.error(f"Error loading model: {str(e)}")
             raise
 
-    def _load_task_maps(self):
-        """Load or create task ID mappings"""
-        self._load_training_task_map()
-        self._load_evaluation_task_map()
-        self._validate_task_maps()
-        self.logger.info(
-            f"Task maps loaded - Training: {self.has_training_data}, "
-            f"Evaluation: {self.has_eval_data}"
-        )
-
-    def _load_training_task_map(self):
-        """Load the training task map from JSON"""
-        try:
-            self.logger.debug("Loading task_id_map.json...")
-            with open("task_id_map.json", "r") as f:
-                self.train_task_map = json.load(f)
-            self.train_int_to_task = {v: k for k, v in self.train_task_map.items()}
-            self.has_training_data = True
-            self.logger.info(f"Loaded {len(self.train_task_map)} training tasks")
-        except FileNotFoundError:
-            self.logger.warning("task_id_map.json not found - skipping training data evaluation")
-            self.has_training_data = False
-        except Exception as e:
-            self.logger.error(f"Error loading training task map: {str(e)}")
-            self.has_training_data = False
-
-    def _load_evaluation_task_map(self):
-        """Load or create the evaluation task map"""
-        try:
-            self.logger.debug("Loading eval_id_map.json...")
-            self.eval_task_map = self._load_eval_map_from_file()
-        except FileNotFoundError:
-            self.logger.info("eval_id_map.json not found - creating from evaluation data...")
-            self.eval_task_map = self._create_eval_map()
-        
-        if self.eval_task_map:
-            self.eval_int_to_task = {v: k for k, v in self.eval_task_map.items()}
-            self.has_eval_data = True
-            self.logger.debug(
-                f"Created reverse mapping with {len(self.eval_int_to_task)} entries"
-            )
-        else:
-            self.logger.error("No evaluation task map created")
-            self.has_eval_data = False
-    def _load_eval_map_from_file(self):
-        """Load evaluation task map from eval_id_map.json"""
-        with open("eval_id_map.json", "r") as f:
-            eval_task_map = json.load(f)
-        self.logger.info(f"Loaded {len(eval_task_map)} evaluation tasks")
-        return eval_task_map
-
-    def _create_eval_map(self):
-        """Create evaluation task map from evaluation data"""
-        try:
-            _, eval_dataset = prepare_eval_data(
-                return_datasets=True,
-                config=self.config  # Pass the config instance
-            )
-            unique_task_ids = self._extract_unique_task_ids(eval_dataset)
-            if not unique_task_ids:
-                raise ValueError("No task IDs found in evaluation dataset")
-            
-            eval_task_map = {
-                task_id: idx 
-                for idx, task_id in enumerate(sorted(unique_task_ids))
-            }
-            
-            self._save_eval_map(eval_task_map)
-            return eval_task_map
-        except Exception as e:
-            self.logger.error(f"Error creating eval_id_map.json: {str(e)}")
-            self.has_eval_data = False
-            raise
-
-    def _extract_unique_task_ids(self, eval_dataset):
-        """Extract unique task IDs from the evaluation dataset"""
-        unique_task_ids = set()
-        eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=1)
-        for _, _, _, _, task_ids in eval_loader:
-            task_id = task_ids[0].item()
-            unique_task_ids.add(str(task_id))
-        return unique_task_ids
-
-    def _save_eval_map(self, eval_task_map):
-        """Save the evaluation task map to eval_id_map.json"""
-        try:
-            with open("eval_id_map.json", "w") as f:
-                json.dump(eval_task_map, f, indent=2)
-            self.logger.info(
-                f"Created and saved eval_id_map.json with {len(eval_task_map)} tasks"
-            )
-        except Exception as e:
-            self.logger.error(f"Error saving eval_id_map.json: {str(e)}")
-            # Continue even if save fails - we still have the map in memory
-
-    def _validate_task_maps(self):
-        """Validate that at least one task map is available"""
-        if not (self.has_training_data or self.has_eval_data):
-            self.logger.error("Neither training nor evaluation data maps are available")
-            raise ValueError("No task maps found or created - cannot perform any evaluation")
-
-    
     def _validate_shapes(self, src, tgt, ctx_input, ctx_output, outputs, mode):
         """Validate tensor shapes and log details"""
         self.logger.debug(f"\nShape validation for {mode}:")
@@ -651,11 +549,13 @@ class EvaluationManager:
     def run_evaluation(self):
         """Main evaluation loop with error handling"""
         try:
-            self._load_task_maps()
+            self.task_mapper.load_training_task_map()
+            self.task_mapper.load_evaluation_task_map()
+            self.task_mapper.validate_task_maps()
             all_results = {}
             
             # Training data evaluation
-            if self.has_training_data:
+            if self.task_mapper.has_training_data:
                 self.logger.info("\nPreparing training data...")
                 try:
                     train_dataset, val_dataset = prepare_training_data(return_datasets=True)
@@ -668,7 +568,7 @@ class EvaluationManager:
                     )
                     
                     self.evaluate_loader(
-                        train_loader, 'training_train', self.train_int_to_task
+                        train_loader, 'training_train', self.task_mapper.train_int_to_task
                     )
                     all_results['training_train'] = self._process_results(
                         'training_train', 
@@ -676,7 +576,7 @@ class EvaluationManager:
                     )
                     
                     self.evaluate_loader(
-                        val_loader, 'training_validation', self.train_int_to_task
+                        val_loader, 'training_validation', self.task_mapper.train_int_to_task
                     )
                     all_results['training_validation'] = self._process_results(
                         'training_validation',
@@ -687,7 +587,7 @@ class EvaluationManager:
                     self.logger.error(f"Error evaluating training data: {str(e)}")
             
             # Evaluation data
-            if self.has_eval_data:
+            if self.task_mapper.has_eval_data:
                 self.logger.info("\nPreparing evaluation data...")
                 try:
                     _, eval_dataset = prepare_eval_data(return_datasets=True)
@@ -696,7 +596,7 @@ class EvaluationManager:
                     )
                     
                     self.evaluate_loader(
-                        eval_loader, 'evaluation', self.eval_int_to_task
+                        eval_loader, 'evaluation', self.task_mapper.eval_int_to_task
                     )
                     all_results['evaluation'] = self._process_results(
                         'evaluation',
