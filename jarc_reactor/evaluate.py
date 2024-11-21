@@ -18,7 +18,24 @@ from jarc_reactor.utils.metrics import (
     TaskMetricsCollector,
     PredictionRecord  # Add this import
 )
+from dataclasses import dataclass
 
+@dataclass
+class BatchData:
+    src: torch.Tensor
+    tgt: torch.Tensor
+    ctx_input: torch.Tensor
+    ctx_output: torch.Tensor
+    predictions: torch.Tensor
+    outputs: torch.Tensor
+    task_ids: torch.Tensor
+
+@dataclass
+class TaskContext:
+    idx: int
+    task_id_int: torch.Tensor
+    mode: str
+    int_to_task: dict
 
 class EvaluationManager:
     def __init__(self, config):
@@ -120,144 +137,192 @@ class EvaluationManager:
     def _process_batch(self, batch, mode, int_to_task):
         """Process a single batch with detailed logging and prediction storage"""
         try:
-            src, tgt, ctx_input, ctx_output, task_ids = [
-                t.to(self.device) for t in batch
-            ]
-            
-            # Log initial tensor info
-            self.logger.debug("\nInitial tensor information:")
-            self.logger.debug(f"src type: {src.dtype}, range: [{src.min():.1f}, {src.max():.1f}]")
-            self.logger.debug(f"tgt type: {tgt.dtype}, range: [{tgt.min():.1f}, {tgt.max():.1f}]")
-            self.logger.debug(f"src shape: {src.shape}")
-            self.logger.debug(f"tgt shape: {tgt.shape}")
+            src, tgt, ctx_input, ctx_output, task_ids = self._move_batch_to_device(batch)
+            self._log_initial_tensor_info(src, tgt)
             
             with torch.no_grad():
                 outputs = self.model(src, tgt, ctx_input, ctx_output)
             
-            # Log raw model outputs
-            self.logger.debug("\nModel outputs:")
-            self.logger.debug(f"shape: {outputs.shape}")
-            self.logger.debug(f"type: {outputs.dtype}")
-            self.logger.debug(f"range: [{outputs.min():.1f}, {outputs.max():.1f}]")
+            self._log_model_outputs(outputs)
+            self._analyze_logits_distribution(outputs)
             
-            # Analyze logits distribution
-            self.logger.debug("\nLogits Distribution:")
-            logits_flat = outputs.view(-1, outputs.size(-1))
-            for i in range(outputs.size(-1)):  # For each class
-                class_logits = logits_flat[:, i]
-                self.logger.debug(
-                    f"Class {i} logits - "
-                    f"mean: {class_logits.mean():.3f}, "
-                    f"std: {class_logits.std():.3f}, "
-                    f"range: [{class_logits.min():.3f}, {class_logits.max():.3f}]"
-                )
-            
-            # Get predictions
             predictions = outputs.argmax(dim=-1)  # Shape: [batch, seq_len]
             
-            # Process each example
+            # Encapsulate batch data
+            batch_data = BatchData(
+                src=src,
+                tgt=tgt,
+                ctx_input=ctx_input,
+                ctx_output=ctx_output,
+                predictions=predictions,
+                outputs=outputs,
+                task_ids=task_ids
+            )
+            
             for idx, task_id_int in enumerate(task_ids):
-                task_id = int_to_task[task_id_int.item()]
-                
-                # Get individual tensors - FIXED: Maintain target dimensions
-                task_input = src[idx:idx + 1]  # [1, 30, 30]
-                task_target = tgt[idx:idx + 1]  # [1, 30, 30] - Keeping all dimensions
-                task_pred = predictions[idx:idx + 1]  # [1, 30, 30]
-                task_raw_outputs = outputs[idx]  # [30, 30, 11]
-                
-                # Debug task tensor shapes
-                self.logger.debug("\nTask tensor shapes:")
-                self.logger.debug(f"task_input: {task_input.shape}")
-                self.logger.debug(f"task_target: {task_target.shape}")
-                self.logger.debug(f"task_pred: {task_pred.shape}")
-                self.logger.debug(f"task_raw_outputs: {task_raw_outputs.shape}")
-                
-                # Convert types for consistency
-                task_target = task_target.to(torch.long)
-                task_pred = task_pred.to(torch.long)
-                
-                # Analyze output distribution for this task
-                analysis = self.analyze_outputs_distribution(
-                    task_raw_outputs,
-                    task_pred,
-                    task_target,
-                    task_id
+                # Encapsulate task context
+                task_context = TaskContext(
+                    idx=idx,
+                    task_id_int=task_id_int,
+                    mode=mode,
+                    int_to_task=int_to_task
                 )
-                
-                # Calculate probabilities and confidence
-                probs = torch.softmax(task_raw_outputs, dim=-1)
-                confidence, _ = probs.max(dim=-1)
-                
-                # Create prediction record with enhanced information
-                pred_record = PredictionRecord(
-                    input_grid=task_input.squeeze(0).cpu().tolist(),
-                    target_grid=task_target.squeeze(0).cpu().tolist(),
-                    predicted_grid=task_pred.squeeze(0).cpu().tolist(),
-                    raw_logits=task_raw_outputs.cpu().tolist(),
-                    position_metrics={
-                        'output_probabilities': probs.cpu().tolist(),
-                        'output_classes': task_pred.squeeze(0).cpu().tolist(),
-                        'output_confidences': confidence.cpu().tolist(),
-                        'distribution_analysis': analysis
-                    }
-                )
-                
-                # Calculate metrics
-                std_acc, std_details = compute_standard_accuracy(
-                    task_pred.flatten(),
-                    task_target.flatten(),
-                )
-                
-                diff_acc, diff_details = compute_differential_accuracy(
-                    task_input.squeeze(0),
-                    task_target.squeeze(0),
-                    task_pred.squeeze(0),
-                )
-                
-                # Enhanced metrics dictionary
-                metrics_dict = {
-                    'standard_accuracy': std_acc,
-                    'differential_accuracy': diff_acc,
-                    'std_details': std_details,
-                    'diff_details': diff_details,
-                    'debug_info': {
-                        'target_shape': list(task_target.shape),
-                        'pred_shape': list(task_pred.shape),
-                        'target_unique': torch.unique(task_target).tolist(),
-                        'pred_unique': torch.unique(task_pred).tolist(),
-                        'output_range': [float(outputs[idx].min()), float(outputs[idx].max())],
-                        'logits_stats': {
-                            'mean': float(task_raw_outputs.mean()),
-                            'std': float(task_raw_outputs.std()),
-                            'min': float(task_raw_outputs.min()),
-                            'max': float(task_raw_outputs.max())
-                        },
-                        'confidence_stats': {
-                            'mean': float(confidence.mean()),
-                            'std': float(confidence.std()),
-                            'min': float(confidence.min()),
-                            'max': float(confidence.max())
-                        },
-                        'distribution_analysis': analysis
-                    }
-                }
-                
-                # Store results
-                self.metrics_collectors[mode].add_result(
-                    task_id,
-                    metrics_dict,
-                    prediction_record=pred_record
-                )
-                
+                self._process_single_task(batch_data, task_context)
+                    
         except Exception as e:
-            self.logger.error(f"Error processing batch: {str(e)}", exc_info=True)
-            self.logger.error("Tensor shapes at failure:")
-            self.logger.error(f"src: {src.shape if 'src' in locals() else 'not created'}")
-            self.logger.error(f"tgt: {tgt.shape if 'tgt' in locals() else 'not created'}")
-            self.logger.error(f"outputs: {outputs.shape if 'outputs' in locals() else 'not created'}")
-            self.logger.error(f"predictions: {predictions.shape if 'predictions' in locals() else 'not created'}")
+            self._handle_batch_processing_error(e, src, tgt, outputs, predictions)
             raise
 
+    def _move_batch_to_device(self, batch):
+        """Move batch tensors to the specified device"""
+        return [t.to(self.device) for t in batch]
+
+    def _log_initial_tensor_info(self, src, tgt):
+        """Log initial tensor information for source and target"""
+        self.logger.debug("\nInitial tensor information:")
+        self.logger.debug(f"src type: {src.dtype}, range: [{src.min():.1f}, {src.max():.1f}]")
+        self.logger.debug(f"tgt type: {tgt.dtype}, range: [{tgt.min():.1f}, {tgt.max():.1f}]")
+        self.logger.debug(f"src shape: {src.shape}")
+        self.logger.debug(f"tgt shape: {tgt.shape}")
+
+    def _log_model_outputs(self, outputs):
+        """Log the shape, type, and range of model outputs"""
+        self.logger.debug("\nModel outputs:")
+        self.logger.debug(f"shape: {outputs.shape}")
+        self.logger.debug(f"type: {outputs.dtype}")
+        self.logger.debug(f"range: [{outputs.min():.1f}, {outputs.max():.1f}]")
+
+    def _analyze_logits_distribution(self, outputs):
+        """Analyze and log the distribution of logits for each class"""
+        self.logger.debug("\nLogits Distribution:")
+        logits_flat = outputs.view(-1, outputs.size(-1))
+        for i in range(outputs.size(-1)):  # For each class
+            class_logits = logits_flat[:, i]
+            self.logger.debug(
+                f"Class {i} logits - "
+                f"mean: {class_logits.mean():.3f}, "
+                f"std: {class_logits.std():.3f}, "
+                f"range: [{class_logits.min():.3f}, {class_logits.max():.3f}]"
+            )
+
+    def _process_single_task(self, batch_data: BatchData, task_context: TaskContext):
+        """Process an individual task within the batch"""
+        idx = task_context.idx
+        task_id = task_context.int_to_task[task_context.task_id_int.item()]
+        
+        # Extract tensors for the task
+        task_input, task_target, task_pred, task_raw_outputs = self._extract_task_tensors(idx, batch_data)
+        self._log_task_tensor_shapes(task_input, task_target, task_pred, task_raw_outputs)
+        
+        task_target = task_target.to(torch.long)
+        task_pred = task_pred.to(torch.long)
+        
+        analysis = self.analyze_outputs_distribution(
+            task_raw_outputs,
+            task_pred,
+            task_target,
+            task_id
+        )
+        
+        probs, confidence = self._calculate_probabilities_confidence(task_raw_outputs)
+        pred_record = self._create_prediction_record(
+            task_input, task_target, task_pred, task_raw_outputs, probs, confidence, analysis
+        )
+        metrics_dict = self._calculate_metrics(
+            task_input, task_target, task_pred, batch_data.outputs, idx, analysis, confidence
+        )
+        
+        self.metrics_collectors[task_context.mode].add_result(
+            task_id,
+            metrics_dict,
+            prediction_record=pred_record
+        )
+
+    def _extract_task_tensors(self, idx, batch_data: BatchData):
+        """Extract individual tensors for a specific task"""
+        task_input = batch_data.src[idx:idx + 1]  # [1, H, W]
+        task_target = batch_data.tgt[idx:idx + 1]  # [1, H, W]
+        task_pred = batch_data.predictions[idx:idx + 1]  # [1, H, W]
+        task_raw_outputs = batch_data.outputs[idx]  # [H, W, num_classes]
+        return task_input, task_target, task_pred, task_raw_outputs
+
+    def _log_task_tensor_shapes(self, task_input, task_target, task_pred, task_raw_outputs):
+        """Log the shapes of task-specific tensors"""
+        self.logger.debug("\nTask tensor shapes:")
+        self.logger.debug(f"task_input: {task_input.shape}")
+        self.logger.debug(f"task_target: {task_target.shape}")
+        self.logger.debug(f"task_pred: {task_pred.shape}")
+        self.logger.debug(f"task_raw_outputs: {task_raw_outputs.shape}")
+
+    def _calculate_probabilities_confidence(self, task_raw_outputs):
+        """Calculate softmax probabilities and confidence scores"""
+        probs = torch.softmax(task_raw_outputs, dim=-1)
+        confidence, _ = probs.max(dim=-1)
+        return probs, confidence
+
+    def _create_prediction_record(self, task_input, task_target, task_pred, task_raw_outputs, probs, confidence, analysis):
+        """Create a PredictionRecord with detailed information"""
+        return PredictionRecord(
+            input_grid=task_input.squeeze(0).cpu().tolist(),
+            target_grid=task_target.squeeze(0).cpu().tolist(),
+            predicted_grid=task_pred.squeeze(0).cpu().tolist(),
+            raw_logits=task_raw_outputs.cpu().tolist(),
+            position_metrics={
+                'output_probabilities': probs.cpu().tolist(),
+                'output_classes': task_pred.squeeze(0).cpu().tolist(),
+                'output_confidences': confidence.cpu().tolist(),
+                'distribution_analysis': analysis
+            }
+        )
+
+    def _calculate_metrics(self, task_input, task_target, task_pred, outputs, idx, analysis, confidence):
+        """Calculate and compile metrics for the task"""
+        std_acc, std_details = compute_standard_accuracy(
+            task_pred.flatten(),
+            task_target.flatten(),
+        )
+        
+        diff_acc, diff_details = compute_differential_accuracy(
+            task_input.squeeze(0),
+            task_target.squeeze(0),
+            task_pred.squeeze(0),
+        )
+        
+        return {
+            'standard_accuracy': std_acc,
+            'differential_accuracy': diff_acc,
+            'std_details': std_details,
+            'diff_details': diff_details,
+            'debug_info': {
+                'target_shape': list(task_target.shape),
+                'pred_shape': list(task_pred.shape),
+                'target_unique': torch.unique(task_target).tolist(),
+                'pred_unique': torch.unique(task_pred).tolist(),
+                'output_range': [float(outputs[idx].min()), float(outputs[idx].max())],
+                'logits_stats': {
+                    'mean': float(outputs[idx].mean()),
+                    'std': float(outputs[idx].std()),
+                    'min': float(outputs[idx].min()),
+                    'max': float(outputs[idx].max())
+                },
+                'confidence_stats': {
+                    'mean': float(confidence.mean()),
+                    'std': float(confidence.std()),
+                    'min': float(confidence.min()),
+                    'max': float(confidence.max())
+                },
+                'distribution_analysis': analysis
+            }
+        }
+
+    def _handle_batch_processing_error(self, exception, src, tgt, outputs, predictions):
+        """Handle exceptions during batch processing with detailed logging"""
+        self.logger.error(f"Error processing batch: {str(exception)}", exc_info=True)
+        self.logger.error("Tensor shapes at failure:")
+        self.logger.error(f"src: {src.shape if 'src' in locals() else 'not created'}")
+        self.logger.error(f"tgt: {tgt.shape if 'tgt' in locals() else 'not created'}")
+        self.logger.error(f"outputs: {outputs.shape if 'outputs' in locals() else 'not created'}")
+        self.logger.error(f"predictions: {predictions.shape if 'predictions' in locals() else 'not created'}")
     def _process_results(self, mode, collector):
         """Process and display results for a specific evaluation mode"""
         try:
