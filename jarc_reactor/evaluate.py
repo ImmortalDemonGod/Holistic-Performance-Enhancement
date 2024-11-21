@@ -128,12 +128,13 @@ class EvaluationManager:
         # Initialize MetricsCalculator
         self.metrics_calculator = MetricsCalculator(logger=self.logger)
 
-        # Initialize BatchProcessor with MetricsCalculator
+        # Initialize BatchProcessor with config
         self.batch_processor = BatchProcessor(
             model=self.model,
             device=self.device,
             logger=self.logger,
-            metrics_calculator=self.metrics_calculator
+            metrics_calculator=self.metrics_calculator,
+            config=self.config  # Pass the config instance
         )
 
     def setup_logging(self):
