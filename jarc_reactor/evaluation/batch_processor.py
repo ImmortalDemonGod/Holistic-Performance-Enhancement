@@ -1,5 +1,6 @@
 # jarc_reactor/evaluation/batch_processor.py
 import torch
+import math
 from dataclasses import dataclass
 from jarc_reactor.evaluation.metrics_calculator import MetricsCalculator
 from jarc_reactor.utils.metrics import compute_standard_accuracy, compute_differential_accuracy, PredictionRecord
