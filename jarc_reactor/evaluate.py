@@ -5,19 +5,19 @@ import json
 from datetime import datetime
 from pathlib import Path
 import torch
-import math
 from tqdm import tqdm
 from jarc_reactor.config import Config
 from jarc_reactor.utils.model_factory import create_transformer_trainer
 from jarc_reactor.data.data_preparation import prepare_data as prepare_training_data
 from jarc_reactor.data.eval_data_prep import prepare_data as prepare_eval_data
+from jarc_reactor.utils.task_mapping import TaskMapper
+from jarc_reactor.evaluation.eval_summary import EvaluationSummary
+from jarc_reactor.evaluation.batch_processor import BatchProcessor
+from jarc_reactor.evaluation.metrics_calculator import MetricsCalculator
 from jarc_reactor.utils.metrics import (
-    compute_standard_accuracy,
-    compute_differential_accuracy,
-    TaskMetricsCollector,
-    PredictionRecord  # Add this import
+    TaskMetricsCollector  # Add this import
 )
-from jarc_reactor.kaggle.submission_handler import create_submission_from_evaluation
+from jarc_reactor.evaluation.logger import EvaluationLogger
 
 
 class EvaluationManager:
@@ -60,34 +60,24 @@ class EvaluationManager:
             'evaluation': TaskMetricsCollector()
         }
         
-        # Initialize flags for available data
-        self.has_training_data = False
-        self.has_eval_data = False
+        # Initialize TaskMapper
+        self.task_mapper = TaskMapper(self.logger, self.config)
+
+        # Initialize MetricsCalculator
+        self.metrics_calculator = MetricsCalculator(logger=self.logger)
+
+        # Initialize BatchProcessor with config
+        self.batch_processor = BatchProcessor(
+            model=self.model,
+            device=self.device,
+            logger=self.logger,
+            metrics_calculator=self.metrics_calculator,
+            config=self.config  # Pass the config instance
+        )
 
     def setup_logging(self):
         """Setup detailed logging configuration"""
-        log_dir = Path('evaluation_logs')
-        log_dir.mkdir(exist_ok=True)
-        
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        log_file = log_dir / f'evaluation_{timestamp}.log'
-        
-        self.logger = logging.getLogger('evaluation')
-        self.logger.setLevel(logging.DEBUG)
-        
-        # File handler for debugging
-        fh = logging.FileHandler(log_file)
-        fh.setLevel(logging.DEBUG)
-        fh.setFormatter(logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        ))
-        self.logger.addHandler(fh)
-        
-        # Console handler for info
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.INFO)
-        ch.setFormatter(logging.Formatter('%(message)s'))
-        self.logger.addHandler(ch)
+        self.logger = EvaluationLogger.setup_logging()
 
     def _load_model(self):
         """Load model with error handling and logging"""
@@ -109,96 +99,6 @@ class EvaluationManager:
             self.logger.error(f"Error loading model: {str(e)}")
             raise
 
-    def _load_task_maps(self):
-        """Load or create task ID mappings"""
-        # Try loading training task map
-        try:
-            self.logger.debug("Loading task_id_map.json...")
-            with open("task_id_map.json", "r") as f:
-                self.train_task_map = json.load(f)
-            self.train_int_to_task = {v: k for k, v in self.train_task_map.items()}
-            self.has_training_data = True
-            self.logger.info(f"Loaded {len(self.train_task_map)} training tasks")
-        except FileNotFoundError:
-            self.logger.warning("task_id_map.json not found - skipping training data evaluation")
-            self.has_training_data = False
-        except Exception as e:
-            self.logger.error(f"Error loading training task map: {str(e)}")
-            self.has_training_data = False
-
-        # Try loading or creating evaluation task map
-        try:
-            self.logger.debug("Loading eval_id_map.json...")
-            try:
-                with open("eval_id_map.json", "r") as f:
-                    self.eval_task_map = json.load(f)
-                    self.logger.info(f"Loaded {len(self.eval_task_map)} evaluation tasks")
-            except FileNotFoundError:
-                self.logger.info("eval_id_map.json not found - creating from evaluation data...")
-                
-                # Load evaluation data to get task IDs
-                try:
-                    # Pass config to prepare_eval_data
-                    _, eval_dataset = prepare_eval_data(
-                        return_datasets=True,
-                        config=self.config  # Pass the config instance
-                    )
-                    
-                    # Extract unique task IDs
-                    unique_task_ids = set()
-                    eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=1)
-                    for _, _, _, _, task_ids in eval_loader:
-                        task_id = task_ids[0].item()
-                        unique_task_ids.add(str(task_id))
-                    
-                    if not unique_task_ids:
-                        raise ValueError("No task IDs found in evaluation dataset")
-                    
-                    # Create task map
-                    self.eval_task_map = {
-                        task_id: idx 
-                        for idx, task_id in enumerate(sorted(unique_task_ids))
-                    }
-                    
-                    # Save the map
-                    try:
-                        with open("eval_id_map.json", "w") as f:
-                            json.dump(self.eval_task_map, f, indent=2)
-                        self.logger.info(
-                            f"Created and saved eval_id_map.json with {len(self.eval_task_map)} tasks"
-                        )
-                    except Exception as e:
-                        self.logger.error(f"Error saving eval_id_map.json: {str(e)}")
-                        # Continue even if save fails - we still have the map in memory
-                    
-                except Exception as e:
-                    self.logger.error(f"Error creating eval_id_map.json: {str(e)}")
-                    self.has_eval_data = False
-                    raise
-                    
-            # Create reverse mapping if we have a valid task map
-            if hasattr(self, 'eval_task_map') and self.eval_task_map:
-                self.eval_int_to_task = {v: k for k, v in self.eval_task_map.items()}
-                self.has_eval_data = True
-                self.logger.debug(
-                    f"Created reverse mapping with {len(self.eval_int_to_task)} entries"
-                )
-            else:
-                raise ValueError("No evaluation task map created")
-            
-        except Exception as e:
-            self.logger.error(f"Error handling evaluation task map: {str(e)}")
-            self.has_eval_data = False
-
-        # Final validation
-        if not (self.has_training_data or self.has_eval_data):
-            self.logger.error("Neither training nor evaluation data maps are available")
-            raise ValueError("No task maps found or created - cannot perform any evaluation")
-
-        self.logger.info(
-            f"Task maps loaded - Training: {self.has_training_data}, "
-            f"Evaluation: {self.has_eval_data}"
-        )
     def _validate_shapes(self, src, tgt, ctx_input, ctx_output, outputs, mode):
         """Validate tensor shapes and log details"""
         self.logger.debug(f"\nShape validation for {mode}:")
@@ -207,147 +107,6 @@ class EvaluationManager:
         self.logger.debug(f"ctx_input: {ctx_input.shape}")
         self.logger.debug(f"ctx_output: {ctx_output.shape}")
         self.logger.debug(f"model outputs: {outputs.shape}")
-
-    def _process_batch(self, batch, mode, int_to_task):
-        """Process a single batch with detailed logging and prediction storage"""
-        try:
-            src, tgt, ctx_input, ctx_output, task_ids = [
-                t.to(self.device) for t in batch
-            ]
-            
-            # Log initial tensor info
-            self.logger.debug("\nInitial tensor information:")
-            self.logger.debug(f"src type: {src.dtype}, range: [{src.min():.1f}, {src.max():.1f}]")
-            self.logger.debug(f"tgt type: {tgt.dtype}, range: [{tgt.min():.1f}, {tgt.max():.1f}]")
-            self.logger.debug(f"src shape: {src.shape}")
-            self.logger.debug(f"tgt shape: {tgt.shape}")
-            
-            with torch.no_grad():
-                outputs = self.model(src, tgt, ctx_input, ctx_output)
-            
-            # Log raw model outputs
-            self.logger.debug(f"\nModel outputs:")
-            self.logger.debug(f"shape: {outputs.shape}")
-            self.logger.debug(f"type: {outputs.dtype}")
-            self.logger.debug(f"range: [{outputs.min():.1f}, {outputs.max():.1f}]")
-            
-            # Analyze logits distribution
-            self.logger.debug("\nLogits Distribution:")
-            logits_flat = outputs.view(-1, outputs.size(-1))
-            for i in range(outputs.size(-1)):  # For each class
-                class_logits = logits_flat[:, i]
-                self.logger.debug(
-                    f"Class {i} logits - "
-                    f"mean: {class_logits.mean():.3f}, "
-                    f"std: {class_logits.std():.3f}, "
-                    f"range: [{class_logits.min():.3f}, {class_logits.max():.3f}]"
-                )
-            
-            # Get predictions
-            predictions = outputs.argmax(dim=-1)  # Shape: [batch, seq_len]
-            
-            # Process each example
-            for idx, task_id_int in enumerate(task_ids):
-                task_id = int_to_task[task_id_int.item()]
-                
-                # Get individual tensors - FIXED: Maintain target dimensions
-                task_input = src[idx:idx + 1]  # [1, 30, 30]
-                task_target = tgt[idx:idx + 1]  # [1, 30, 30] - Keeping all dimensions
-                task_pred = predictions[idx:idx + 1]  # [1, 30, 30]
-                task_raw_outputs = outputs[idx]  # [30, 30, 11]
-                
-                # Debug task tensor shapes
-                self.logger.debug(f"\nTask tensor shapes:")
-                self.logger.debug(f"task_input: {task_input.shape}")
-                self.logger.debug(f"task_target: {task_target.shape}")
-                self.logger.debug(f"task_pred: {task_pred.shape}")
-                self.logger.debug(f"task_raw_outputs: {task_raw_outputs.shape}")
-                
-                # Convert types for consistency
-                task_target = task_target.to(torch.long)
-                task_pred = task_pred.to(torch.long)
-                
-                # Analyze output distribution for this task
-                analysis = self.analyze_outputs_distribution(
-                    task_raw_outputs,
-                    task_pred,
-                    task_target,
-                    task_id
-                )
-                
-                # Calculate probabilities and confidence
-                probs = torch.softmax(task_raw_outputs, dim=-1)
-                confidence, _ = probs.max(dim=-1)
-                
-                # Create prediction record with enhanced information
-                pred_record = PredictionRecord(
-                    input_grid=task_input.squeeze(0).cpu().tolist(),
-                    target_grid=task_target.squeeze(0).cpu().tolist(),
-                    predicted_grid=task_pred.squeeze(0).cpu().tolist(),
-                    raw_logits=task_raw_outputs.cpu().tolist(),
-                    position_metrics={
-                        'output_probabilities': probs.cpu().tolist(),
-                        'output_classes': task_pred.squeeze(0).cpu().tolist(),
-                        'output_confidences': confidence.cpu().tolist(),
-                        'distribution_analysis': analysis
-                    }
-                )
-                
-                # Calculate metrics
-                std_acc, std_details = compute_standard_accuracy(
-                    task_pred.flatten(),
-                    task_target.flatten(),
-                )
-                
-                diff_acc, diff_details = compute_differential_accuracy(
-                    task_input.squeeze(0),
-                    task_target.squeeze(0),
-                    task_pred.squeeze(0),
-                )
-                
-                # Enhanced metrics dictionary
-                metrics_dict = {
-                    'standard_accuracy': std_acc,
-                    'differential_accuracy': diff_acc,
-                    'std_details': std_details,
-                    'diff_details': diff_details,
-                    'debug_info': {
-                        'target_shape': list(task_target.shape),
-                        'pred_shape': list(task_pred.shape),
-                        'target_unique': torch.unique(task_target).tolist(),
-                        'pred_unique': torch.unique(task_pred).tolist(),
-                        'output_range': [float(outputs[idx].min()), float(outputs[idx].max())],
-                        'logits_stats': {
-                            'mean': float(task_raw_outputs.mean()),
-                            'std': float(task_raw_outputs.std()),
-                            'min': float(task_raw_outputs.min()),
-                            'max': float(task_raw_outputs.max())
-                        },
-                        'confidence_stats': {
-                            'mean': float(confidence.mean()),
-                            'std': float(confidence.std()),
-                            'min': float(confidence.min()),
-                            'max': float(confidence.max())
-                        },
-                        'distribution_analysis': analysis
-                    }
-                }
-                
-                # Store results
-                self.metrics_collectors[mode].add_result(
-                    task_id,
-                    metrics_dict,
-                    prediction_record=pred_record
-                )
-                
-        except Exception as e:
-            self.logger.error(f"Error processing batch: {str(e)}", exc_info=True)
-            self.logger.error("Tensor shapes at failure:")
-            self.logger.error(f"src: {src.shape if 'src' in locals() else 'not created'}")
-            self.logger.error(f"tgt: {tgt.shape if 'tgt' in locals() else 'not created'}")
-            self.logger.error(f"outputs: {outputs.shape if 'outputs' in locals() else 'not created'}")
-            self.logger.error(f"predictions: {predictions.shape if 'predictions' in locals() else 'not created'}")
-            raise
 
     def _process_results(self, mode, collector):
         """Process and display results for a specific evaluation mode"""
@@ -448,11 +207,23 @@ class EvaluationManager:
             raise
 
     def evaluate_loader(self, loader, mode, int_to_task):
-        """Evaluate all batches in a loader"""
+        """Evaluate all batches in a loader."""
         self.logger.info(f"\nStarting evaluation for {mode}...")
         try:
             for batch_idx, batch in enumerate(tqdm(loader, desc=f"Evaluating {mode}")):
-                self._process_batch(batch, mode, int_to_task)
+                task_results = self.batch_processor.process_batch(batch, mode, int_to_task)
+                
+                for task_result in task_results:
+                    task_id = task_result['task_id']
+                    metrics = task_result['metrics']
+                    pred_record = task_result['prediction_record']
+                    
+                    self.metrics_collectors[mode].add_result(
+                        task_id,
+                        metrics,
+                        prediction_record=pred_record
+                    )
+                
                 if (batch_idx + 1) % 10 == 0:
                     self.logger.debug(f"Processed {batch_idx + 1} batches")
                     
@@ -476,175 +247,23 @@ class EvaluationManager:
     def generate_summary(self, all_results):
         """Generate a comprehensive evaluation summary with key findings"""
         try:
-            summary_file = self.results_dir / f'evaluation_summary_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt'
-            
-            with open(summary_file, 'w') as f:
-                def write(text):
-                    print(text)  # Print to console
-                    f.write(text + '\n')  # Write to file
-                
-                write("\n" + "="*80)
-                write("                        EVALUATION SUMMARY REPORT")
-                write("="*80 + "\n")
-                
-                # Model Information
-                write("MODEL CONFIGURATION:")
-                write(f"Checkpoint: {self.config.model.checkpoint_path}")
-                write(f"Encoder layers: {self.config.model.encoder_layers}")
-                write(f"Decoder layers: {self.config.model.decoder_layers}")
-                write(f"Model dimension: {self.config.model.d_model}")
-                write(f"Attention heads: {self.config.model.heads}\n")
-                
-                # Overall Performance
-                write("OVERALL PERFORMANCE:")
-                for mode, results in all_results.items():
-                    if 'overall_metrics' in results:
-                        metrics = results['overall_metrics']
-                        write(f"\n{mode.upper()}:")
-                        write(f"  Standard Accuracy: {metrics['standard_accuracy']:.4f}")
-                        write(f"  Differential Accuracy: {metrics['differential_accuracy']:.4f}")
-                write("")
-                
-                # Model Behavior Analysis
-                write("MODEL BEHAVIOR ANALYSIS:")
-                for mode, results in all_results.items():
-                    if 'task_summaries' in results:
-                        pred_values = set()
-                        target_values = set()
-                        total_tasks = len(results['task_summaries'])
-                        perfect_tasks = 0
-                        failed_tasks = 0  # Tasks with 0 accuracy
-                        
-                        for task_id, metrics in results['task_summaries'].items():
-                            if 'debug_info' in metrics:
-                                debug = metrics['debug_info']
-                                if 'pred_unique' in debug:
-                                    pred_values.update(debug['pred_unique'])
-                                if 'target_unique' in debug:
-                                    target_values.update(debug['target_unique'])
-                            
-                            # Count perfect and failed tasks
-                            if metrics.get('standard_accuracy', 0) >= 0.999:
-                                perfect_tasks += 1
-                            elif metrics.get('standard_accuracy', 0) == 0:
-                                failed_tasks += 1
-                        
-                        write(f"\n{mode.upper()} ANALYSIS:")
-                        write(f"  Total tasks: {total_tasks}")
-                        write(f"  Perfect solutions: {perfect_tasks} ({perfect_tasks/total_tasks*100:.1f}%)")
-                        write(f"  Failed tasks: {failed_tasks} ({failed_tasks/total_tasks*100:.1f}%)")
-                        write(f"  Model predictions range: {sorted(pred_values)}")
-                        write(f"  Expected values range: {sorted(target_values)}")
-                write("")
-                
-                # Task-Specific Analysis
-                write("INTERESTING TASK PATTERNS:")
-                for mode, results in all_results.items():
-                    if 'task_summaries' in results:
-                        write(f"\n{mode.upper()}:")
-                        
-                        # Find best and worst performing tasks
-                        tasks = [(task_id, metrics.get('standard_accuracy', 0)) 
-                                for task_id, metrics in results['task_summaries'].items()]
-                        tasks.sort(key=lambda x: x[1], reverse=True)
-                        
-                        # Best tasks
-                        write("\nBest performing tasks:")
-                        for task_id, acc in tasks[:3]:
-                            metrics = results['task_summaries'][task_id]
-                            write(f"  Task {task_id}:")
-                            write(f"    Standard Accuracy: {acc:.4f}")
-                            write(f"    Differential Accuracy: {metrics.get('differential_accuracy', 0):.4f}")
-                            if 'debug_info' in metrics:
-                                debug = metrics['debug_info']
-                                if 'pred_unique' in debug and 'target_unique' in debug:
-                                    write(f"    Predictions: {debug['pred_unique']}")
-                                    write(f"    Targets: {debug['target_unique']}")
-                        
-                        # Worst tasks
-                        write("\nWorst performing tasks:")
-                        for task_id, acc in tasks[-3:]:
-                            metrics = results['task_summaries'][task_id]
-                            write(f"  Task {task_id}:")
-                            write(f"    Standard Accuracy: {acc:.4f}")
-                            write(f"    Differential Accuracy: {metrics.get('differential_accuracy', 0):.4f}")
-                            if 'debug_info' in metrics:
-                                debug = metrics['debug_info']
-                                if 'pred_unique' in debug and 'target_unique' in debug:
-                                    write(f"    Predictions: {debug['pred_unique']}")
-                                    write(f"    Targets: {debug['target_unique']}")
-                
-                # Key Findings
-                write("\nKEY FINDINGS:")
-                # Check if model predictions are clustered
-                all_preds = set()
-                all_targets = set()
-                for results in all_results.values():
-                    for metrics in results.get('task_summaries', {}).values():
-                        if 'debug_info' in metrics:
-                            debug = metrics['debug_info']
-                            if 'pred_unique' in debug:
-                                all_preds.update(debug['pred_unique'])
-                            if 'target_unique' in debug:
-                                all_targets.update(debug['target_unique'])
-                
-                write(f"\n1. Model Prediction Range:")
-                write(f"   - Model predicts values in range: {sorted(all_preds)}")
-                write(f"   - Expected value range: {sorted(all_targets)}")
-                if len(all_preds) < len(all_targets):
-                    write("   ! Model is not using full output range")
-                
-                # Calculate prediction bias
-                pred_mean = sum(all_preds) / len(all_preds) if all_preds else 0
-                target_mean = sum(all_targets) / len(all_targets) if all_targets else 0
-                if abs(pred_mean - target_mean) > 1:
-                    write(f"\n2. Prediction Bias:")
-                    write(f"   - Average prediction: {pred_mean:.2f}")
-                    write(f"   - Average target: {target_mean:.2f}")
-                    write("   ! Model shows significant bias in predictions")
-                
-                write("\n3. Performance Pattern:")
-                total_perfect = sum(1 for results in all_results.values()
-                                for metrics in results.get('task_summaries', {}).values()
-                                if metrics.get('standard_accuracy', 0) >= 0.999)
-                total_tasks = sum(len(results.get('task_summaries', {})) 
-                                for results in all_results.values())
-                
-                write(f"   - Perfect solutions: {total_perfect}/{total_tasks} tasks")
-                write(f"   - Success rate: {total_perfect/total_tasks*100:.1f}%")
-                
-                # Training Recommendations
-                write("\nTRAINING RECOMMENDATIONS:")
-                if len(all_preds) < len(all_targets):
-                    write("1. Model needs better output distribution - consider:")
-                    write("   - Longer training time")
-                    write("   - Adjusting loss function to encourage full output range")
-                    write("   - Checking output layer configuration")
-                
-                if total_perfect/total_tasks < 0.5:
-                    write("\n2. Low success rate suggests:")
-                    write("   - Model may need more capacity (layers/dimensions)")
-                    write("   - Training data might be insufficient")
-                    write("   - Consider curriculum learning approach")
-                
-                write("\n" + "="*80)
-                write(f"Report saved to: {summary_file}")
-                write("="*80 + "\n")
-                
+            summary_generator = EvaluationSummary(self, all_results)
+            summary_file = summary_generator.generate_summary()
             return summary_file
-            
         except Exception as e:
             self.logger.error(f"Error generating summary: {str(e)}")
             raise
-
+    
     def run_evaluation(self):
         """Main evaluation loop with error handling"""
         try:
-            self._load_task_maps()
+            self.task_mapper.load_training_task_map()
+            self.task_mapper.load_evaluation_task_map()
+            self.task_mapper.validate_task_maps()
             all_results = {}
             
             # Training data evaluation
-            if self.has_training_data:
+            if self.task_mapper.has_training_data:
                 self.logger.info("\nPreparing training data...")
                 try:
                     train_dataset, val_dataset = prepare_training_data(return_datasets=True)
@@ -657,7 +276,7 @@ class EvaluationManager:
                     )
                     
                     self.evaluate_loader(
-                        train_loader, 'training_train', self.train_int_to_task
+                        train_loader, 'training_train', self.task_mapper.train_int_to_task
                     )
                     all_results['training_train'] = self._process_results(
                         'training_train', 
@@ -665,7 +284,7 @@ class EvaluationManager:
                     )
                     
                     self.evaluate_loader(
-                        val_loader, 'training_validation', self.train_int_to_task
+                        val_loader, 'training_validation', self.task_mapper.train_int_to_task
                     )
                     all_results['training_validation'] = self._process_results(
                         'training_validation',
@@ -676,7 +295,7 @@ class EvaluationManager:
                     self.logger.error(f"Error evaluating training data: {str(e)}")
             
             # Evaluation data
-            if self.has_eval_data:
+            if self.task_mapper.has_eval_data:
                 self.logger.info("\nPreparing evaluation data...")
                 try:
                     _, eval_dataset = prepare_eval_data(return_datasets=True)
@@ -685,7 +304,7 @@ class EvaluationManager:
                     )
                     
                     self.evaluate_loader(
-                        eval_loader, 'evaluation', self.eval_int_to_task
+                        eval_loader, 'evaluation', self.task_mapper.eval_int_to_task
                     )
                     all_results['evaluation'] = self._process_results(
                         'evaluation',
@@ -702,60 +321,10 @@ class EvaluationManager:
             
             if self.config.evaluation.create_submission:
                 self.create_submission()
-        except Exception as e:
+        except Exception:
             self.logger.error("Evaluation failed:", exc_info=True)
             raise
-    
-    def analyze_outputs_distribution(self, outputs, predictions, targets, task_id):
-        """
-        Analyze distribution of outputs, predictions, and targets
-        
-        Args:
-            outputs: [batch, H, W, num_classes] or [H, W, num_classes]
-            predictions: [batch, H, W] or [H, W]
-            targets: [batch, H, W] or [H, W]
-            task_id: Task identifier
-        """
-        with torch.no_grad():
-            # Debug original shapes
-            self.logger.debug(f"\nOriginal shapes before processing:")
-            self.logger.debug(f"outputs: {outputs.shape}")
-            self.logger.debug(f"predictions: {predictions.shape}")
-            self.logger.debug(f"targets: {targets.shape}")
-            
-            # Handle batch dimension properly for all tensors
-            if outputs.dim() == 4:
-                outputs = outputs[0]  # [H, W, num_classes]
-            if predictions.dim() == 3:
-                predictions = predictions[0]  # [H, W]
-                
-            # Special handling for targets to ensure grid structure
-            if targets.dim() == 3:
-                targets = targets[0]  # Remove batch dimension if present
-            if targets.dim() == 1:
-                # Reshape to match grid structure using known dimensions
-                H = W = int(math.sqrt(targets.size(0)))  # Should be 30
-                targets = targets.view(H, W)
-                
-            # Extra validation
-            if targets.dim() != 2:
-                raise ValueError(f"Expected 2D targets after processing, got {targets.dim()}D with shape {targets.shape}")
-                
-            # Verify shapes after processing
-            self.logger.debug(f"\nShapes after processing:")
-            self.logger.debug(f"outputs: {outputs.shape}")
-            self.logger.debug(f"predictions: {predictions.shape}")
-            self.logger.debug(f"targets: {targets.shape}")
-            
-            # Assert correct dimensions
-            assert outputs.dim() == 3, f"Expected outputs to be 3D after processing, got {outputs.dim()}D"
-            assert predictions.dim() == 2, f"Expected predictions to be 2D after processing, got {predictions.dim()}D"
-            assert targets.dim() == 2, f"Expected targets to be 2D after processing, got {targets.dim()}D"
-            assert predictions.shape == targets.shape, (
-                f"Predictions shape {predictions.shape} doesn't match targets shape {targets.shape}. "
-                f"Original target shape was {targets.shape}"
-            )
-        
+  
     def create_submission(self):
         """Create submission file from evaluation results"""
         try:
@@ -800,7 +369,7 @@ class EvaluationManager:
                             cleaned_grid.append(valid_row)
                             self.logger.debug(f"Row {row_idx}: found {len(valid_row)} valid columns")
                     
-                    self.logger.debug(f"After first pass:")
+                    self.logger.debug("After first pass:")
                     self.logger.debug(f"Max columns: {max_cols}")
                     self.logger.debug(f"Valid rows: {len(cleaned_grid)}")
                     
@@ -855,6 +424,8 @@ class EvaluationManager:
         except Exception as e:
             self.logger.error(f"Failed to create submission: {str(e)}", exc_info=True)
             raise
+
+
 def main():
     """Main entry point with error handling"""
     try:
@@ -862,7 +433,7 @@ def main():
         evaluator = EvaluationManager(cfg)
         evaluator.run_evaluation()
         
-    except Exception as e:
+    except Exception:
         logging.error("Evaluation failed:", exc_info=True)
         raise
 

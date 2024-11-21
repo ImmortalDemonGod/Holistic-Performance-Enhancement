@@ -179,6 +179,10 @@ class FineTuningConfig:
         self.patience = 5
 
 
+class MetricsConfig:
+    def __init__(self, confidence_threshold=0.5):
+        self.confidence_threshold = confidence_threshold
+
 class SchedulerConfig:
     def __init__(self):
         self.use_cosine_annealing = True  # Set to True to enable CosineAnnealingWarmRestarts
@@ -230,6 +234,9 @@ class Config:
             fast_dev_run=FAST_DEV_RUN,
             train_from_checkpoint=TRAIN_FROM_CHECKPOINT
         )
+        
+        # Initialize metrics configuration
+        self.metrics = MetricsConfig()
         
         self.logging = LoggingConfig()
         self.finetuning = FineTuningConfig()

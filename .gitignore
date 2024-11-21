@@ -22,3 +22,8 @@ ARC-AGI/*
 build/*
 jarc_reactor.egg-info/*
 jarc_reactor.egg-info/*
+jarc_reactor/__pycache__/*
+jarc_reactor/data/__pycache__/*
+jarc_reactor/evaluation/__pycache__/*
+jarc_reactor/models/__pycache__/*
+jarc_reactor/utils/__pycache__/*
