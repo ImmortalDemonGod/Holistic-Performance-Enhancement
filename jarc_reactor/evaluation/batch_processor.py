@@ -22,11 +22,12 @@ class TaskContext:
     int_to_task: dict
 
 class BatchProcessor:
-    def __init__(self, model, device, logger, metrics_calculator):
+    def __init__(self, model, device, logger, metrics_calculator, config):
         self.model = model
         self.device = device
         self.logger = logger
         self.metrics_calculator = MetricsCalculator
+        self.config = config  # Store the config instance
 
     def process_batch(self, batch, mode, int_to_task):
         """Process a single batch with detailed logging and prediction storage."""
@@ -41,7 +42,10 @@ class BatchProcessor:
             self._analyze_logits_distribution(outputs)
             
             predictions = outputs.argmax(dim=-1)  # Shape: [batch, seq_len]
-            
+
+            # Extract confidence from batch or use default from config
+            confidence = batch.get('confidence', self.config.metrics.confidence_threshold)
+
             # Encapsulate batch data
             batch_data = BatchData(
                 src=src,
@@ -52,7 +56,7 @@ class BatchProcessor:
                 outputs=outputs,
                 task_ids=task_ids
             )
-            
+
             task_results = []
             for idx, task_id_int in enumerate(task_ids):
                 # Encapsulate task context
@@ -62,11 +66,11 @@ class BatchProcessor:
                     mode=mode,
                     int_to_task=int_to_task
                 )
-                task_result = self._process_single_task(batch_data, task_context)
+                task_result = self._process_single_task(batch_data, task_context, confidence)
                 task_results.append(task_result)
-                    
+
             return task_results  # Return list of processed task results
-                
+
         except Exception as e:
             self._handle_batch_processing_error(e, batch)
             raise
