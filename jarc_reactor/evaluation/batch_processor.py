@@ -27,7 +27,7 @@ class BatchProcessor:
         self.model = model
         self.device = device
         self.logger = logger
-        self.metrics_calculator = MetricsCalculator
+        self.metrics_calculator = metrics_calculator
         self.config = config  # Store the config instance
 
     def process_batch(self, batch, mode, int_to_task):
