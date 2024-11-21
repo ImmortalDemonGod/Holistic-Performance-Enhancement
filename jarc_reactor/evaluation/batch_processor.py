@@ -44,8 +44,13 @@ class BatchProcessor:
             
             predictions = outputs.argmax(dim=-1)  # Shape: [batch, seq_len]
 
-            # Extract confidence from batch or use default from config
-            confidence = batch.get('confidence', self.config.metrics.confidence_threshold)
+            # Extract confidence from batch if available, else use default from config
+            if isinstance(batch, dict):
+                confidence = batch.get('confidence', self.config.metrics.confidence_threshold)
+                self.logger.debug("Batch is a dict. Using provided confidence value.")
+            else:
+                confidence = self.config.metrics.confidence_threshold
+                self.logger.debug("Batch is not a dict. Using default confidence value.")
 
             # Encapsulate batch data
             batch_data = BatchData(
