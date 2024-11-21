@@ -525,11 +525,11 @@ class EvaluationManager:
                 writer.write_training_recommendations(all_results)
                 writer.write_footer(summary_file)
         
-        return summary_file
+            return summary_file
         
-    except Exception as e:
-        self.logger.error(f"Error generating summary: {str(e)}")
-        raise
+        except Exception as e:
+            self.logger.error(f"Error generating summary: {str(e)}")
+            raise
 
     def analyze_model_behavior(self, mode, results):
         """Analyze model behavior for a specific mode."""
