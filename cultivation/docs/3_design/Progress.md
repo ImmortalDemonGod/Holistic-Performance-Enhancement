@@ -231,3 +231,136 @@ After this sprint, the repo will compile, lint, test, and publish documentation 
 4. **GPU usage** in CI (needed Phase P4+); budget concerns?
 
 Let me know your preferences, and I can scaffold the corresponding files or automation in the next commit.
+Below is an updated “**repo‑plumbing kit**” that treats the notebook as a biology asset living at  
+
+```
+cultivation/notebooks/biology/malthus_logistic_demo.ipynb
+```
+
+Feel free to copy‑paste each block straight into the repo.
+
+---
+
+## 1.  `requirements.txt`
+
+Make sure you have everything CI will need — add the two bold lines if they’re missing:
+
+```txt
+numpy
+scipy
+matplotlib
+sympy
+jupyter                # already there if you used it locally
+**nbconvert            # ← converts / executes notebooks in CI**
+**pytest               # ← minimal test scaffold for later phases**
+```
+
+---
+
+## 2.  GitHub Actions workflow – `ci-notebooks.yml`
+
+Create (or append to) `.github/workflows/ci-notebooks.yml`:
+
+```yaml
+name: Notebook smoke‑test
+
+on:
+  push:
+    paths:
+      - "cultivation/notebooks/**.ipynb"
+      - ".github/workflows/ci-notebooks.yml"
+      - "requirements.txt"
+  pull_request:
+    paths:
+      - "cultivation/notebooks/**.ipynb"
+
+jobs:
+  execute-notebooks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install deps
+        run: |
+          python -m pip install -r requirements.txt
+
+      - name: Run biology demo notebook
+        run: |
+          jupyter nbconvert \
+            --to html \
+            --execute cultivation/notebooks/biology/malthus_logistic_demo.ipynb \
+            --output executed_malthus_logistic_demo.html
+
+      # optional – upload the rendered HTML so you can preview it in the
+      # workflow artefacts tab
+      - name: Upload artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: biology-notebook-html
+          path: executed_malthus_logistic_demo.html
+```
+
+### What this does
+
+* **nbconvert `--execute`** runs the notebook top‑to‑bottom; any error fails the job.  
+* Converts it to HTML so reviewers can click through without running Python.  
+* Stores the HTML as a build artefact (nice but optional).
+
+---
+
+## 3.  Docs backlink
+
+Add a quick link in the biology chapter so readers discover the live notebook:
+
+```markdown
+<!-- docs/5_mathematical_biology/chapter_1_single_species.md -->
+
+> 🔗 Interactive demo:  
+> [malthus_logistic_demo.ipynb](../../notebooks/biology/malthus_logistic_demo.ipynb)
+```
+
+If you later publish docs with MkDocs or Docusaurus the link will still resolve.
+
+---
+
+## 4.  Tiny placeholder test (keeps `pytest` green)
+
+Create `tests/test_sanity.py`:
+
+```python
+def test_repo_sanity():
+    """Fail‑early placeholder so pytest exits green."""
+    assert 1 + 1 == 2
+```
+
+CI that already runs `pytest` will now pass even before real biology tests land.
+
+---
+
+## 5.  `.gitignore` nudge (optional)
+
+If you commit the executed HTML somewhere under `docs/` add:
+
+```
+# ignore temporary nbconvert outputs produced locally
+executed_*.html
+```
+
+CI uploads the file as an artefact but it won’t clutter your working tree.
+
+---
+
+### ✅ Outcome
+
+* Any PR that edits the biology notebook must still run start‑to‑finish on CI.  
+* Reviewers get a rendered HTML to skim quickly.  
+* Down‑stream docs can link directly to the notebook.  
+
+Let me know if you’d like a Makefile target, extra caching tricks, or to extend the workflow to *all* notebooks in one shot!
