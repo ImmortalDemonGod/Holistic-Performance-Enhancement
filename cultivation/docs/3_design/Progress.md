@@ -364,3 +364,138 @@ CI uploads the file as an artefact but it won’t clutter your working tree.
 * Down‑stream docs can link directly to the notebook.  
 
 Let me know if you’d like a Makefile target, extra caching tricks, or to extend the workflow to *all* notebooks in one shot!
+======
+Here are **six “bite‑sized” documentation wins** you (or I) can knock out immediately. Each produces a new file in `docs/` and plugs an obvious gap in the knowledge flow.
+
+| # | Doc we’d add | Lives in | Why it matters | Effort |
+|---|--------------|---------|----------------|--------|
+| 1 | **`docs/3_design/architecture_overview.md`** <br>*(one‑screen Mermaid diagram + bullets)* | 3 _design | Everyone asks “how do the pieces talk?”—a single diagram beats 50 Slack pings. | 30 min |
+| 2 | **`docs/2_requirements/data_contracts.md`** | 2 _requirements | Formal schema for CSV/Parquet emitted by each ETL script—lets code & notebooks evolve safely. | 45 min |
+| 3 | **`docs/1_background/glossary.md`** | 1 _background | Collect all loaded terms (VO₂ max, PID, PBH, ARC, etc.) once; link from every other page. | 25 min |
+| 4 | **`docs/4_analysis/template.md`** | 4 _analysis | A ready‑to‑copy front‑matter block for new reports (title, data snapshot, next‑action).  Keeps analysis layer uniform. | 10 min |
+| 5 | **`docs/5_mathematical_biology/notebook_index.md`** | 5 _mathematical_biology | Table that maps each section → the demo notebook that implements it (with run status badge). | 20 min |
+| 6 | **`CONTRIBUTING.md`** *(repo root)* | — | Explains branch naming, CI expectations, doc locations; unblocks outside contributors. | 30 min |
+
+---
+
+## 1 · Architecture overview (quick draft)
+
+```markdown
+# 🏗️ High‑level Architecture
+
+```mermaid
+graph TD
+    subgraph Data Sources
+        wearables([Wearable CSV / GPX])
+        papers[[PubMed / arXiv PDFs]]
+        git[(Git logs)]
+    end
+    subgraph ETL / Scripts
+        runETL(process_run_data.py)
+        bioETL(analyze_literature.py)
+        codeETL(commit_metrics.py)
+    end
+    subgraph Core Datasets
+        runningDB[(running.parquet)]
+        biologyDB[(biology.parquet)]
+        softwareDB[(software.parquet)]
+        synergyDB[(synergy.parquet)]
+    end
+    subgraph Analytics & ML
+        notebooks
+        synergyCalc(calculate_synergy.py)
+        rlAgent(rl_agent.py)
+    end
+    wearables --> runETL --> runningDB
+    papers --> bioETL --> biologyDB
+    git --> codeETL --> softwareDB
+    runningDB --> synergyCalc
+    biologyDB --> synergyCalc
+    softwareDB --> synergyCalc --> synergyDB
+    synergyDB --> rlAgent
+    synergyDB --> notebooks
+```
+
+> **Tip:** regenerate this diagram via `make diagram` so CI always embeds the latest graph.
+
+*Next gaps to draw*: Lean proofs pipeline, Task Master CLI flow.
+
+```
+
+---
+
+## 2 · Data‑contract skeleton
+
+```markdown
+# 📑 Data Contracts
+
+| Dataset | Location | Column | Type | Units / Range | Notes |
+|---------|----------|--------|------|---------------|-------|
+| **running.parquet** | `data/running/` | `timestamp` | datetime64 | UTC | ISO8601 from device |
+| | | `distance_m` | float | ≥ 0 | raw from GPX |
+| | | `hr_bpm` | int | 30‑240 | missing → NaN |
+| **biology.parquet** | … | … | … | … | |
+```
+
+Include a “breaking‑change checklist” (update scripts, bump minor version, etc.).
+
+---
+
+## 3 · Glossary seed
+
+```markdown
+**ARC**  Artificial Reasoning Challenge — grid‑based pattern problems.  
+**PBH**  Primordial Black Hole.  
+**PID**  Proportional‑Integral‑Derivative controller (see docs/3_design/control.md).  
+…
+```
+
+---
+
+## 4 · Analysis template
+
+Already hinted in `docs/4_analysis/analysis_overview.md`; drop an actual copy so authors can `cp` it:
+
+```markdown
+<!-- analysis_template.md -->
+# 📊 <Domain> – <Short title> (YYYY‑MM‑DD)
+
+> Analysis of commit `<sha>` using dataset `<file>`.
+
+## Data snapshot
+| Metric | Value |
+|--------|------:|
+| … | … |
+
+## Visuals
+![figure](../assets/<img>.png)
+
+## Interpretation
+1. …
+2. …
+
+## Next action
+- [ ] open issue …
+```
+
+---
+
+## 5 · Notebook index
+
+Simple table with ✅/❌ status so readers know which demos currently execute.
+
+---
+
+## 6 · Contributing guide (mini)
+
+* sections: branching, commit lint, how to run notebook CI locally (`make nb‑test`), doc style.
+
+---
+
+### How to proceed
+
+1. Pick one or two from the list and I’ll scaffold the Markdown right now.  
+2. Commit & push → notebook CI is already wired, so docs-only PR stays green.  
+3. Rinse‑and‑repeat as more parts of the codebase solidify.
+
+Let me know which document you want first (or if you’d like me to bulk‑create all six in one go).
