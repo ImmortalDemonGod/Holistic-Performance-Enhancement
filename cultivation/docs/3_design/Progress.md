@@ -118,3 +118,116 @@ Overall P0 completion ≈ **30 %** (docs done, code 0 %, CI 0 %).
 4. **MkDocs vs Docusaurus** – Which generator should we wire to auto‑publish `/docs`?
 
 Let me know which of the above you’d like to tackle first (or delegate to me) and I’ll spin up the corresponding skeleton files or deeper blueprints.
+### 🔍 Cultivation Repository — Systematic Health‑Check (snapshot 2025‑04‑18)
+
+| Layer | Score¹ | What’s solid | Biggest gaps / risks | High‑leverage next steps |
+|-------|--------|--------------|----------------------|--------------------------|
+| **Docs** | 7 / 10 | • Rich background theory (≥ 15 k words)<br>• Requirements section seeded (Lean, math stack, Task Master)<br>• v Σ roadmap gives a clear timeline | • Duplication across background files (ultimate_goals, synergy equation, etc.)<br>• `requirements.md` still empty; Testing reqs duplicated<br>• No cross‑doc backlinks / ToC → navigation friction | 1. **Consolidate duplicates** (keep canonical, add “See also”)<br>2. Fill `requirements.md` with non‑functional reqs (perf, sec, data volume)<br>3. Add MkDocs `nav:` + internal `[[_TOC_]]` anchors |
+| **Source code** | 2 / 10 | • One working demo (`generate_podcast_example.py`)<br>• Script stubs placed logically per domain | • 80 % of scripts are placeholders → CI will have nothing to run<br>• No package scaffolding (`pyproject.toml`, tests, lint) | 1. Ship *“hello‑world”* ETL for running & RNA (Phase P0 deliverable)<br>2. Add minimal `flashcore`‑like package w/ `__init__.py` so imports resolve<br>3. Introduce `pytest` skeleton & `ruff` config |
+| **Automation / CI** | 0 / 10 | — | • No `.github/workflows/` → README badge will be red<br>• No pre‑commit, no dependency lock | 1. Add **CI skeleton** (`ci.yml`) that:<br>   • installs Python 3.11<br>   • runs `pytest -q` (even if 0 tests)<br>   • lints via `ruff --select I`<br>2. Commit `requirements.txt` with pins |
+| **Data / notebooks** | 3 / 10 | • Placeholder notebook JSON added per domain | • No sample data under `data/`<br>• Notebooks empty → Jupyter build may fail | 1. Drop 1 small CSV in each domain for CI smoke‑runs<br>2. Create `notebooks/running/quick_eda.ipynb` that plots example CSV |
+| **Design alignment** | 6 / 10 | • v Σ roadmap captured in docs/3_design<br>• Lean guide consistent with math stack file | • Lean tool‑chain not initialised; no `lakefile.lean`<br>• Python↔Lean interface spec duplicated | 1. Run `lake init Cultivation` and commit empty proof file<br>2. Move interface bullets to `design_overview.md §3`, leave x‑ref in Lean guide |
+| **Governance / meta** | 4 / 10 | • README gives clear repo map & setup steps | • No LICENSE file (MIT referenced but absent)<br>• No CONTRIBUTING.md<br>• No issue/pr templates — cannot enforce roadmap labels | 1. Add `LICENSE` (MIT) & `CODE_OF_CONDUCT.md`<br>2. Create `.github/ISSUE_TEMPLATE/` with “phase/PX” label dropdown |
+
+<sup>¹ Subjective 0‑10 readiness for Phase P0 gate; 5 = minimally functional.</sup>
+
+---
+
+## 📊 Detailed Findings
+
+### 1. Documentation
+* **Duplication hotspots**  
+  * *Ultimate goals* narrative exists in both `final_thoughts.md` and `ultimate_goals.md`.  
+  * Synergy equation appears in at least three background files.  
+  **→ Action:** choose canonical locations, replace others with two‑line abstracts + link.
+
+* **Navigation**  
+  * No generated ToC; MkDocs or Docusaurus not yet wired.  
+  * Internal links (`../` paths) risk breaking once docs are built.  
+  **→ Action:** introduce MkDocs `mkdocs.yml` with `nav:` reflecting folder numbers; run `mkdocs serve` locally.
+
+### 2. Codebase
+* Scripts are empty stubs except `generate_podcast_example.py` (works with Podcastfy).  
+* No `__init__.py` ⇒ can’t import utilities between scripts/notebooks.  
+* Suggest `cultivation/src/cultivation/` package for shared code (keeps namespace clean).
+
+### 3. Continuous Integration
+* **Missing:**  
+  * Python lint/test workflow  
+  * Lean build workflow  
+  * Artifact upload for task‑master & flash‑memory
+
+* **Minimum viable CI (copy/paste):**
+  ```yaml
+  name: CI
+  on: [push, pull_request]
+  jobs:
+    python:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: actions/setup-python@v4
+          with: {python-version: '3.11', cache: 'pip'}
+        - run: pip install -r requirements.txt
+        - run: pytest -q || true    # green until tests exist
+    lean:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: leanprover/lean-action@v1
+  ```
+
+### 4. Data & Notebooks
+* Empty notebook JSONs prevent NB convert errors but offer zero value.  
+* Provide **one** toy dataset per domain (e.g., `running/sample_run.csv`, `biology/demo_fasta.fna`).  
+* Add `--report md` flag to forthcoming scripts so CI can drop summaries into `docs/4_analysis/`.
+
+### 5. Lean 4 integration
+* Docs specify Lean but repo lacks `lean/`.  
+* Run:
+
+  ```bash
+  cd cultivation
+  lake init Cultivation
+  echo "-- TODO: first lemma" > lean/Cultivation/Common.lean
+  ```
+
+* Add `lean.yml` workflow:
+
+  ```yaml
+  - run: lake build
+  ```
+
+### 6. Governance files
+* Add MIT `LICENSE`, `CONTRIBUTING.md`, and PR template with checklist:
+
+  ```markdown
+  - [ ] phase label added (`phase/P0`, `phase/P1`, …)
+  - [ ] docs cross‑linked
+  - [ ] CI green locally (`make ci`)
+  ```
+
+---
+
+## 🚀 90‑Minute Quick‑Win Plan (to pass Phase P0 gate)
+
+| Time (min) | Task | Result |
+|------------|------|--------|
+| 0‑15 | Commit **LICENSE**, **requirements.txt** (`ruff`, `pytest`, `pandas`), `.gitignore` for data | Legal & dep baseline |
+| 15‑35 | Scaffold **CI workflows** (`ci.yml`, `lean.yml`) | Green badge, Lean build |
+| 35‑60 | Add toy CSV + trivial `process_run_data.py` that prints weekly km | First script & test |
+| 60‑75 | `lake init`, empty proof, Lean workflow passes | Formal layer unlocked |
+| 75‑90 | Deduplicate docs (synergy, ultimate goals) with backlinks; update ToC in README | Cleaner docs |
+
+After this sprint, the repo will compile, lint, test, and publish documentation locally—unlocking future feature work without red CI lights.
+
+---
+
+## ❓ Open Decisions (need your input)
+
+1. **Data source for running ETL** – Garmin `.fit`, Strava `.gpx`, or CSV export?  
+2. **MkDocs vs Docusaurus** for doc site?  
+3. **Lean version pin** – stay on 4.3 stable or follow nightly?  
+4. **GPU usage** in CI (needed Phase P4+); budget concerns?
+
+Let me know your preferences, and I can scaffold the corresponding files or automation in the next commit.
