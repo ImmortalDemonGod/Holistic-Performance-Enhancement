@@ -24,6 +24,12 @@ if __name__ == '__main__':
     run_dir = os.path.join(args.figures_dir, f"week{week}", args.prefix)
     os.makedirs(run_dir, exist_ok=True)
 
+    # Create subfolders for images and txt
+    img_dir = os.path.join(run_dir, "images")
+    txt_dir = os.path.join(run_dir, "txt")
+    os.makedirs(img_dir, exist_ok=True)
+    os.makedirs(txt_dir, exist_ok=True)
+
     # Plot heart rate distribution
     plt.figure(figsize=(10, 5))
     sns.histplot(hr_df['heart_rate'], bins=20, kde=True, color='red')
@@ -31,8 +37,16 @@ if __name__ == '__main__':
     plt.xlabel('Heart Rate (bpm)')
     plt.ylabel('Frequency')
     plt.tight_layout()
-    plt.savefig(f"{run_dir}/hr_distribution.png")
+    plt.savefig(f"{img_dir}/hr_distribution.png")
     plt.close()
+
+    # --- TEXTUAL REPRESENTATIONS OF PLOTS ---
+    # Heart Rate Distribution
+    hr_desc = hr_df['heart_rate'].describe(percentiles=[0.1, 0.25, 0.5, 0.75, 0.9])
+    with open(f"{txt_dir}/hr_distribution.txt", "w") as f:
+        f.write("Heart Rate Distribution (bpm):\n")
+        f.write(hr_desc.to_string())
+        f.write("\n")
 
     # Plot pace distribution (less spread, more readable bins)
     plt.figure(figsize=(10, 5))
@@ -46,15 +60,28 @@ if __name__ == '__main__':
     plt.xlabel('Pace (min/km)')
     plt.ylabel('Frequency')
     plt.tight_layout()
-    plt.savefig(f"{run_dir}/pace_distribution.png")
+    plt.savefig(f"{img_dir}/pace_distribution.png")
     plt.close()
+
+    # Pace Distribution
+    pace_desc = pace_df['pace_min_per_km'].describe(percentiles=[0.1, 0.25, 0.5, 0.75, 0.9])
+    with open(f"{txt_dir}/pace_distribution.txt", "w") as f:
+        f.write("Pace Distribution (min/km):\n")
+        f.write(pace_desc.to_string())
+        f.write("\n")
 
     # 2D joint distribution: Heart Rate vs. Pace
     plt.figure(figsize=(8, 6))
     sns.jointplot(x='pace_min_per_km', y='heart_rate', data=df, kind='hex', cmap='viridis')
     plt.suptitle('Heart Rate vs. Pace (min/km)', y=1.02)
-    plt.savefig(f"{run_dir}/hr_vs_pace_hexbin.png")
+    plt.savefig(f"{img_dir}/hr_vs_pace_hexbin.png")
     plt.close()
+
+    # HR vs Pace: correlation
+    corr = df[['heart_rate', 'pace_min_per_km']].corr().iloc[0,1]
+    with open(f"{txt_dir}/hr_vs_pace_hexbin.txt", "w") as f:
+        f.write("Correlation between Heart Rate and Pace (min/km):\n")
+        f.write(f"Correlation coefficient: {corr:.3f}\n")
 
     # Optional: Print some quantiles
     print('Heart Rate Quantiles:')
@@ -62,4 +89,4 @@ if __name__ == '__main__':
     print('\nPace Quantiles (min/km):')
     print(pace_df['pace_min_per_km'].quantile([0.1, 0.25, 0.5, 0.75, 0.9]))
 
-    print(f'\nPlots saved as hr_distribution.png, pace_distribution.png, and hr_vs_pace_hexbin.png in {run_dir}')
+    print(f'\nImages saved in {img_dir}, textual summaries in {txt_dir}')
