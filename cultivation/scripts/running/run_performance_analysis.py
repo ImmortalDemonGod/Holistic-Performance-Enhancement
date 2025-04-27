@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import argparse
+import os
 
 def compute_training_zones(df, hrmax, zones=None):
     """
@@ -105,11 +106,16 @@ def main():
     print("\n--- Recommendations ---")
     for rec in recs:
         print(f"- {rec}")
+    # Determine week/run subdirectory for figures
+    date_part = args.prefix.split('_')[0]
+    week = pd.to_datetime(date_part).isocalendar().week
+    run_dir = os.path.join(args.figures_dir, f"week{week}", args.prefix)
+    os.makedirs(run_dir, exist_ok=True)
     # Plot time in zone
     tiz['percent'].plot(kind='bar', color='skyblue', title='Time in HR Zone (%)')
     plt.ylabel('% of Run Time')
     plt.tight_layout()
-    plt.savefig(f"{args.figures_dir}/{args.prefix}_time_in_hr_zone.png")
+    plt.savefig(f"{run_dir}/time_in_hr_zone.png")
     plt.close()
     # Plot HR drift
     df['heart_rate'].plot(label='Heart Rate', alpha=0.7)
@@ -117,7 +123,7 @@ def main():
     plt.title('Heart Rate Over Time')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(f"{args.figures_dir}/{args.prefix}_hr_over_time_drift.png")
+    plt.savefig(f"{run_dir}/hr_over_time_drift.png")
     plt.close()
     # Plot pacing
     df['pace_min_per_km'].plot(label='Pace (min/km)', alpha=0.7)
@@ -125,7 +131,7 @@ def main():
     plt.title('Pace Over Time')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(f"{args.figures_dir}/{args.prefix}_pace_over_time.png")
+    plt.savefig(f"{run_dir}/pace_over_time.png")
     plt.close()
 
 if __name__ == '__main__':
