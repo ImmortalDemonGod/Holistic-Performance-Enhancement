@@ -82,6 +82,91 @@ cultivation/
 #### 7. `.gitignore` - Git Configuration
 - **Purpose**: Specifies files and directories to ignore in Git (e.g., large data logs, secret tokens, environment files, script outputs).
 
+## 🏃 Automated Running Data Ingestion & Analysis Workflow
+
+This project supports robust, scalable ingestion and analysis of running data files (.fit and .gpx) with zero manual intervention required—even if your device exports files with generic names like `activity.fit` or `run1.gpx`.
+
+### How It Works
+
+1. **Drop your raw files** (from any device) into `cultivation/data/raw/`. Files can have any name (e.g., `activity.fit`, `export.gpx`, `run1.fit`, etc.).
+2. **Run the batch processing script:**
+   ```bash
+   cd cultivation/scripts/running/
+   python3 process_all_runs.py
+   ```
+   - This will automatically:
+     - Detect and auto-rename any generic file names to a descriptive format (e.g., `20250427_auto.fit`), extracting the activity date from file content.
+     - Parse each run file into a summary CSV in `cultivation/data/processed/`.
+     - Generate all plots and advanced analytics, saving them in `cultivation/outputs/figures/`, all named after their corresponding run.
+
+### Output Naming Conventions
+
+- **Raw data:** `cultivation/data/raw/YYYYMMDD_<label>.fit` or `.gpx` (auto-renamed if needed)
+- **Processed:** `cultivation/data/processed/YYYYMMDD_<label>_fit_summary.csv` (or `_gpx_summary.csv`)
+- **Figures:** `cultivation/outputs/figures/YYYYMMDD_<label>_<analysis>.png`
+
+### Adding New Runs
+
+- You can add any number of new files to `data/raw/` at any time. The pipeline will process only new or renamed files, with no risk of overwriting or confusion.
+- All outputs are organized and traceable by run and date.
+
+### Troubleshooting
+
+- If a file cannot be auto-renamed (e.g., missing date in metadata), it will be skipped and a message will be printed.
+- For best results, use devices that embed timestamps in FIT/GPX files.
+
+## 🛠️ Requirements
+
+- Python 3.8+
+- Install dependencies:
+  ```bash
+  pip install fitdecode gpxpy pandas numpy matplotlib seaborn haversine
+  ```
+  (You may also use a `requirements.txt` file if provided.)
+
+## 📜 Script Overview
+
+- **auto_rename_raw_files.py**: Renames generically named `.fit`/`.gpx` files in `data/raw/` to a date-based format using file metadata.
+- **parse_run_files.py**: Parses a `.fit` or `.gpx` file to a summary CSV with computed metrics.
+- **analyze_hr_pace_distribution.py**: Generates heart rate and pace distribution plots from a summary CSV.
+- **run_performance_analysis.py**: Produces advanced analytics (training zones, HR drift, pacing) and plots from a summary CSV.
+- **process_all_runs.py**: Orchestrates the full pipeline—auto-renames files, parses all runs, and generates all analyses/plots in batch.
+
+## 🗂️ Example Output Structure
+
+After running the batch script, your directories will look like:
+
+```
+cultivation/data/raw/
+    20250427_auto.fit
+    20250426_evening.gpx
+cultivation/data/processed/
+    20250427_auto_fit_summary.csv
+    20250426_evening_gpx_summary.csv
+cultivation/outputs/figures/
+    20250427_auto_hr_distribution.png
+    20250427_auto_pace_distribution.png
+    20250427_auto_hr_vs_pace_hexbin.png
+    20250427_auto_time_in_hr_zone.png
+    20250427_auto_hr_over_time_drift.png
+    20250427_auto_pace_over_time.png
+    20250426_evening_hr_distribution.png
+    ...
+```
+
+## ⚙️ Extending & Customizing
+
+- **Add new analysis scripts:** Follow the argument pattern (`--input`, `--output`, `--prefix`) and add your script to `process_all_runs.py`.
+- **Change output locations:** Adjust the directories in `process_all_runs.py`.
+- **Change naming conventions:** Edit the prefix logic in the batch script and/or renaming script.
+
+## 🧩 Troubleshooting & Error Handling
+
+- If a file cannot be auto-renamed (e.g., missing date in metadata), it will be skipped and a message printed.
+- If a required Python package is missing, install it using `pip` as above.
+- If a file is corrupt or cannot be parsed, the script will print an error and continue with other files.
+- For best results, use devices that embed timestamps in FIT/GPX files.
+
 ## 🚀 Getting Started
 
 Follow these steps to set up and run the project locally.
