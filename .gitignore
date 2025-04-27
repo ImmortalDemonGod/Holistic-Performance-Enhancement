@@ -219,3 +219,10 @@ Thumbs.db
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+# Ignore all generated figures and plots
+cultivation/outputs/figures/*.png
+cultivation/outputs/figures/*.jpg
+cultivation/outputs/figures/*.jpeg
+cultivation/outputs/figures/*.svg
+cultivation/outputs/figures/*.pdf
