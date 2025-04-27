@@ -1,0 +1,10 @@
+Run Summary:
+  Start time: 2025-04-21 00:00:13+00:00
+  End time: 2025-04-21 00:43:51+00:00
+  Duration: 0 days 00:43:38
+  Total distance (km): 8.40
+  Avg pace (min/km): 4.93
+  Avg HR: 178.0
+  Max HR: 201.0
+  Avg cadence: 80.5
+  Elevation gain (m): 37.4
