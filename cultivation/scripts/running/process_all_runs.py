@@ -2,6 +2,7 @@ import os
 import argparse
 from pathlib import Path
 import subprocess
+import pandas as pd
 
 # Use hardcoded absolute path for venv python
 VENV_PYTHON = "/Users/tomriddle1/Holistic-Performance-Enhancement/.venv/bin/python"
@@ -59,6 +60,30 @@ def main():
             '--figures_dir', args.figures_dir,
             '--prefix', base
         ], cwd=str(PROJECT_ROOT), check=True)
+
+    # === NEW: Weekly Comparison Step ===
+    # Find all processed CSVs, group by ISO week, and if any week has 2+ runs, compare the two most recent
+    processed_files = sorted(Path(args.processed_dir).glob('*_summary.csv'))
+    week_to_files = {}
+    for csv_path in processed_files:
+        base = os.path.basename(csv_path)
+        date_part = base.split('_')[0]
+        week = pd.to_datetime(date_part).isocalendar().week
+        if week not in week_to_files:
+            week_to_files[week] = []
+        week_to_files[week].append((csv_path, pd.to_datetime(date_part)))
+    for week, files in week_to_files.items():
+        if len(files) >= 2:
+            # Sort by date, pick two most recent
+            files_sorted = sorted(files, key=lambda x: x[1], reverse=True)
+            run1, run2 = files_sorted[0][0], files_sorted[1][0]
+            print(f"Comparing runs from week {week}: {os.path.basename(run1)} vs {os.path.basename(run2)}")
+            subprocess.run([
+                VENV_PYTHON, str(SCRIPTS_DIR / 'compare_weekly_runs.py'),
+                '--run1', str(run1),
+                '--run2', str(run2),
+                '--figures_dir', args.figures_dir
+            ], cwd=str(PROJECT_ROOT), check=True)
 
 if __name__ == '__main__':
     main()
