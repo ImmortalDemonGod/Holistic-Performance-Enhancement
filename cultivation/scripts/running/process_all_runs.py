@@ -5,7 +5,8 @@ import subprocess
 
 # Use hardcoded absolute path for venv python
 VENV_PYTHON = "/Users/tomriddle1/Holistic-Performance-Enhancement/.venv/bin/python"
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+# Set PROJECT_ROOT to the top-level project directory (not cultivation)
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SCRIPTS_DIR = PROJECT_ROOT / 'cultivation' / 'scripts' / 'running'
 
 def get_run_files(raw_dir):
