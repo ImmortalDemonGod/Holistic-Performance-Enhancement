@@ -4,6 +4,39 @@ Welcome to the **Holistic Performance Enhancement** project repository! This ini
 
 ![Cultivation Banner](path_to_your_banner_image)
 
+## 🚀 Quick Start: Automated Running Data Analysis
+
+You can now analyze your running data with a fully automated, one-click workflow:
+
+1. **Drop your raw files** (from any device) into `cultivation/data/raw/`. Files can have any name (e.g., `activity.fit`, `export.gpx`, `run1.fit`, etc.).
+2. **Run the batch processing script from the project root:**
+   ```bash
+   .venv/bin/python cultivation/scripts/running/process_all_runs.py
+   ```
+   - No arguments are needed for standard use.
+   - The script will:
+     - Automatically rename all files using the correct date and time from their metadata.
+     - Process and analyze every `.fit` and `.gpx` file found.
+     - Save all outputs (summaries, plots, analytics) in the appropriate folders.
+     - Print a summary and recommendations for each run.
+
+**You do not need to run any other script or specify any arguments.**
+Just drop your files and run the batch script—everything else is handled for you.
+
+### Output Locations
+- **Processed summaries:** `cultivation/data/processed/`
+- **Figures and plots:** `cultivation/outputs/figures/`
+
+### Advanced Usage
+If you want to override the default directories, you can use:
+```bash
+.venv/bin/python cultivation/scripts/running/process_all_runs.py \
+  --raw_dir <raw_dir> \
+  --processed_dir <processed_dir> \
+  --figures_dir <figures_dir>
+```
+But for most users, the defaults will work out of the box!
+
 ## 📁 Repository Structure
 
 A well-organized repository is key to maintaining clarity and efficiency. Below is the proposed directory structure for the Cultivation project, along with brief explanations for each component.
