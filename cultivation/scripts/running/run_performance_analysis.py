@@ -111,28 +111,60 @@ def main():
     week = pd.to_datetime(date_part).isocalendar().week
     run_dir = os.path.join(args.figures_dir, f"week{week}", args.prefix)
     os.makedirs(run_dir, exist_ok=True)
+    # Create subfolders for images and txt
+    img_dir = os.path.join(run_dir, "images")
+    txt_dir = os.path.join(run_dir, "txt")
+    os.makedirs(img_dir, exist_ok=True)
+    os.makedirs(txt_dir, exist_ok=True)
     # Plot time in zone
     tiz['percent'].plot(kind='bar', color='skyblue', title='Time in HR Zone (%)')
     plt.ylabel('% of Run Time')
     plt.tight_layout()
-    plt.savefig(f"{run_dir}/time_in_hr_zone.png")
+    plt.savefig(f"{img_dir}/time_in_hr_zone.png")
     plt.close()
+    # Save textual representation of time in HR zone
+    tiz.to_csv(f"{txt_dir}/time_in_hr_zone.txt", sep='\t')
     # Plot HR drift
     df['heart_rate'].plot(label='Heart Rate', alpha=0.7)
     plt.axvline(df.index[len(df)//2], color='red', linestyle='--', label='Midpoint')
     plt.title('Heart Rate Over Time')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(f"{run_dir}/hr_over_time_drift.png")
+    plt.savefig(f"{img_dir}/hr_over_time_drift.png")
     plt.close()
+    # Save textual representation of HR drift
+    with open(f"{txt_dir}/hr_over_time_drift.txt", "w") as f:
+        f.write("Heart Rate Drift Analysis:\n")
+        f.write(str(hr_drift))
+        f.write("\n")
     # Plot pacing
     df['pace_min_per_km'].plot(label='Pace (min/km)', alpha=0.7)
     plt.axvline(df.index[len(df)//2], color='red', linestyle='--', label='Midpoint')
     plt.title('Pace Over Time')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(f"{run_dir}/pace_over_time.png")
+    plt.savefig(f"{img_dir}/pace_over_time.png")
     plt.close()
+    # Save textual representation of pacing
+    with open(f"{txt_dir}/pace_over_time.txt", "w") as f:
+        f.write("Pacing Strategy Analysis:\n")
+        f.write(str(pacing))
+        f.write("\n")
+    # --- Save run-level summary as text ---
+    summary_lines = [
+        f"Run Summary:",
+        f"  Start time: {df.index[0]}",
+        f"  End time: {df.index[-1]}",
+        f"  Duration: {df.index[-1] - df.index[0]}",
+        f"  Total distance (km): {df['distance_cumulative_km'].iloc[-1]:.2f}" if 'distance_cumulative_km' in df else "  Total distance (km): N/A",
+        f"  Avg pace (min/km): {df['pace_min_per_km'].mean():.2f}" if 'pace_min_per_km' in df else "  Avg pace (min/km): N/A",
+        f"  Avg HR: {df['heart_rate'].mean():.1f}" if 'heart_rate' in df else "  Avg HR: N/A",
+        f"  Max HR: {df['heart_rate'].max():.1f}" if 'heart_rate' in df else "  Max HR: N/A",
+        f"  Avg cadence: {df['cadence'].mean():.1f}" if 'cadence' in df else "  Avg cadence: N/A",
+        f"  Elevation gain (m): {df['elevation'].diff().clip(lower=0).sum():.1f}" if 'elevation' in df else "  Elevation gain (m): N/A"
+    ]
+    with open(f"{txt_dir}/run_summary.txt", "w") as f:
+        f.write("\n".join(summary_lines) + "\n")
 
 if __name__ == '__main__':
     main()
