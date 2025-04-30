@@ -82,6 +82,33 @@ def generate_recommendations(results):
         recs.append("Great job! Your run shows good balance and control.")
     return recs
 
+def detect_strides(df, pace_threshold=4.5, min_stride_duration=8, max_stride_duration=40, cadence_threshold=80):
+    df = df.copy()
+    stride_candidate = (df['pace_min_per_km'] < pace_threshold) & (df['cadence'] > cadence_threshold)
+    df['stride'] = False
+    in_stride = False
+    stride_start_idx = None
+    for idx in df.index:
+        if stride_candidate.loc[idx]:
+            if not in_stride:
+                in_stride = True
+                stride_start_idx = idx
+        else:
+            if in_stride:
+                in_stride = False
+                stride_end_idx = idx
+                start_pos = df.index.get_loc(stride_start_idx)
+                end_pos = df.index.get_loc(stride_end_idx)
+                stride_duration = (df.iloc[end_pos-1].name - df.iloc[start_pos].name).total_seconds()
+                if min_stride_duration <= stride_duration <= max_stride_duration:
+                    df.loc[stride_start_idx:df.iloc[end_pos-1].name, 'stride'] = True
+                stride_start_idx = None
+    if in_stride and stride_start_idx is not None:
+        stride_duration = (df.iloc[-1].name - df.loc[stride_start_idx].name).total_seconds()
+        if min_stride_duration <= stride_duration <= max_stride_duration:
+            df.loc[stride_start_idx:df.iloc[-1].name, 'stride'] = True
+    return df
+
 def main():
     parser = argparse.ArgumentParser(description='Advanced run performance analysis.')
     parser.add_argument('--input', type=str, required=True, help='Path to input summary CSV')
@@ -92,6 +119,7 @@ def main():
     df = pd.read_csv(args.input, index_col=0, parse_dates=True)
     hrmax = df['heart_rate'].max() if 'heart_rate' in df else 199
     df, zones = compute_training_zones(df, hrmax)
+    df = detect_strides(df)
     tiz = time_in_zone(df)
     hr_drift = compute_hr_drift(df)
     pacing = pacing_strategy(df)
@@ -147,6 +175,35 @@ def main():
         f.write("Pacing Strategy Analysis:\n")
         f.write(str(pacing))
         f.write("\n")
+    # --- Stride summary and visualization ---
+    stride_blocks = df[df['stride']].copy()
+    stride_blocks['block'] = (stride_blocks.index.to_series().diff().dt.total_seconds() > 5).cumsum()
+    stride_groups = stride_blocks.groupby('block')
+    stride_summary_lines = [f"Stride segments detected: {stride_groups.ngroups}"]
+    for i, group in stride_groups:
+        stride_summary_lines.append(
+            f"Stride {i+1}: {group.index[0]} to {group.index[-1]}, duration: {(group.index[-1]-group.index[0]).total_seconds():.1f}s, avg pace: {group['pace_min_per_km'].mean():.2f}, avg HR: {group['heart_rate'].mean():.1f}")
+    # Add stride summary to run summary
+    # --- Stride plot: highlight strides on pace and HR plots ---
+    plt.figure(figsize=(12,6))
+    plt.plot(df.index, df['pace_min_per_km'], label='Pace (min/km)', alpha=0.7)
+    plt.scatter(df[df['stride']].index, df[df['stride']]['pace_min_per_km'], color='red', label='Stride', s=15)
+    plt.title('Pace Over Time (Strides Highlighted)')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(f"{img_dir}/pace_with_strides.png")
+    plt.close()
+    plt.figure(figsize=(12,6))
+    plt.plot(df.index, df['heart_rate'], label='Heart Rate', alpha=0.7)
+    plt.scatter(df[df['stride']].index, df[df['stride']]['heart_rate'], color='red', label='Stride', s=15)
+    plt.title('Heart Rate Over Time (Strides Highlighted)')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(f"{img_dir}/hr_with_strides.png")
+    plt.close()
+    # Save stride summary as text
+    with open(f"{txt_dir}/stride_summary.txt", "w") as f:
+        f.write("\n".join(stride_summary_lines) + "\n")
     # --- Save run-level summary as text ---
     summary_lines = [
         f"Run Summary:",
@@ -206,6 +263,8 @@ def main():
         marker_path = os.path.join(txt_dir, "weather_failed.marker")
         with open(marker_path, "w") as mf:
             mf.write(f"Weather fetch failed for run at {df.index[0]} (lat={lat}, lon={lon}) on 2025-04-29T23:53:52-05:00\n")
+    summary_lines.append("  --- Stride Segments ---")
+    summary_lines.extend(["    " + line for line in stride_summary_lines])
     with open(f"{txt_dir}/run_summary.txt", "w") as f:
         f.write("\n".join(summary_lines) + "\n")
 
