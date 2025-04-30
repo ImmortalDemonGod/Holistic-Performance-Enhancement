@@ -183,19 +183,29 @@ def main():
     lon = df['longitude'].iloc[0] if 'longitude' in df else None
     summary_lines.append(f"  Start location: ({lat:.5f}, {lon:.5f})" if lat is not None and lon is not None else "  Start location: N/A")
     weather = fetch_weather_open_meteo(lat, lon, df.index[0])
-    if weather:
-        summary_lines.append("  Weather at start:")
-        summary_lines.append(f"    Temperature: {weather['temperature_c']} °C (feels like {weather['apparent_temp_c']} °C)")
-        summary_lines.append(f"    Precipitation: {weather['precipitation_mm']} mm")
-        summary_lines.append(f"    Humidity: {weather['humidity_percent']} %")
-        summary_lines.append(f"    Wind speed: {weather['wind_speed_kmh']} km/h")
-        summary_lines.append(f"    Description: {weather['weather_description']}")
+    if weather and 'hourly' in weather and weather['hourly']['temperature_2m']:
+        # Extract first available hour's data
+        try:
+            idx = 0
+            temp = weather['hourly']['temperature_2m'][idx]
+            app_temp = weather['hourly'].get('apparent_temperature', [None]*len(weather['hourly']['temperature_2m']))[idx]
+            precip = weather['hourly']['precipitation'][idx]
+            humidity = weather['hourly'].get('relative_humidity_2m', [None]*len(weather['hourly']['temperature_2m']))[idx]
+            wind = weather['hourly'].get('windspeed_10m', [None]*len(weather['hourly']['temperature_2m']))[idx]
+            desc = weather['hourly'].get('weathercode', [None]*len(weather['hourly']['temperature_2m']))[idx]
+            summary_lines.append("  Weather at start:")
+            summary_lines.append(f"    Temperature: {temp} °C (feels like {app_temp} °C)")
+            summary_lines.append(f"    Precipitation: {precip} mm")
+            summary_lines.append(f"    Humidity: {humidity} %")
+            summary_lines.append(f"    Wind speed: {wind} km/h")
+            summary_lines.append(f"    Description: {desc}")
+        except Exception as e:
+            summary_lines.append(f"  Weather at start: [malformed data: {e}]")
     else:
         summary_lines.append("  Weather at start: N/A [weather API unavailable or failed]")
-        # --- Write a marker file so batch processing can skip this run in the future ---
         marker_path = os.path.join(txt_dir, "weather_failed.marker")
         with open(marker_path, "w") as mf:
-            mf.write(f"Weather fetch failed for run at {df.index[0]} (lat={lat}, lon={lon}) on 2025-04-29T23:48:23-05:00\n")
+            mf.write(f"Weather fetch failed for run at {df.index[0]} (lat={lat}, lon={lon}) on 2025-04-29T23:53:52-05:00\n")
     with open(f"{txt_dir}/run_summary.txt", "w") as f:
         f.write("\n".join(summary_lines) + "\n")
 
