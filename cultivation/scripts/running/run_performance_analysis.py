@@ -191,7 +191,11 @@ def main():
         summary_lines.append(f"    Wind speed: {weather['wind_speed_kmh']} km/h")
         summary_lines.append(f"    Description: {weather['weather_description']}")
     else:
-        summary_lines.append("  Weather at start: N/A")
+        summary_lines.append("  Weather at start: N/A [weather API unavailable or failed]")
+        # --- Write a marker file so batch processing can skip this run in the future ---
+        marker_path = os.path.join(txt_dir, "weather_failed.marker")
+        with open(marker_path, "w") as mf:
+            mf.write(f"Weather fetch failed for run at {df.index[0]} (lat={lat}, lon={lon}) on 2025-04-29T23:48:23-05:00\n")
     with open(f"{txt_dir}/run_summary.txt", "w") as f:
         f.write("\n".join(summary_lines) + "\n")
 

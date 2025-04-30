@@ -12,8 +12,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SCRIPTS_DIR = PROJECT_ROOT / 'cultivation' / 'scripts' / 'running'
 
 def get_run_files(raw_dir):
-    """Return list of all .fit and .gpx files in the raw data directory."""
-    return sorted([f for f in Path(raw_dir).glob('*') if f.suffix in ['.fit', '.gpx']])
+    """Return list of all .gpx files in the raw data directory (skip .fit files, which are only used for HR override)."""
+    return sorted([f for f in Path(raw_dir).glob('*') if f.suffix == '.gpx'])
 
 def main():
     parser = argparse.ArgumentParser(description="Batch process all running data files.")
