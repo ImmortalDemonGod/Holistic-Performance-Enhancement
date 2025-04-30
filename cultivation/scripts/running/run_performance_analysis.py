@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 import argparse
 import os
+from weather_utils import fetch_weather_open_meteo
 
 def compute_training_zones(df, hrmax, zones=None):
     """
@@ -109,11 +109,8 @@ def main():
     # Determine week/run subdirectory for figures
     date_part = args.prefix.split('_')[0]
     week = pd.to_datetime(date_part).isocalendar().week
-    run_dir = os.path.join(args.figures_dir, f"week{week}", args.prefix)
-    os.makedirs(run_dir, exist_ok=True)
-    # Create subfolders for images and txt
-    img_dir = os.path.join(run_dir, "images")
-    txt_dir = os.path.join(run_dir, "txt")
+    img_dir = f"{args.figures_dir}/week{week}/{args.prefix}/images"
+    txt_dir = f"{args.figures_dir}/week{week}/{args.prefix}/txt"
     os.makedirs(img_dir, exist_ok=True)
     os.makedirs(txt_dir, exist_ok=True)
     # Plot time in zone
@@ -163,6 +160,38 @@ def main():
         f"  Avg cadence: {df['cadence'].mean():.1f}" if 'cadence' in df else "  Avg cadence: N/A",
         f"  Elevation gain (m): {df['elevation'].diff().clip(lower=0).sum():.1f}" if 'elevation' in df else "  Elevation gain (m): N/A"
     ]
+
+    # --- Add advanced metrics from metrics.py if available ---
+    try:
+        from metrics import run_metrics
+        # Map columns if needed for metrics.py compatibility
+        if 'dist' not in df and 'distance_segment_m' in df:
+            df['dist'] = df['distance_segment_m']
+        if 'dt' not in df and 'time_delta_s' in df:
+            df['dt'] = df['time_delta_s']
+        if 'hr' not in df and 'heart_rate' in df:
+            df['hr'] = df['heart_rate']
+        adv_metrics = run_metrics(df, threshold_hr=175, resting_hr=50)
+        summary_lines.append("  --- Advanced Metrics (run_metrics) ---")
+        for k, v in adv_metrics.items():
+            summary_lines.append(f"    {k}: {v}")
+    except Exception as e:
+        summary_lines.append(f"  [metrics] Could not compute advanced metrics: {e}")
+
+    # --- Add location and weather ---
+    lat = df['latitude'].iloc[0] if 'latitude' in df else None
+    lon = df['longitude'].iloc[0] if 'longitude' in df else None
+    summary_lines.append(f"  Start location: ({lat:.5f}, {lon:.5f})" if lat is not None and lon is not None else "  Start location: N/A")
+    weather = fetch_weather_open_meteo(lat, lon, df.index[0])
+    if weather:
+        summary_lines.append("  Weather at start:")
+        summary_lines.append(f"    Temperature: {weather['temperature_c']} °C (feels like {weather['apparent_temp_c']} °C)")
+        summary_lines.append(f"    Precipitation: {weather['precipitation_mm']} mm")
+        summary_lines.append(f"    Humidity: {weather['humidity_percent']} %")
+        summary_lines.append(f"    Wind speed: {weather['wind_speed_kmh']} km/h")
+        summary_lines.append(f"    Description: {weather['weather_description']}")
+    else:
+        summary_lines.append("  Weather at start: N/A")
     with open(f"{txt_dir}/run_summary.txt", "w") as f:
         f.write("\n".join(summary_lines) + "\n")
 
