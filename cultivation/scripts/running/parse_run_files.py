@@ -125,6 +125,16 @@ def summarize_run(df, label):
     summary['max_hr'] = df['heart_rate'].max() if 'heart_rate' in df else np.nan
     summary['avg_cadence'] = df['cadence'].mean() if 'cadence' in df else np.nan
     summary['elevation_gain_m'] = df['elevation'].diff().clip(lower=0).sum() if 'elevation' in df else np.nan
+
+    # --- Integrate metrics if GPX ---
+    if hasattr(df, '_is_gpx_metrics') or 'pace_sec_km' in df.columns:
+        try:
+            from metrics import run_metrics
+            metrics = run_metrics(df, threshold_hr=175, resting_hr=50)
+            summary.update(metrics)
+        except Exception as e:
+            print(f"[metrics] Could not compute advanced metrics: {e}")
+
     print(f"\nSummary for {label}:")
     for k, v in summary.items():
         print(f"  {k}: {v}")
