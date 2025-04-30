@@ -3,6 +3,7 @@ import argparse
 from pathlib import Path
 import subprocess
 import pandas as pd
+from metrics import parse_gpx, run_metrics
 
 # Use hardcoded absolute path for venv python
 VENV_PYTHON = "/Users/tomriddle1/Holistic-Performance-Enhancement/.venv/bin/python"
@@ -35,17 +36,24 @@ def main():
     for run_file in run_files:
         base = run_file.stem  # e.g., 20250425_afternoon_run
         print(f"Processing {run_file}...")
-        # 1. Parse raw file to CSV summary
         if run_file.suffix == '.fit':
             csv_out = Path(args.processed_dir) / f"{base}_fit_summary.csv"
         else:
             csv_out = Path(args.processed_dir) / f"{base}_gpx_summary.csv"
+        # === New: Skip if already processed ===
+        if csv_out.exists():
+            print(f"  Skipping {run_file}: summary already exists at {csv_out}")
+            continue
         # Run parse_run_files.py
         subprocess.run([
             VENV_PYTHON, str(SCRIPTS_DIR / 'parse_run_files.py'),
             '--input', str(run_file),
             '--output', str(csv_out)
         ], cwd=str(PROJECT_ROOT), check=True)
+
+        # If GPX, also extract metrics using new module (now integrated into summary CSV)
+        # No need to write separate JSON; metrics are included in summary CSV by parse_run_files.py
+
         # 2. Run HR/pace analysis
         subprocess.run([
             VENV_PYTHON, str(SCRIPTS_DIR / 'analyze_hr_pace_distribution.py'),
