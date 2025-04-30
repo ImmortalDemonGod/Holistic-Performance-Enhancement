@@ -8,3 +8,18 @@ Run Summary:
   Max HR: 201.0
   Avg cadence: 80.5
   Elevation gain (m): 37.4
+  --- Advanced Metrics (run_metrics) ---
+    distance_km: 8.4
+    duration_min: 43.6
+    avg_pace_min_per_km: 5.19
+    avg_hr: 178.0
+    efficiency_factor: 0.01803
+    decoupling_%: 16.88
+    hrTSS: 76.2
+  Start location: (34.60718, -98.42602)
+  Weather at start:
+    Temperature: 11.7 °C (feels like 11.2 °C)
+    Precipitation: 0.0 mm
+    Humidity: 86 %
+    Wind speed: 2.3 km/h
+    Description: Clear sky
