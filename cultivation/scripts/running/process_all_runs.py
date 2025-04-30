@@ -38,16 +38,63 @@ def main():
         print(f"Processing {run_file}...")
         if run_file.suffix == '.fit':
             csv_out = Path(args.processed_dir) / f"{base}_fit_summary.csv"
+            input_file = run_file
         else:
             csv_out = Path(args.processed_dir) / f"{base}_gpx_summary.csv"
-        # === New: Skip if already processed ===
+            gpx_path = run_file
+            override_gpx = gpx_path.with_name(gpx_path.stem + "_hr_override.gpx")
+            # Always prefer override file if present
+            if override_gpx.exists():
+                print(f"  [DEBUG] Using override GPX: {override_gpx}")
+                input_file = override_gpx
+            else:
+                # --- Improved FIT/GPX matching logic ---
+                def extract_base_name(stem):
+                    # Remove leading timestamp and trailing _whoop_accurate_heart_rate if present
+                    parts = stem.split('_')
+                    # Heuristic: timestamp is always first 2 parts (date+time), extra suffix is last 4 parts for FIT
+                    base = '_'.join(parts[2:-4]) if stem.endswith('whoop_accurate_heart_rate') else '_'.join(parts[2:])
+                    return base
+                gpx_base = extract_base_name(gpx_path.stem)
+                fit_candidates = list(Path(args.raw_dir).glob(f"*whoop_accurate_heart_rate.fit"))
+                fit_match = None
+                for fit_file in fit_candidates:
+                    fit_base = extract_base_name(fit_file.stem)
+                    print(f"[DEBUG] gpx_base: {gpx_base}, fit_base: {fit_base}")
+                    if gpx_base == fit_base:
+                        fit_match = fit_file
+                        break
+                print(f"[DEBUG] fit_match: {fit_match}")
+                if fit_match:
+                    print(f"  [DEBUG] About to run override script: {gpx_path} -> {override_gpx} using {fit_match}")
+                    try:
+                        result = subprocess.run([
+                            VENV_PYTHON, str(SCRIPTS_DIR / 'override_gpx_hr_with_fit.py'),
+                            '--gpx', str(gpx_path),
+                            '--fit', str(fit_match),
+                            '--output', str(override_gpx)
+                        ], cwd=str(PROJECT_ROOT), capture_output=True, text=True, check=True)
+                        print(f"  [DEBUG] HR override script output:\n{result.stdout}")
+                        if result.stderr:
+                            print(f"  [DEBUG] HR override script errors:\n{result.stderr}")
+                    except subprocess.CalledProcessError as e:
+                        print(f"  [ERROR] HR override script failed: {e}")
+                        print(f"  [ERROR] Script stdout:\n{e.stdout}")
+                        print(f"  [ERROR] Script stderr:\n{e.stderr}")
+                    if override_gpx.exists():
+                        input_file = override_gpx
+                    else:
+                        input_file = gpx_path
+                else:
+                    input_file = gpx_path
+        # === Now check if already processed ===
         if csv_out.exists():
             print(f"  Skipping {run_file}: summary already exists at {csv_out}")
             continue
         # Run parse_run_files.py
         subprocess.run([
             VENV_PYTHON, str(SCRIPTS_DIR / 'parse_run_files.py'),
-            '--input', str(run_file),
+            '--input', str(input_file),
             '--output', str(csv_out)
         ], cwd=str(PROJECT_ROOT), check=True)
 
