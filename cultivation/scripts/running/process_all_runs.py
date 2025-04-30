@@ -36,6 +36,24 @@ def main():
     for run_file in run_files:
         base = run_file.stem  # e.g., 20250425_afternoon_run
         print(f"Processing {run_file}...")
+        # --- Allow explicit reprocessing of runs with marker files if CSV is present ---
+        figures_dir = Path(args.figures_dir)
+        # Try to find week and prefix from file name
+        try:
+            date_part = base.split('_')[0]
+            week = pd.to_datetime(date_part).isocalendar().week
+            txt_dir = figures_dir / f"week{week}" / base / "txt"
+            marker_path = txt_dir / "weather_failed.marker"
+            csv_out = Path(args.processed_dir) / f"{base}_gpx_summary.csv"
+            # If marker exists but CSV exists, allow reprocessing (do not skip)
+            if marker_path.exists() and not csv_out.exists():
+                print(f"  [INFO] Weather marker found but CSV missing. Processing anyway.")
+            # If marker exists and CSV exists, print info but do not skip
+            elif marker_path.exists() and csv_out.exists():
+                print(f"  [INFO] Weather marker found but CSV exists. Explicitly reprocessing.")
+            # If marker does not exist, proceed as normal
+        except Exception as e:
+            print(f"  [WARN] Could not determine marker file for {base}: {e}")
         if run_file.suffix == '.fit':
             csv_out = Path(args.processed_dir) / f"{base}_fit_summary.csv"
             input_file = run_file
