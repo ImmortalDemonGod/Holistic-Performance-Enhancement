@@ -1,3 +1,5 @@
+# NOTE: Seaborn is permitted in this script, but NOT in any python_user_visible tool or UI-facing code per project policy.
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
