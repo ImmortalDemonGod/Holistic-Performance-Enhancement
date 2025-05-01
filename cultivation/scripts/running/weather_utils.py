@@ -7,7 +7,7 @@ def fetch_weather_open_meteo(lat, lon, dt, max_retries=2, max_backoff=2.0):
     Robustly fetch weather for a given latitude, longitude, and datetime (UTC).
     Implements exponential backoff on network/API errors.
     Tries variations in time (±0 to ±5 hours) on the same day and location (rounded, nudged lat/lon) until data is found.
-    Returns dict or None if all reasonable attempts fail.
+    Returns (weather_dict, offset_hours) or (None, None) if all fail.
     """
     time_offsets = [timedelta(hours=h) for h in range(-5,6)]
     lat_variations = [lat, round(lat,3), round(lat,2), lat+0.01, lat-0.01, lat+0.05, lat-0.05, lat+0.1, lat-0.1]
@@ -24,7 +24,7 @@ def fetch_weather_open_meteo(lat, lon, dt, max_retries=2, max_backoff=2.0):
                         if resp.status_code == 200:
                             weather = resp.json()
                             if 'hourly' in weather and weather['hourly']['temperature_2m']:
-                                return weather
+                                return weather, offset.total_seconds() / 3600
                     except Exception as e:
                         print(f"[Weather] Error: {e} (lat={lat_try}, lon={lon_try}, time={hour_iso})")
         # If we reach here, all variations failed for this attempt
@@ -33,4 +33,4 @@ def fetch_weather_open_meteo(lat, lon, dt, max_retries=2, max_backoff=2.0):
         time.sleep(backoff)
         attempt += 1
     print(f"[Weather] Failed to fetch weather after {max_retries} retries for lat={lat}, lon={lon}, time={dt}")
-    return None
+    return None, None

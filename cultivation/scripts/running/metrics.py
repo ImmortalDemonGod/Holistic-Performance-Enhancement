@@ -19,6 +19,8 @@ License: MIT
 from __future__ import annotations
 
 import math
+import json
+import yaml
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict
@@ -115,8 +117,22 @@ def parse_gpx(path: str | Path) -> pd.DataFrame:
     return df
 
 # ------------------------------------------------------------------ metrics
+_ZONES_FILE = Path(__file__).parent.parent.parent / 'data' / 'zones_personal.yml'
+
+def load_personal_zones():
+    with open(_ZONES_FILE, 'r') as f:
+        return yaml.safe_load(f)
+
+def compute_training_zones(hr_series, pace_series, zones):
+    # Dummy implementation for backup match; real logic may be more complex
+    zone_hr = hr_series.apply(lambda x: next((z['name'] for z in zones['hr'] if x >= z['min'] and x < z['max']), 'Unknown'))
+    zone_pace = pace_series.apply(lambda x: next((z['name'] for z in zones['pace'] if x >= z['min'] and x < z['max']), 'Unknown'))
+    # For effective zone, just pick HR if available, else pace
+    zone_effective = zone_hr.fillna(zone_pace)
+    return zone_hr, zone_pace, zone_effective
+
 def run_metrics(
-    df: pd.DataFrame, *, threshold_hr: int = 175, resting_hr: int = 50
+    df: pd.DataFrame, *, threshold_hr: int = 186, resting_hr: int = 50
 ) -> Dict[str, float]:
     """
     Compute headline metrics for a single steady-state run.
@@ -150,26 +166,29 @@ def run_metrics(
     avg_hr = df["hr"].mean()
     avg_speed = total_dist_m / secs  # m s⁻¹
     avg_pace = 1000 / avg_speed / 60  # min km⁻¹
-
-    # ---------- EF & aerobic decoupling
     ef = avg_speed / avg_hr
-    halfway = len(df) // 2
+    # Time-based midpoint for decoupling
+    midpoint = df.index[0] + (df.index[-1] - df.index[0]) / 2
+    first_half = df[df.index <= midpoint]
+    second_half = df[df.index > midpoint]
     ef_1 = (
-        df.iloc[:halfway]["dist"].sum()
-        / df.iloc[:halfway]["dt"].sum()
-        / df.iloc[:halfway]["hr"].mean()
+        first_half["dist"].sum()
+        / first_half["dt"].sum()
+        / first_half["hr"].mean()
     )
     ef_2 = (
-        df.iloc[halfway:]["dist"].sum()
-        / df.iloc[halfway:]["dt"].sum()
-        / df.iloc[halfway:]["hr"].mean()
+        second_half["dist"].sum()
+        / second_half["dt"].sum()
+        / second_half["hr"].mean()
     )
     decouple_pct = abs(ef_2 - ef_1) / ef_1 * 100
-
-    # ---------- HR-based Training-Stress Score
     intensity_factor = (avg_hr - resting_hr) / (threshold_hr - resting_hr)
-    hr_tss = secs * intensity_factor**2 / 36  # see: https://bit.ly/hrTSS
-
+    hr_tss = secs * intensity_factor**2 / 36
+    zones = load_personal_zones()
+    zone_hr, zone_pace, zone_effective = compute_training_zones(df['hr'], df['pace_sec_km'], zones)
+    df['zone_hr'] = zone_hr
+    df['zone_pace'] = zone_pace
+    df['zone_effective'] = zone_effective
     return {
         "distance_km": round(total_dist_m / 1_000, 2),
         "duration_min": round(secs / 60, 1),
@@ -178,4 +197,5 @@ def run_metrics(
         "efficiency_factor": round(ef, 5),
         "decoupling_%": round(decouple_pct, 2),
         "hrTSS": round(hr_tss, 1),
+        "zones_applied": json.dumps(zones),
     }
