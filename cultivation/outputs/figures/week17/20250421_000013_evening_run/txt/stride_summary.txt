@@ -1,16 +1,17 @@
-Stride segments detected: 15
+Stride segments detected: 16
 Stride 1: 2025-04-21 00:00:29+00:00 to 2025-04-21 00:00:47+00:00, duration: 18.0s, avg pace: 3.57, avg HR: 102.2
 Stride 2: 2025-04-21 00:03:48+00:00 to 2025-04-21 00:03:58+00:00, duration: 10.0s, avg pace: 4.11, avg HR: 141.1
-Stride 3: 2025-04-21 00:04:11+00:00 to 2025-04-21 00:04:31+00:00, duration: 20.0s, avg pace: 3.56, avg HR: 147.3
-Stride 4: 2025-04-21 00:07:01+00:00 to 2025-04-21 00:07:12+00:00, duration: 11.0s, avg pace: 3.41, avg HR: 162.4
+Stride 3: 2025-04-21 00:04:07+00:00 to 2025-04-21 00:04:31+00:00, duration: 24.0s, avg pace: 3.63, avg HR: 146.8
+Stride 4: 2025-04-21 00:06:59+00:00 to 2025-04-21 00:07:12+00:00, duration: 13.0s, avg pace: 3.39, avg HR: 162.6
 Stride 5: 2025-04-21 00:07:36+00:00 to 2025-04-21 00:07:47+00:00, duration: 11.0s, avg pace: 3.56, avg HR: 169.7
 Stride 6: 2025-04-21 00:09:25+00:00 to 2025-04-21 00:09:35+00:00, duration: 10.0s, avg pace: 3.74, avg HR: 193.5
-Stride 7: 2025-04-21 00:21:58+00:00 to 2025-04-21 00:22:07+00:00, duration: 9.0s, avg pace: 4.21, avg HR: 188.5
+Stride 7: 2025-04-21 00:21:58+00:00 to 2025-04-21 00:22:14+00:00, duration: 16.0s, avg pace: 4.16, avg HR: 188.8
 Stride 8: 2025-04-21 00:23:45+00:00 to 2025-04-21 00:24:06+00:00, duration: 21.0s, avg pace: 4.24, avg HR: 182.9
-Stride 9: 2025-04-21 00:24:59+00:00 to 2025-04-21 00:25:11+00:00, duration: 12.0s, avg pace: 3.98, avg HR: 197.3
-Stride 10: 2025-04-21 00:26:01+00:00 to 2025-04-21 00:26:09+00:00, duration: 8.0s, avg pace: 3.89, avg HR: 195.3
-Stride 11: 2025-04-21 00:30:45+00:00 to 2025-04-21 00:31:04+00:00, duration: 19.0s, avg pace: 3.41, avg HR: 174.5
-Stride 12: 2025-04-21 00:35:44+00:00 to 2025-04-21 00:35:52+00:00, duration: 8.0s, avg pace: 4.14, avg HR: 192.7
-Stride 13: 2025-04-21 00:42:41+00:00 to 2025-04-21 00:42:51+00:00, duration: 10.0s, avg pace: 4.17, avg HR: 191.5
-Stride 14: 2025-04-21 00:42:55+00:00 to 2025-04-21 00:43:03+00:00, duration: 8.0s, avg pace: 4.16, avg HR: 192.3
-Stride 15: 2025-04-21 00:43:20+00:00 to 2025-04-21 00:43:51+00:00, duration: 31.0s, avg pace: 3.59, avg HR: 194.7
+Stride 9: 2025-04-21 00:24:42+00:00 to 2025-04-21 00:24:51+00:00, duration: 9.0s, avg pace: 4.06, avg HR: 195.0
+Stride 10: 2025-04-21 00:24:55+00:00 to 2025-04-21 00:25:11+00:00, duration: 16.0s, avg pace: 4.00, avg HR: 197.2
+Stride 11: 2025-04-21 00:26:01+00:00 to 2025-04-21 00:26:09+00:00, duration: 8.0s, avg pace: 3.89, avg HR: 195.3
+Stride 12: 2025-04-21 00:30:45+00:00 to 2025-04-21 00:31:04+00:00, duration: 19.0s, avg pace: 3.41, avg HR: 174.5
+Stride 13: 2025-04-21 00:35:44+00:00 to 2025-04-21 00:35:52+00:00, duration: 8.0s, avg pace: 4.14, avg HR: 192.7
+Stride 14: 2025-04-21 00:42:41+00:00 to 2025-04-21 00:42:51+00:00, duration: 10.0s, avg pace: 4.17, avg HR: 191.5
+Stride 15: 2025-04-21 00:42:55+00:00 to 2025-04-21 00:43:03+00:00, duration: 8.0s, avg pace: 4.16, avg HR: 192.3
+Stride 16: 2025-04-21 00:43:20+00:00 to 2025-04-21 00:43:51+00:00, duration: 31.0s, avg pace: 3.59, avg HR: 194.7

@@ -1,8 +1,8 @@
-distance_km: 8.3
-duration_min: 46.7
-avg_pace_min_per_km: 5.62
-avg_hr: 181.7
-efficiency_factor: 0.01632
-decoupling_%: 8.22
-hrTSS: 86.3
-zones_applied: {"Z1 (Recovery)": {"bpm": [0, 158], "pace_min_per_km": [9.4, 99]}, "Z2 (Aerobic)": {"bpm": [158, 166], "pace_min_per_km": [9.0, 9.4]}, "Z3 (Tempo)": {"bpm": [167, 175], "pace_min_per_km": [8.5, 8.9]}, "Z4 (Threshold)": {"bpm": [177, 184], "pace_min_per_km": [8.1, 8.4]}, "Z5 (VO2max)": {"bpm": [186, 201], "pace_min_per_km": [0, 8.0]}}
+distance_km: 7.83
+duration_min: 39.4
+avg_pace_min_per_km: 5.03
+avg_hr: 183.6
+efficiency_factor: 0.01804
+decoupling_%: 7.75
+hrTSS: 75.0
+zones_applied: {"Z1 (Recovery)": {"bpm": [0, 159], "pace_min_per_km": [999, 9.4]}, "Z2 (Aerobic)": {"bpm": [160, 185], "pace_min_per_km": [9.0, 9.4]}, "Z3 (Tempo)": {"bpm": [186, 195], "pace_min_per_km": [8.5, 8.9]}, "Z4 (Threshold)": {"bpm": [196, 186], "pace_min_per_km": [8.1, 8.4]}, "Z5 (VO2max)": {"bpm": [187, 201], "pace_min_per_km": [0, 8.0]}}
