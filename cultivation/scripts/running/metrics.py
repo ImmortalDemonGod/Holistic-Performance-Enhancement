@@ -54,6 +54,8 @@ def parse_gpx(path: str | Path) -> pd.DataFrame:
     lon   : float  (deg)
     ele   : float  (m) – NaN if absent
     hr    : int    (bpm) – NaN if absent
+    cadence : int  (rpm) – NaN if absent
+    power  : int   (W)   – NaN if absent
     dt    : float  (s)  – seconds since previous point
     dist  : float  (m)  – segment distance
     speed_mps        : raw speed (m/s)
@@ -73,13 +75,17 @@ def parse_gpx(path: str | Path) -> pd.DataFrame:
         ts = pd.to_datetime(pt.find("g:time", ns).text, utc=True)
         hr_node = pt.find(".//gpxtpx:hr", ns)
         hr = int(hr_node.text) if hr_node is not None else np.nan
-        rows.append((ts, lat, lon, ele, hr))
+        cad_node = pt.find(".//gpxtpx:cad", ns)
+        cad = int(cad_node.text) if cad_node is not None else np.nan
+        power_node = pt.find(".//power", ns)
+        power = int(power_node.text) if power_node is not None else np.nan
+        rows.append((ts, lat, lon, ele, hr, cad, power))
 
     if not rows:
         raise ValueError(f"No <trkpt> found in {path}")
 
     df = (
-        pd.DataFrame(rows, columns=["time", "lat", "lon", "ele", "hr"])
+        pd.DataFrame(rows, columns=["time", "lat", "lon", "ele", "hr", "cadence", "power"])
         .sort_values("time")
         .reset_index(drop=True)
     )
