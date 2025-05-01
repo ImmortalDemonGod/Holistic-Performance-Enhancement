@@ -12,25 +12,22 @@ jobs:
       - id: kpi
         run: |
           python - <<'PY'
-          import pandas as pd, json, sys
-          w = pd.read_parquet('data/weekly_metrics.parquet').tail(2)
-          ef_chg = (w['ef_mean'].iloc[-1] - w['ef_mean'].iloc[-2]) / w['ef_mean'].iloc[-2]
-          drift   = w['decoupling_mean'].iloc[-1]
-          print(json.dumps({'ef_chg':ef_chg, 'drift':drift}))
+          import os, pathlib, sys, json, pandas as pd
+          w = pd.read_parquet('cultivation/data/weekly_metrics.parquet').tail(2)
+          if len(w) < 2:
+              print('::set-output name=insufficient_data::true')
+              print(json.dumps({'ef': None, 'drift': None}))
+              sys.exit(0)
+          ef = (w['ef_mean'].iloc[-1] - w['ef_mean'].iloc[-2]) / w['ef_mean'].iloc[-2]
+          drift = w['decoupling_mean'].iloc[-1]
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+              fh.write(f"ef={ef}\n")
+              fh.write(f"drift={drift}\n")
+          print(json.dumps({'ef':ef, 'drift':drift}))
           PY
       - name: Fail if KPIs unmet
-        run: |
-          OUTPUT=$(python - <<'PY'
-          import pandas as pd, json
-          w = pd.read_parquet('data/weekly_metrics.parquet').tail(2)
-          if len(w) < 2:
-              print("::warning ::Not enough weeks for KPI diff; skipping gate")
-              exit(0)
-          ef_chg = (w['ef_mean'].iloc[-1] - w['ef_mean'].iloc[-2]) / w['ef_mean'].iloc[-2]
-          drift   = w['decoupling_mean'].iloc[-1]
-          print(json.dumps({'ef_chg':ef_chg, 'drift':drift}))
-          PY
-          )
-          ef=$(python -c 'import sys, json; print(json.load(sys.stdin)["ef_chg"])' <<< "$OUTPUT")
-          drift=$(python -c 'import sys, json; print(json.load(sys.stdin)["drift"])' <<< "$OUTPUT")
-          python -c "import sys; ef=float(sys.argv[1]); drift=float(sys.argv[2]);\nif ef < 0.05 or drift > 0.07:\n    print('::error ::KPI gate failed — hold progression'); sys.exit(1)" "$ef" "$drift"
+        if: ${{ (steps.kpi.outputs.ef | abs) < 0.05 || steps.kpi.outputs.ef < 0 || steps.kpi.outputs.drift > 0.07 }}
+        run: exit 1
+      - name: Insufficient data status
+        if: steps.kpi.outputs.insufficient_data == 'true'
+        run: echo "::warning ::Not enough weeks for KPI diff; skipping gate"
