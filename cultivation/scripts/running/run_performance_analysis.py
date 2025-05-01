@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import argparse
 import os
 from weather_utils import fetch_weather_open_meteo
-from metrics import load_personal_zones, compute_training_zones, run_metrics
+from metrics import load_personal_zones, compute_training_zones, run_metrics, lower_z2_bpm
 
 def time_in_zone(df, zone_col='zone_hr'):
     df = df.copy()
@@ -16,8 +16,11 @@ def time_in_zone(df, zone_col='zone_hr'):
 
 def generate_recommendations(results):
     recs = []
-    # Time in high zones
-    if results['time_in_zone_hr'].loc['Z4 (Threshold)', 'percent'] > 30 or results['time_in_zone_hr'].loc['Z5 (VO2max)', 'percent'] > 10:
+    # Time in high zones: safely retrieve percentages for zones
+    tiz_hr = results['time_in_zone_hr']
+    z4_pct = tiz_hr['percent'].get('Z4 (Threshold)', 0)
+    z5_pct = tiz_hr['percent'].get('Z5 (VO2max)', 0)
+    if z4_pct > 30 or z5_pct > 10:
         recs.append("Consider more aerobic base training to balance high-intensity work.")
     # HR drift
     if results['hr_drift']['hr_drift_pct'] > 5:
@@ -55,10 +58,15 @@ def detect_strides(df, pace_threshold=4.5, min_stride_duration=8, max_stride_dur
     return df
 
 def compute_hr_drift(df):
-    # Divide run into two halves by time
-    midpoint = df.index[0] + (df.index[-1] - df.index[0]) / 2
-    first_half = df[df.index <= midpoint]
-    second_half = df[df.index > midpoint]
+    # ---- HR-drift filter: ignore warm-up below Z2 lower bound ----
+    lz2 = lower_z2_bpm()
+    core = df[df['heart_rate'] >= lz2]
+    if core.empty:
+        core = df
+    # Divide run into two halves by time (on core segment)
+    midpoint = core.index[0] + (core.index[-1] - core.index[0]) / 2
+    first_half = core[core.index <= midpoint]
+    second_half = core[core.index > midpoint]
     hr1 = first_half['heart_rate'].mean()
     hr2 = second_half['heart_rate'].mean()
     drift = (hr2 - hr1) / hr1 * 100 if hr1 else np.nan
@@ -179,7 +187,13 @@ def main():
     lat = df['latitude'].iloc[0] if 'latitude' in df else None
     lon = df['longitude'].iloc[0] if 'longitude' in df else None
     weather, offset = fetch_weather_open_meteo(lat, lon, df.index[0])
-    if weather and 'hourly' in weather and weather['hourly']['temperature_2m']:
+    if (
+        weather
+        and 'hourly' in weather
+        and 'temperature_2m' in weather['hourly']
+        and weather['hourly']['temperature_2m'] is not None
+        and len(weather['hourly']['temperature_2m']) > 0
+    ):
         idx = 0
         if 'time' in weather['hourly']:
             try:
@@ -242,7 +256,13 @@ def main():
     lon = df['longitude'].iloc[0] if 'longitude' in df else None
     summary_lines.append(f"  Start location: ({lat:.5f}, {lon:.5f})" if lat is not None and lon is not None else "  Start location: N/A")
     weather, offset = fetch_weather_open_meteo(lat, lon, df.index[0])
-    if weather and 'hourly' in weather and weather['hourly']['temperature_2m']:
+    if (
+        weather
+        and 'hourly' in weather
+        and 'temperature_2m' in weather['hourly']
+        and weather['hourly']['temperature_2m'] is not None
+        and len(weather['hourly']['temperature_2m']) > 0
+    ):
         idx = 0
         if 'time' in weather['hourly']:
             try:

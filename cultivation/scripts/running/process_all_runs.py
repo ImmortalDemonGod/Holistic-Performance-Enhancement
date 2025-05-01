@@ -3,17 +3,27 @@ import argparse
 from pathlib import Path
 import subprocess
 import pandas as pd
+import sys
 from metrics import parse_gpx, run_metrics
 
-# Use hardcoded absolute path for venv python
-VENV_PYTHON = "/Users/tomriddle1/Holistic-Performance-Enhancement/.venv/bin/python"
+# Use sys.executable for subprocesses
+PYTHON_EXEC = os.environ.get('VENV_PYTHON', sys.executable)
 # Set PROJECT_ROOT to the top-level project directory (not cultivation)
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SCRIPTS_DIR = PROJECT_ROOT / 'cultivation' / 'scripts' / 'running'
 
 def get_run_files(raw_dir):
-    """Return list of all .gpx files in the raw data directory (skip .fit files, which are only used for HR override)."""
-    return sorted([f for f in Path(raw_dir).glob('*') if f.suffix == '.gpx'])
+    """Return list of all .gpx files in the raw data directory, but skip base .gpx if an _hr_override.gpx exists."""
+    raw_dir = Path(raw_dir)
+    all_gpx = sorted([f for f in raw_dir.glob('*.gpx')])
+    override_stems = {f.stem.replace('_hr_override', '') for f in all_gpx if f.stem.endswith('_hr_override')}
+    filtered = []
+    for f in all_gpx:
+        # If this is a base file and an override exists, skip it
+        if not f.stem.endswith('_hr_override') and f.stem in override_stems:
+            continue
+        filtered.append(f)
+    return filtered
 
 def main():
     parser = argparse.ArgumentParser(description="Batch process all running data files.")
@@ -25,7 +35,7 @@ def main():
     # Step 0: Auto-rename files before processing (integrated, no need for separate call)
     print("Checking for generic file names and auto-renaming if needed...")
     subprocess.run([
-        VENV_PYTHON, str(SCRIPTS_DIR / 'auto_rename_raw_files.py'),
+        PYTHON_EXEC, str(SCRIPTS_DIR / 'auto_rename_raw_files.py'),
         '--raw_dir', args.raw_dir
     ], cwd=str(PROJECT_ROOT), check=True)
 
@@ -65,8 +75,10 @@ def main():
             csv_out = Path(args.processed_dir) / f"{base}_fit_summary.csv"
         else:
             csv_out = Path(args.processed_dir) / f"{base}_gpx_summary.csv"
+        # Skip if summary CSV already exists (including marker logic)
         if csv_out.exists():
-            print(f"  Skipping {run_file}: summary already exists at {csv_out}")
+            continue
+        if marker_path.exists():
             continue
         # Run parse_run_files.py
         # build PID like "2025w18-Tue"
@@ -87,23 +99,25 @@ def main():
             return "unknown"
         pid = build_planning_id(run_file)
         subprocess.run([
-            VENV_PYTHON, str(SCRIPTS_DIR / 'parse_run_files.py'),
+            PYTHON_EXEC, str(SCRIPTS_DIR / 'parse_run_files.py'),
             '--input', str(input_file),
             '--output', str(csv_out),
-            '--planning_id', pid
+            '--planning_id', pid,
+            '--figures_dir', str(args.figures_dir),
+            '--prefix', base
         ], cwd=str(PROJECT_ROOT), check=True)
 
         # If GPX, also extract metrics using new module (now integrated into summary CSV)
         # No need to write separate JSON; metrics are included in summary CSV by parse_run_files.py
         subprocess.run([
-            VENV_PYTHON, str(SCRIPTS_DIR / 'analyze_hr_pace_distribution.py'),
+            PYTHON_EXEC, str(SCRIPTS_DIR / 'analyze_hr_pace_distribution.py'),
             '--input', str(csv_out),
             '--figures_dir', args.figures_dir,
             '--prefix', base
         ], cwd=str(PROJECT_ROOT), check=True)
         # 3. Run advanced analysis
         subprocess.run([
-            VENV_PYTHON, str(SCRIPTS_DIR / 'run_performance_analysis.py'),
+            PYTHON_EXEC, str(SCRIPTS_DIR / 'run_performance_analysis.py'),
             '--input', str(csv_out),
             '--figures_dir', args.figures_dir,
             '--prefix', base
@@ -127,7 +141,7 @@ def main():
             run1, run2 = files_sorted[0][0], files_sorted[1][0]
             print(f"Comparing runs from week {week}: {os.path.basename(run1)} vs {os.path.basename(run2)}")
             subprocess.run([
-                VENV_PYTHON, str(SCRIPTS_DIR / 'compare_weekly_runs.py'),
+                PYTHON_EXEC, str(SCRIPTS_DIR / 'compare_weekly_runs.py'),
                 '--run1', str(run1),
                 '--run2', str(run2),
                 '--figures_dir', args.figures_dir
