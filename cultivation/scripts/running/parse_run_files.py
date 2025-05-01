@@ -59,36 +59,44 @@ def parse_gpx(file_path):
         print(f"An unexpected error occurred while parsing '{file_path}': {e}")
         return None
     if not gpx or not gpx.tracks:
-        print(f"No tracks found in '{file_path}'.")
+        print(f"No tracks found in GPX file '{file_path}'.")
         return None
     for track in gpx.tracks:
         for segment in track.segments:
             for point in segment.points:
-                data = {
-                    'time': point.time,
+                point_data = {
                     'latitude': point.latitude,
                     'longitude': point.longitude,
                     'elevation': point.elevation,
+                    'time': point.time,
                     'heart_rate': None,
                     'cadence': None,
-                    'temperature': None
                 }
                 if point.extensions:
-                    for ext in point.extensions:
-                        for child in ext:
-                            if child.tag.endswith('hr'):
-                                data['heart_rate'] = float(child.text)
-                            elif child.tag.endswith('cad'):
-                                data['cadence'] = float(child.text)
-                            elif child.tag.endswith('atemp'):
-                                data['temperature'] = float(child.text)
-                points_data.append(data)
+                    for ext_element in point.extensions:
+                        ns_gpxtpx = "http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
+                        hr_elem = ext_element.find(f'{{{ns_gpxtpx}}}hr')
+                        if hr_elem is not None and hr_elem.text:
+                            point_data['heart_rate'] = int(hr_elem.text)
+                        cad_elem = ext_element.find(f'{{{ns_gpxtpx}}}cad')
+                        if cad_elem is not None and cad_elem.text:
+                            point_data['cadence'] = int(cad_elem.text)
+                points_data.append(point_data)
     if not points_data:
-        print(f"No track points found in '{file_path}'.")
+        print(f"No track points extracted from '{file_path}'.")
         return None
     df = pd.DataFrame(points_data)
-    df['time'] = pd.to_datetime(df['time'])
+    df['time'] = pd.to_datetime(df['time'], utc=True)
     df = df.sort_values('time').set_index('time')
+    # Patch: add distance and speed for GPX parses so downstream metrics work
+    if df is not None and ('dt' not in df.columns or 'dist' not in df.columns or 'distance_segment_m' not in df.columns):
+        df = add_distance_and_speed(df)
+    # Ensure compatibility: add 'dist' as segment distance in meters, matching metrics.py
+    if 'distance_segment_m' in df.columns and 'dist' not in df.columns:
+        df['dist'] = df['distance_segment_m']
+    # Ensure compatibility: add 'dt' as time delta in seconds, matching metrics.py
+    if 'time_delta_s' in df.columns and 'dt' not in df.columns:
+        df['dt'] = df['time_delta_s']
     return df
 
 def haversine_distance(lat1, lon1, lat2, lon2):
@@ -112,10 +120,10 @@ def add_distance_and_speed(df):
     df['pace_min_per_km'] = 16.6667 / df['speed_mps'].replace(0, np.nan)  # 1000/60 = 16.6667
     return df
 
-def summarize_run(df, filetype):
+def summarize_run(df, label):
     summary = {}
     if df is None or df.empty:
-        print(f"No data for {filetype}")
+        print(f"No data for {label}")
         return summary
     summary['start_time'] = df.index[0]
     summary['end_time'] = df.index[-1]
@@ -126,17 +134,15 @@ def summarize_run(df, filetype):
     summary['max_hr'] = df['heart_rate'].max() if 'heart_rate' in df else np.nan
     summary['avg_cadence'] = df['cadence'].mean() if 'cadence' in df else np.nan
     summary['elevation_gain_m'] = df['elevation'].diff().clip(lower=0).sum() if 'elevation' in df else np.nan
-
     # --- Integrate metrics if GPX ---
-    if hasattr(df, '_is_gpx_metrics') or 'pace_sec_km' in df.columns:
+    if 'pace_sec_km' in df.columns:
         try:
             from metrics import run_metrics
             metrics = run_metrics(df, threshold_hr=175, resting_hr=50)
             summary.update(metrics)
         except Exception as e:
             print(f"[metrics] Could not compute advanced metrics: {e}")
-
-    print(f"\nSummary for {filetype}:")
+    print(f"\nSummary for {label}:")
     for k, v in summary.items():
         print(f"  {k}: {v}")
     return summary

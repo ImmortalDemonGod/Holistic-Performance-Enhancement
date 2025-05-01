@@ -4,36 +4,9 @@ import matplotlib.pyplot as plt
 import argparse
 import os
 from weather_utils import fetch_weather_open_meteo
+from metrics import load_personal_zones, compute_training_zones, run_metrics
 
-def compute_training_zones(df, hrmax, zones=None):
-    """
-    Annotate DataFrame with heart rate zones.
-    zones: list of (zone_name, lower_pct, upper_pct)
-    """
-    if zones is None:
-        zones = [
-            ("Z1 (Recovery)", 0.5, 0.6),
-            ("Z2 (Endurance)", 0.6, 0.7),
-            ("Z3 (Tempo)", 0.7, 0.8),
-            ("Z4 (Threshold)", 0.8, 0.9),
-            ("Z5 (VO2max)", 0.9, 1.0)
-        ]
-    def hr_zone(hr):
-        if np.isnan(hr):
-            return None
-        pct = hr / hrmax
-        for name, low, high in zones:
-            if low <= pct < high:
-                return name
-        if pct >= zones[-1][2]:
-            return zones[-1][0]
-        return None
-    df = df.copy()
-    df['hr_zone'] = df['heart_rate'].apply(hr_zone)
-    return df, zones
-
-def time_in_zone(df, zone_col='hr_zone'):
-    # Compute time delta for each row
+def time_in_zone(df, zone_col='zone_hr'):
     df = df.copy()
     df['time_delta_s'] = df.index.to_series().diff().dt.total_seconds().fillna(0)
     zone_times = df.groupby(zone_col)['time_delta_s'].sum()
@@ -41,45 +14,17 @@ def time_in_zone(df, zone_col='hr_zone'):
     zone_pct = zone_times / total_time * 100
     return pd.DataFrame({'seconds': zone_times, 'percent': zone_pct})
 
-def compute_hr_drift(df):
-    # Divide run into two halves by time
-    midpoint = df.index[0] + (df.index[-1] - df.index[0]) / 2
-    first_half = df[df.index <= midpoint]
-    second_half = df[df.index > midpoint]
-    hr1 = first_half['heart_rate'].mean()
-    hr2 = second_half['heart_rate'].mean()
-    drift = (hr2 - hr1) / hr1 * 100 if hr1 else np.nan
-    return {'first_half_hr': hr1, 'second_half_hr': hr2, 'hr_drift_pct': drift}
-
-def pacing_strategy(df):
-    # Split by distance
-    total_dist = df['distance_cumulative_km'].iloc[-1]
-    halfway = total_dist / 2
-    first_half = df[df['distance_cumulative_km'] <= halfway]
-    second_half = df[df['distance_cumulative_km'] > halfway]
-    pace1 = first_half['pace_min_per_km'].mean()
-    pace2 = second_half['pace_min_per_km'].mean()
-    if pace2 < pace1:
-        strategy = 'Negative split (faster second half)'
-    elif pace2 > pace1:
-        strategy = 'Positive split (slower second half)'
-    else:
-        strategy = 'Even pacing'
-    return {'first_half_pace': pace1, 'second_half_pace': pace2, 'strategy': strategy}
-
 def generate_recommendations(results):
     recs = []
     # Time in high zones
-    if results['time_in_zone'].loc['Z4 (Threshold)', 'percent'] > 30 or results['time_in_zone'].loc['Z5 (VO2max)', 'percent'] > 10:
+    if results['time_in_zone_hr'].loc['Z4 (Threshold)', 'percent'] > 30 or results['time_in_zone_hr'].loc['Z5 (VO2max)', 'percent'] > 10:
         recs.append("Consider more aerobic base training to balance high-intensity work.")
     # HR drift
     if results['hr_drift']['hr_drift_pct'] > 5:
         recs.append("Significant HR drift detected—focus on aerobic endurance and pacing.")
     # Pacing
-    if results['pacing']['strategy'].startswith('Positive'):
-        recs.append("Try to avoid slowing down in the second half—work on even pacing or negative splits.")
-    if not recs:
-        recs.append("Great job! Your run shows good balance and control.")
+    if results['pacing']['strategy'] == 'positive':
+        recs.append("Try to avoid slowing down in the second half—aim for even or negative splits.")
     return recs
 
 def detect_strides(df, pace_threshold=4.5, min_stride_duration=8, max_stride_duration=40, cadence_threshold=80):
@@ -109,6 +54,32 @@ def detect_strides(df, pace_threshold=4.5, min_stride_duration=8, max_stride_dur
             df.loc[stride_start_idx:df.iloc[-1].name, 'stride'] = True
     return df
 
+def compute_hr_drift(df):
+    # Divide run into two halves by time
+    midpoint = df.index[0] + (df.index[-1] - df.index[0]) / 2
+    first_half = df[df.index <= midpoint]
+    second_half = df[df.index > midpoint]
+    hr1 = first_half['heart_rate'].mean()
+    hr2 = second_half['heart_rate'].mean()
+    drift = (hr2 - hr1) / hr1 * 100 if hr1 else np.nan
+    return {'first_half_hr': hr1, 'second_half_hr': hr2, 'hr_drift_pct': drift}
+
+def pacing_strategy(df):
+    # Split by distance
+    total_dist = df['distance_cumulative_km'].iloc[-1]
+    halfway = total_dist / 2
+    first_half = df[df['distance_cumulative_km'] <= halfway]
+    second_half = df[df['distance_cumulative_km'] > halfway]
+    pace1 = first_half['pace_min_per_km'].mean()
+    pace2 = second_half['pace_min_per_km'].mean()
+    if pace2 < pace1:
+        strategy = 'negative'
+    elif pace2 > pace1:
+        strategy = 'positive'
+    else:
+        strategy = 'even'
+    return {'first_half_pace': pace1, 'second_half_pace': pace2, 'strategy': strategy}
+
 def main():
     parser = argparse.ArgumentParser(description='Advanced run performance analysis.')
     parser.add_argument('--input', type=str, required=True, help='Path to input summary CSV')
@@ -117,16 +88,25 @@ def main():
     args = parser.parse_args()
 
     df = pd.read_csv(args.input, index_col=0, parse_dates=True)
-    hrmax = df['heart_rate'].max() if 'heart_rate' in df else 199
-    df, zones = compute_training_zones(df, hrmax)
+    zones = load_personal_zones()
+    zone_hr, zone_pace, zone_effective = compute_training_zones(df['heart_rate'], df['pace_min_per_km'], zones)
+    df['zone_hr'] = zone_hr
+    df['zone_pace'] = zone_pace
+    df['zone_effective'] = zone_effective
     df = detect_strides(df)
-    tiz = time_in_zone(df)
+    tiz_hr = time_in_zone(df, zone_col='zone_hr')
+    tiz_pace = time_in_zone(df, zone_col='zone_pace')
+    tiz_effective = time_in_zone(df, zone_col='zone_effective')
     hr_drift = compute_hr_drift(df)
     pacing = pacing_strategy(df)
-    results = {'time_in_zone': tiz, 'hr_drift': hr_drift, 'pacing': pacing}
+    results = {'time_in_zone_hr': tiz_hr, 'time_in_zone_pace': tiz_pace, 'time_in_zone_effective': tiz_effective, 'hr_drift': hr_drift, 'pacing': pacing}
     recs = generate_recommendations(results)
     print("\n--- Training Zone Time (%) ---")
-    print(tiz)
+    print(tiz_hr)
+    print("\n--- Training Zone Time (%) ---")
+    print(tiz_pace)
+    print("\n--- Training Zone Time (%) ---")
+    print(tiz_effective)
     print("\n--- HR Drift ---")
     print(hr_drift)
     print("\n--- Pacing Strategy ---")
@@ -141,14 +121,26 @@ def main():
     txt_dir = f"{args.figures_dir}/week{week}/{args.prefix}/txt"
     os.makedirs(img_dir, exist_ok=True)
     os.makedirs(txt_dir, exist_ok=True)
-    # Plot time in zone
-    tiz['percent'].plot(kind='bar', color='skyblue', title='Time in HR Zone (%)')
+    # Plot time in zones
+    tiz_hr['percent'].plot(kind='bar', color='skyblue', title='Time in HR Zone (%)')
     plt.ylabel('% of Run Time')
     plt.tight_layout()
     plt.savefig(f"{img_dir}/time_in_hr_zone.png")
     plt.close()
-    # Save textual representation of time in HR zone
-    tiz.to_csv(f"{txt_dir}/time_in_hr_zone.txt", sep='\t')
+    tiz_pace['percent'].plot(kind='bar', color='skyblue', title='Time in Pace Zone (%)')
+    plt.ylabel('% of Run Time')
+    plt.tight_layout()
+    plt.savefig(f"{img_dir}/time_in_pace_zone.png")
+    plt.close()
+    tiz_effective['percent'].plot(kind='bar', color='skyblue', title='Time in Effective Zone (%)')
+    plt.ylabel('% of Run Time')
+    plt.tight_layout()
+    plt.savefig(f"{img_dir}/time_in_effective_zone.png")
+    plt.close()
+    # Save textual representation of time in zones
+    tiz_hr.to_csv(f"{txt_dir}/time_in_hr_zone.txt", sep='\t')
+    tiz_pace.to_csv(f"{txt_dir}/time_in_pace_zone.txt", sep='\t')
+    tiz_effective.to_csv(f"{txt_dir}/time_in_effective_zone.txt", sep='\t')
     # Plot HR drift
     df['heart_rate'].plot(label='Heart Rate', alpha=0.7)
     plt.axvline(df.index[len(df)//2], color='red', linestyle='--', label='Midpoint')
@@ -175,35 +167,42 @@ def main():
         f.write("Pacing Strategy Analysis:\n")
         f.write(str(pacing))
         f.write("\n")
-    # --- Stride summary and visualization ---
-    stride_blocks = df[df['stride']].copy()
-    stride_blocks['block'] = (stride_blocks.index.to_series().diff().dt.total_seconds() > 5).cumsum()
-    stride_groups = stride_blocks.groupby('block')
+    # Stride summary
+    stride_groups = df[df['stride']].groupby((df['stride'] != df['stride'].shift()).cumsum())
     stride_summary_lines = [f"Stride segments detected: {stride_groups.ngroups}"]
-    for i, group in stride_groups:
+    for i, (_, group) in enumerate(stride_groups):
         stride_summary_lines.append(
             f"Stride {i+1}: {group.index[0]} to {group.index[-1]}, duration: {(group.index[-1]-group.index[0]).total_seconds():.1f}s, avg pace: {group['pace_min_per_km'].mean():.2f}, avg HR: {group['heart_rate'].mean():.1f}")
-    # Add stride summary to run summary
-    # --- Stride plot: highlight strides on pace and HR plots ---
-    plt.figure(figsize=(12,6))
-    plt.plot(df.index, df['pace_min_per_km'], label='Pace (min/km)', alpha=0.7)
-    plt.scatter(df[df['stride']].index, df[df['stride']]['pace_min_per_km'], color='red', label='Stride', s=15)
-    plt.title('Pace Over Time (Strides Highlighted)')
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(f"{img_dir}/pace_with_strides.png")
-    plt.close()
-    plt.figure(figsize=(12,6))
-    plt.plot(df.index, df['heart_rate'], label='Heart Rate', alpha=0.7)
-    plt.scatter(df[df['stride']].index, df[df['stride']]['heart_rate'], color='red', label='Stride', s=15)
-    plt.title('Heart Rate Over Time (Strides Highlighted)')
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(f"{img_dir}/hr_with_strides.png")
-    plt.close()
-    # Save stride summary as text
     with open(f"{txt_dir}/stride_summary.txt", "w") as f:
         f.write("\n".join(stride_summary_lines) + "\n")
+    # Weather fetch
+    lat = df['latitude'].iloc[0] if 'latitude' in df else None
+    lon = df['longitude'].iloc[0] if 'longitude' in df else None
+    weather, offset = fetch_weather_open_meteo(lat, lon, df.index[0])
+    if weather and 'hourly' in weather and weather['hourly']['temperature_2m']:
+        idx = 0
+        if 'time' in weather['hourly']:
+            try:
+                times = pd.to_datetime(weather['hourly']['time'])
+                idx = (np.abs(times - df.index[0])).argmin()
+            except Exception:
+                pass
+        temp = weather['hourly']['temperature_2m'][idx]
+        app_temp = weather['hourly'].get('apparent_temperature', [None]*len(weather['hourly']['temperature_2m']))[idx]
+        with open(f"{txt_dir}/weather.txt", "w") as f:
+            f.write(f"Temperature: {temp}, Apparent: {app_temp}\n")
+    else:
+        marker_path = os.path.join(txt_dir, "weather_failed.marker")
+        with open(marker_path, "w") as mf:
+            mf.write(f"Weather fetch failed for run at {df.index[0]} (lat={lat}, lon={lon}) on {pd.Timestamp.now()}\n")
+    # Advanced metrics
+    try:
+        adv_metrics = run_metrics(df, threshold_hr=175, resting_hr=50)
+        with open(f"{txt_dir}/advanced_metrics.txt", "w") as f:
+            f.write(str(adv_metrics) + "\n")
+    except Exception as e:
+        with open(f"{txt_dir}/advanced_metrics.txt", "w") as f:
+            f.write(f"Failed to compute advanced metrics: {e}\n")
     # --- Save run-level summary as text ---
     summary_lines = [
         f"Run Summary:",
@@ -217,52 +216,50 @@ def main():
         f"  Avg cadence: {df['cadence'].mean():.1f}" if 'cadence' in df else "  Avg cadence: N/A",
         f"  Elevation gain (m): {df['elevation'].diff().clip(lower=0).sum():.1f}" if 'elevation' in df else "  Elevation gain (m): N/A"
     ]
-
     # --- Add advanced metrics from metrics.py if available ---
     try:
-        from metrics import run_metrics
-        # Map columns if needed for metrics.py compatibility
-        if 'dist' not in df and 'distance_segment_m' in df:
-            df['dist'] = df['distance_segment_m']
-        if 'dt' not in df and 'time_delta_s' in df:
-            df['dt'] = df['time_delta_s']
-        if 'hr' not in df and 'heart_rate' in df:
-            df['hr'] = df['heart_rate']
         adv_metrics = run_metrics(df, threshold_hr=175, resting_hr=50)
         summary_lines.append("  --- Advanced Metrics (run_metrics) ---")
         for k, v in adv_metrics.items():
             summary_lines.append(f"    {k}: {v}")
     except Exception as e:
         summary_lines.append(f"  [metrics] Could not compute advanced metrics: {e}")
-
     # --- Add location and weather ---
     lat = df['latitude'].iloc[0] if 'latitude' in df else None
     lon = df['longitude'].iloc[0] if 'longitude' in df else None
     summary_lines.append(f"  Start location: ({lat:.5f}, {lon:.5f})" if lat is not None and lon is not None else "  Start location: N/A")
-    weather = fetch_weather_open_meteo(lat, lon, df.index[0])
+    weather, offset = fetch_weather_open_meteo(lat, lon, df.index[0])
     if weather and 'hourly' in weather and weather['hourly']['temperature_2m']:
-        # Extract first available hour's data
-        try:
-            idx = 0
-            temp = weather['hourly']['temperature_2m'][idx]
-            app_temp = weather['hourly'].get('apparent_temperature', [None]*len(weather['hourly']['temperature_2m']))[idx]
-            precip = weather['hourly']['precipitation'][idx]
-            humidity = weather['hourly'].get('relative_humidity_2m', [None]*len(weather['hourly']['temperature_2m']))[idx]
-            wind = weather['hourly'].get('windspeed_10m', [None]*len(weather['hourly']['temperature_2m']))[idx]
-            desc = weather['hourly'].get('weathercode', [None]*len(weather['hourly']['temperature_2m']))[idx]
-            summary_lines.append("  Weather at start:")
-            summary_lines.append(f"    Temperature: {temp} °C (feels like {app_temp} °C)")
-            summary_lines.append(f"    Precipitation: {precip} mm")
-            summary_lines.append(f"    Humidity: {humidity} %")
-            summary_lines.append(f"    Wind speed: {wind} km/h")
-            summary_lines.append(f"    Description: {desc}")
-        except Exception as e:
-            summary_lines.append(f"  Weather at start: [malformed data: {e}]")
+        idx = 0
+        if 'time' in weather['hourly']:
+            try:
+                times = pd.to_datetime(weather['hourly']['time'])
+                idx = (np.abs(times - df.index[0])).argmin()
+            except Exception:
+                pass
+        temp = weather['hourly']['temperature_2m'][idx]
+        app_temp = weather['hourly'].get('apparent_temperature', [None]*len(weather['hourly']['temperature_2m']))[idx]
+        precip = weather['hourly'].get('precipitation', [None]*len(weather['hourly']['temperature_2m']))[idx]
+        humidity = weather['hourly'].get('relative_humidity_2m', [None]*len(weather['hourly']['temperature_2m']))[idx]
+        wind = weather['hourly'].get('windspeed_10m', [None]*len(weather['hourly']['temperature_2m']))[idx]
+        desc = weather['hourly'].get('weathercode', [None]*len(weather['hourly']['temperature_2m']))[idx]
+        summary_lines.append("  Weather at start:")
+        summary_lines.append(f"    Temperature: {temp} °C (feels like {app_temp} °C)")
+        summary_lines.append(f"    Precipitation: {precip} mm")
+        summary_lines.append(f"    Humidity: {humidity} %")
+        summary_lines.append(f"    Wind speed: {wind} km/h")
+        summary_lines.append(f"    Description: {desc}")
     else:
         summary_lines.append("  Weather at start: N/A [weather API unavailable or failed]")
         marker_path = os.path.join(txt_dir, "weather_failed.marker")
         with open(marker_path, "w") as mf:
-            mf.write(f"Weather fetch failed for run at {df.index[0]} (lat={lat}, lon={lon}) on 2025-04-29T23:53:52-05:00\n")
+            mf.write(f"Weather fetch failed for run at {df.index[0]} (lat={lat}, lon={lon}) on {pd.Timestamp.now()}\n")
+    # --- Stride Segments ---
+    stride_groups = df[df['stride']].groupby((df['stride'] != df['stride'].shift()).cumsum())
+    stride_summary_lines = [f"Stride segments detected: {stride_groups.ngroups}"]
+    for i, (_, group) in enumerate(stride_groups):
+        stride_summary_lines.append(
+            f"Stride {i+1}: {group.index[0]} to {group.index[-1]}, duration: {(group.index[-1]-group.index[0]).total_seconds():.1f}s, avg pace: {group['pace_min_per_km'].mean():.2f}, avg HR: {group['heart_rate'].mean():.1f}")
     summary_lines.append("  --- Stride Segments ---")
     summary_lines.extend(["    " + line for line in stride_summary_lines])
     with open(f"{txt_dir}/run_summary.txt", "w") as f:

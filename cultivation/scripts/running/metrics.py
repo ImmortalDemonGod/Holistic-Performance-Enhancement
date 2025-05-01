@@ -117,19 +117,55 @@ def parse_gpx(path: str | Path) -> pd.DataFrame:
     return df
 
 # ------------------------------------------------------------------ metrics
-_ZONES_FILE = Path(__file__).parent.parent.parent / 'data' / 'zones_personal.yml'
+_ZONES_FILE = Path(__file__).parents[3] / "data" / "zones_personal.yml"
 
 def load_personal_zones():
-    with open(_ZONES_FILE, 'r') as f:
-        return yaml.safe_load(f)
+    if not _ZONES_FILE.exists():
+        raise FileNotFoundError(
+            f"Personal zone file {_ZONES_FILE} missing; "
+            "run `scripts/running/generate_zone_file.py` first"
+        )
+    with _ZONES_FILE.open() as f:
+        zones = yaml.safe_load(f)
+    # Validate schema
+    for z in zones.values():
+        assert 'bpm' in z and 'pace_min_per_km' in z, "Each zone must have bpm and pace_min_per_km"
+        assert len(z['bpm']) == 2 and len(z['pace_min_per_km']) == 2, "Each range must have two values"
+    return zones
 
-def compute_training_zones(hr_series, pace_series, zones):
-    # Dummy implementation for backup match; real logic may be more complex
-    zone_hr = hr_series.apply(lambda x: next((z['name'] for z in zones['hr'] if x >= z['min'] and x < z['max']), 'Unknown'))
-    zone_pace = pace_series.apply(lambda x: next((z['name'] for z in zones['pace'] if x >= z['min'] and x < z['max']), 'Unknown'))
-    # For effective zone, just pick HR if available, else pace
-    zone_effective = zone_hr.fillna(zone_pace)
-    return zone_hr, zone_pace, zone_effective
+def compute_training_zones(hr_array, pace_array, zones=None):
+    if zones is None:
+        zones = load_personal_zones()
+    def zone_hr(hr):
+        if np.isnan(hr):
+            return None
+        for name, z in zones.items():
+            lo, hi = z['bpm']
+            if lo <= hr <= hi:
+                return name
+        return None
+    # Convert pace to min/km if needed
+    # Use median-based check to avoid GPS spikes breaking scaling logic
+    if pace_array.median() > 20:  # ≈ sec/km
+        pace_min = pace_array / 60
+    else:
+        pace_min = pace_array
+    def zone_pace(pace):
+        if np.isnan(pace):
+            return None
+        for name, z in zones.items():
+            lo, hi = z['pace_min_per_km']
+            if lo <= pace <= hi:
+                return name
+        return None
+    zone_hr_col = hr_array.apply(zone_hr)
+    zone_pace_col = pace_min.apply(zone_pace)
+    def zone_effective(hr, pace):
+        if hr and pace:
+            return hr if hr == pace else "mixed"
+        return hr or pace
+    zone_effective_col = [zone_effective(h, p) for h, p in zip(zone_hr_col, zone_pace_col)]
+    return zone_hr_col, zone_pace_col, zone_effective_col
 
 def run_metrics(
     df: pd.DataFrame, *, threshold_hr: int = 186, resting_hr: int = 50
@@ -156,9 +192,9 @@ def run_metrics(
 
     Notes
     -----
-    • Efficiency Factor (EF) = avg speed (m/s) ÷ avg HR (bpm).  
-    • Aerobic decoupling is |EF² – EF¹| / EF¹ expressed %.  
-      < 5 % : strong aerobic base; 5-10 % : borderline; >10 % : drift.  
+    • Efficiency Factor (EF) = avg speed (m/s) ÷ avg HR (bpm).
+    • Aerobic decoupling is |EF² – EF¹| / EF¹ expressed %.
+      < 5 % : strong aerobic base; 5-10 % : borderline; >10 % : drift.
     • hrTSS scales like TrainingPeaks TSS (100 ≈ 1 h at threshold).
     """
     total_dist_m = df["dist"].sum()

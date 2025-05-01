@@ -7,7 +7,8 @@ def fetch_weather_open_meteo(lat, lon, dt, max_retries=2, max_backoff=2.0):
     Robustly fetch weather for a given latitude, longitude, and datetime (UTC).
     Implements exponential backoff on network/API errors.
     Tries variations in time (±0 to ±5 hours) on the same day and location (rounded, nudged lat/lon) until data is found.
-    Returns (weather_dict, offset_hours) or (None, None) if all fail.
+    Returns:
+        tuple: (weather_dict, offset_hours) if successful, or (None, None) if all attempts fail.
     """
     time_offsets = [timedelta(hours=h) for h in range(-5,6)]
     lat_variations = [lat, round(lat,3), round(lat,2), lat+0.01, lat-0.01, lat+0.05, lat-0.05, lat+0.1, lat-0.1]
