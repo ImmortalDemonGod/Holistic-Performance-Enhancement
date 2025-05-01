@@ -30,3 +30,7 @@ jobs:
           drift   = w['decoupling_mean'].iloc[-1]
           print(json.dumps({'ef_chg':ef_chg, 'drift':drift}))
           PY
+          )
+          ef=$(python -c 'import sys, json; print(json.load(sys.stdin)["ef_chg"])' <<< "$OUTPUT")
+          drift=$(python -c 'import sys, json; print(json.load(sys.stdin)["drift"])' <<< "$OUTPUT")
+          python -c "import sys; ef=float(sys.argv[1]); drift=float(sys.argv[2]);\nif ef < 0.05 or drift > 0.07:\n    print('::error ::KPI gate failed — hold progression'); sys.exit(1)" "$ef" "$drift"
