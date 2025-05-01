@@ -193,12 +193,59 @@ cultivation/outputs/figures/
 - **Change output locations:** Adjust the directories in `process_all_runs.py`.
 - **Change naming conventions:** Edit the prefix logic in the batch script and/or renaming script.
 
-## 🧩 Troubleshooting & Error Handling
+## 🧪 Testing and Quality Assurance
 
-- If a file cannot be auto-renamed (e.g., missing date in metadata), it will be skipped and a message printed.
-- If a required Python package is missing, install it using `pip` as above.
-- If a file is corrupt or cannot be parsed, the script will print an error and continue with other files.
-- For best results, use devices that embed timestamps in FIT/GPX files.
+This repository uses `pytest` for unit testing. To run the tests:
+
+```bash
+pytest
+```
+
+A sample test for GPX parsing with missing HR/cadence data is included in `tests/test_parse_gpx.py`.
+
+### Continuous Integration
+
+![CI](https://github.com/ImmortalDemonGod/Holistic-Performance-Enhancement/actions/workflows/run-metrics.yml/badge.svg)
+
+---
+
+## 🔒 Secrets and Environment Variables
+
+Secrets (such as API keys) are not stored in the repository. To set up your environment:
+
+1. Copy `.env.template` to `.env`:
+   ```bash
+   cp .env.template .env
+   ```
+2. Fill in your API keys and other secrets in `.env`.
+3. Scripts will read from environment variables automatically.
+
+---
+
+## 📦 Dependency Management
+
+All dependencies are listed in `requirements.txt`. To update or lock dependencies:
+
+```bash
+pip freeze > requirements.txt
+```
+
+For advanced dependency management, consider using [pip-tools](https://github.com/jazzband/pip-tools) or Poetry.
+
+---
+
+## 🗂️ Tests and Sample Data
+
+- All tests are in the `tests/` directory.
+- Sample GPX files for edge cases are in `tests/data/`.
+
+---
+
+## 🏁 Next Steps
+
+- Expand tests for weather fallback and KPI phase jump logic.
+- Use the `.env.template` for all new secrets.
+- Keep `requirements.txt` up to date and locked.
 
 ## 🚀 Getting Started
 
