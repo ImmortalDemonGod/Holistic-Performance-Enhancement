@@ -28,15 +28,16 @@ def test_zone_mapping_sanity():
     from cultivation.scripts.running.metrics import compute_training_zones, load_personal_zones
     import numpy as np
     # Create HR and pace arrays spanning the range
-    hr = np.linspace(100, 190, 10)
-    pace = np.linspace(4.0, 8.0, 10)
     zones = load_personal_zones()
-    zone_hr, zone_pace, zone_effective = compute_training_zones(hr, pace, zones)
-    # Check that all returned zones are in the YAML-defined set
-    zone_names_hr = set(zones['hr'].keys())
-    zone_names_pace = set(zones['pace'].keys())
-    assert all(z in zone_names_hr or z is None for z in zone_hr)
-    assert all(z in zone_names_pace or z is None for z in zone_pace)
+    zone_names = set(zones.keys())
+
+    # use Series, not ndarray
+    hr_s = pd.Series(np.linspace(100, 190, 10))
+    pace_s = pd.Series(np.linspace(4.0, 8.0, 10) * 60)  # sec / km
+
+    zone_hr, zone_pace, zone_eff = compute_training_zones(hr_s, pace_s, zones)
+
+    assert set(z for z in zone_hr.dropna()) <= zone_names
     # Effective zones should be in the union
-    all_zones = zone_names_hr.union(zone_names_pace)
-    assert all(z in all_zones or z is None for z in zone_effective)
+    all_zones = zone_names
+    assert all(z in all_zones or z is None for z in zone_eff)

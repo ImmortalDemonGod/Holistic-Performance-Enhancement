@@ -1,2 +1,2 @@
 Pacing Strategy Analysis:
-{'first_half_pace': np.float64(7.295192203710035), 'second_half_pace': np.float64(7.869147469342354), 'strategy': 'Positive split (slower second half)'}
+{'first_half_pace': np.float64(7.295192203710035), 'second_half_pace': np.float64(7.869147469342354), 'strategy': 'positive'}
