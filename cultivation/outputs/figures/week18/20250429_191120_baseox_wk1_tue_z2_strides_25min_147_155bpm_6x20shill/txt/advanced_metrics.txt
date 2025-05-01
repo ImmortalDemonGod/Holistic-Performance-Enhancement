@@ -1,8 +1,0 @@
-distance_km: 7.57
-duration_min: 44.6
-avg_pace_min_per_km: 5.89
-avg_hr: 173.2
-efficiency_factor: 0.01633
-decoupling_%: 0.15
-hrTSS: 72.2
-zones_applied: {"Z1 (Recovery)": {"bpm": [0, 158], "pace_min_per_km": [9.4, 99]}, "Z2 (Aerobic)": {"bpm": [158, 166], "pace_min_per_km": [9.0, 9.4]}, "Z3 (Tempo)": {"bpm": [167, 175], "pace_min_per_km": [8.5, 8.9]}, "Z4 (Threshold)": {"bpm": [177, 184], "pace_min_per_km": [8.1, 8.4]}, "Z5 (VO2max)": {"bpm": [186, 201], "pace_min_per_km": [0, 8.0]}}

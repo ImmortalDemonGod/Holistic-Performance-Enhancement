@@ -1,8 +1,0 @@
-Stride segments detected: 7
-Stride 1: 2025-04-29 19:37:31+00:00 to 2025-04-29 19:37:39+00:00, duration: 8.0s, avg pace: 3.99, avg HR: 153.0
-Stride 2: 2025-04-29 19:42:23+00:00 to 2025-04-29 19:42:34+00:00, duration: 11.0s, avg pace: 3.59, avg HR: 173.0
-Stride 3: 2025-04-29 19:43:48+00:00 to 2025-04-29 19:44:04+00:00, duration: 16.0s, avg pace: 3.62, avg HR: 174.8
-Stride 4: 2025-04-29 19:44:59+00:00 to 2025-04-29 19:45:20+00:00, duration: 21.0s, avg pace: 3.82, avg HR: 180.7
-Stride 5: 2025-04-29 19:47:32+00:00 to 2025-04-29 19:47:44+00:00, duration: 12.0s, avg pace: 3.61, avg HR: 168.9
-Stride 6: 2025-04-29 19:49:28+00:00 to 2025-04-29 19:49:49+00:00, duration: 21.0s, avg pace: 3.44, avg HR: 178.0
-Stride 7: 2025-04-29 19:50:31+00:00 to 2025-04-29 19:50:51+00:00, duration: 20.0s, avg pace: 2.93, avg HR: 172.5
