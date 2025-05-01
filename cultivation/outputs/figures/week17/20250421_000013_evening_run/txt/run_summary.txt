@@ -1,23 +1,23 @@
 Run Summary:
-  Start time: 2025-04-21 00:00:13+00:00
+  Start time: 2025-04-21 00:00:29+00:00
   End time: 2025-04-21 00:43:51+00:00
-  Duration: 0 days 00:43:38
+  Duration: 0 days 00:43:22
   Total distance (km): 8.40
-  Avg pace (min/km): 4.93
-  Avg HR: 178.0
+  Avg pace (min/km): 4.66
+  Avg HR: 179.0
   Max HR: 201.0
-  Avg cadence: 80.5
-  Elevation gain (m): 37.4
+  Avg cadence: 164.2
+  Elevation gain (m): N/A
   --- Advanced Metrics (run_metrics) ---
-    distance_km: 8.4
-    duration_min: 43.6
-    avg_pace_min_per_km: 5.19
-    avg_hr: 178.0
-    efficiency_factor: 0.01803
-    decoupling_%: 16.19
-    hrTSS: 76.2
-    zones_applied: {"Z1 (Recovery)": {"bpm": [0, 158], "pace_min_per_km": [9.4, 99]}, "Z2 (Aerobic)": {"bpm": [158, 166], "pace_min_per_km": [9.0, 9.4]}, "Z3 (Tempo)": {"bpm": [167, 175], "pace_min_per_km": [8.5, 8.9]}, "Z4 (Threshold)": {"bpm": [177, 184], "pace_min_per_km": [8.1, 8.4]}, "Z5 (VO2max)": {"bpm": [186, 201], "pace_min_per_km": [0, 8.0]}}
-  Start location: (34.60718, -98.42602)
+    distance_km: 7.97
+    duration_min: 36.2
+    avg_pace_min_per_km: 4.54
+    avg_hr: 179.0
+    efficiency_factor: 0.02051
+    decoupling_%: 7.11
+    hrTSS: 64.3
+    zones_applied: {"Z1 (Recovery)": {"bpm": [0, 159], "pace_min_per_km": [999, 9.4]}, "Z2 (Aerobic)": {"bpm": [160, 185], "pace_min_per_km": [9.0, 9.4]}, "Z3 (Tempo)": {"bpm": [186, 195], "pace_min_per_km": [8.5, 8.9]}, "Z4 (Threshold)": {"bpm": [196, 186], "pace_min_per_km": [8.1, 8.4]}, "Z5 (VO2max)": {"bpm": [187, 201], "pace_min_per_km": [0, 8.0]}}
+  Start location: (34.60708, -98.42584)
   Weather at start:
     Temperature: 20.4 °C (feels like None °C)
     Precipitation: 0.0 mm
