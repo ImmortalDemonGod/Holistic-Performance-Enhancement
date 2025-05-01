@@ -1,6 +1,7 @@
+# personalised HR & pace bands 2025-04-30
 Z1 (Recovery):
   bpm: [0, 158]
-  pace_min_per_km: [9.4, 99]
+  pace_min_per_km: [9.4, 99]     # 99 = “no upper limit”
 
 Z2 (Aerobic):
   bpm: [158, 166]
