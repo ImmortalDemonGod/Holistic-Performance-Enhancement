@@ -1,0 +1,3 @@
+Pace Comparison (Week 18):
+20250429_191120_baseox_wk1_tue_z2_strides_25min_147_155bpm_6x20shill: mean=7.29, min=2.49
+20250429_191120_baseox_wk1_tue_z2_strides_25min_147_155bpm_6x20shill_hr_override: mean=7.29, min=2.49

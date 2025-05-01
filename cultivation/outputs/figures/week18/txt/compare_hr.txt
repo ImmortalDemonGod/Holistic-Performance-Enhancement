@@ -1,0 +1,3 @@
+Heart Rate Comparison (Week 18):
+20250429_191120_baseox_wk1_tue_z2_strides_25min_147_155bpm_6x20shill: mean=173.2, max=189
+20250429_191120_baseox_wk1_tue_z2_strides_25min_147_155bpm_6x20shill_hr_override: mean=173.2, max=189
