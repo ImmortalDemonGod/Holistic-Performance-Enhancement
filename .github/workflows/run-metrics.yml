@@ -1,0 +1,32 @@
+on:
+  push:
+    paths: ['cultivation/data/processed/**']
+jobs:
+  metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y jq bc
+      - run: pip install -r requirements.txt
+      - run: python cultivation/scripts/running/aggregate_weekly_runs.py
+      - id: kpi
+        run: |
+          python - <<'PY'
+          import pandas as pd, json, sys
+          w = pd.read_parquet('data/weekly_metrics.parquet').tail(2)
+          ef_chg = (w['ef_mean'].iloc[-1] - w['ef_mean'].iloc[-2]) / w['ef_mean'].iloc[-2]
+          drift   = w['decoupling_mean'].iloc[-1]
+          print(json.dumps({'ef_chg':ef_chg, 'drift':drift}))
+          PY
+      - name: Fail if KPIs unmet
+        run: |
+          OUTPUT=$(python - <<'PY'
+          import pandas as pd, json
+          w = pd.read_parquet('data/weekly_metrics.parquet').tail(2)
+          if len(w) < 2:
+              print("::warning ::Not enough weeks for KPI diff; skipping gate")
+              exit(0)
+          ef_chg = (w['ef_mean'].iloc[-1] - w['ef_mean'].iloc[-2]) / w['ef_mean'].iloc[-2]
+          drift   = w['decoupling_mean'].iloc[-1]
+          print(json.dumps({'ef_chg':ef_chg, 'drift':drift}))
+          PY

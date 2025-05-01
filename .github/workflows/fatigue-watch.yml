@@ -1,0 +1,23 @@
+name: fatigue-watch
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Runs daily at 01:00 CDT (06:00 UTC)
+  workflow_dispatch:
+
+concurrency:
+  group: fatigue-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fatigue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - run: python cultivation/scripts/running/fatigue_watch.py
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_USER: ${{ github.actor }}
