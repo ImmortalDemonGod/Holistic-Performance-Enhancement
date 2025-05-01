@@ -1,8 +1,19 @@
 import requests
 import time
 from datetime import timedelta
+import pandas as pd
+from pathlib import Path
 
-def fetch_weather_open_meteo(lat, lon, dt, max_retries=2, max_backoff=2.0):
+CACHE_PATH = Path(__file__).parents[2] / 'data' / 'weather_cache.parquet'
+
+# Load cache if exists
+if CACHE_PATH.exists():
+    weather_cache = pd.read_parquet(CACHE_PATH)
+else:
+    weather_cache = pd.DataFrame(columns=['lat','lon','date','weather'])
+
+def fetch_weather_open_meteo(lat, lon, dt, max_retries=6, max_backoff=2.0):
+    global weather_cache
     """
     Robustly fetch weather for a given latitude, longitude, and datetime (UTC).
     Implements exponential backoff on network/API errors.
@@ -10,6 +21,12 @@ def fetch_weather_open_meteo(lat, lon, dt, max_retries=2, max_backoff=2.0):
     Returns:
         tuple: (weather_dict, offset_hours) if successful, or (None, None) if all attempts fail.
     """
+    # Check cache first
+    date_str = pd.to_datetime(dt).strftime('%Y-%m-%d')
+    cached = weather_cache[(weather_cache['lat']==lat)&(weather_cache['lon']==lon)&(weather_cache['date']==date_str)]
+    if not cached.empty:
+        return cached.iloc[0]['weather'], 0
+
     time_offsets = [timedelta(hours=h) for h in range(-5,6)]
     lat_variations = [lat, round(lat,3), round(lat,2), lat+0.01, lat-0.01, lat+0.05, lat-0.05, lat+0.1, lat-0.1]
     lon_variations = [lon, round(lon,3), round(lon,2), lon+0.01, lon-0.01, lon+0.05, lon-0.05, lon+0.1, lon-0.1]
@@ -25,7 +42,11 @@ def fetch_weather_open_meteo(lat, lon, dt, max_retries=2, max_backoff=2.0):
                         if resp.status_code == 200:
                             weather = resp.json()
                             if 'hourly' in weather and weather['hourly']['temperature_2m']:
-                                return weather, offset.total_seconds() / 3600
+                                result = weather
+                                # Save to cache
+                                weather_cache = pd.concat([weather_cache, pd.DataFrame([{'lat':lat,'lon':lon,'date':date_str,'weather':result}])], ignore_index=True)
+                                weather_cache.to_parquet(CACHE_PATH, index=False)
+                                return result, offset.total_seconds() / 3600
                     except Exception as e:
                         print(f"[Weather] Error: {e} (lat={lat_try}, lon={lon_try}, time={hour_iso})")
         # If we reach here, all variations failed for this attempt
