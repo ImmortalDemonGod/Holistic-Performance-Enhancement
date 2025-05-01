@@ -14,12 +14,14 @@ Run Summary:
     avg_pace_min_per_km: 5.62
     avg_hr: 181.7
     efficiency_factor: 0.01632
-    decoupling_%: 11.0
-    hrTSS: 86.3
+    decoupling_%: 8.22
+    hrTSS: 72.9
+    zones_applied: {"Z1 (Recovery)": {"bpm": [0, 158], "pace_min_per_km": [9.4, 99]}, "Z2 (Aerobic)": {"bpm": [158, 166], "pace_min_per_km": [9.0, 9.4]}, "Z3 (Tempo)": {"bpm": [167, 175], "pace_min_per_km": [8.5, 8.9]}, "Z4 (Threshold)": {"bpm": [177, 184], "pace_min_per_km": [8.1, 8.4]}, "Z5 (VO2max)": {"bpm": [186, 201], "pace_min_per_km": [0, 8.0]}}
   Start location: (34.60707, -98.42427)
   Weather at start:
-    Temperature: 23.2 °C (feels like 24.9 °C)
-    Precipitation: 0.6 mm
-    Humidity: 76 %
-    Wind speed: 11.1 km/h
-    Description: Moderate drizzle
+    Temperature: 20.4 °C (feels like None °C)
+    Precipitation: 0.0 mm
+    Humidity: None %
+    Wind speed: 7.6 km/h
+    Description: 2
+    Weather offset (hr): -5.0
