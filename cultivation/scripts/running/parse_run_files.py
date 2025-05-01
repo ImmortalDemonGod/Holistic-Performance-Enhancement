@@ -59,34 +59,35 @@ def parse_gpx(file_path):
         print(f"An unexpected error occurred while parsing '{file_path}': {e}")
         return None
     if not gpx or not gpx.tracks:
-        print(f"No tracks found in GPX file '{file_path}'.")
+        print(f"No tracks found in '{file_path}'.")
         return None
     for track in gpx.tracks:
         for segment in track.segments:
             for point in segment.points:
-                point_data = {
+                data = {
+                    'time': point.time,
                     'latitude': point.latitude,
                     'longitude': point.longitude,
                     'elevation': point.elevation,
-                    'time': point.time,
                     'heart_rate': None,
                     'cadence': None,
+                    'temperature': None
                 }
                 if point.extensions:
-                    for ext_element in point.extensions:
-                        ns_gpxtpx = "http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
-                        hr_elem = ext_element.find(f'{{{ns_gpxtpx}}}hr')
-                        if hr_elem is not None and hr_elem.text:
-                            point_data['heart_rate'] = int(hr_elem.text)
-                        cad_elem = ext_element.find(f'{{{ns_gpxtpx}}}cad')
-                        if cad_elem is not None and cad_elem.text:
-                            point_data['cadence'] = int(cad_elem.text)
-                points_data.append(point_data)
+                    for ext in point.extensions:
+                        for child in ext:
+                            if child.tag.endswith('hr'):
+                                data['heart_rate'] = float(child.text)
+                            elif child.tag.endswith('cad'):
+                                data['cadence'] = float(child.text)
+                            elif child.tag.endswith('atemp'):
+                                data['temperature'] = float(child.text)
+                points_data.append(data)
     if not points_data:
-        print(f"No track points extracted from '{file_path}'.")
+        print(f"No track points found in '{file_path}'.")
         return None
     df = pd.DataFrame(points_data)
-    df['time'] = pd.to_datetime(df['time'], utc=True)
+    df['time'] = pd.to_datetime(df['time'])
     df = df.sort_values('time').set_index('time')
     return df
 
@@ -111,10 +112,10 @@ def add_distance_and_speed(df):
     df['pace_min_per_km'] = 16.6667 / df['speed_mps'].replace(0, np.nan)  # 1000/60 = 16.6667
     return df
 
-def summarize_run(df, label):
+def summarize_run(df, filetype):
     summary = {}
     if df is None or df.empty:
-        print(f"No data for {label}")
+        print(f"No data for {filetype}")
         return summary
     summary['start_time'] = df.index[0]
     summary['end_time'] = df.index[-1]
@@ -135,7 +136,7 @@ def summarize_run(df, label):
         except Exception as e:
             print(f"[metrics] Could not compute advanced metrics: {e}")
 
-    print(f"\nSummary for {label}:")
+    print(f"\nSummary for {filetype}:")
     for k, v in summary.items():
         print(f"  {k}: {v}")
     return summary
@@ -144,6 +145,7 @@ def main():
     parser = argparse.ArgumentParser(description='Parse a FIT or GPX file and output summary CSV.')
     parser.add_argument('--input', type=str, required=True, help='Path to input .fit or .gpx file')
     parser.add_argument('--output', type=str, required=True, help='Path to output CSV file')
+    parser.add_argument('--planning_id', type=str, default='', help='ID from calendar CSV')
     args = parser.parse_args()
 
     input_path = args.input
@@ -154,6 +156,8 @@ def main():
         if fit_df is not None:
             fit_df = add_distance_and_speed(fit_df)
             summarize_run(fit_df, 'FIT')
+            # --- attach calendar linkage & extra units ---
+            fit_df['planning_id'] = args.planning_id
             fit_df.to_csv(output_path)
     elif input_path.endswith('.gpx'):
         print(f'Parsing GPX file: {input_path}')
@@ -161,6 +165,8 @@ def main():
         if gpx_df is not None:
             gpx_df = add_distance_and_speed(gpx_df)
             summarize_run(gpx_df, 'GPX')
+            # --- attach calendar linkage & extra units ---
+            gpx_df['planning_id'] = args.planning_id
             gpx_df.to_csv(output_path)
     else:
         print('Unsupported file type. Please provide a .fit or .gpx file.')

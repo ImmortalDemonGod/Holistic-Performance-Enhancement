@@ -36,90 +36,65 @@ def main():
     for run_file in run_files:
         base = run_file.stem  # e.g., 20250425_afternoon_run
         print(f"Processing {run_file}...")
-        # --- Allow explicit reprocessing of runs with marker files if CSV is present ---
         figures_dir = Path(args.figures_dir)
-        # Try to find week and prefix from file name
         try:
             date_part = base.split('_')[0]
             week = pd.to_datetime(date_part).isocalendar().week
             txt_dir = figures_dir / f"week{week}" / base / "txt"
             marker_path = txt_dir / "weather_failed.marker"
             csv_out = Path(args.processed_dir) / f"{base}_gpx_summary.csv"
-            # If marker exists but CSV exists, allow reprocessing (do not skip)
             if marker_path.exists() and not csv_out.exists():
                 print(f"  [INFO] Weather marker found but CSV missing. Processing anyway.")
-            # If marker exists and CSV exists, print info but do not skip
             elif marker_path.exists() and csv_out.exists():
                 print(f"  [INFO] Weather marker found but CSV exists. Explicitly reprocessing.")
-            # If marker does not exist, proceed as normal
         except Exception as e:
             print(f"  [WARN] Could not determine marker file for {base}: {e}")
-        if run_file.suffix == '.fit':
+
+        # --- Only process HR override if user wants it ---
+        # By default, process only the HR override version if it exists, otherwise process original
+        gpx_path = run_file
+        override_gpx = gpx_path.with_name(gpx_path.stem + "_hr_override.gpx")
+        if override_gpx.exists():
+            print(f"  [DEBUG] Using override GPX: {override_gpx}")
+            input_file = override_gpx
+        else:
+            input_file = gpx_path
+
+        # === Now check if already processed ===
+        if input_file.suffix == '.fit':
             csv_out = Path(args.processed_dir) / f"{base}_fit_summary.csv"
-            input_file = run_file
         else:
             csv_out = Path(args.processed_dir) / f"{base}_gpx_summary.csv"
-            gpx_path = run_file
-            override_gpx = gpx_path.with_name(gpx_path.stem + "_hr_override.gpx")
-            # Always prefer override file if present
-            if override_gpx.exists():
-                print(f"  [DEBUG] Using override GPX: {override_gpx}")
-                input_file = override_gpx
-            else:
-                # --- Improved FIT/GPX matching logic ---
-                def extract_base_name(stem):
-                    # Remove leading timestamp and trailing _whoop_accurate_heart_rate if present
-                    parts = stem.split('_')
-                    # Heuristic: timestamp is always first 2 parts (date+time), extra suffix is last 4 parts for FIT
-                    base = '_'.join(parts[2:-4]) if stem.endswith('whoop_accurate_heart_rate') else '_'.join(parts[2:])
-                    return base
-                gpx_base = extract_base_name(gpx_path.stem)
-                fit_candidates = list(Path(args.raw_dir).glob(f"*whoop_accurate_heart_rate.fit"))
-                fit_match = None
-                for fit_file in fit_candidates:
-                    fit_base = extract_base_name(fit_file.stem)
-                    print(f"[DEBUG] gpx_base: {gpx_base}, fit_base: {fit_base}")
-                    if gpx_base == fit_base:
-                        fit_match = fit_file
-                        break
-                print(f"[DEBUG] fit_match: {fit_match}")
-                if fit_match:
-                    print(f"  [DEBUG] About to run override script: {gpx_path} -> {override_gpx} using {fit_match}")
-                    try:
-                        result = subprocess.run([
-                            VENV_PYTHON, str(SCRIPTS_DIR / 'override_gpx_hr_with_fit.py'),
-                            '--gpx', str(gpx_path),
-                            '--fit', str(fit_match),
-                            '--output', str(override_gpx)
-                        ], cwd=str(PROJECT_ROOT), capture_output=True, text=True, check=True)
-                        print(f"  [DEBUG] HR override script output:\n{result.stdout}")
-                        if result.stderr:
-                            print(f"  [DEBUG] HR override script errors:\n{result.stderr}")
-                    except subprocess.CalledProcessError as e:
-                        print(f"  [ERROR] HR override script failed: {e}")
-                        print(f"  [ERROR] Script stdout:\n{e.stdout}")
-                        print(f"  [ERROR] Script stderr:\n{e.stderr}")
-                    if override_gpx.exists():
-                        input_file = override_gpx
-                    else:
-                        input_file = gpx_path
-                else:
-                    input_file = gpx_path
-        # === Now check if already processed ===
         if csv_out.exists():
             print(f"  Skipping {run_file}: summary already exists at {csv_out}")
             continue
         # Run parse_run_files.py
+        # build PID like "2025w18-Tue"
+        def build_planning_id(run_file):
+            # Placeholder: extract from filename, e.g., "20250429_191120_baseox_wk1_tue_z2_strides_25min"
+            import re
+            from datetime import datetime
+            stem = run_file.stem
+            date_match = re.match(r"(\d{8})_", stem)
+            day_map = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+            if date_match:
+                date_str = date_match.group(1)
+                dt = datetime.strptime(date_str, "%Y%m%d")
+                week = dt.isocalendar().week
+                year = dt.isocalendar().year
+                dow = day_map[dt.weekday()]
+                return f"{year}w{week:02d}-{dow}"
+            return "unknown"
+        pid = build_planning_id(run_file)
         subprocess.run([
             VENV_PYTHON, str(SCRIPTS_DIR / 'parse_run_files.py'),
             '--input', str(input_file),
-            '--output', str(csv_out)
+            '--output', str(csv_out),
+            '--planning_id', pid
         ], cwd=str(PROJECT_ROOT), check=True)
 
         # If GPX, also extract metrics using new module (now integrated into summary CSV)
         # No need to write separate JSON; metrics are included in summary CSV by parse_run_files.py
-
-        # 2. Run HR/pace analysis
         subprocess.run([
             VENV_PYTHON, str(SCRIPTS_DIR / 'analyze_hr_pace_distribution.py'),
             '--input', str(csv_out),
