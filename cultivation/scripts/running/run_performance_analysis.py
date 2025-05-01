@@ -197,9 +197,16 @@ def main():
             mf.write(f"Weather fetch failed for run at {df.index[0]} (lat={lat}, lon={lon}) on {pd.Timestamp.now()}\n")
     # Advanced metrics
     try:
+        # Ensure 'hr' column exists for metrics.py compatibility
+        if 'heart_rate' in df.columns and 'hr' not in df.columns:
+            df['hr'] = df['heart_rate']
+        # Ensure 'pace_sec_km' exists for metrics.py compatibility
+        if 'pace_sec_km' not in df.columns and 'pace_min_per_km' in df.columns:
+            df['pace_sec_km'] = df['pace_min_per_km'] * 60
         adv_metrics = run_metrics(df, threshold_hr=175, resting_hr=50)
         with open(f"{txt_dir}/advanced_metrics.txt", "w") as f:
-            f.write(str(adv_metrics) + "\n")
+            for k, v in adv_metrics.items():
+                f.write(f"{k}: {v}\n")
     except Exception as e:
         with open(f"{txt_dir}/advanced_metrics.txt", "w") as f:
             f.write(f"Failed to compute advanced metrics: {e}\n")
@@ -218,6 +225,12 @@ def main():
     ]
     # --- Add advanced metrics from metrics.py if available ---
     try:
+        # Ensure 'hr' column exists for metrics.py compatibility
+        if 'heart_rate' in df.columns and 'hr' not in df.columns:
+            df['hr'] = df['heart_rate']
+        # Ensure 'pace_sec_km' exists for metrics.py compatibility
+        if 'pace_sec_km' not in df.columns and 'pace_min_per_km' in df.columns:
+            df['pace_sec_km'] = df['pace_min_per_km'] * 60
         adv_metrics = run_metrics(df, threshold_hr=175, resting_hr=50)
         summary_lines.append("  --- Advanced Metrics (run_metrics) ---")
         for k, v in adv_metrics.items():
@@ -260,8 +273,8 @@ def main():
     for i, (_, group) in enumerate(stride_groups):
         stride_summary_lines.append(
             f"Stride {i+1}: {group.index[0]} to {group.index[-1]}, duration: {(group.index[-1]-group.index[0]).total_seconds():.1f}s, avg pace: {group['pace_min_per_km'].mean():.2f}, avg HR: {group['heart_rate'].mean():.1f}")
-    summary_lines.append("  --- Stride Segments ---")
-    summary_lines.extend(["    " + line for line in stride_summary_lines])
+    # summary_lines.append("  --- Stride Segments ---")
+    # summary_lines.extend(["    " + line for line in stride_summary_lines])
     with open(f"{txt_dir}/run_summary.txt", "w") as f:
         f.write("\n".join(summary_lines) + "\n")
 
