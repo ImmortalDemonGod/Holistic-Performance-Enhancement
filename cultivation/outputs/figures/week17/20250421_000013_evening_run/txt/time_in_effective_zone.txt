@@ -1,0 +1,4 @@
+zone_effective	seconds	percent
+Z1 (Recovery)	284.0	10.847975553857907
+Z5 (VO2max)	1357.0	51.83346065699007
+mixed	977.0	37.31856378915202
