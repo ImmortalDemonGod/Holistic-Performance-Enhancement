@@ -191,12 +191,14 @@ def load_personal_zones():
             "run `scripts/running/generate_zone_file.py` first"
         )
     with _ZONES_FILE.open() as f:
-        zones = yaml.safe_load(f)
-    # Validate schema
-    for z in zones.values():
+        zones_yaml = yaml.safe_load(f)
+    # Allow an optional 'model' or other metadata field
+    if isinstance(zones_yaml, dict) and 'model' in zones_yaml:
+        zones_yaml.pop('model')
+    for z in zones_yaml.values():
         assert 'bpm' in z and 'pace_min_per_km' in z, "Each zone must have bpm and pace_min_per_km"
         assert len(z['bpm']) == 2 and len(z['pace_min_per_km']) == 2, "Each range must have two values"
-    return zones
+    return zones_yaml
 
 def lower_z2_bpm(zones=None):
     """Return the lower bpm boundary of Z2 (Aerobic)."""

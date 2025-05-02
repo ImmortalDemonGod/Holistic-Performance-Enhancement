@@ -23,7 +23,7 @@
 |-------------------|--------------------|----------------------------|
 | ↑ Mitochondrial density & oxidative enzymes | ≥ 25 min continuous at 70‑78 % HRₘₐₓ | EF ↑ 3–5 % wk⁻¹; Rest‑HR ↓ 1–3 bpm |
 | ↑ Capillary density & plasma volume | Long‑run 30→40 min @ 65‑75 % HRₘₐₓ | HR‑drift slope ↓ ≥ 0.3 % mi⁻¹ |
-| Improved neuromuscular efficiency | 6×20″ strides / hill surges @ > 180 spm | Cadence SD ↓; Flight‑time ↑ |
+| Improved neuromuscular efficiency | 6×20″ strides / hill surges @ Gradual increase from baseline (~165 spm) towards 170+ spm; focus on improvement trend and consistency (low SD) | Cadence SD ↓; Flight‑time ↑ |
 | Connective‑tissue robustness | Low‑impact Z2 + eccentric hills | sRPE ≤ 4 despite ↑ mi |
 
 *Four weeks* allow mitochondrial and plasma‑volume adaptations to express while limiting over‑reach at low mileage.
@@ -32,23 +32,25 @@
 
 ## 2 · Weekly Micro‑cycle Blueprint  — *real HR & pace bands (min·mile⁻¹)*
 
-| Day | Session | Duration (min) | **HR target** (bpm) | **Pace band** (min·mile⁻¹) | Focus |
-|-----|---------|----------------|----------------------|-----------------------------|-------|
-| **Mon** | OFF (+ HRV log) | — | — | — | Super‑compensation |
-| **Tue** | <abbr title="Include 5‑min brisk walk + 5‑min jog warm‑up; 5‑min cool‑down">Z2 steady + 6×20″ strides*</abbr> | **25** | **147 – 155** | Steady **8:11 – 8:43** · Strides **5:38 – 6:02** | Mito flux + neuromuscular snap |
-| **Wed** | Recovery jog + mobility | **15** | **131 – 141** | **9:07 – 10:04** | Capillary flush |
-| **Thu** | Z2 steady (alt route) | **25** | **149 – 155** | **8:03 – 8:35** | Economy consistency |
-| **Fri** | OFF / <abbr title="Suggested: 2× circuit – split‑squat, single‑leg RDL, calf‑raise, plank">light strength†</abbr> | — | — | — | Tendon stiffness |
-| **Sat** | Long‑run progressive ‡ | **30 → 40** | **145 – 149 → 149 – 151** | **8:27 – 8:43 → 8:11 – 8:27** | Durability + fuel pathway |
-| **Sun** | Walk / bike spin | 15 | **≤ 120** | n/a | Glycogen refill |
+| Day | Session | Duration ( min) | **HR target** (%) | Focus |
+|-----|---------|----------------|----------------------|-------|
+| **Mon** | OFF (+ HRV log) | — | — | Super‑compensation |
+| **Tue** | <abbr title="Include 5‑min brisk walk + 5‑min jog warm‑up; 5‑min cool‑down">Z2 steady + 6×20″ strides*</abbr> | **25** | **72–78** | Mito flux + neuromuscular snap |
+| **Wed** | Recovery jog + mobility | **15** | **65–70** | Capillary flush |
+| **Thu** | Z2 steady (alt route) | **25** | **72–78** | Economy consistency |
+| **Fri** | OFF / <abbr title="Suggested: 2× circuit – split‑squat, single‑leg RDL, calf‑raise, plank">light strength†</abbr> | — | — | Tendon stiffness |
+| **Sat** | Long‑run progressive ‡ | **30 → 40** | **72–78** | Durability + fuel pathway |
+| **Sun** | Walk / bike spin | 15 | **≤ 55** | Glycogen refill |
 
 <small>*Strides on 3–4 % grade if possible for eccentric stimulus.<br>†Body‑weight or < 25 % 1‑RM loads to avoid DOMS.<br>‡Always precede with 5‑min walk + 5‑min jog; finish with 5‑min walk cool‑down.</small>
 
-> *HRₘₐₓ = 201 bpm (cultivation data).  Pace bands stem from 8 : 03 min·mile⁻¹ aerobic speed; pipeline recalculates from `avg_pace_min_per_mile`.*
+> *Execution Priority: Maintain target HR strictly for all Z2 and Recovery sessions. Pace is secondary and should be adjusted (slowed or walked) as needed to stay within the target HR zone. Initial pace may be significantly slower than typical Z2 pace bands.*
+
+> *Initial pace at target Z2 HR needs to be established during the first few weeks.*
 
 ### 2.1 Load‑Ramp & Deload  – Mileage / Run‑time
 
-| Week | Run‑time (min) | Long‑run (min) | Strides (reps) | **Miles (low / high)** |
+| Week | Run‑time ( min) | Long‑run ( min) | Strides ( reps) | **Miles (low / high)** |
 |------|---------------|----------------|----------------|------------------------|
 | **1** | **95** | 30 | 6 | **9.5 / 10.2** |
 | **2** | 105 | 35 | 6 | 10.5 / 11.2 |
@@ -59,7 +61,7 @@ Run‑time grows ≈ 10 % per week, aligning with safe progression guideline
 
 ### 2.2 Equivalent Kilometres
 
-| Week | Km (low / high) |
+| Week | Km ( low / high) |
 |------|----------------|
 | 1 | 15 / 16.4 |
 | 2 | 16.9 / 18.0 |
@@ -114,6 +116,8 @@ CI YAML remains valid; no change required.
 2. **Fuel & hydration log** – record carbohydrate intake *(g · h⁻¹)* and fluids *(mL)* in `nutrition_log.csv` (schema: `date,session_id,carbs_g,fluid_ml`).
 3. **Mobility & strength capture** – `recovery.csv` (schema: `date,session_id,stretch_min,strength_min`) populated automatically from the mobile form check‑boxes.
 4. **Hill‑grade validator** – CI job `ci‑grade.yml` fails if the average grade during strides is < 2 % or > 6 % (parsed from FIT elevation data).
+5. **Live Cadence**: Monitor cadence during runs, aiming for gradual increase and consistency.
+6. **HR Zone Alerts**: Configure watch alerts for the Z2 upper limit (e.g., 160 bpm) to ensure intensity discipline.
 
 ---
 
@@ -161,11 +165,12 @@ Alerts are surfaced by `fatigue_watch.py` (daily cron) and block progression lab
 
 ---
 
-### 📎 Next Steps (unchanged)
+### 📎 Next Steps
 
-1. **Merge** this update and regenerate plan CSV via `pid_scheduler.py --template BaseOx --baseline_miles 10`.
-2. Verify CI gate green after the first upload.
-3. Schedule Week‑2 mini‑test (`subLT_drift.ipynb`).
+1. **Implement plan updates (Pace guidance, Cadence focus, Instrumentation).**
+2. **Execute Week 2 focusing strictly on Z2 HR adherence, letting pace fall where necessary.**
+3. **Monitor pace achieved during correct Z2 HR execution to establish a realistic baseline aerobic pace.**
+4. **Continue cadence improvement efforts.**
+5. **Investigate Wk18 Tue HR override data sparsity.**
 
 With the mileage correctly scaled *and* instrumentation / validation sections restored, the Base‑Ox plan is fully documented and self‑governing.
-
