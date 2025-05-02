@@ -1,0 +1,4 @@
+zone_effective	seconds	percent
+Z1 (Recovery)	356.0	23.544973544973544
+Z2 (Aerobic)	133.0	8.796296296296296
+mixed	1023.0	67.65873015873017

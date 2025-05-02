@@ -1,2 +1,0 @@
-Heart Rate Drift Analysis:
-{'first_half_hr': np.float64(185.68264014466547), 'second_half_hr': np.float64(190.05711610486892), 'hr_drift_pct': np.float64(2.3558884970589054)}

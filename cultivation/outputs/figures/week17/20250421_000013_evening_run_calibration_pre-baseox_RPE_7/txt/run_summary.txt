@@ -1,0 +1,26 @@
+Run Summary:
+  Start time: 2025-04-21 00:00:29+00:00
+  End time: 2025-04-21 00:43:51+00:00
+  Duration: 0 days 00:43:22
+  Total distance (km): 8.40
+  Avg pace (min/km): 4.66
+  Avg HR: 179.0
+  Max HR: 201.0
+  Avg cadence: 164.2
+  Elevation gain (m): N/A
+  --- Advanced Metrics (run_metrics) ---
+    distance_km: 7.97
+    duration_min: 36.2
+    avg_pace_min_per_km: 4.54
+    avg_hr: 179.0
+    efficiency_factor: 0.02051
+    decoupling_%: 8.48
+    hrTSS: 64.3
+    zones_applied: {"Z1 (Recovery)": {"bpm": [0, 145], "pace_min_per_km": [7.0, 999]}, "Z2 (Aerobic)": {"bpm": [145, 160], "pace_min_per_km": [5.6, 7.0]}, "Z3 (Tempo)": {"bpm": [161, 175], "pace_min_per_km": [5.2, 5.6]}, "Z4 (Threshold)": {"bpm": [176, 186], "pace_min_per_km": [4.8, 5.2]}, "Z5 (VO2max)": {"bpm": [187, 201], "pace_min_per_km": [0.0, 4.8]}}
+  Start location: (34.60708, -98.42584)
+  Weather at start:
+    Temperature: 20.4 °C (feels like None °C)
+    Precipitation: 0.0 mm
+    Humidity: None %
+    Wind speed: 7.6 km/h
+    Description: 0
