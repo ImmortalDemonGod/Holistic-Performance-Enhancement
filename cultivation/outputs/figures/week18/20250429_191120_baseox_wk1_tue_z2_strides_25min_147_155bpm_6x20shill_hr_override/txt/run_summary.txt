@@ -16,7 +16,7 @@ Run Summary:
     efficiency_factor: 0.01822
     decoupling_%: 1.24
     hrTSS: 62.3
-    zones_applied: {"Z1 (Recovery)": {"bpm": [0, 159], "pace_min_per_km": [999, 9.4]}, "Z2 (Aerobic)": {"bpm": [160, 185], "pace_min_per_km": [9.0, 9.4]}, "Z3 (Tempo)": {"bpm": [186, 195], "pace_min_per_km": [8.5, 8.9]}, "Z4 (Threshold)": {"bpm": [196, 186], "pace_min_per_km": [8.1, 8.4]}, "Z5 (VO2max)": {"bpm": [187, 201], "pace_min_per_km": [0, 8.0]}}
+    zones_applied: {"Z1 (Recovery)": {"bpm": [0, 159], "pace_min_per_km": [9.4, 999]}, "Z2 (Aerobic)": {"bpm": [160, 185], "pace_min_per_km": [9.0, 9.4]}, "Z3 (Tempo)": {"bpm": [186, 195], "pace_min_per_km": [8.5, 8.9]}, "Z4 (Threshold)": {"bpm": [186, 196], "pace_min_per_km": [8.1, 8.4]}, "Z5 (VO2max)": {"bpm": [187, 201], "pace_min_per_km": [0, 8.0]}}
   Start location: (34.60702, -98.42564)
   Weather at start:
     Temperature: 20.4 °C (feels like None °C)
