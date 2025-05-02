@@ -1,3 +1,4 @@
+
 Run Summary:
   Start time: 2025-05-01 16:51:43+00:00
   End time: 2025-05-01 17:16:55+00:00
@@ -8,6 +9,7 @@ Run Summary:
   Max HR: 162.0
   Avg cadence: 155.2
   Elevation gain (m): N/A
+
   --- Advanced Metrics (run_metrics) ---
     distance_km: 2.33
     duration_min: 17.7
@@ -16,7 +18,33 @@ Run Summary:
     efficiency_factor: 0.01465
     decoupling_%: 3.54
     hrTSS: 18.7
-    zones_applied: {"Z1 (Recovery)": {"bpm": [0, 145], "pace_min_per_km": [7.0, 999]}, "Z2 (Aerobic)": {"bpm": [145, 160], "pace_min_per_km": [5.6, 7.0]}, "Z3 (Tempo)": {"bpm": [161, 175], "pace_min_per_km": [5.2, 5.6]}, "Z4 (Threshold)": {"bpm": [176, 186], "pace_min_per_km": [4.8, 5.2]}, "Z5 (VO2max)": {"bpm": [187, 201], "pace_min_per_km": [0.0, 4.8]}}
+    zones_applied:
+      Z1 (Recovery): {'bpm': [0, 145], 'pace_min_per_km': [7.0, 999]}
+      Z2 (Aerobic): {'bpm': [145, 160], 'pace_min_per_km': [5.6, 7.0]}
+      Z3 (Tempo): {'bpm': [161, 175], 'pace_min_per_km': [5.2, 5.6]}
+      Z4 (Threshold): {'bpm': [176, 186], 'pace_min_per_km': [4.8, 5.2]}
+      Z5 (VO2max): {'bpm': [187, 201], 'pace_min_per_km': [0.0, 4.8]}
+
+
+--- Pre-Run Wellness Context (Data for 2025-05-01) ---
+  HRV (Whoop): 101.0 ms (Δ1d: -7.3%, Δ7d: n/a)
+  RHR (Whoop): 55.0 bpm (Δ1d: +3.8%, Δ7d: n/a)
+  RHR (Garmin): 47.0 bpm (Δ1d: -7.8%, Δ7d: -4.1%)
+  Recovery Score (Whoop): 84.0 % (Δ1d: +55.6%, Δ7d: n/a)
+  Sleep Score (Whoop): 81.0 % (Δ1d: +80.0%, Δ7d: n/a)
+  Body Battery (Garmin): 74.8 % (Δ1d: +109.9%, Δ7d: +21.7%)
+  Avg Stress (Garmin, Prev Day): 30.0 %
+  Sleep Duration (Whoop): 8.0 h (Δ1d: +112.0%, Δ7d: n/a)
+  Sleep Consistency (Whoop): 17.0 % (Δ1d: +41.7%, Δ7d: n/a)
+  Sleep Disturbances/hr (Whoop): 0.7  (Δ1d: -29.3%, Δ7d: n/a)
+  Strain Score (Whoop): n/a
+  Skin Temp (Whoop): 91.0 °F (Δ1d: +176.6%, Δ7d: n/a)
+  Resp Rate (Whoop): 17.2 rpm (Δ1d: -3.3%, Δ7d: n/a)
+  Steps (Garmin): 6445.0  (Δ1d: +157.7%, Δ7d: +54.5%)
+  Total Activity (Garmin): 73.7 min (Δ1d: +5.8%, Δ7d: -17.9%)
+  Resp Rate (Garmin): 15.1 rpm (Δ1d: +4.7%, Δ7d: +6.9%)
+  VO2max (Garmin): 53.0 ml/kg/min
+  ---
   Start location: (34.60741, -98.43125)
   Weather at start:
     Temperature: 20.3 °C (feels like None °C)
