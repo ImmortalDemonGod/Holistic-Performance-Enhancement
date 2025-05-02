@@ -326,13 +326,19 @@ def main():
     VERBOSE = args.verbose
     # ---------- NEW: regenerate zones YAML if requested ----------
     if args.rebuild_zones:
+        def _ascending(a, b):
+            return [min(a, b), max(a, b)]
         zones = {
-            'Z1 (Recovery)': {'bpm': [0, args.aet-1], 'pace_min_per_km': [999, 9.4]},
-            'Z2 (Aerobic)':  {'bpm': [args.aet, args.lt-1], 'pace_min_per_km': [9.0, 9.4]},
-            'Z3 (Tempo)':    {'bpm': [args.lt, args.lt+9], 'pace_min_per_km': [8.5, 8.9]},
-            'Z4 (Threshold)':{'bpm': [args.lt+10, args.hrmax-15], 'pace_min_per_km': [8.1, 8.4]},
-            'Z5 (VO2max)':   {'bpm': [args.hrmax-14, args.hrmax], 'pace_min_per_km': [0,   8.0]},
+            'Z1 (Recovery)': {'bpm': _ascending(0, args.aet-1), 'pace_min_per_km': _ascending(9.4, 999)},
+            'Z2 (Aerobic)':  {'bpm': _ascending(args.aet, args.lt-1), 'pace_min_per_km': _ascending(9.0, 9.4)},
+            'Z3 (Tempo)':    {'bpm': _ascending(args.lt, args.lt+9), 'pace_min_per_km': _ascending(8.5, 8.9)},
+            'Z4 (Threshold)':{'bpm': _ascending(args.lt+10, args.hrmax-15), 'pace_min_per_km': _ascending(8.1, 8.4)},
+            'Z5 (VO2max)':   {'bpm': _ascending(args.hrmax-14, args.hrmax), 'pace_min_per_km': _ascending(0, 8.0)},
         }
+        # Optional: sanity check for reversed bounds
+        for name, z in zones.items():
+            assert z['bpm'][0] <= z['bpm'][1], f"{name} bpm bounds reversed!"
+            assert z['pace_min_per_km'][0] <= z['pace_min_per_km'][1], f"{name} pace bounds reversed!"
         with _ZONES_FILE.open('w') as f:
             import yaml
             yaml.safe_dump(zones, f)
