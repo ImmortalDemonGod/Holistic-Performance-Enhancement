@@ -3,8 +3,8 @@ Z1 (Recovery):
   - 0
   - 159
   pace_min_per_km:
-  - 999
   - 9.4
+  - 999
 Z2 (Aerobic):
   bpm:
   - 160
@@ -21,8 +21,8 @@ Z3 (Tempo):
   - 8.9
 Z4 (Threshold):
   bpm:
-  - 196
   - 186
+  - 196
   pace_min_per_km:
   - 8.1
   - 8.4
