@@ -1,0 +1,7 @@
+.venvtomriddle1@Toms-Mac-mini Holistic-Performance-Enhancement % rm -rf cultivation/outputs/figures/week18 cultivation/outputs/figures/week17 \
+cultivation/data/processed/20250421_000013_evening_run_gpx_summary.csv \
+cultivation/data/processed/20250425_201748_afternoon_run_gpx_summary.csv \
+cultivation/data/processed/20250429_191120_baseox_wk1_tue_z2_strides_25min_147_155bpm_6x20shill_hr_override_gpx_summary.csv \
+cultivation/data/processed/20250501_164245_baseox_wk1_day4_thu_z2steady_25min_warmup_cooldown_cameron_loop_hr147_155_cadence82_84_rpe_3_gpx_summary.csv && \
+/Users/tomriddle1/Holistic-Performance-Enhancement/.venv/bin/python \
+/Users/tomriddle1/Holistic-Performance-Enhancement/cultivation/scripts/running/process_all_runs.py
