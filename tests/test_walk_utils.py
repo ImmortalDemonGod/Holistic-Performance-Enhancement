@@ -20,7 +20,7 @@ def make_valid_walk_df():
 # 1. Input validation: missing columns
 def test_missing_columns():
     df = make_valid_walk_df().drop(columns=['cadence'])
-    with pytest.raises((KeyError, ValueError)):
+    with pytest.raises((TypeError, ValueError)):
         walk_utils.walk_block_segments(
             df, 'is_walk', 'pace_min_per_km', 'cadence', 140
         )
@@ -29,7 +29,7 @@ def test_missing_columns():
 def test_invalid_types():
     df = make_valid_walk_df()
     df['cadence'] = 'bad'  # string instead of numeric
-    with pytest.raises(Exception):
+    with pytest.raises((TypeError, ValueError)):
         walk_utils.walk_block_segments(
             df, 'is_walk', 'pace_min_per_km', 'cadence', 140
         )
