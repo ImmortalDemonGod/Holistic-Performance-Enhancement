@@ -167,6 +167,28 @@ def main():
     parser.add_argument('--prefix', type=str, required=True, help='Prefix for output files (e.g., date_activity)')
     args = parser.parse_args()
 
+    # --- Load wellness context if available ---
+    wellness_context = None
+    VERBOSE = False
+    try:
+        wellness_path = os.path.join(os.path.dirname(__file__), '../../data/daily_wellness.parquet')
+        wellness_path = os.path.abspath(wellness_path)
+        if os.path.exists(wellness_path):
+            wellness_df = pd.read_parquet(wellness_path)
+            # Use today's date or closest available
+            today = df.index[0].date() if hasattr(df.index[0], 'date') else pd.to_datetime(df.index[0]).date()
+            if today in wellness_df.index:
+                wellness_context = wellness_df.loc[today].to_dict()
+            else:
+                # fallback: use most recent available
+                wellness_context = wellness_df.iloc[-1].to_dict()
+        else:
+            wellness_context = {}
+    except Exception as e:
+        wellness_context = {}
+        if VERBOSE:
+            print(f"[WARN] Could not load wellness data: {e}")
+
     df = pd.read_csv(args.input, index_col=0, parse_dates=True)
     zones = load_personal_zones()
     zone_hr, zone_pace, zone_effective = compute_training_zones(df['heart_rate'], df['pace_min_per_km'], zones)
