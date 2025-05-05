@@ -13,13 +13,16 @@ import json
 import requests
 import argparse
 
-CALENDAR_CSV = Path(__file__).parents[3] / 'training_plans' / '2025_Q2_running_plan.csv'
-LOOKUP_TABLE = Path(__file__).parent.parent.parent / 'data' / 'pid_lookup.csv'
-STATUS_PATH = Path(__file__).parent.parent.parent / 'data' / 'status.json'
+# --- Path configuration ---
+PROJECT_ROOT  = Path(__file__).resolve().parents[3]          # cultivation repo-root
+CALENDAR_CSV  = PROJECT_ROOT / 'training_plans' / '2025_Q2_running_plan.csv'
+DATA_DIR      = PROJECT_ROOT / 'cultivation' / 'data'
+LOOKUP_TABLE  = DATA_DIR / 'pid_lookup.csv'
+STATUS_PATH   = DATA_DIR / 'status.json'
 
-MODEL = os.getenv('MODEL', 'claude-3-opus-20240229')
+MODEL = os.environ.get('MODEL', 'claude-3-opus-20240229')
 PHASES = ["Base-Ox", "Tempo-Dur", "Peak"]
-REPO_SLUG = os.getenv('GITHUB_REPOSITORY', 'ImmortalDemonGod/Holistic-Performance-Enhancement')
+REPO_SLUG = os.environ.get('GITHUB_REPOSITORY', 'ImmortalDemonGod/Holistic-Performance-Enhancement')
 
 def emit_pid(date):
     """
@@ -66,12 +69,12 @@ def kpi_gate_passed():
     """
     Check if the latest run-metrics workflow succeeded via GitHub REST API.
     Returns:
-        bool: True if gate passed or token missing, False otherwise
+        bool: True if gate passed, False otherwise
     """
-    token = os.getenv("GITHUB_TOKEN")
+    token = os.environ.get("GITHUB_TOKEN")
     if not token:
-        print("Warning: GITHUB_TOKEN not set; assuming gate passed.")
-        return True
+        print("Error: GITHUB_TOKEN missing – unable to verify KPI gate.")
+        return False  # keep current phase
     url = f"https://api.github.com/repos/{REPO_SLUG}/actions/workflows/run-metrics.yml/runs?per_page=1&branch=main&status=completed"
     headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github+json"}
     try:
@@ -140,7 +143,8 @@ def main():
         # Find matching row in calendar
         row = df[df['Week'] == week]
         if not row.empty:
-            activity = row.iloc[0][day_name]
+            row = row.iloc[0]  # Ensure row is a Series, not DataFrame
+            activity = row[day_name]
             if activity and activity.lower() not in ['rest', 'rest/hrv']:
                 pid = emit_pid(monday + timedelta(days=i))
                 print(f"Scheduling: {pid} - {activity}")
