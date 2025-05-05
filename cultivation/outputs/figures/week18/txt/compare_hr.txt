@@ -1,3 +1,3 @@
 Heart Rate Comparison (Week 18):
+20250503_174110_baseox_wk1_sat_day6_proglong_30_40min_145_160bpm_11-14minmi_Z2_durability_rpe_4_anklepain_2: mean=152.7, max=176
 20250501_164245_baseox_wk1_day4_thu_z2steady_25min_postflood_cameron_loop_hr147_155_cadence82_84_rpe_3: mean=149.5, max=162
-20250429_191120_baseox_wk1_tue_z2_strides_25min_147_155bpm_6x20shill_RPE_5_hr_override: mean=175.0, max=189.0
