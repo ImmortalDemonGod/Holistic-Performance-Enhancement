@@ -3,16 +3,76 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 import os
-from weather_utils import fetch_weather_open_meteo
-from metrics import load_personal_zones, compute_training_zones, run_metrics, lower_z2_bpm
+import sys
+
+# Add the script directory to the path for direct script execution
+script_dir = os.path.dirname(os.path.abspath(__file__))
+if script_dir not in sys.path:
+    sys.path.insert(0, script_dir)
+
+# Import the required modules
+try:
+    # First try direct imports (for script execution)
+    from weather_utils import fetch_weather_open_meteo, get_weather_description
+    from metrics import load_personal_zones, compute_training_zones, run_metrics, lower_z2_bpm
+except ImportError:
+    # Fall back to full module path (for module imports)
+    from cultivation.scripts.running.weather_utils import fetch_weather_open_meteo, get_weather_description
+    from cultivation.scripts.running.metrics import load_personal_zones, compute_training_zones, run_metrics, lower_z2_bpm
 
 def time_in_zone(df, zone_col='zone_hr'):
+    """Calculate time spent in each zone.
+
+    Args:
+        df: DataFrame with time index
+        zone_col: Column containing zone labels
+
+    Returns:
+        DataFrame with seconds and percent columns
+    """
     df = df.copy()
     df['time_delta_s'] = df.index.to_series().diff().dt.total_seconds().fillna(0)
     zone_times = df.groupby(zone_col)['time_delta_s'].sum()
     total_time = zone_times.sum()
     zone_pct = zone_times / total_time * 100
     return pd.DataFrame({'seconds': zone_times, 'percent': zone_pct})
+
+def calculate_fatigue_kpi_zones(df):
+    """Calculate fatigue KPI zones based on heart rate data.
+
+    Fatigue KPI zones are used to monitor training load and fatigue.
+    - 'Recovery': HR < lower_z2_bpm
+    - 'Aerobic': lower_z2_bpm <= HR <= 160 (Base-Ox Z2 ceiling)
+    - 'Threshold': 160 < HR <= 175 (Base-Ox Z3 ceiling)
+    - 'High Intensity': HR > 175
+
+    Args:
+        df: DataFrame with heart_rate column
+
+    Returns:
+        Series with fatigue KPI zone labels
+    """
+    if 'heart_rate' not in df.columns:
+        return pd.Series(index=df.index)
+
+    # Get the lower Z2 boundary
+    lz2 = lower_z2_bpm()
+
+    # Define fatigue KPI zones based on heart rate
+    conditions = [
+        df['heart_rate'] < lz2,
+        (df['heart_rate'] >= lz2) & (df['heart_rate'] <= 160),
+        (df['heart_rate'] > 160) & (df['heart_rate'] <= 175),
+        df['heart_rate'] > 175
+    ]
+    choices = [
+        'Recovery (< Z2)',
+        'Aerobic (Z2)',
+        'Threshold (Z3)',
+        'High Intensity (Z4+)'
+    ]
+
+    return pd.Series(np.select(conditions, choices, default=None), index=df.index)
 
 def generate_recommendations(results):
     recs = []
@@ -22,12 +82,24 @@ def generate_recommendations(results):
     z5_pct = tiz_hr['percent'].get('Z5 (VO2max)', 0)
     if z4_pct > 30 or z5_pct > 10:
         recs.append("Consider more aerobic base training to balance high-intensity work.")
+
+    # Time in fatigue KPI zones
+    tiz_fatigue = results['time_in_zone_fatigue_kpi']
+    threshold_pct = tiz_fatigue['percent'].get('Threshold (Z3)', 0)
+    high_intensity_pct = tiz_fatigue['percent'].get('High Intensity (Z4+)', 0)
+
+    # Base-Ox phase recommendations
+    if threshold_pct + high_intensity_pct > 20:
+        recs.append("During Base-Ox phase, limit time above 160 bpm to less than 20% of total run time.")
+
     # HR drift
     if results['hr_drift']['hr_drift_pct'] > 5:
         recs.append("Significant HR drift detected—focus on aerobic endurance and pacing.")
+
     # Pacing
     if results['pacing']['strategy'] == 'positive':
         recs.append("Try to avoid slowing down in the second half—aim for even or negative splits.")
+
     return recs
 
 def detect_strides(df, pace_threshold=4.5, min_stride_duration=8, max_stride_duration=40, cadence_threshold=80):
@@ -101,20 +173,36 @@ def main():
     df['zone_hr'] = zone_hr
     df['zone_pace'] = zone_pace
     df['zone_effective'] = zone_effective
+
+    # Calculate fatigue KPI zones
+    df['zone_fatigue_kpi'] = calculate_fatigue_kpi_zones(df)
+
     df = detect_strides(df)
     tiz_hr = time_in_zone(df, zone_col='zone_hr')
     tiz_pace = time_in_zone(df, zone_col='zone_pace')
     tiz_effective = time_in_zone(df, zone_col='zone_effective')
+    tiz_fatigue_kpi = time_in_zone(df, zone_col='zone_fatigue_kpi')
+
     hr_drift = compute_hr_drift(df)
     pacing = pacing_strategy(df)
-    results = {'time_in_zone_hr': tiz_hr, 'time_in_zone_pace': tiz_pace, 'time_in_zone_effective': tiz_effective, 'hr_drift': hr_drift, 'pacing': pacing}
+
+    results = {
+        'time_in_zone_hr': tiz_hr,
+        'time_in_zone_pace': tiz_pace,
+        'time_in_zone_effective': tiz_effective,
+        'time_in_zone_fatigue_kpi': tiz_fatigue_kpi,
+        'hr_drift': hr_drift,
+        'pacing': pacing
+    }
     recs = generate_recommendations(results)
-    print("\n--- Training Zone Time (%) ---")
+    print("\n--- HR Zone Time (%) ---")
     print(tiz_hr)
-    print("\n--- Training Zone Time (%) ---")
+    print("\n--- Pace Zone Time (%) ---")
     print(tiz_pace)
-    print("\n--- Training Zone Time (%) ---")
+    print("\n--- Effective Zone Time (%) ---")
     print(tiz_effective)
+    print("\n--- Fatigue KPI Zone Time (%) ---")
+    print(tiz_fatigue_kpi)
     print("\n--- HR Drift ---")
     print(hr_drift)
     print("\n--- Pacing Strategy ---")
@@ -145,10 +233,18 @@ def main():
     plt.tight_layout()
     plt.savefig(f"{img_dir}/time_in_effective_zone.png")
     plt.close()
+
+    # Plot time in fatigue KPI zones
+    tiz_fatigue_kpi['percent'].plot(kind='bar', color='skyblue', title='Time in Fatigue KPI Zone (%)')
+    plt.ylabel('% of Run Time')
+    plt.tight_layout()
+    plt.savefig(f"{img_dir}/time_in_fatigue_kpi_zone.png")
+    plt.close()
     # Save textual representation of time in zones
     tiz_hr.to_csv(f"{txt_dir}/time_in_hr_zone.txt", sep='\t')
     tiz_pace.to_csv(f"{txt_dir}/time_in_pace_zone.txt", sep='\t')
     tiz_effective.to_csv(f"{txt_dir}/time_in_effective_zone.txt", sep='\t')
+    tiz_fatigue_kpi.to_csv(f"{txt_dir}/time_in_fatigue_kpi_zone.txt", sep='\t')
     # Plot HR drift
     df['heart_rate'].plot(label='Heart Rate', alpha=0.7)
     plt.axvline(df.index[len(df)//2], color='red', linestyle='--', label='Midpoint')
@@ -186,7 +282,7 @@ def main():
     # Weather fetch
     lat = df['latitude'].iloc[0] if 'latitude' in df else None
     lon = df['longitude'].iloc[0] if 'longitude' in df else None
-    weather, offset = fetch_weather_open_meteo(lat, lon, df.index[0])
+    weather, _ = fetch_weather_open_meteo(lat, lon, df.index[0])
     if (
         weather
         and 'hourly' in weather
@@ -203,13 +299,17 @@ def main():
                 pass
         temp = weather['hourly']['temperature_2m'][idx]
         app_temp = weather['hourly'].get('apparent_temperature', [None]*len(weather['hourly']['temperature_2m']))[idx]
+        desc = weather['hourly'].get('weathercode', [None]*len(weather['hourly']['temperature_2m']))[idx]
         with open(f"{txt_dir}/weather.txt", "w") as f:
             f.write(f"Temperature: {temp}, Apparent: {app_temp}\n")
+            f.write(f"Description: {get_weather_description(desc)}\n")
     else:
         marker_path = os.path.join(txt_dir, "weather_failed.marker")
         with open(marker_path, "w") as mf:
             mf.write(f"Weather fetch failed for run at {df.index[0]} (lat={lat}, lon={lon}) on {pd.Timestamp.now()}\n")
     # Advanced metrics
+    adv_metrics = None
+    adv_metrics_error = None
     try:
         # Ensure 'hr' column exists for metrics.py compatibility
         if 'heart_rate' in df.columns and 'hr' not in df.columns:
@@ -218,10 +318,14 @@ def main():
         if 'pace_sec_km' not in df.columns and 'pace_min_per_km' in df.columns:
             df['pace_sec_km'] = df['pace_min_per_km'] * 60
         adv_metrics = run_metrics(df, threshold_hr=175, resting_hr=50)
-        adv_metrics_lines = []
+    except Exception as e:
+        adv_metrics_error = str(e)
+    # Write advanced metrics to file
+    adv_metrics_lines = []
+    if adv_metrics is not None:
         for k, v in adv_metrics.items():
             if k == 'zones_applied':
-                adv_metrics_lines.append(f"    zones_applied:")
+                adv_metrics_lines.append("    zones_applied:")
                 try:
                     import json
                     zones_dict = json.loads(v) if isinstance(v, str) else v
@@ -231,11 +335,10 @@ def main():
                     adv_metrics_lines.append(f"      [Error decoding zones_applied: {e}]")
             else:
                 adv_metrics_lines.append(f"    {k}: {v}")
-        with open(f"{txt_dir}/advanced_metrics.txt", "w") as f:
-            f.write("\n".join(adv_metrics_lines) + "\n")
-    except Exception as e:
-        with open(f"{txt_dir}/advanced_metrics.txt", "w") as f:
-            f.write(f"Failed to compute advanced metrics: {e}\n")
+    else:
+        adv_metrics_lines.append(f"Failed to compute advanced metrics: {adv_metrics_error}")
+    with open(f"{txt_dir}/advanced_metrics.txt", "w") as f:
+        f.write("\n".join(adv_metrics_lines) + "\n")
     # --- Save run-level summary as text ---
     summary_lines = [
         "\nRun Summary:",
@@ -251,17 +354,10 @@ def main():
     ]
     summary_lines.append("")
     summary_lines.append("  --- Advanced Metrics (run_metrics) ---")
-    try:
-        # Ensure 'hr' column exists for metrics.py compatibility
-        if 'heart_rate' in df.columns and 'hr' not in df.columns:
-            df['hr'] = df['heart_rate']
-        # Ensure 'pace_sec_km' exists for metrics.py compatibility
-        if 'pace_sec_km' not in df.columns and 'pace_min_per_km' in df.columns:
-            df['pace_sec_km'] = df['pace_min_per_km'] * 60
-        adv_metrics = run_metrics(df, threshold_hr=175, resting_hr=50)
+    if adv_metrics is not None:
         for k, v in adv_metrics.items():
             if k == 'zones_applied':
-                summary_lines.append(f"    zones_applied:")
+                summary_lines.append("    zones_applied:")
                 try:
                     import json
                     zones_dict = json.loads(v) if isinstance(v, str) else v
@@ -271,48 +367,9 @@ def main():
                     summary_lines.append(f"      [Error decoding zones_applied: {e}]")
             else:
                 summary_lines.append(f"    {k}: {v}")
-    except Exception as e:
-        summary_lines.append(f"  [metrics] Could not compute advanced metrics: {e}")
+    else:
+        summary_lines.append(f"  [metrics] Could not compute advanced metrics: {adv_metrics_error}")
     summary_lines.append("")
-    # --- Add Pre-Run Wellness Context ---
-    from datetime import timedelta
-    wellness_context = {}
-    try:
-        CACHE_FILE = os.path.join(os.path.dirname(__file__), "..", "..", "data", "daily_wellness.parquet")
-        wellness_df = pd.read_parquet(CACHE_FILE)
-        # Ensure index is date
-        if not pd.api.types.is_datetime64_any_dtype(wellness_df.index):
-            wellness_df.index = pd.to_datetime(wellness_df.index).date
-        run_date = df.index[0].date()
-        prev_date = run_date - timedelta(days=1)
-        try:
-            today = wellness_df.loc[run_date]
-            wellness_context['hrv_whoop'] = today.get('hrv_whoop', None)
-            wellness_context['rhr_whoop'] = today.get('rhr_whoop', None)
-            wellness_context['rhr_garmin'] = today.get('rhr_garmin', None)
-            wellness_context['recovery_score_whoop'] = today.get('recovery_score_whoop', None)
-            wellness_context['sleep_score_whoop'] = today.get('sleep_score_whoop', None)
-            wellness_context['body_battery_garmin'] = today.get('body_battery_garmin', None)
-            wellness_context['avg_stress_garmin_prev_day'] = today.get('avg_stress_garmin_prev_day', None)
-            wellness_context['sleep_total_whoop'] = today.get('sleep_total_whoop', None)
-            wellness_context['sleep_consistency_whoop'] = today.get('sleep_consistency_whoop', None)
-            wellness_context['sleep_disturbances_per_hour_whoop'] = today.get('sleep_disturbances_per_hour_whoop', None)
-            wellness_context['strain_score_whoop'] = today.get('strain_score_whoop', None)
-            wellness_context['skin_temp_whoop'] = today.get('skin_temp_whoop', None)
-            wellness_context['resp_rate_whoop'] = today.get('resp_rate_whoop', None)
-            wellness_context['steps_garmin'] = today.get('steps_garmin', None)
-            wellness_context['total_activity_garmin'] = today.get('total_activity_garmin', None)
-            wellness_context['resp_rate_garmin'] = today.get('resp_rate_garmin', None)
-            wellness_context['vo2max_garmin'] = today.get('vo2max_garmin', None)
-        except Exception:
-            pass
-        try:
-            yesterday = wellness_df.loc[prev_date]
-            wellness_context['avg_stress_garmin_prev_day'] = yesterday.get('avg_stress_garmin', None)
-        except Exception:
-            pass
-    except Exception:
-        pass
     # Convert skin_temp_whoop and its comparison values from C to F before summary
     def _to_float(val):
         try:
@@ -425,7 +482,7 @@ def main():
     lat = df['latitude'].iloc[0] if 'latitude' in df else None
     lon = df['longitude'].iloc[0] if 'longitude' in df else None
     summary_lines.append(f"  Start location: ({lat:.5f}, {lon:.5f})" if lat is not None and lon is not None else "  Start location: N/A")
-    weather, offset = fetch_weather_open_meteo(lat, lon, df.index[0])
+    weather, _ = fetch_weather_open_meteo(lat, lon, df.index[0])
     if (
         weather
         and 'hourly' in weather
@@ -451,7 +508,7 @@ def main():
         summary_lines.append(f"    Precipitation: {precip} mm")
         summary_lines.append(f"    Humidity: {humidity} %")
         summary_lines.append(f"    Wind speed: {wind} km/h")
-        summary_lines.append(f"    Description: {desc}")
+        summary_lines.append(f"    Description: {get_weather_description(desc)}")
     else:
         summary_lines.append("  Weather at start: N/A [weather API unavailable or failed]")
         marker_path = os.path.join(txt_dir, "weather_failed.marker")
