@@ -1,3 +1,5 @@
+# NOTE: Seaborn is permitted in this script, but NOT in any python_user_visible tool or UI-facing code per project policy.
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -82,6 +84,44 @@ if __name__ == '__main__':
     with open(f"{txt_dir}/hr_vs_pace_hexbin.txt", "w") as f:
         f.write("Correlation between Heart Rate and Pace (min/km):\n")
         f.write(f"Correlation coefficient: {corr:.3f}\n")
+
+    # --- POWER ANALYSIS ---
+    if 'power' in df.columns:
+        power_df = df.dropna(subset=['power'])
+        # Plot power distribution
+        plt.figure(figsize=(10, 5))
+        sns.histplot(power_df['power'], bins=20, kde=True, color='orange')
+        plt.title('Power Distribution (W)')
+        plt.xlabel('Power (W)')
+        plt.ylabel('Frequency')
+        plt.tight_layout()
+        plt.savefig(f"{img_dir}/power_distribution.png")
+        plt.close()
+        # Text summary
+        power_desc = power_df['power'].describe(percentiles=[0.1, 0.25, 0.5, 0.75, 0.9])
+        with open(f"{txt_dir}/power_distribution.txt", "w") as f:
+            f.write("Power Distribution (W):\n")
+            f.write(power_desc.to_string())
+            f.write("\n")
+
+    # --- CADENCE ANALYSIS ---
+    if 'cadence' in df.columns:
+        cadence_df = df.dropna(subset=['cadence'])
+        # Plot cadence distribution
+        plt.figure(figsize=(10, 5))
+        sns.histplot(cadence_df['cadence'], bins=20, kde=True, color='green')
+        plt.title('Cadence Distribution (spm)')
+        plt.xlabel('Cadence (spm)')
+        plt.ylabel('Frequency')
+        plt.tight_layout()
+        plt.savefig(f"{img_dir}/cadence_distribution.png")
+        plt.close()
+        # Text summary
+        cadence_desc = cadence_df['cadence'].describe(percentiles=[0.1, 0.25, 0.5, 0.75, 0.9])
+        with open(f"{txt_dir}/cadence_distribution.txt", "w") as f:
+            f.write("Cadence Distribution (spm):\n")
+            f.write(cadence_desc.to_string())
+            f.write("\n")
 
     # Optional: Print some quantiles
     print('Heart Rate Quantiles:')

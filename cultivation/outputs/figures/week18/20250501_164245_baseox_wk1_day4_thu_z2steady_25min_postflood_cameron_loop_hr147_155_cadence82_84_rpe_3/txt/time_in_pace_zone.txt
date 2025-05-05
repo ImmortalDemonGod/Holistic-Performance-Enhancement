@@ -1,0 +1,5 @@
+zone_pace	seconds	percent
+Z1 (Recovery)	1081.0	71.494708994709
+Z2 (Aerobic)	34.0	2.2486772486772484
+Z3 (Tempo)	396.0	26.190476190476193
+Z4 (Threshold)	1.0	0.06613756613756613

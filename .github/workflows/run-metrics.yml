@@ -1,0 +1,47 @@
+on:
+  push:
+    paths: ['cultivation/data/processed/**']
+jobs:
+  metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y jq bc
+      - run: pip install -r requirements.txt
+      - run: python cultivation/scripts/running/aggregate_weekly_runs.py
+      - id: kpi
+        run: |
+          python - <<'PY'
+          import os, pathlib, sys, json, pandas as pd
+          w = pd.read_parquet('cultivation/data/weekly_metrics.parquet').tail(2)
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+              if len(w) < 2:
+                  fh.write(f"insufficient_data=true\n")
+                  fh.write(f"ef=\n")
+                  fh.write(f"ef_abs=\n")
+                  fh.write(f"drift=\n")
+                  print(json.dumps({'ef': None, 'drift': None}))
+                  sys.exit(0)
+              ef = (w['ef_mean'].iloc[-1] - w['ef_mean'].iloc[-2]) / w['ef_mean'].iloc[-2]
+              drift = w['decoupling_mean'].iloc[-1]
+              fh.write(f"insufficient_data=false\n")
+              fh.write(f"ef={ef}\n")
+              fh.write(f"ef_abs={abs(ef)}\n")
+              fh.write(f"drift={drift}\n")
+          print(json.dumps({'ef':ef, 'drift':drift}))
+          PY
+      - name: Calc KPI flags
+        run: |
+          if (( $(echo "${{ steps.kpi.outputs.ef_abs }} < 0.05" | bc -l) )) || \
+             (( $(echo "${{ steps.kpi.outputs.ef }} < 0" | bc -l) )) || \
+             (( $(echo "${{ steps.kpi.outputs.drift }} > 0.07" | bc -l) )); then
+             echo "gate_fail=true" >> "$GITHUB_OUTPUT"
+          fi
+        id: gate
+
+      - name: Fail if KPIs unmet
+        if: steps.gate.outputs.gate_fail == 'true'
+        run: exit 1
+      - name: Insufficient data status
+        if: ${{ steps.kpi.outputs.insufficient_data == 'true' }}
+        run: echo "::warning ::Not enough weeks for KPI diff; skipping gate"

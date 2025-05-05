@@ -1,0 +1,2 @@
+Temperature: 18.8, Apparent: None
+Description: Mainly clear
