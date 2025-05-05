@@ -3,9 +3,9 @@ import pandas as pd
 import math
 
 def filter_gps_jitter(df, pace_col, cad_col, cad_thr):
-    """Keep rows where pace > 8.7 min/km (14 min/mile) OR cadence < 140 spm (i.e., walking if either is true)."""
+    """Keep rows where pace > 8.7 min/km (14 min/mile) OR cadence < cad_thr spm (i.e., walking if either is true)."""
     walk_pace = (df[pace_col] > 8.7)
-    walk_cad = (df[cad_col] < 140)
+    walk_cad = (df[cad_col] < cad_thr)
     return df[walk_pace | walk_cad]
 
 
@@ -100,7 +100,10 @@ def walk_block_segments(gpx_df, is_walk_col, pace_col, cad_col, cad_thr=128, max
         # --- DEBUG for sanity fail ---
         if dur_s >= 60 and (pd.isnull(dist_km) or dist_km <= 0):
             print(f"[SANITY DEBUG] BAD SEGMENT: seg_id={seg_id}, start={start_ts}, end={end_ts}, dur_s={dur_s}, dist_km={dist_km}")
-            print(grp_df[['distance_cumulative_km', 'dt']])
+            cols = ['distance_cumulative_km']
+            if 'dt' in grp_df.columns:
+                cols.append('dt')
+            print(grp_df[cols])
         avg_pace = compute_time_weighted_pace(dur_s, dist_km)
         if pd.isnull(avg_pace) and not pd.isnull(dist_km) and dist_km > 0:
             avg_pace_val = ''
