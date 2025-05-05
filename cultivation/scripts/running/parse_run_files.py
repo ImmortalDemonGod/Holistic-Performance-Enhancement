@@ -112,7 +112,8 @@ def add_distance_and_speed(df):
     df['time_prev'] = df.index.to_series().shift(1)
     df['time_delta_s'] = (df.index - df['time_prev']).dt.total_seconds().fillna(0)
     df['dt'] = df['time_delta_s']
-    df['speed_mps'] = df['distance_segment_m'] / df['time_delta_s']
+    time_delta = df['time_delta_s'].replace(0, np.nan)
+    df['speed_mps'] = df['distance_segment_m'] / time_delta
     df['speed_mps'] = df['speed_mps'].bfill()
     # --- Always create distance_cumulative_km and pace_min_per_km ---
     if 'distance_segment_m' in df.columns:
@@ -120,7 +121,7 @@ def add_distance_and_speed(df):
     else:
         df['distance_cumulative_km'] = np.nan
     if 'speed_mps' in df.columns:
-        df['pace_min_per_km'] = 16.6667 / df['speed_mps'].replace(0, np.nan)
+        df['pace_min_per_km'] = 16.6667 / df['speed_mps'].replace([0, np.inf], np.nan)
     else:
         df['pace_min_per_km'] = np.nan
     # --- Diagnostics if all NaN ---
@@ -158,14 +159,16 @@ def summarize_run(df, label):
     # --- Integrate metrics if GPX ---
     if 'pace_sec_km' in df.columns:
         try:
-            from metrics import run_metrics
+            from cultivation.scripts.running.metrics import run_metrics
             metrics = run_metrics(df, threshold_hr=175, resting_hr=50)
             summary.update(metrics)
         except Exception as e:
-            if VERBOSE: print(f"[metrics] Could not compute advanced metrics: {e}")
-    if VERBOSE: print(f"\nSummary for {label}:")
-    for k, v in summary.items():
-        if VERBOSE: print(f"  {k}: {v}")
+            if VERBOSE:
+                print(f"[metrics] Could not compute advanced metrics: {e}")
+    if VERBOSE:
+        print(f"\nSummary for {label}:")
+        for k, v in summary.items():
+            print(f"  {k}: {v}")
     return summary
 
 def main():
@@ -231,17 +234,16 @@ def main():
                 txt_dir = run_dir / 'txt'
                 txt_dir.mkdir(parents=True, exist_ok=True)
                 # --- Use concise, generic names for summary files ---
-                walk_txt = str(txt_dir / 'walk.txt')
                 session_summary_txt = str(txt_dir / 'session_full_summary.txt')
                 run_only_summary_txt = str(txt_dir / 'run_only_summary.txt')
             else:
                 raise RuntimeError("figures_dir and prefix must be provided to determine walk summary output directory.")
             print(f"[DIAG] output_path: {output_path}")
-            print(f"[DIAG] walk_txt: {walk_txt}")
             print(f"[DIAG] session_summary_txt: {session_summary_txt}")
             print(f"[DIAG] run_only_summary_txt: {run_only_summary_txt}")
             print(f"[DIAG] CWD: {os.getcwd()}")
             print(f"[DIAG] walk_df shape before writing: {walk_df.shape}")
+            print(f"[DIAG] ARGS: figures_dir={getattr(args, 'figures_dir', None)} prefix={getattr(args, 'prefix', None)} input={getattr(args, 'input', None)} output={getattr(args, 'output', None)} planning_id={getattr(args, 'planning_id', None)}")
             # --- Write session-level summary (Strava-like, all data) ---
             with open(session_summary_txt, 'w') as f:
                 f.write("Run Session Summary (Strava-like):\n")
@@ -254,34 +256,36 @@ def main():
                 for k, v in run_only_summary.items():
                     f.write(f"  {k}: {v}\n")
             if walk_df.empty:
-                print(f"[WARN] walk_df is empty, not writing walk summary file: {walk_txt}")
+                print(f"[WARN] walk_df is empty, not writing walk segments.")
             else:
-                print(f"[DIAG] Writing walk summary to: {walk_txt}")
-                cols = ['timestamp','distance_cumulative_km','pace_min_per_km','cadence','heart_rate']
-                walk_out = walk_df.copy()
-                idx_name = walk_out.index.name
-                if 'timestamp' not in walk_out.columns:
-                    walk_out = walk_out.reset_index()
-                    if 'index' in walk_out.columns and 'timestamp' not in walk_out.columns:
-                        walk_out = walk_out.rename(columns={'index': 'timestamp'})
-                    elif idx_name and idx_name != 'timestamp' and idx_name in walk_out.columns:
-                        walk_out = walk_out.rename(columns={idx_name: 'timestamp'})
-                walk_out = walk_out[[c for c in cols if c in walk_out.columns]]
-                # --- PATCH 1: Seed first row of distance_cumulative_km with 0.0 if missing or blank ---
-                if 'distance_cumulative_km' in walk_out.columns and len(walk_out) > 0:
-                    walk_out.iloc[0, walk_out.columns.get_loc('distance_cumulative_km')] = 0.0
-                walk_out = filter_gps_jitter(walk_out, 'pace_min_per_km', 'cadence', args.walk_cad_thr)
-                walk_out = walk_out[[c for c in cols if c in walk_out.columns]]
-                walk_out.to_csv(walk_txt, index=False)
-                print(f"[DIAG] Finished writing walk summary: {walk_txt}")
-                print(f"[DIAG] File exists after write? {os.path.exists(walk_txt)}")
                 # --- STEP 1: Write walk_segments.csv (contiguous walk blocks) ---
                 segments = walk_block_segments(gpx_df, 'is_walk', 'pace_min_per_km', 'cadence', args.walk_cad_thr)
-                # --- DEBUG: Print all walk segments for diagnosis ---
-                print(f"[DEBUG] Number of walk segments: {len(segments)}")
-                for i, s in enumerate(segments):
-                    print(f"[DEBUG] Walk segment {i}: start={s.get('start_ts')}, end={s.get('end_ts')}, dur_s={s['dur_s']}, dist_km={s.get('dist_km')}, tag={s.get('tag')}, note={s.get('note')}")
-                seg_df = pd.DataFrame(segments)
+                # For each segment, add a points_json field with the per-point data as a JSON array
+                import json
+                seg_rows = []
+                for seg in segments:
+                    seg_start = pd.to_datetime(seg['start_ts'])
+                    seg_end = pd.to_datetime(seg['end_ts'])
+                    # Select per-point data within segment
+                    # Ensure we have a 'timestamp' column in walk_df
+                    walk_points = walk_df.copy()
+                    if 'timestamp' not in walk_points.columns:
+                        if walk_points.index.name == 'time' or walk_points.index.name is not None:
+                            walk_points = walk_points.reset_index()
+                        # After reset_index, check if index is now a column
+                        if 'index' in walk_points.columns and 'timestamp' not in walk_points.columns:
+                            walk_points = walk_points.rename(columns={'index': 'timestamp'})
+                        elif walk_points.index.name and walk_points.index.name != 'timestamp' and walk_points.index.name in walk_points.columns:
+                            walk_points = walk_points.rename(columns={walk_points.index.name: 'timestamp'})
+                        elif 'time' in walk_points.columns and 'timestamp' not in walk_points.columns:
+                            walk_points = walk_points.rename(columns={'time': 'timestamp'})
+                    mask = (walk_points['timestamp'] >= seg_start) & (walk_points['timestamp'] <= seg_end)
+                    points_df = walk_points.loc[mask, ['timestamp','distance_cumulative_km','pace_min_per_km','cadence','heart_rate']].copy()
+                    # Ensure timestamp is str (for JSON serializability)
+                    points_df['timestamp'] = points_df['timestamp'].astype(str)
+                    seg['points_json'] = json.dumps(points_df.to_dict(orient='records'))
+                    seg_rows.append(seg)
+                seg_df = pd.DataFrame(seg_rows)
                 csv_dir = Path(txt_dir).parent / 'csv'
                 csv_dir.mkdir(exist_ok=True)
                 seg_csv = str(csv_dir / 'walk_segments.csv')
