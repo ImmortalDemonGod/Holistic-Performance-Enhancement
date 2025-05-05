@@ -4,13 +4,30 @@ from pathlib import Path
 import subprocess
 import pandas as pd
 import sys
-from metrics import parse_gpx, run_metrics
+# (imports removed – handled inside called scripts)
 
 # Use sys.executable for subprocesses
 PYTHON_EXEC = os.environ.get('VENV_PYTHON', sys.executable)
 # Set PROJECT_ROOT to the top-level project directory (not cultivation)
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SCRIPTS_DIR = PROJECT_ROOT / 'cultivation' / 'scripts' / 'running'
+
+# --- Step 0.5: Ensure wellness data is up to date before processing runs ---
+WELLNESS_PARQUET = PROJECT_ROOT / 'cultivation' / 'data' / 'daily_wellness.parquet'
+SYNC_SCRIPT = PROJECT_ROOT / 'cultivation' / 'scripts' / 'sync_habitdash.py'
+
+def ensure_wellness_uptodate():
+    today = date.today()
+    try:
+        df = pd.read_parquet(WELLNESS_PARQUET)
+        df.index = pd.to_datetime(df.index).date
+        if today not in df.index:
+            print(f"[INFO] Today's wellness data missing, syncing Habit Dash...")
+            subprocess.run([PYTHON_EXEC, str(SYNC_SCRIPT)], cwd=str(PROJECT_ROOT), check=True)
+    except FileNotFoundError:
+        print("[INFO] Wellness file not found, syncing Habit Dash...")
+        subprocess.run([PYTHON_EXEC, str(SYNC_SCRIPT)], cwd=str(PROJECT_ROOT), check=True)
+
 
 def get_run_files(raw_dir):
     """Return list of all .gpx files in the raw data directory, but skip base .gpx if an _hr_override.gpx exists."""
@@ -38,6 +55,9 @@ def main():
         PYTHON_EXEC, str(SCRIPTS_DIR / 'auto_rename_raw_files.py'),
         '--raw_dir', args.raw_dir
     ], cwd=str(PROJECT_ROOT), check=True)
+
+    # Step 0.5: Ensure wellness data is up to date BEFORE processing runs
+    ensure_wellness_uptodate()
 
     run_files = get_run_files(args.raw_dir)
     if not run_files:
@@ -148,4 +168,5 @@ def main():
             ], cwd=str(PROJECT_ROOT), check=True)
 
 if __name__ == '__main__':
+    from datetime import date
     main()
