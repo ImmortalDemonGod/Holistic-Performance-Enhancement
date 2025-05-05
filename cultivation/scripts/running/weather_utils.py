@@ -3,8 +3,57 @@ import time
 from datetime import timedelta
 import pandas as pd
 from pathlib import Path
+from typing import Dict, Optional, Tuple, Union, Any
+import os
+import json
 
-CACHE_PATH = Path(__file__).parents[2] / 'data' / 'weather_cache.parquet'
+# Set up data directory and cache path
+DATA_DIR = Path(__file__).parents[2] / 'data'
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+CACHE_PATH = DATA_DIR / 'weather_cache.parquet'
+
+# WMO Weather interpretation codes (WW) mapping
+WMO_WEATHER_CODES: Dict[int, str] = {
+    0: "Clear sky",
+    1: "Mainly clear",
+    2: "Partly cloudy",
+    3: "Overcast",
+    45: "Fog",
+    48: "Depositing rime fog",
+    51: "Light drizzle",
+    53: "Moderate drizzle",
+    55: "Dense drizzle",
+    56: "Light freezing drizzle",
+    57: "Dense freezing drizzle",
+    61: "Slight rain",
+    63: "Moderate rain",
+    65: "Heavy rain",
+    66: "Light freezing rain",
+    67: "Heavy freezing rain",
+    71: "Slight snow fall",
+    73: "Moderate snow fall",
+    75: "Heavy snow fall",
+    77: "Snow grains",
+    80: "Slight rain showers",
+    81: "Moderate rain showers",
+    82: "Violent rain showers",
+    85: "Slight snow showers",
+    86: "Heavy snow showers",
+    95: "Thunderstorm",
+    96: "Thunderstorm with slight hail",
+    99: "Thunderstorm with heavy hail"
+}
+
+def get_weather_description(code: Optional[Union[int, float, str]]) -> str:
+    """Convert WMO weather code to human-readable description."""
+    if code is None:
+        return "Unknown"
+
+    try:
+        code_int = int(float(code))
+        return WMO_WEATHER_CODES.get(code_int, f"Unknown weather code: {code_int}")
+    except (ValueError, TypeError):
+        return f"Invalid weather code: {code}"
 
 # Load cache if exists
 if CACHE_PATH.exists():
@@ -25,13 +74,22 @@ def fetch_weather_open_meteo(lat, lon, dt, max_retries=6, max_backoff=2.0):
     date_str = pd.to_datetime(dt).strftime('%Y-%m-%d')
     cached = weather_cache[(weather_cache['lat']==lat)&(weather_cache['lon']==lon)&(weather_cache['date']==date_str)]
     if not cached.empty:
-        return cached.iloc[0]['weather'], 0
+        # Deserialize weather if needed
+        weather = cached.iloc[0]['weather']
+        if isinstance(weather, str):
+            try:
+                weather = json.loads(weather)
+            except Exception:
+                pass
+        return weather, 0
 
     time_offsets = [timedelta(hours=h) for h in range(-5,6)]
     lat_variations = [lat, round(lat,3), round(lat,2), lat+0.01, lat-0.01, lat+0.05, lat-0.05, lat+0.1, lat-0.1]
     lon_variations = [lon, round(lon,3), round(lon,2), lon+0.01, lon-0.01, lon+0.05, lon-0.05, lon+0.1, lon-0.1]
+
     attempt = 0
     while attempt < max_retries:
+        all_failed = True
         for lat_try in lat_variations:
             for lon_try in lon_variations:
                 for offset in time_offsets:
@@ -44,15 +102,19 @@ def fetch_weather_open_meteo(lat, lon, dt, max_retries=6, max_backoff=2.0):
                             if 'hourly' in weather and weather['hourly']['temperature_2m']:
                                 result = weather
                                 # Save to cache
-                                weather_cache = pd.concat([weather_cache, pd.DataFrame([{'lat':lat,'lon':lon,'date':date_str,'weather':result}])], ignore_index=True)
+                                weather_cache = pd.concat([
+                                    weather_cache,
+                                    pd.DataFrame([{'lat':lat,'lon':lon,'date':date_str,'weather':json.dumps(result)}])
+                                ], ignore_index=True)
                                 weather_cache.to_parquet(CACHE_PATH, index=False)
                                 return result, offset.total_seconds() / 3600
                     except Exception as e:
                         print(f"[Weather] Error: {e} (lat={lat_try}, lon={lon_try}, time={hour_iso})")
         # If we reach here, all variations failed for this attempt
-        backoff = min(max_backoff, 0.2 * (2 ** attempt))
-        print(f"[Weather][Backoff] Attempt {attempt+1} failed, retrying in {backoff:.2f}s...")
-        time.sleep(backoff)
+        if all_failed:
+            backoff = min(max_backoff, 0.2 * (2 ** attempt))
+            print(f"[Weather][Backoff] Attempt {attempt+1} failed, retrying in {backoff:.2f}s...")
+            time.sleep(backoff)
         attempt += 1
     print(f"[Weather] Failed to fetch weather after {max_retries} retries for lat={lat}, lon={lon}, time={dt}")
     return None, None
