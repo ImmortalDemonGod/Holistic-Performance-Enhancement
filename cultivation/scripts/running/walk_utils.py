@@ -3,10 +3,10 @@ import pandas as pd
 import math
 
 def filter_gps_jitter(df, pace_col, cad_col, cad_thr):
-    """Remove rows where (pace < 4.0 or pace > 9.5) and cadence < cad_thr."""
-    bad_fast = (df[pace_col] < 4.0) & (df[cad_col] < cad_thr)
-    bad_slow = (df[pace_col] > 9.5) & (df[cad_col] < cad_thr)
-    return df[~(bad_fast | bad_slow)]
+    """Keep rows where pace > 8.7 min/km (14 min/mile) OR cadence < 140 spm (i.e., walking if either is true)."""
+    walk_pace = (df[pace_col] > 8.7)
+    walk_cad = (df[cad_col] < 140)
+    return df[walk_pace | walk_cad]
 
 
 def drop_short_segments(segments, min_duration=5):
@@ -57,20 +57,22 @@ def walk_block_segments(gpx_df, is_walk_col, pace_col, cad_col, cad_thr=128, max
     Group contiguous walk blocks after filtering GPS jitter, allowing up to `max_gap_s` seconds of non-walk between walk intervals.
     Returns a list of segment dicts.
     """
-    walk_df = gpx_df[gpx_df[is_walk_col]].copy()
-    walk_df = filter_gps_jitter(walk_df, pace_col, cad_col, cad_thr)
-    is_walk = gpx_df[is_walk_col].astype(int)
+    # Filter walk points to remove GPS jitter
+    walk_df = filter_gps_jitter(
+        gpx_df[gpx_df[is_walk_col]].copy(), pace_col, cad_col, cad_thr
+    )
+
     # Identify start/end of blocks allowing for gaps
-    dt = gpx_df['dt'].values if 'dt' in gpx_df else np.ones(len(gpx_df))
     blocks = []
     block_start = None
     last_walk_idx = None
-    for i, (idx, row) in enumerate(gpx_df.iterrows()):
-        if row[is_walk_col]:
+    for _, (idx, row) in enumerate(gpx_df.iterrows()):
+        # Check if this is a valid walk point (in original data AND passed the jitter filter)
+        if row[is_walk_col] and idx in walk_df.index:
             if block_start is None:
                 block_start = idx
             last_walk_idx = idx
-            last_walk_i = i
+            # last_walk_i variable removed (unused)
         else:
             # Non-walk row
             if block_start is not None:
