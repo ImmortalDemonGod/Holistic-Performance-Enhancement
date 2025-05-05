@@ -25,17 +25,32 @@ def sync_data(days_to_sync=7):
     logging.info(f"Syncing Habit Dash data from {start_date} to {end_date}")
 
     all_data = []
+    error_count = 0
+
     for source, metric in METRICS_TO_FETCH:
         field_id = FIELD_IDS.get(source, {}).get(metric)
         if field_id:
             logging.info(f"Fetching {source} - {metric} (ID: {field_id})")
-            fetched = client.get_data(field_id=field_id, date_start=start_date.isoformat(), date_end=end_date.isoformat())
-            if fetched:
-                for item in fetched:
-                    col_name = f"{metric}_{source}"
-                    all_data.append({'date': item.get('date'), col_name: item.get('value')})
+            try:
+                fetched = client.get_data(
+                    field_id=field_id,
+                    date_start=start_date.isoformat(),
+                    date_end=end_date.isoformat()
+                )
+                if fetched:
+                    for item in fetched:
+                        col_name = f"{metric}_{source}"
+                        all_data.append({'date': item.get('date'), col_name: item.get('value')})
+                else:
+                    logging.warning(f"No data returned for {source} - {metric}")
+            except Exception as e:
+                logging.error(f"Error fetching {source} - {metric}: {e}")
+                error_count += 1
         else:
             logging.warning(f"Skipping {source} - {metric}, Field ID not found.")
+
+    if error_count > 0:
+        logging.warning(f"{error_count} errors occurred while fetching data")
 
     if not all_data:
         logging.warning("No data fetched from Habit Dash.")
