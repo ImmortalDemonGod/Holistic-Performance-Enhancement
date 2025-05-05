@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import argparse
 import os
 import sys
+from datetime import timedelta
 
 # Add the script directory to the path for direct script execution
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -169,19 +170,15 @@ def main():
 
     # --- Load wellness context if available ---
     wellness_context = None
+    wellness_df = None
     VERBOSE = False
     try:
         wellness_path = os.path.join(os.path.dirname(__file__), '../../data/daily_wellness.parquet')
         wellness_path = os.path.abspath(wellness_path)
         if os.path.exists(wellness_path):
             wellness_df = pd.read_parquet(wellness_path)
-            # Use today's date or closest available
-            today = df.index[0].date() if hasattr(df.index[0], 'date') else pd.to_datetime(df.index[0]).date()
-            if today in wellness_df.index:
-                wellness_context = wellness_df.loc[today].to_dict()
-            else:
-                # fallback: use most recent available
-                wellness_context = wellness_df.iloc[-1].to_dict()
+            # We'll set the wellness context date after loading the main dataframe
+            wellness_context = {}
         else:
             wellness_context = {}
     except Exception as e:
@@ -190,6 +187,15 @@ def main():
             print(f"[WARN] Could not load wellness data: {e}")
 
     df = pd.read_csv(args.input, index_col=0, parse_dates=True)
+    # Now set the wellness context date if possible
+    if wellness_df is not None and not wellness_df.empty:
+        run_date = df.index[0].date() if hasattr(df.index[0], 'date') else pd.to_datetime(df.index[0]).date()
+        if run_date in wellness_df.index:
+            wellness_context = wellness_df.loc[run_date].to_dict()
+        else:
+            # fallback: use most recent available
+            wellness_context = wellness_df.iloc[-1].to_dict()
+
     zones = load_personal_zones()
     zone_hr, zone_pace, zone_effective = compute_training_zones(df['heart_rate'], df['pace_min_per_km'], zones)
     df['zone_hr'] = zone_hr
@@ -467,8 +473,9 @@ def main():
         ("vo2max_garmin", "VO2max (Garmin)", "ml/kg/min", None),
     ]
     if wellness_context:
+        run_date = df.index[0].date() if hasattr(df.index[0], 'date') else pd.to_datetime(df.index[0]).date()
         summary_lines.append("\n--- Pre-Run Wellness Context (Data for {}) ---".format(run_date))
-        for idx, (key, label, unit, unit_conv) in enumerate(metric_specs):
+        for key, label, unit, unit_conv in metric_specs:
             today_val = wellness_context.get(key)
             # Daily delta
             prev_val = None
@@ -494,7 +501,7 @@ def main():
                 summary_lines.append(f"  {label}: {disp_val} (Δ1d: {delta_1d}, Δ7d: {delta_7d})")
             else:
                 summary_lines.append(f"  {label}: {disp_val}")
-            # Insert separator ONLY after vo2max_garmin, and only if not last metric
+            # Insert separator ONLY after vo2max_garmin
             if key == "vo2max_garmin":
                 summary_lines.append("  ---")
     else:

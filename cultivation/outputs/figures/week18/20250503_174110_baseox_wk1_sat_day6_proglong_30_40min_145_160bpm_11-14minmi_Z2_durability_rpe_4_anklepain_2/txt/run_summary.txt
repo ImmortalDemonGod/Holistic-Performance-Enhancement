@@ -26,7 +26,25 @@ Run Summary:
       Z5 (VO2max): {'bpm': [187, 201], 'pace_min_per_km': [0.0, 4.8]}
 
 
---- Pre-Run Wellness Context: n/a ---
+--- Pre-Run Wellness Context (Data for 2025-05-03) ---
+  HRV (Whoop): 80.4 ms (Δ1d: -39.9%, Δ7d: n/a)
+  RHR (Whoop): 62.0 bpm (Δ1d: +26.5%, Δ7d: n/a)
+  RHR (Garmin): 54.0 bpm (Δ1d: +17.4%, Δ7d: +0.0%)
+  Recovery Score (Whoop): 47.0 % (Δ1d: -50.0%, Δ7d: n/a)
+  Sleep Score (Whoop): 100.0 % (Δ1d: +38.9%, Δ7d: n/a)
+  Body Battery (Garmin): 39.0 % (Δ1d: -35.1%, Δ7d: +188.0%)
+  Avg Stress (Garmin, Prev Day): n/a
+  Sleep Duration (Whoop): 9.2 h (Δ1d: +39.4%, Δ7d: n/a)
+  Sleep Consistency (Whoop): 46.0 % (Δ1d: +4.5%, Δ7d: n/a)
+  Sleep Disturbances/hr (Whoop): 0.4  (Δ1d: -51.5%, Δ7d: n/a)
+  Strain Score (Whoop): 13.5  (Δ1d: +114.8%, Δ7d: n/a)
+  Skin Temp (Whoop): 91.6 °F (Δ1d: +175.9%, Δ7d: n/a)
+  Resp Rate (Whoop): 16.5 rpm (Δ1d: +1.9%, Δ7d: n/a)
+  Steps (Garmin): 11564.0  (Δ1d: +300%+, Δ7d: +300%+)
+  Total Activity (Garmin): 130.3 min (Δ1d: +189.6%, Δ7d: +300%+)
+  Resp Rate (Garmin): 15.2 rpm (Δ1d: +10.1%, Δ7d: -1.7%)
+  VO2max (Garmin): 53.0 ml/kg/min
+  ---
   Start location: (34.60701, -98.42512)
   Weather at start:
     Temperature: 18.8 °C (feels like None °C)

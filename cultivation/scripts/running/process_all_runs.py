@@ -22,7 +22,7 @@ def ensure_wellness_uptodate():
         df = pd.read_parquet(WELLNESS_PARQUET)
         df.index = pd.to_datetime(df.index).date
         if today not in df.index:
-            print(f"[INFO] Today's wellness data missing, syncing Habit Dash...")
+            print("[INFO] Today's wellness data missing, syncing Habit Dash...")
             subprocess.run([PYTHON_EXEC, str(SYNC_SCRIPT)], cwd=str(PROJECT_ROOT), check=True)
     except FileNotFoundError:
         print("[INFO] Wellness file not found, syncing Habit Dash...")
@@ -72,33 +72,29 @@ def main():
             week = pd.to_datetime(date_part).isocalendar().week
             txt_dir = figures_dir / f"week{week}" / base / "txt"
             marker_path = txt_dir / "weather_failed.marker"
-            csv_out = Path(args.processed_dir) / f"{base}_gpx_summary.csv"
+            # Decide input file (HR override or not)
+            gpx_path = run_file
+            override_gpx = gpx_path.with_name(gpx_path.stem + "_hr_override.gpx")
+            if override_gpx.exists():
+                print(f"  [DEBUG] Using override GPX: {override_gpx}")
+                input_file = override_gpx
+            else:
+                input_file = gpx_path
+            # Build csv_out once, before any checks
+            if input_file.suffix == '.fit':
+                csv_out = Path(args.processed_dir) / f"{base}_fit_summary.csv"
+            else:
+                csv_out = Path(args.processed_dir) / f"{base}_gpx_summary.csv"
+            # ---- marker & skip logic use the correct path ----
             if marker_path.exists() and not csv_out.exists():
-                print(f"  [INFO] Weather marker found but CSV missing. Processing anyway.")
+                print("  [INFO] Weather marker found but CSV missing. Processing anyway.")
             elif marker_path.exists() and csv_out.exists():
-                print(f"  [INFO] Weather marker found but CSV exists. Explicitly reprocessing.")
+                print("  [INFO] Weather marker found but CSV exists. Explicitly reprocessing.")
         except Exception as e:
             print(f"  [WARN] Could not determine marker file for {base}: {e}")
 
-        # --- Only process HR override if user wants it ---
-        # By default, process only the HR override version if it exists, otherwise process original
-        gpx_path = run_file
-        override_gpx = gpx_path.with_name(gpx_path.stem + "_hr_override.gpx")
-        if override_gpx.exists():
-            print(f"  [DEBUG] Using override GPX: {override_gpx}")
-            input_file = override_gpx
-        else:
-            input_file = gpx_path
-
         # === Now check if already processed ===
-        if input_file.suffix == '.fit':
-            csv_out = Path(args.processed_dir) / f"{base}_fit_summary.csv"
-        else:
-            csv_out = Path(args.processed_dir) / f"{base}_gpx_summary.csv"
-        # Skip if summary CSV already exists (including marker logic)
         if csv_out.exists():
-            continue
-        if marker_path.exists():
             continue
         # Run parse_run_files.py
         # build PID like "2025w18-Tue"

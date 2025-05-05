@@ -45,9 +45,13 @@ def get_current_phase():
         str: phase name
     """
     if STATUS_PATH.exists():
-        with open(STATUS_PATH) as f:
-            status = json.load(f)
-        return status.get("phase", PHASES[0])
+        try:
+            with open(STATUS_PATH) as f:
+                status = json.load(f)
+            return status.get("phase", PHASES[0])
+        except json.JSONDecodeError as e:
+            print(f"Error parsing status file: {e}. Using default phase.")
+            return PHASES[0]
     return PHASES[0]
 
 def advance_phase(current):
@@ -86,8 +90,8 @@ def kpi_gate_passed():
         print(f"Latest run-metrics workflow conclusion: {runs[0]['conclusion'] if runs else 'none'}")
         return False
     except Exception as e:
-        print(f"Could not check KPI gate: {e}. Assuming passed.")
-        return True
+        print(f"Could not check KPI gate: {e}. Assuming failed for safety.")
+        return False
 
 def main():
     """
@@ -125,12 +129,7 @@ def main():
     gate_passed = kpi_gate_passed()
     new_phase = current_phase
     if gate_passed:
-        if current_phase == "Base-Ox":
-            new_phase = "Tempo-Dur"
-        elif current_phase == "Tempo-Dur":
-            new_phase = "Peak"
-        else:
-            new_phase = current_phase
+        new_phase = advance_phase(current_phase)
     if new_phase != current_phase:
         with open(STATUS_PATH, "w") as f:
             json.dump({"phase": new_phase}, f)
@@ -155,11 +154,15 @@ def main():
                 intensity_pct = 0
                 # Push to Task Master
                 if not args.dry_run and shutil.which('task-master'):
-                    subprocess.run([
-                        'task-master', 'create', task_title,
-                        '--scheduled', scheduled_time,
-                        '--labels', session_code, pid
-                    ], check=True)
+                    try:
+                        subprocess.run([
+                            'task-master', 'create', task_title,
+                            '--scheduled', scheduled_time,
+                            '--labels', session_code, pid
+                        ], check=True)
+                    except subprocess.CalledProcessError as e:
+                        print(f"Error scheduling task {pid}: {e}")
+                        # Continue with next task rather than failing completely
                 else:
                     print('task-master CLI not found – dry-run only')
                 tasks.append(pid)
