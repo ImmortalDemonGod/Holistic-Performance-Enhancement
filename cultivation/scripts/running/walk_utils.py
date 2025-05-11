@@ -3,10 +3,13 @@ import pandas as pd
 import math
 
 def filter_gps_jitter(df, pace_col, cad_col, cad_thr):
-    """Keep rows where pace > 8.7 min/km (14 min/mile) OR cadence < cad_thr spm (i.e., walking if either is true)."""
-    walk_pace = (df[pace_col] > 8.7)
-    walk_cad = (df[cad_col] < cad_thr)
-    return df[walk_pace | walk_cad]
+    """
+    Remove GPS jitter points: drop rows where pace < 8.7 min/km AND cadence < cad_thr spm.
+    Keep points where pace >= 8.7 OR cadence >= cad_thr.
+    """
+    pace_flag = df[pace_col] >= 8.7
+    cad_flag = df[cad_col] >= cad_thr
+    return df[pace_flag | cad_flag]
 
 
 def drop_short_segments(segments, min_duration=5):
