@@ -1,0 +1,54 @@
+
+Run Summary:
+  Start time: 2025-05-11 17:32:10+00:00
+  End time: 2025-05-11 17:47:47+00:00
+  Duration: 0 days 00:15:37
+  Total distance (km): 0.93
+  Avg pace (min/km): 3.19
+  Avg HR: 93.2
+  Max HR: 95.0
+  Avg cadence: 178.0
+  Elevation gain (m): N/A
+
+  --- Advanced Metrics (run_metrics) ---
+    distance_km: 0.01
+    duration_min: 0.1
+    avg_pace_min_per_km: 9.56
+    avg_hr: 93.2
+    efficiency_factor: 0.01871
+    decoupling_%: 100.0
+    hrTSS: 0.0
+    zones_applied:
+      Z1 (Recovery): {'bpm': [0, 145], 'pace_min_per_km': [7.0, 999]}
+      Z2 (Aerobic): {'bpm': [145, 160], 'pace_min_per_km': [6.85, 8.7]}
+      Z3 (Tempo): {'bpm': [161, 175], 'pace_min_per_km': [5.2, 6.85]}
+      Z4 (Threshold): {'bpm': [176, 186], 'pace_min_per_km': [4.8, 5.2]}
+      Z5 (VO2max): {'bpm': [187, 201], 'pace_min_per_km': [0.0, 4.8]}
+
+
+--- Pre-Run Wellness Context (Data for 2025-05-11) ---
+  HRV (Whoop): 85.2 ms (Δ1d: +0.3%, Δ7d: -23.4%)
+  RHR (Whoop): 58.0 bpm (Δ1d: +1.8%, Δ7d: +11.5%)
+  RHR (Garmin): 50.0 bpm (Δ1d: -3.8%, Δ7d: +4.2%)
+  Recovery Score (Whoop): 53.0 % (Δ1d: +6.0%, Δ7d: -40.4%)
+  Sleep Score (Whoop): 88.0 % (Δ1d: +2.3%, Δ7d: -9.3%)
+  Body Battery (Garmin): 30.4 % (Δ1d: -27.0%, Δ7d: -51.3%)
+  Avg Stress (Garmin, Prev Day): n/a
+  Sleep Duration (Whoop): 7.8 h (Δ1d: +7.3%, Δ7d: -2.7%)
+  Sleep Consistency (Whoop): 83.0 % (Δ1d: +10.7%, Δ7d: +27.7%)
+  Sleep Disturbances/hr (Whoop): 1.4  (Δ1d: +15.8%, Δ7d: +28.6%)
+  Strain Score (Whoop): n/a
+  Skin Temp (Whoop): 92.7 °F (Δ1d: +173.3%, Δ7d: +171.3%)
+  Resp Rate (Whoop): 17.2 rpm (Δ1d: +2.1%, Δ7d: +7.7%)
+  Steps (Garmin): 2791.0  (Δ1d: -86.3%, Δ7d: +51.3%)
+  Total Activity (Garmin): 40.8 min (Δ1d: -77.8%, Δ7d: +11.6%)
+  Resp Rate (Garmin): 15.7 rpm (Δ1d: +4.2%, Δ7d: +8.9%)
+  VO2max (Garmin): n/a
+  ---
+  Start location: (34.60714, -98.42644)
+  Weather at start:
+    Temperature: 22.8 °C (feels like None °C)
+    Precipitation: 0.0 mm
+    Humidity: None %
+    Wind speed: 14.1 km/h
+    Description: Overcast

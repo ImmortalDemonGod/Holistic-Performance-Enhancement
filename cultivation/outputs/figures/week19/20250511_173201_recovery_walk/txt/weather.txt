@@ -1,0 +1,2 @@
+Temperature: 22.8, Apparent: None
+Description: Overcast
