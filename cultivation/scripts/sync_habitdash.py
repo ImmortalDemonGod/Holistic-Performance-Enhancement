@@ -75,4 +75,8 @@ def sync_data(days_to_sync=7):
     logging.info(f"Successfully synced data and updated {CACHE_FILE}")
 
 if __name__ == "__main__":
-    sync_data(days_to_sync=7)  # Sync last 7 days by default
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--days", type=int, default=7, help="Number of days to sync (default: 7)")
+    args = parser.parse_args()
+    sync_data(days_to_sync=args.days)
