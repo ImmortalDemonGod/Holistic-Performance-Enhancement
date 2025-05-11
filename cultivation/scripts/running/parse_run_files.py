@@ -372,6 +372,8 @@ def main():
                 print(f"[DIAG] Wrote walk_summary.txt: {summary_txt}")
                 # --- STEP 3: Write walk_over_time.txt (only walk-flagged rows, time-series) ---
                 if len(walk_df) > 0:
+                    # Ensure index is named 'timestamp' so reset_index() produces the column
+                    walk_df.index.name = 'timestamp'
                     over_time_cols = [
                         'timestamp',
                         'distance_cumulative_km',

@@ -73,17 +73,24 @@ if __name__ == '__main__':
         f.write("\n")
 
     # 2D joint distribution: Heart Rate vs. Pace
-    plt.figure(figsize=(8, 6))
-    sns.jointplot(x='pace_min_per_km', y='heart_rate', data=df, kind='hex', cmap='viridis')
-    plt.suptitle('Heart Rate vs. Pace (min/km)', y=1.02)
-    plt.savefig(f"{img_dir}/hr_vs_pace_hexbin.png")
-    plt.close()
-
+    subset = df[['pace_min_per_km', 'heart_rate']].dropna()
+    if not subset.empty:
+        try:
+            g = sns.jointplot(x='pace_min_per_km', y='heart_rate', data=subset, kind='hex', cmap='viridis')
+            g.fig.suptitle('Heart Rate vs. Pace (min/km)', y=1.02)
+            g.fig.tight_layout()
+            g.fig.savefig(f"{img_dir}/hr_vs_pace_hexbin.png")
+            plt.close('all')
+        except Exception as e:
+            print(f"Skipping HR vs Pace hexbin: {e}")
+    else:
+        print("Not enough data for HR vs Pace hexbin plot.")
     # HR vs Pace: correlation
-    corr = df[['heart_rate', 'pace_min_per_km']].corr().iloc[0,1]
-    with open(f"{txt_dir}/hr_vs_pace_hexbin.txt", "w") as f:
-        f.write("Correlation between Heart Rate and Pace (min/km):\n")
-        f.write(f"Correlation coefficient: {corr:.3f}\n")
+    if not subset.empty:
+        corr = subset.corr().iloc[0, 1]
+        with open(f"{txt_dir}/hr_vs_pace_hexbin.txt", "w") as f:
+            f.write("Correlation between Heart Rate and Pace (min/km):\n")
+            f.write(f"Correlation coefficient: {corr:.3f}\n")
 
     # --- POWER ANALYSIS ---
     if 'power' in df.columns:
