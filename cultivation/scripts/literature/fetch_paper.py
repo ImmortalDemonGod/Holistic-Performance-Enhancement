@@ -10,6 +10,7 @@ from pathlib import Path
 import datetime
 import logging
 import re # For sanitizing filenames
+import time
 
 # Attempt relative import for DocInsightClient
 try:
@@ -150,11 +151,42 @@ def fetch_arxiv_paper(arxiv_id: str):
     elif not metadata_payload:
         logging.warning(f"Cannot create note for {cleaned_arxiv_id} as metadata is missing.")
 
-    # 4. Initial DocInsight Client Integration (Stubbed)
+    # 4. DocInsight Client Integration
     try:
         client = DocInsightClient()
-        logging.info(f"Calling DocInsightClient.start_research for {cleaned_arxiv_id}")
-        client.start_research(paper_id=cleaned_arxiv_id)
+        logging.info(f"Initiating DocInsight processing for {cleaned_arxiv_id}")
+        query_text = (
+            f"Summarize abstract and key contributions of {cleaned_arxiv_id}"
+        )
+        job_id = client.start_research(
+            query=query_text,
+            force_index=[str(pdf_path.resolve())]
+        )
+        logging.info(f"DocInsight job started with ID: {job_id} for {cleaned_arxiv_id}")
+        # Poll and fetch results immediately for simple integration
+        if job_id:
+            time.sleep(0.2)
+            try:
+                results = client.get_results([job_id])
+                if results and results[0].get('status') == 'done':
+                    summary = results[0].get('answer', '')
+                    novelty = results[0].get('novelty', '')
+                    # Update metadata
+                    metadata_payload['docinsight_summary'] = summary
+                    metadata_payload['docinsight_novelty'] = novelty
+                    if metadata_path.exists():
+                        with open(metadata_path, 'w') as f_meta:
+                            json.dump(metadata_payload, f_meta, indent=2)
+                        logging.info(f"Updated metadata for {cleaned_arxiv_id} with DocInsight results.")
+                    # Append to note
+                    if note_path.exists() and '## DocInsight Summary' not in note_path.read_text():
+                        with open(note_path, 'a') as f_note:
+                            f_note.write("\n\n## DocInsight Summary\n")
+                            f_note.write(f"{summary}\n")
+                            f_note.write(f"\n*Novelty Score (DocInsight): {novelty}*\n")
+                        logging.info(f"Appended DocInsight summary to note for {cleaned_arxiv_id}")
+            except Exception as e:
+                logging.error(f"Error fetching results for {cleaned_arxiv_id}: {e}")
     except Exception as e:
         logging.error(f"Failed to interact with DocInsightClient for {cleaned_arxiv_id}: {e}")
 

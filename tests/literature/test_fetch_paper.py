@@ -94,7 +94,12 @@ def test_fetch_arxiv_paper_success(
 
     note_path = NOTES_TEST_DIR / f"{cleaned_arxiv_id}.md"
     mock_file_open.assert_any_call(note_path, 'w')
-    mock_start_research.assert_called_once_with(paper_id=cleaned_arxiv_id)
+    # Ensure start_research called with new query and force_index
+    mock_start_research.assert_called_once()
+    call_kwargs = mock_start_research.call_args.kwargs
+    assert 'query' in call_kwargs and 'force_index' in call_kwargs
+    assert cleaned_arxiv_id in call_kwargs['query']
+    assert str((PDF_TEST_DIR / f"{cleaned_arxiv_id}.pdf").resolve()) in call_kwargs['force_index']
 
 @patch('requests.get')
 @patch.object(Path, 'mkdir')
@@ -150,7 +155,12 @@ def test_fetch_arxiv_paper_files_already_exist(
         result = fetch_arxiv_paper(arxiv_id)
     assert result is True
     mock_requests_get.assert_not_called()
-    mock_start_research.assert_called_once_with(paper_id=cleaned_arxiv_id)
+    # Ensure start_research called with new query and force_index even if files exist
+    mock_start_research.assert_called_once()
+    call_kwargs = mock_start_research.call_args.kwargs
+    assert 'query' in call_kwargs and 'force_index' in call_kwargs
+    assert cleaned_arxiv_id in call_kwargs['query']
+    assert str((PDF_TEST_DIR / f"{cleaned_arxiv_id}.pdf").resolve()) in call_kwargs['force_index']
 
 @patch('cultivation.scripts.literature.fetch_paper.fetch_arxiv_paper')
 def test_main_function_calls_fetch_arxiv_paper(mock_fetch_arxiv, capsys, monkeypatch):
