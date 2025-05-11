@@ -47,8 +47,8 @@ Run Summary:
   ---
   Start location: (34.60885, -98.44895)
   Weather at start:
-    Temperature: 23.9 °C (feels like None °C)
+    Temperature: 23.9 °C (feels like N/A)
     Precipitation: 0.0 mm
-    Humidity: None %
+    Humidity: N/A %
     Wind speed: 8.3 km/h
     Description: Mainly clear

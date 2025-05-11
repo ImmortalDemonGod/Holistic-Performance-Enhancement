@@ -4,7 +4,7 @@ Walk Summary:
   Total walk distance (km): 0.00
   Avg walk pace (min/km): nan
   Avg walk HR (bpm): nan
-  Max walk HR (bpm): 
+  Max walk HR (bpm): nan
   Avg walk cadence (spm): nan
   Energy cost est. (kcal): 0
   Notes:

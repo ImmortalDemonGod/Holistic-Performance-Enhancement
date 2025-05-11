@@ -1,2 +1,5 @@
-Pacing Strategy Analysis:
-{'first_half_pace': np.float64(7.961452215042247), 'second_half_pace': np.float64(7.51346149413445), 'strategy': 'negative'}
+{
+  "first_half_pace": 7.961452215042247,
+  "second_half_pace": 7.51346149413445,
+  "strategy": "negative"
+}

@@ -1,2 +1,2 @@
-Temperature: 23.7, Apparent: None
+Temperature: 23.7 °C, Apparent: None °C
 Description: Mainly clear
