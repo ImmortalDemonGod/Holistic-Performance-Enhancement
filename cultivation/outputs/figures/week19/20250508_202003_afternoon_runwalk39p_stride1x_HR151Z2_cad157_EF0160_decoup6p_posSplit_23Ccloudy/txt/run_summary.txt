@@ -1,0 +1,54 @@
+
+Run Summary:
+  Start time: 2025-05-08 20:20:52+00:00
+  End time: 2025-05-08 21:40:53+00:00
+  Duration: 0 days 01:20:01
+  Total distance (km): 9.96
+  Avg pace (min/km): 7.14
+  Avg HR: 151.0
+  Max HR: 169.0
+  Avg cadence: 156.6
+  Elevation gain (m): N/A
+
+  --- Advanced Metrics (run_metrics) ---
+    distance_km: 6.84
+    duration_min: 47.2
+    avg_pace_min_per_km: 6.91
+    avg_hr: 151.0
+    efficiency_factor: 0.01598
+    decoupling_%: 5.94
+    hrTSS: 51.4
+    zones_applied:
+      Z1 (Recovery): {'bpm': [0, 145], 'pace_min_per_km': [7.0, 999]}
+      Z2 (Aerobic): {'bpm': [145, 160], 'pace_min_per_km': [6.85, 8.7]}
+      Z3 (Tempo): {'bpm': [161, 175], 'pace_min_per_km': [5.2, 6.85]}
+      Z4 (Threshold): {'bpm': [176, 186], 'pace_min_per_km': [4.8, 5.2]}
+      Z5 (VO2max): {'bpm': [187, 201], 'pace_min_per_km': [0.0, 4.8]}
+
+
+--- Pre-Run Wellness Context (Data for 2025-05-08) ---
+  HRV (Whoop): 87.6 ms (Δ1d: +10.1%, Δ7d: -13.3%)
+  RHR (Whoop): 56.0 bpm (Δ1d: -3.4%, Δ7d: +1.8%)
+  RHR (Garmin): 52.0 bpm (Δ1d: -1.9%, Δ7d: +10.6%)
+  Recovery Score (Whoop): 52.0 % (Δ1d: +33.3%, Δ7d: -38.1%)
+  Sleep Score (Whoop): 80.0 % (Δ1d: -5.9%, Δ7d: -1.2%)
+  Body Battery (Garmin): 44.7 % (Δ1d: -4.3%, Δ7d: -24.6%)
+  Avg Stress (Garmin, Prev Day): n/a
+  Sleep Duration (Whoop): 7.9 h (Δ1d: +4.7%, Δ7d: -1.7%)
+  Sleep Consistency (Whoop): 55.0 % (Δ1d: -20.3%, Δ7d: +223.5%)
+  Sleep Disturbances/hr (Whoop): 1.2  (Δ1d: -27.5%, Δ7d: +67.9%)
+  Strain Score (Whoop): 13.8  (Δ1d: -4.5%, Δ7d: +25.8%)
+  Skin Temp (Whoop): 92.0 °F (Δ1d: +179.2%, Δ7d: +180.8%)
+  Resp Rate (Whoop): 16.6 rpm (Δ1d: +0.4%, Δ7d: -3.4%)
+  Steps (Garmin): 13359.0  (Δ1d: +27.8%, Δ7d: +61.4%)
+  Total Activity (Garmin): 152.0 min (Δ1d: +27.5%, Δ7d: +15.6%)
+  Resp Rate (Garmin): 14.6 rpm (Δ1d: +3.0%, Δ7d: -2.9%)
+  VO2max (Garmin): 54.0 ml/kg/min (Δ1d: +0.0%, Δ7d: +1.9%)
+  ---
+  Start location: (34.60740, -98.42594)
+  Weather at start:
+    Temperature: 22.7 °C (feels like N/A)
+    Precipitation: 0.0 mm
+    Humidity: N/A %
+    Wind speed: 7.6 km/h
+    Description: Partly cloudy

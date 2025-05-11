@@ -1,0 +1,2 @@
+Temperature: 22.7 °C, Apparent: None °C
+Description: Partly cloudy

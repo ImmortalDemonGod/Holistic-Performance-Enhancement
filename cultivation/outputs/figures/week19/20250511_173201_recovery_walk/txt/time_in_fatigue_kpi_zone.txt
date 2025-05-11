@@ -1,0 +1,2 @@
+zone_fatigue_kpi	seconds	percent
+Recovery (< Z2)	937.0	100.0

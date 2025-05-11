@@ -1,2 +1,2 @@
-Temperature: 20.4, Apparent: None
+Temperature: 20.4 °C, Apparent: None °C
 Description: Clear sky

@@ -1,2 +1,2 @@
-Temperature: 18.8, Apparent: None
+Temperature: 18.8 °C, Apparent: None °C
 Description: Mainly clear

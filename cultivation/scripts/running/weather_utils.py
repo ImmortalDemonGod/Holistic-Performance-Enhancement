@@ -56,8 +56,33 @@ def get_weather_description(code: Optional[Union[int, float, str]]) -> str:
         return f"Invalid weather code: {code}"
 
 # Load cache if exists
+import numpy as np
+
+def make_json_serializable(obj):
+    """
+    Recursively convert numpy arrays in dicts/lists to lists for JSON serialization.
+    """
+    if isinstance(obj, dict):
+        return {k: make_json_serializable(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [make_json_serializable(v) for v in obj]
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    else:
+        return obj
+
 if CACHE_PATH.exists():
     weather_cache = pd.read_parquet(CACHE_PATH)
+    # Ensure weather column is always a string (JSON)
+    if 'weather' in weather_cache.columns:
+        def safe_serialize(x):
+            if isinstance(x, dict):
+                try:
+                    return json.dumps(make_json_serializable(x))
+                except Exception:
+                    return None
+            return x if pd.notnull(x) else None
+        weather_cache['weather'] = weather_cache['weather'].apply(safe_serialize)
 else:
     weather_cache = pd.DataFrame(columns=['lat','lon','date','weather'])
 

@@ -1,10 +1,12 @@
-import pandas as pd
-import numpy as np
+import pandas as pd  # type: ignore
+import numpy as np  # type: ignore
 import matplotlib.pyplot as plt
 import argparse
 import os
 import sys
 from datetime import timedelta
+import json
+import datetime
 
 # Add the script directory to the path for direct script execution
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,12 +16,12 @@ if script_dir not in sys.path:
 # Import the required modules
 try:
     # First try direct imports (for script execution)
-    from weather_utils import fetch_weather_open_meteo, get_weather_description
-    from metrics import load_personal_zones, compute_training_zones, run_metrics, lower_z2_bpm
+    from weather_utils import fetch_weather_open_meteo, get_weather_description  # type: ignore
+    from metrics import load_personal_zones, compute_training_zones, run_metrics, lower_z2_bpm  # type: ignore
 except ImportError:
     # Fall back to full module path (for module imports)
-    from cultivation.scripts.running.weather_utils import fetch_weather_open_meteo, get_weather_description
-    from cultivation.scripts.running.metrics import load_personal_zones, compute_training_zones, run_metrics, lower_z2_bpm
+    from cultivation.scripts.running.weather_utils import fetch_weather_open_meteo, get_weather_description  # type: ignore
+    from cultivation.scripts.running.metrics import load_personal_zones, compute_training_zones, run_metrics, lower_z2_bpm  # type: ignore
 
 def time_in_zone(df, zone_col='zone_hr'):
     """Calculate time spent in each zone.
@@ -190,11 +192,18 @@ def main():
     # Now set the wellness context date if possible
     if wellness_df is not None and not wellness_df.empty:
         run_date = df.index[0].date() if hasattr(df.index[0], 'date') else pd.to_datetime(df.index[0]).date()
-        if run_date in wellness_df.index:
-            wellness_context = wellness_df.loc[run_date].to_dict()
+        # Ensure both index and lookup are datetime.date
+        idx = [d if isinstance(d, datetime.date) and not isinstance(d, pd.Timestamp) else d.date() for d in wellness_df.index]
+        run_date_dt = run_date if isinstance(run_date, datetime.date) and not isinstance(run_date, pd.Timestamp) else run_date.date()
+        mask = [d <= run_date_dt for d in idx]
+        if any(mask):
+            closest = max([d for d in idx if d <= run_date_dt])
+            # Use positional index since wellness_df.index may not be unique or sorted
+            pos = idx.index(closest)
+            wellness_context = wellness_df.iloc[pos].to_dict()
         else:
-            # fallback: use most recent available
-            wellness_context = wellness_df.iloc[-1].to_dict()
+            wellness_context = {k: 'n/a' for k in wellness_df.columns}
+            print(f"[WARN] No wellness data available on or before {run_date}.")
 
     zones = load_personal_zones()
     zone_hr, zone_pace, zone_effective = compute_training_zones(df['heart_rate'], df['pace_min_per_km'], zones)
@@ -283,9 +292,10 @@ def main():
     plt.close()
     # Save textual representation of HR drift
     with open(f"{txt_dir}/hr_over_time_drift.txt", "w") as f:
-        f.write("Heart Rate Drift Analysis:\n")
-        f.write(str(hr_drift))
-        f.write("\n")
+        f.write("hr_drift:\n")
+        f.write(f"first_half_hr: {float(hr_drift['first_half_hr']):.2f}\n")
+        f.write(f"second_half_hr: {float(hr_drift['second_half_hr']):.2f}\n")
+        f.write(f"hr_drift_pct: {float(hr_drift['hr_drift_pct']):.2f}\n")
     # Plot pacing
     df['pace_min_per_km'].plot(label='Pace (min/km)', alpha=0.7)
     plt.axvline(df.index[len(df)//2], color='red', linestyle='--', label='Midpoint')
@@ -296,9 +306,19 @@ def main():
     plt.close()
     # Save textual representation of pacing
     with open(f"{txt_dir}/pace_over_time.txt", "w") as f:
-        f.write("Pacing Strategy Analysis:\n")
-        f.write(str(pacing))
-        f.write("\n")
+        # Write pacing strategy as JSON
+        first = float(pacing['first_half_pace'])
+        raw_second = pacing['second_half_pace']
+        if isinstance(raw_second, (float, np.floating)) and np.isnan(raw_second):
+            second = None
+        else:
+            second = float(raw_second)
+        data = {
+            "first_half_pace": first,
+            "second_half_pace": second,
+            "strategy": pacing['strategy']
+        }
+        json.dump(data, f, indent=2)
     # Stride summary
     stride_groups = df[df['stride']].groupby((df['stride'] != df['stride'].shift()).cumsum())
     stride_summary_lines = [f"Stride segments detected: {stride_groups.ngroups}"]
@@ -327,9 +347,18 @@ def main():
                 pass
         temp = weather['hourly']['temperature_2m'][idx]
         app_temp = weather['hourly'].get('apparent_temperature', [None]*len(weather['hourly']['temperature_2m']))[idx]
+        precip = weather['hourly'].get('precipitation', [None]*len(weather['hourly']['temperature_2m']))[idx]
+        humidity = weather['hourly'].get('relative_humidity_2m', [None]*len(weather['hourly']['temperature_2m']))[idx]
+        wind = weather['hourly'].get('windspeed_10m', [None]*len(weather['hourly']['temperature_2m']))[idx]
         desc = weather['hourly'].get('weathercode', [None]*len(weather['hourly']['temperature_2m']))[idx]
+        # Format weather metrics with N/A fallback
+        temp_val = f"{temp:.1f}" if temp is not None else "N/A"
+        app_temp_val = f"{app_temp:.1f}" if app_temp is not None else "N/A"
+        precip_val = f"{precip:.1f}" if precip is not None else "N/A"
+        humidity_val = f"{humidity}" if humidity is not None else "N/A"
+        wind_val = f"{wind}" if wind is not None else "N/A"
         with open(f"{txt_dir}/weather.txt", "w") as f:
-            f.write(f"Temperature: {temp}, Apparent: {app_temp}\n")
+            f.write(f"Temperature: {temp} °C, Apparent: {app_temp} °C\n")
             f.write(f"Description: {get_weather_description(desc)}\n")
     else:
         marker_path = os.path.join(txt_dir, "weather_failed.marker")
@@ -355,7 +384,6 @@ def main():
             if k == 'zones_applied':
                 adv_metrics_lines.append("    zones_applied:")
                 try:
-                    import json
                     zones_dict = json.loads(v) if isinstance(v, str) else v
                     for zone, vals in zones_dict.items():
                         adv_metrics_lines.append(f"      {zone}: {vals}")
@@ -387,7 +415,6 @@ def main():
             if k == 'zones_applied':
                 summary_lines.append("    zones_applied:")
                 try:
-                    import json
                     zones_dict = json.loads(v) if isinstance(v, str) else v
                     for zone, vals in zones_dict.items():
                         summary_lines.append(f"      {zone}: {vals}")
@@ -532,11 +559,17 @@ def main():
         humidity = weather['hourly'].get('relative_humidity_2m', [None]*len(weather['hourly']['temperature_2m']))[idx]
         wind = weather['hourly'].get('windspeed_10m', [None]*len(weather['hourly']['temperature_2m']))[idx]
         desc = weather['hourly'].get('weathercode', [None]*len(weather['hourly']['temperature_2m']))[idx]
+        # Format weather values with human-readable placeholders
+        temp_val = f"{temp:.1f} °C" if temp is not None else "N/A"
+        app_temp_val = f"{app_temp:.1f}" if app_temp is not None else "N/A"
+        precip_val = f"{precip:.1f}" if precip is not None else "N/A"
+        humidity_val = f"{humidity}" if humidity is not None else "N/A"
+        wind_val = f"{wind}" if wind is not None else "N/A"
         summary_lines.append("  Weather at start:")
-        summary_lines.append(f"    Temperature: {temp} °C (feels like {app_temp} °C)")
-        summary_lines.append(f"    Precipitation: {precip} mm")
-        summary_lines.append(f"    Humidity: {humidity} %")
-        summary_lines.append(f"    Wind speed: {wind} km/h")
+        summary_lines.append(f"    Temperature: {temp_val} (feels like {app_temp_val})")
+        summary_lines.append(f"    Precipitation: {precip_val} mm")
+        summary_lines.append(f"    Humidity: {humidity_val} %")
+        summary_lines.append(f"    Wind speed: {wind_val} km/h")
         summary_lines.append(f"    Description: {get_weather_description(desc)}")
     else:
         summary_lines.append("  Weather at start: N/A [weather API unavailable or failed]")

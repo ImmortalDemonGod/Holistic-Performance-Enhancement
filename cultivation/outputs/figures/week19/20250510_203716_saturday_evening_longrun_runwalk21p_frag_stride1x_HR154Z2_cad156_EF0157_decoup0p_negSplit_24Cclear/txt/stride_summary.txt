@@ -1,0 +1,2 @@
+Stride segments detected: 1
+Stride 1: 2025-05-10 21:23:11+00:00 to 2025-05-10 21:23:24+00:00, duration: 13.0s, avg pace: 3.61, avg HR: 156.4

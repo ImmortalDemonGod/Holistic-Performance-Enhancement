@@ -353,6 +353,11 @@ def main():
                 session_secs = (gpx_df.index[-1] - gpx_df.index[0]).total_seconds() if len(gpx_df) > 1 else 1
                 walk_pct = 100 * total_walk_time / session_secs if session_secs > 0 else 0
                 kcal = int(round(0.95 * 70 * total_walk_dist)) if not np.isnan(total_walk_dist) else ''
+                # Represent missing max_hr uniformly as nan
+                if not isinstance(max_hr, (int, float)) or math.isnan(max_hr):
+                    max_hr_str = 'nan'
+                else:
+                    max_hr_str = f"{max_hr:.1f}"
                 summary_lines = [
                     "Walk Summary:",
                     f"  Segments detected: {len(summary['valid_segments'])}",
@@ -360,7 +365,7 @@ def main():
                     f"  Total walk distance (km): {total_walk_dist:.2f}",
                     f"  Avg walk pace (min/km): {avg_pace:.1f}",
                     f"  Avg walk HR (bpm): {avg_hr:.1f}",
-                    f"  Max walk HR (bpm): {max_hr}",
+                    f"  Max walk HR (bpm): {max_hr_str}",
                     f"  Avg walk cadence (spm): {avg_cad:.0f}",
                     f"  Energy cost est. (kcal): {kcal}",
                     "  Notes:",
@@ -372,6 +377,8 @@ def main():
                 print(f"[DIAG] Wrote walk_summary.txt: {summary_txt}")
                 # --- STEP 3: Write walk_over_time.txt (only walk-flagged rows, time-series) ---
                 if len(walk_df) > 0:
+                    # Ensure index is named 'timestamp' so reset_index() produces the column
+                    walk_df.index.name = 'timestamp'
                     over_time_cols = [
                         'timestamp',
                         'distance_cumulative_km',

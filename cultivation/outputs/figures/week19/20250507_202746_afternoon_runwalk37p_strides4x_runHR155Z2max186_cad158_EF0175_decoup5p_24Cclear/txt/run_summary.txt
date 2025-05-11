@@ -1,0 +1,54 @@
+
+Run Summary:
+  Start time: 2025-05-07 20:30:33+00:00
+  End time: 2025-05-07 21:30:11+00:00
+  Duration: 0 days 00:59:38
+  Total distance (km): 8.40
+  Avg pace (min/km): 6.39
+  Avg HR: 155.4
+  Max HR: 186.0
+  Avg cadence: 158.5
+  Elevation gain (m): N/A
+
+  --- Advanced Metrics (run_metrics) ---
+    distance_km: 6.0
+    duration_min: 36.7
+    avg_pace_min_per_km: 6.11
+    avg_hr: 155.4
+    efficiency_factor: 0.01754
+    decoupling_%: 5.17
+    hrTSS: 43.5
+    zones_applied:
+      Z1 (Recovery): {'bpm': [0, 145], 'pace_min_per_km': [7.0, 999]}
+      Z2 (Aerobic): {'bpm': [145, 160], 'pace_min_per_km': [6.85, 8.7]}
+      Z3 (Tempo): {'bpm': [161, 175], 'pace_min_per_km': [5.2, 6.85]}
+      Z4 (Threshold): {'bpm': [176, 186], 'pace_min_per_km': [4.8, 5.2]}
+      Z5 (VO2max): {'bpm': [187, 201], 'pace_min_per_km': [0.0, 4.8]}
+
+
+--- Pre-Run Wellness Context (Data for 2025-05-07) ---
+  HRV (Whoop): 79.6 ms (Δ1d: -14.8%, Δ7d: -27.0%)
+  RHR (Whoop): 58.0 bpm (Δ1d: +3.6%, Δ7d: +9.4%)
+  RHR (Garmin): 53.0 bpm (Δ1d: +1.9%, Δ7d: +3.9%)
+  Recovery Score (Whoop): 39.0 % (Δ1d: -25.0%, Δ7d: -27.8%)
+  Sleep Score (Whoop): 85.0 % (Δ1d: +2.4%, Δ7d: +88.9%)
+  Body Battery (Garmin): 46.7 % (Δ1d: -16.8%, Δ7d: +31.0%)
+  Avg Stress (Garmin, Prev Day): n/a
+  Sleep Duration (Whoop): 7.5 h (Δ1d: -13.4%, Δ7d: +98.9%)
+  Sleep Consistency (Whoop): 69.0 % (Δ1d: +19.0%, Δ7d: +300%+)
+  Sleep Disturbances/hr (Whoop): 1.7  (Δ1d: +290.7%, Δ7d: +63.9%)
+  Strain Score (Whoop): 14.4  (Δ1d: +83.0%, Δ7d: +234.1%)
+  Skin Temp (Whoop): 91.3 °F (Δ1d: +178.5%, Δ7d: +177.6%)
+  Resp Rate (Whoop): 16.5 rpm (Δ1d: -0.7%, Δ7d: -6.9%)
+  Steps (Garmin): 10457.0  (Δ1d: +300%+, Δ7d: +300%+)
+  Total Activity (Garmin): 119.2 min (Δ1d: +228.3%, Δ7d: +71.3%)
+  Resp Rate (Garmin): 14.2 rpm (Δ1d: +2.8%, Δ7d: -1.4%)
+  VO2max (Garmin): 54.0 ml/kg/min
+  ---
+  Start location: (34.60702, -98.42308)
+  Weather at start:
+    Temperature: 23.7 °C (feels like N/A)
+    Precipitation: 0.0 mm
+    Humidity: N/A %
+    Wind speed: 10.7 km/h
+    Description: Mainly clear

@@ -27,28 +27,28 @@ Run Summary:
 
 
 --- Pre-Run Wellness Context (Data for 2025-04-21) ---
-  HRV (Whoop): 117.5 ms
-  RHR (Whoop): 51.0 bpm
-  RHR (Garmin): 46.0 bpm
-  Recovery Score (Whoop): 83.0 %
-  Sleep Score (Whoop): 100.0 %
-  Body Battery (Garmin): 34.1 %
+  HRV (Whoop): n/a
+  RHR (Whoop): n/a
+  RHR (Garmin): 52.0 bpm (Δ1d: +13.0%, Δ7d: n/a)
+  Recovery Score (Whoop): n/a
+  Sleep Score (Whoop): n/a
+  Body Battery (Garmin): 11.9 % (Δ1d: -78.0%, Δ7d: n/a)
   Avg Stress (Garmin, Prev Day): n/a
-  Sleep Duration (Whoop): 8.4 h
-  Sleep Consistency (Whoop): 37.0 %
-  Sleep Disturbances/hr (Whoop): 0.4 
+  Sleep Duration (Whoop): n/a
+  Sleep Consistency (Whoop): n/a
+  Sleep Disturbances/hr (Whoop): n/a
   Strain Score (Whoop): n/a
-  Skin Temp (Whoop): 92.1 °F
-  Resp Rate (Whoop): 15.6 rpm
-  Steps (Garmin): 280.0 
-  Total Activity (Garmin): 15.2 min
-  Resp Rate (Garmin): 14.9 rpm
+  Skin Temp (Whoop): n/a
+  Resp Rate (Whoop): n/a
+  Steps (Garmin): 4065.0  (Δ1d: -53.0%, Δ7d: n/a)
+  Total Activity (Garmin): 76.4 min (Δ1d: -25.4%, Δ7d: n/a)
+  Resp Rate (Garmin): n/a
   VO2max (Garmin): n/a
   ---
   Start location: (34.60708, -98.42584)
   Weather at start:
-    Temperature: 20.4 °C (feels like None °C)
+    Temperature: 20.4 °C (feels like N/A)
     Precipitation: 0.0 mm
-    Humidity: None %
+    Humidity: N/A %
     Wind speed: 7.6 km/h
     Description: Clear sky

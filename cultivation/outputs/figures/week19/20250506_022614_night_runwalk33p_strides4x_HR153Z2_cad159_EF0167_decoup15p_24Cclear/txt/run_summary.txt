@@ -1,0 +1,54 @@
+
+Run Summary:
+  Start time: 2025-05-06 02:53:31+00:00
+  End time: 2025-05-06 03:37:19+00:00
+  Duration: 0 days 00:43:48
+  Total distance (km): 7.16
+  Avg pace (min/km): 6.95
+  Avg HR: 153.3
+  Max HR: 175.0
+  Avg cadence: 159.3
+  Elevation gain (m): N/A
+
+  --- Advanced Metrics (run_metrics) ---
+    distance_km: 3.34
+    duration_min: 21.7
+    avg_pace_min_per_km: 6.49
+    avg_hr: 153.3
+    efficiency_factor: 0.01674
+    decoupling_%: 15.26
+    hrTSS: 24.7
+    zones_applied:
+      Z1 (Recovery): {'bpm': [0, 145], 'pace_min_per_km': [7.0, 999]}
+      Z2 (Aerobic): {'bpm': [145, 160], 'pace_min_per_km': [6.85, 8.7]}
+      Z3 (Tempo): {'bpm': [161, 175], 'pace_min_per_km': [5.2, 6.85]}
+      Z4 (Threshold): {'bpm': [176, 186], 'pace_min_per_km': [4.8, 5.2]}
+      Z5 (VO2max): {'bpm': [187, 201], 'pace_min_per_km': [0.0, 4.8]}
+
+
+--- Pre-Run Wellness Context (Data for 2025-05-06) ---
+  HRV (Whoop): 93.3 ms (Δ1d: -20.5%, Δ7d: -7.3%)
+  RHR (Whoop): 56.0 bpm (Δ1d: +9.8%, Δ7d: +3.7%)
+  RHR (Garmin): 52.0 bpm (Δ1d: +13.0%, Δ7d: +4.0%)
+  Recovery Score (Whoop): 52.0 % (Δ1d: -37.3%, Δ7d: -42.9%)
+  Sleep Score (Whoop): 83.0 % (Δ1d: -17.0%, Δ7d: -17.0%)
+  Body Battery (Garmin): 56.2 % (Δ1d: +3.9%, Δ7d: -7.4%)
+  Avg Stress (Garmin, Prev Day): n/a
+  Sleep Duration (Whoop): 8.7 h (Δ1d: +3.3%, Δ7d: -1.2%)
+  Sleep Consistency (Whoop): 58.0 % (Δ1d: +56.8%, Δ7d: n/a)
+  Sleep Disturbances/hr (Whoop): 0.4  (Δ1d: -3.2%, Δ7d: -61.3%)
+  Strain Score (Whoop): 7.9  (Δ1d: -45.5%, Δ7d: -49.8%)
+  Skin Temp (Whoop): 91.0 °F (Δ1d: +172.8%, Δ7d: +166.2%)
+  Resp Rate (Whoop): 16.6 rpm (Δ1d: +6.6%, Δ7d: +0.4%)
+  Steps (Garmin): 1265.0  (Δ1d: -88.6%, Δ7d: -85.3%)
+  Total Activity (Garmin): 36.3 min (Δ1d: -67.0%, Δ7d: -64.4%)
+  Resp Rate (Garmin): 13.8 rpm (Δ1d: -6.6%, Δ7d: +9.5%)
+  VO2max (Garmin): n/a
+  ---
+  Start location: (34.60885, -98.44895)
+  Weather at start:
+    Temperature: 23.9 °C (feels like N/A)
+    Precipitation: 0.0 mm
+    Humidity: N/A %
+    Wind speed: 8.3 km/h
+    Description: Mainly clear

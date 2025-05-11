@@ -1,0 +1,11 @@
+Walk Summary:
+  Segments detected: 55
+  Total walk time: 29 min 21 s  (20.8 % of session)
+  Total walk distance (km): 2.53
+  Avg walk pace (min/km): 12.2
+  Avg walk HR (bpm): 148.6
+  Max walk HR (bpm): 169.7
+  Avg walk cadence (spm): 128
+  Energy cost est. (kcal): 168
+  Notes:
+    • (Auto-generated. Edit as needed.)

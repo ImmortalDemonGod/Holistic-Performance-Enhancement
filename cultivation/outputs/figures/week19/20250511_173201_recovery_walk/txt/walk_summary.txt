@@ -1,0 +1,11 @@
+Walk Summary:
+  Segments detected: 0
+  Total walk time: 0 min 00 s  (0.0 % of session)
+  Total walk distance (km): 0.00
+  Avg walk pace (min/km): nan
+  Avg walk HR (bpm): nan
+  Max walk HR (bpm): nan
+  Avg walk cadence (spm): nan
+  Energy cost est. (kcal): 0
+  Notes:
+    • (Auto-generated. Edit as needed.)
