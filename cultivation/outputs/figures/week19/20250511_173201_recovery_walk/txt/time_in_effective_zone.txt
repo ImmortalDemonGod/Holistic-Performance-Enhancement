@@ -1,0 +1,3 @@
+zone_effective	seconds	percent
+Z1 (Recovery)	936.0	99.89327641408752
+mixed	1.0	0.10672358591248667

@@ -1,0 +1,2 @@
+zone_pace	seconds	percent
+Z5 (VO2max)	1.0	100.0

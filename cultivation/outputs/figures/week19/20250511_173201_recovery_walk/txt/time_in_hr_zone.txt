@@ -1,0 +1,2 @@
+zone_hr	seconds	percent
+Z1 (Recovery)	937.0	100.0
