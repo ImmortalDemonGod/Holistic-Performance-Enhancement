@@ -11,6 +11,7 @@ import datetime
 import logging
 import re # For sanitizing filenames
 import time
+import os
 
 # Attempt relative import for DocInsightClient
 try:
@@ -39,17 +40,28 @@ def fetch_arxiv_paper(arxiv_id: str):
     cleaned_arxiv_id = arxiv_id.replace("arxiv:", "", 1).lower()
     logging.info(f"Processing arXiv ID: {cleaned_arxiv_id}")
 
-    PDF_DIR.mkdir(parents=True, exist_ok=True)
-    METADATA_DIR.mkdir(parents=True, exist_ok=True)
-    NOTES_DIR.mkdir(parents=True, exist_ok=True)
+    # Override output directories via env var
+    override_base = os.getenv('LIT_DIR_OVERRIDE')
+    if override_base:
+        pdf_dir = Path(override_base) / 'pdf'
+        metadata_dir = Path(override_base) / 'metadata'
+        notes_dir = Path(override_base) / 'notes'
+    else:
+        pdf_dir = PDF_DIR
+        metadata_dir = METADATA_DIR
+        notes_dir = NOTES_DIR
+
+    pdf_dir.mkdir(parents=True, exist_ok=True)
+    metadata_dir.mkdir(parents=True, exist_ok=True)
+    notes_dir.mkdir(parents=True, exist_ok=True)
 
     pdf_url = f"{ARXIV_PDF_BASE_URL}{cleaned_arxiv_id}.pdf"
     abs_url = f"{ARXIV_ABS_BASE_URL}{cleaned_arxiv_id}"
     api_url = f"{ARXIV_API_BASE_URL}{cleaned_arxiv_id}"
 
-    pdf_path = PDF_DIR / f"{cleaned_arxiv_id}.pdf"
-    metadata_path = METADATA_DIR / f"{cleaned_arxiv_id}.json"
-    note_path = NOTES_DIR / f"{cleaned_arxiv_id}.md"
+    pdf_path = pdf_dir / f"{cleaned_arxiv_id}.pdf"
+    metadata_path = metadata_dir / f"{cleaned_arxiv_id}.json"
+    note_path = notes_dir / f"{cleaned_arxiv_id}.md"
 
     # 1. Download PDF
     if not pdf_path.exists():
@@ -153,7 +165,12 @@ def fetch_arxiv_paper(arxiv_id: str):
 
     # 4. DocInsight Client Integration
     try:
-        client = DocInsightClient()
+        # Allow override of DocInsight base URL via env var
+        api_url = os.getenv('DOCINSIGHT_API_URL')
+        if api_url:
+            client = DocInsightClient(base_url=api_url)
+        else:
+            client = DocInsightClient()
         logging.info(f"Initiating DocInsight processing for {cleaned_arxiv_id}")
         query_text = (
             f"Summarize abstract and key contributions of {cleaned_arxiv_id}"
