@@ -1,0 +1,2 @@
+Temperature: 22.7, Apparent: None
+Description: Partly cloudy

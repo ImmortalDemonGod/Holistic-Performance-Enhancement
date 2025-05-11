@@ -1,0 +1,2 @@
+Temperature: 23.7, Apparent: None
+Description: Mainly clear
