@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-metrics_literature.py - Aggregate literature metadata into reading_stats.parquet
+metrics_literature.py - Aggregate literature metadata and instrumented reading session metrics into reading_stats.parquet
 """
 import json
 from pathlib import Path
-from datetime import datetime
 import pandas as pd
 import pandera as pa
 from pandera import Column, DataFrameSchema
 import logging
+import sqlite3
 
 
 def load_metadata(md_dir: Path) -> pd.DataFrame:
@@ -16,56 +16,108 @@ def load_metadata(md_dir: Path) -> pd.DataFrame:
     for fp in md_dir.glob('*.json'):
         try:
             data = json.loads(fp.read_text())
-            imported = data.get('imported_at')
+            arxiv_id = data.get('arxiv_id')
             novelty = data.get('docinsight_novelty')
-            if imported is None or novelty is None:
-                logging.warning(f"Skipping {fp.name}: missing imported_at or docinsight_novelty.")
+            if not arxiv_id or novelty is None:
+                logging.warning(f"Skipping {fp.name}: missing arxiv_id or docinsight_novelty.")
                 continue
-            dt = datetime.fromisoformat(imported)
-            week = dt.strftime('%Y-W%V')
-            records.append({'iso_week': week, 'novelty': float(novelty)})
+            records.append({
+                'arxiv_id': arxiv_id,
+                'docinsight_novelty_corpus': float(novelty)
+            })
         except Exception:
             logging.warning(f"Skipping {fp.name}: invalid JSON or data.")
             continue
     return pd.DataFrame(records)
 
 
-def aggregate(df: pd.DataFrame) -> pd.DataFrame:
-    if df.empty:
-        return pd.DataFrame(columns=['iso_week', 'papers_read', 'avg_novelty'])
-    grouped = df.groupby('iso_week').agg(
-        papers_read=pd.NamedAgg(column='novelty', aggfunc='count'),
-        avg_novelty=pd.NamedAgg(column='novelty', aggfunc='mean')
+def load_sessions(db_path: Path) -> pd.DataFrame:
+    conn = sqlite3.connect(str(db_path))
+    df = pd.read_sql_query(
+        'SELECT session_id, paper_id AS arxiv_id, started_at, finished_at FROM sessions',
+        conn, parse_dates=['started_at', 'finished_at']
     )
-    return grouped.reset_index()
+    conn.close()
+    return df
+
+
+def load_events(db_path: Path) -> pd.DataFrame:
+    conn = sqlite3.connect(str(db_path))
+    df = pd.read_sql_query(
+        'SELECT session_id, event_type, timestamp, payload FROM events',
+        conn, parse_dates=['timestamp']
+    )
+    conn.close()
+    return df
 
 
 def get_schema() -> DataFrameSchema:
     return DataFrameSchema({
-        "iso_week": Column(pa.String),
-        "papers_read": Column(pa.Int, nullable=False),
-        "avg_novelty": Column(pa.Float, nullable=True),
-        "minutes_spent": Column(pa.Float, nullable=True)
+        'arxiv_id': Column(pa.String, nullable=False),
+        'date_read': Column(pa.DateTime, nullable=False),
+        'iso_week_read': Column(pa.String, nullable=False),
+        'time_spent_minutes_actual': Column(pa.Float, nullable=True),
+        'docinsight_novelty_corpus': Column(pa.Float, nullable=False),
+        'self_rated_novelty_personal': Column(pa.Float, nullable=True),
+        'self_rated_comprehension': Column(pa.Int, nullable=True),
+        'self_rated_relevance': Column(pa.Int, nullable=True),
+        'flashcards_created': Column(pa.Int, nullable=True),
+        'docinsight_queries_during_session': Column(pa.Int, nullable=True),
+        'notes_length_chars_final': Column(pa.Int, nullable=True),
+        'pages_viewed_count': Column(pa.Int, nullable=True),
+        'highlights_made_count': Column(pa.Int, nullable=True)
     }, coerce=True)
 
 
 def main():
-    base = Path(__file__).parent.parent / 'literature' / 'metadata'
+    md_dir = Path(__file__).parent.parent / 'literature' / 'metadata'
+    db_path = Path(__file__).parent.parent / 'literature' / 'db.sqlite'
     out = Path(__file__).parent.parent / 'literature' / 'reading_stats.parquet'
-    df = load_metadata(base)
-    stats = aggregate(df)
-    # Placeholder for minutes_spent until actual time tracking is implemented
-    stats['minutes_spent'] = None
-
+    logging.info('Loading metadata and session data')
+    metadata_df = load_metadata(md_dir)
+    sessions_df = load_sessions(db_path)
+    events_df = load_events(db_path)
+    records = []
+    for _, row in sessions_df.iterrows():
+        sess_id = row['session_id']
+        if pd.isna(row['finished_at']):
+            continue
+        finished = row['finished_at']
+        date_read = finished.date()
+        iso_week = finished.strftime('%Y-W%V')
+        # parse session_summary_user
+        evt = events_df[events_df['session_id']==sess_id]
+        summary = evt[evt['event_type']=='session_summary_user']
+        metrics = {}
+        if not summary.empty:
+            try:
+                metrics = json.loads(summary.iloc[-1]['payload'])
+            except Exception:
+                metrics = {}
+        records.append({
+            'arxiv_id': row['arxiv_id'],
+            'date_read': pd.to_datetime(date_read),
+            'iso_week_read': iso_week,
+            'time_spent_minutes_actual': metrics.get('actual_time_spent_minutes'),
+            'docinsight_novelty_corpus': metadata_df.set_index('arxiv_id').loc[row['arxiv_id'],'docinsight_novelty_corpus'] if row['arxiv_id'] in metadata_df['arxiv_id'].values else None,
+            'self_rated_novelty_personal': metrics.get('self_rated_novelty_personal'),
+            'self_rated_comprehension': metrics.get('self_rated_comprehension'),
+            'self_rated_relevance': metrics.get('self_rated_relevance'),
+            'flashcards_created': len(evt[evt['event_type']=='flashcard_staged']),
+            'docinsight_queries_during_session': len(evt[evt['event_type']=='docinsight_query']),
+            'notes_length_chars_final': None,
+            'pages_viewed_count': None,
+            'highlights_made_count': None
+        })
+    df = pd.DataFrame(records)
     schema = get_schema()
     try:
-        schema.validate(stats, lazy=True)
+        schema.validate(df, lazy=True)
     except pa.errors.SchemaErrors as e:
-        logging.error(f"Schema validation error on reading_stats.parquet: {e}")
+        logging.error(f"Schema validation error: {e}")
         raise
-
-    stats.to_parquet(out, index=False)
-    logging.info("INFO: 'minutes_spent' in reading_stats.parquet is currently a placeholder and not derived from actual reading time.")
+    df.to_parquet(out, index=False)
+    logging.info(f"Wrote enriched reading stats to {out}")
     print(f"Wrote reading stats to {out}")
 
 
