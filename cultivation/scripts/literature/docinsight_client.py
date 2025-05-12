@@ -24,7 +24,7 @@ class DocInsightClient:
         if force_index:
             payload["force_index"] = force_index
         try:
-            resp = requests.post(url, json=payload)
+            resp = requests.post(url, json=payload, timeout=timeout)
             if resp.status_code != 200:
                 raise DocInsightAPIError(f"start_research failed: {resp.status_code} {resp.text}")
             data = resp.json()
@@ -41,7 +41,7 @@ class DocInsightClient:
         url = f"{self.base_url}/get_results"
         payload = {"job_ids": job_ids}
         try:
-            resp = requests.post(url, json=payload)
+            resp = requests.post(url, json=payload, timeout=timeout)
             if resp.status_code != 200:
                 raise DocInsightAPIError(f"get_results failed: {resp.status_code} {resp.text}")
             return resp.json()
@@ -58,9 +58,9 @@ class DocInsightClient:
         while time.time() - start < timeout:
             try:
                 results = self.get_results([job_id], timeout=poll_interval)
-            except DocInsightTimeoutError as e:
+            except DocInsightTimeoutError:
                 continue
-            except DocInsightAPIError as e:
+            except DocInsightAPIError:
                 raise
             if results and isinstance(results, list):
                 status = results[0].get("status")

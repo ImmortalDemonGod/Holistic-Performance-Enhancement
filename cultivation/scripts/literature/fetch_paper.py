@@ -21,9 +21,9 @@ SCHEMA_PATH = Path(__file__).parent.parent.parent / 'schemas' / 'paper.schema.js
 
 # Attempt relative import for DocInsightClient
 try:
-    from .docinsight_client import DocInsightClient
+    from .docinsight_client import DocInsightClient, DocInsightAPIError, DocInsightTimeoutError
 except ImportError:
-    from docinsight_client import DocInsightClient
+    from docinsight_client import DocInsightClient, DocInsightAPIError, DocInsightTimeoutError
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -205,55 +205,46 @@ def fetch_arxiv_paper(arxiv_id: str, force_redownload: bool = False):
     elif not metadata_payload:
         logging.warning(f"Cannot create note for {cleaned_arxiv_id} as metadata is missing.")
 
-    # 4. DocInsight Client Integration
+    # 4. DocInsight Client Integration with polling
+    api_url = os.getenv('DOCINSIGHT_API_URL')
+    client = DocInsightClient(base_url=api_url) if api_url else DocInsightClient()
+    logging.info(f"Initiating DocInsight processing for {cleaned_arxiv_id}")
+    query_text = (
+        f"Summarize the abstract and key contributions of the paper titled: '{metadata_payload.get('title', 'N/A')}' (arXiv:{cleaned_arxiv_id})"
+    )
     try:
-        # Allow override of DocInsight base URL via env var
-        api_url = os.getenv('DOCINSIGHT_API_URL')
-        if api_url:
-            client = DocInsightClient(base_url=api_url)
-        else:
-            client = DocInsightClient()
-        logging.info(f"Initiating DocInsight processing for {cleaned_arxiv_id}")
-        # Include both the title and arXiv ID in the DocInsight query for better context
-        query_text = (
-            f"Summarize the abstract and key contributions of the paper titled: '{metadata_payload.get('title', 'N/A')}' (arXiv:{cleaned_arxiv_id})"
-        )
-        job_id = client.start_research(
-            query=query_text,
-            force_index=[str(pdf_path.resolve())]
-        )
+        job_id = client.start_research(query=query_text, force_index=[str(pdf_path.resolve())])
         logging.info(f"DocInsight job started with ID: {job_id} for {cleaned_arxiv_id}")
-        # Poll and fetch results immediately for simple integration
-        if job_id:
-            time.sleep(0.2)
-            try:
-                results = client.get_results([job_id])
-                if results and results[0].get('status') == 'done':
-                    summary = results[0].get('answer', '')
-                    novelty = results[0].get('novelty', '')
-                    # Update metadata
-                    metadata_payload['docinsight_summary'] = summary
-                    metadata_payload['docinsight_novelty'] = novelty
-                    if metadata_path.exists():
-                        with open(metadata_path, 'w') as f_meta:
-                            json.dump(metadata_payload, f_meta, indent=2)
-                        logging.info(f"Updated metadata for {cleaned_arxiv_id} with DocInsight results.")
-                    # Append to note
-                    if note_path.exists() and '## DocInsight Summary' not in note_path.read_text():
-                        with open(note_path, 'a') as f_note:
-                            f_note.write("\n\n## DocInsight Summary\n")
-                            f_note.write(f"{summary}\n")
-                            f_note.write(f"\n*Novelty Score (DocInsight): {novelty}*\n")
-                        logging.info(f"Appended DocInsight summary to note for {cleaned_arxiv_id}")
-            except Exception as e:
-                logging.error(f"Error fetching results for {cleaned_arxiv_id}: {e}")
+        # Poll until done or timeout
+        result = client.wait_for_result(job_id)
+        summary = result.get('answer') or result.get('docinsight_summary') or ''
+        novelty = result.get('novelty')
+        metadata_payload['docinsight_summary'] = summary
+        metadata_payload['docinsight_novelty'] = novelty
+        # persist updated metadata
+        if metadata_path.exists():
+            with open(metadata_path, 'w') as f_meta:
+                json.dump(metadata_payload, f_meta, indent=2)
+            logging.info(f"Updated metadata for {cleaned_arxiv_id} with DocInsight results.")
+        # append to note
+        if note_path.exists() and '## DocInsight Summary' not in note_path.read_text():
+            with open(note_path, 'a') as f_note:
+                f_note.write("\n\n## DocInsight Summary\n")
+                f_note.write(f"{summary}\n")
+                f_note.write(f"\n*Novelty Score (DocInsight): {novelty}*\n")
+            logging.info(f"Appended DocInsight summary to note for {cleaned_arxiv_id}")
+    except DocInsightTimeoutError as te:
+        logging.error(f"DocInsight job {job_id} timed out for {cleaned_arxiv_id}: {te}")
+    except DocInsightAPIError as ae:
+        logging.error(f"DocInsight API error for {cleaned_arxiv_id}: {ae}")
     except Exception as e:
-        logging.error(f"Failed to interact with DocInsightClient for {cleaned_arxiv_id}: {e}")
+        logging.error(f"Unexpected DocInsight error for {cleaned_arxiv_id}: {e}")
 
     return True
 
 def main():
     parser = argparse.ArgumentParser(description="Fetch a paper by arXiv ID, URL, or DOI.")
+    parser.add_argument('--force-redownload', action='store_true', help='Re-download PDF and metadata even if files exist')
     parser.add_argument('--arxiv_id', type=str, help='arXiv ID of the paper (e.g., "2310.01234")')
     parser.add_argument('--url', type=str, help='Direct URL to the paper PDF (Not yet implemented)')
     parser.add_argument('--doi', type=str, help='DOI of the paper (Not yet implemented)')
@@ -264,7 +255,7 @@ def main():
         return
 
     if args.arxiv_id:
-        success = fetch_arxiv_paper(args.arxiv_id)
+        success = fetch_arxiv_paper(args.arxiv_id, force_redownload=args.force_redownload)
         if success:
             logging.info(f"Successfully processed arXiv ID: {args.arxiv_id}")
         else:

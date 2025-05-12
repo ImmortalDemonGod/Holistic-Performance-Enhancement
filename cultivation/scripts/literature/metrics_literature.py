@@ -54,6 +54,8 @@ def main():
     out = Path(__file__).parent.parent / 'literature' / 'reading_stats.parquet'
     df = load_metadata(base)
     stats = aggregate(df)
+    # Placeholder for minutes_spent until actual time tracking is implemented
+    stats['minutes_spent'] = None
 
     schema = get_schema()
     try:
