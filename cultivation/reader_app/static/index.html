@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Instrumented PDF Reader</title>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #viewer { width: 100vw; height: 98vh; border: none; }
+    #toolbar { background: #f7f7f7; padding: 8px; }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <input type="text" id="arxiv_id" placeholder="arXiv ID" />
+    <button id="loadBtn">Load PDF</button>
+    <span id="status"></span>
+  </div>
+  <iframe id="viewer" src="" allowfullscreen></iframe>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="/static/main.js"></script>
+</body>
+</html>
