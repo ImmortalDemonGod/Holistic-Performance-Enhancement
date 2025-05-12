@@ -12,6 +12,12 @@ import logging
 import re # For sanitizing filenames
 import time
 import os
+import sys
+import jsonschema
+from jsonschema import validate, ValidationError
+from typing import Optional, Any, Dict
+
+SCHEMA_PATH = Path(__file__).parent.parent.parent / 'schemas' / 'paper.schema.json'
 
 # Attempt relative import for DocInsightClient
 try:
@@ -36,7 +42,27 @@ def sanitize_filename_component(text, max_length=50):
     text = re.sub(r'[-\s]+', '-', text)
     return text[:max_length]
 
-def fetch_arxiv_paper(arxiv_id: str):
+def robust_get(url: str, max_retries: int = 5, backoff_factor: float = 1.0, timeout: int = 30, allowed_statuses=(500, 502, 503, 504)) -> Optional[requests.Response]:
+    """
+    Robust GET with retries and exponential backoff for transient errors.
+    """
+    for attempt in range(1, max_retries + 1):
+        try:
+            response = requests.get(url, timeout=timeout)
+            response.raise_for_status()
+            return response
+        except Exception as e:
+            # Retry on all exceptions (including StopIteration from mocks)
+            if isinstance(e, requests.exceptions.RequestException) and hasattr(e, 'response') and e.response is not None and e.response.status_code not in allowed_statuses:
+                logging.error(f"Non-retryable error {e.response.status_code} on {url}: {e}")
+                break
+            wait = min(backoff_factor * (2 ** (attempt - 1)), 10)
+            logging.warning(f"Attempt {attempt} failed for {url}: {e}. Retrying in {wait:.1f}s...")
+            time.sleep(wait)
+    logging.error(f"All retries failed for {url}")
+    return None
+
+def fetch_arxiv_paper(arxiv_id: str, force_redownload: bool = False):
     cleaned_arxiv_id = arxiv_id.replace("arxiv:", "", 1).lower()
     logging.info(f"Processing arXiv ID: {cleaned_arxiv_id}")
 
@@ -64,27 +90,33 @@ def fetch_arxiv_paper(arxiv_id: str):
     note_path = notes_dir / f"{cleaned_arxiv_id}.md"
 
     # 1. Download PDF
-    if not pdf_path.exists():
-        try:
-            logging.info(f"Downloading PDF from {pdf_url}...")
-            response = requests.get(pdf_url, timeout=30)
-            response.raise_for_status()
+    if force_redownload or not pdf_path.exists():
+        logging.info(f"Downloading PDF from {pdf_url}...")
+        response = robust_get(pdf_url)
+        if response is not None:
             with open(pdf_path, 'wb') as f:
                 f.write(response.content)
             logging.info(f"PDF saved to {pdf_path}")
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Failed to download PDF for {cleaned_arxiv_id}: {e}")
+        else:
+            logging.error(f"Failed to download PDF for {cleaned_arxiv_id} after retries.")
             return False
     else:
         logging.info(f"PDF already exists: {pdf_path}")
 
     # 2. Fetch and Parse Metadata from arXiv API
     metadata_payload = {}
-    if not metadata_path.exists():
+    if force_redownload or not metadata_path.exists():
+        logging.info(f"Fetching metadata from {api_url}...")
         try:
-            logging.info(f"Fetching metadata from {api_url}...")
-            response = requests.get(api_url, timeout=30)
-            response.raise_for_status()
+            response = robust_get(api_url)
+            if response is None:
+                logging.error(f"Failed to fetch metadata for {cleaned_arxiv_id} after retries.")
+                return False
+        except Exception:
+            logging.error(f"Failed to fetch metadata for {cleaned_arxiv_id}")
+            return False
+        # proceed to parse XML if GET succeeded
+        try:
             xml_root = ET.fromstring(response.content)
             ns = {'atom': 'http://www.w3.org/2005/Atom', 'arxiv': 'http://arxiv.org/schemas/atom'}
 
@@ -106,7 +138,7 @@ def fetch_arxiv_paper(arxiv_id: str):
             primary_category = primary_category_xml.attrib.get('term') if primary_category_xml is not None else "unknown"
 
             metadata_payload = {
-                "id": cleaned_arxiv_id,
+                "arxiv_id": cleaned_arxiv_id,
                 "title": title,
                 "authors": authors,
                 "year": paper_date.year,
@@ -114,19 +146,29 @@ def fetch_arxiv_paper(arxiv_id: str):
                 "day": paper_date.day,
                 "source": "arXiv",
                 "abstract": abstract,
+                "pdf_path": str(pdf_path),
+                "note_path": str(note_path),
                 "pdf_link": pdf_url,
                 "abs_link": abs_url,
                 "primary_category": primary_category,
                 "tags": [],
                 "imported_at": datetime.datetime.utcnow().isoformat() + "Z"
             }
+
+            # JSON Schema validation
+            try:
+                with open(SCHEMA_PATH, 'r') as schema_file:
+                    schema = json.load(schema_file)
+                validate(instance=metadata_payload, schema=schema)
+            except ValidationError as ve:
+                logging.error(f"Metadata schema validation failed for {cleaned_arxiv_id}: {ve.message} (field: {list(ve.path)})")
+                logging.error(f"Marking {cleaned_arxiv_id} as processing_error_metadata.")
+                return False
+            except Exception as ve:
+                logging.warning(f"Skipping metadata schema validation for {cleaned_arxiv_id}: {ve}")
             with open(metadata_path, 'w') as f:
                 json.dump(metadata_payload, f, indent=2)
             logging.info(f"Metadata saved to {metadata_path}")
-
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Failed to fetch metadata for {cleaned_arxiv_id}: {e}")
-            return False
         except ET.ParseError as e:
             logging.error(f"Failed to parse XML metadata for {cleaned_arxiv_id}: {e}")
             return False
@@ -172,8 +214,9 @@ def fetch_arxiv_paper(arxiv_id: str):
         else:
             client = DocInsightClient()
         logging.info(f"Initiating DocInsight processing for {cleaned_arxiv_id}")
+        # Include both the title and arXiv ID in the DocInsight query for better context
         query_text = (
-            f"Summarize abstract and key contributions of {cleaned_arxiv_id}"
+            f"Summarize the abstract and key contributions of the paper titled: '{metadata_payload.get('title', 'N/A')}' (arXiv:{cleaned_arxiv_id})"
         )
         job_id = client.start_research(
             query=query_text,
