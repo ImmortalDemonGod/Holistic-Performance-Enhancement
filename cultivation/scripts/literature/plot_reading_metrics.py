@@ -75,6 +75,50 @@ def plot_time_on_page(df, arxiv_id):
         plt.tight_layout()
         plt.show()
 
+from rapidfuzz import process, fuzz
+import numpy as np
+import os
+
+
+def cluster_similar_texts(texts, threshold=90):
+    """Cluster texts using fuzzy matching (rapidfuzz) with a similarity threshold."""
+    clusters = []
+    used = set()
+    for i, t in enumerate(texts):
+        if i in used:
+            continue
+        group = [t]
+        used.add(i)
+        for j in range(i+1, len(texts)):
+            if j in used:
+                continue
+            score = fuzz.ratio(t, texts[j])
+            if score >= threshold:
+                group.append(texts[j])
+                used.add(j)
+        clusters.append(group)
+    # Use the longest text in each cluster as the canonical flashcard
+    canonical = [max(group, key=len) for group in clusters]
+    return canonical, clusters
+
+
+def assign_page_numbers(sel_df, full_df):
+    # For each selection, find the latest view_area_update event before it (by timestamp)
+    view_df = full_df[full_df['event_type'] == 'view_area_update'][['timestamp', 'page_num']].copy()
+    view_df = view_df.sort_values('timestamp')
+    sel_df = sel_df.sort_values('timestamp')
+    sel_df['page_num'] = np.nan
+    view_idx = 0
+    view_times = view_df['timestamp'].tolist()
+    view_pages = view_df['page_num'].tolist()
+    for i, row in sel_df.iterrows():
+        while view_idx + 1 < len(view_times) and view_times[view_idx + 1] <= row['timestamp']:
+            view_idx += 1
+        if view_times:
+            sel_df.at[i, 'page_num'] = view_pages[view_idx]
+    return sel_df
+
+
 def analyze_text_selections(df):
     # Filter for text_selected events
     sel_df = df[df['event_type'] == 'text_selected'].copy()
@@ -84,33 +128,55 @@ def analyze_text_selections(df):
     # Clean and dedupe selected text
     sel_df['clean_text'] = sel_df['selected_text'].str.strip().replace({r'\s+': ' '}, regex=True)
     # Remove single-character and whitespace-only selections
-    deduped = [t for t in sel_df['clean_text'].drop_duplicates().tolist() if len(t.strip()) > 1]
-    # Count frequencies
-    freq = sel_df['clean_text'].value_counts()
+    sel_df = sel_df[sel_df['clean_text'].str.len() > 1]
+    # Assign page numbers
+    sel_df = assign_page_numbers(sel_df, df)
+    # Cluster similar texts
+    canonical, clusters = cluster_similar_texts(sel_df['clean_text'].tolist(), threshold=90)
+    # Map canonical to page numbers (most common page in cluster)
+    cluster_pages = []
+    for group in clusters:
+        pages = sel_df[sel_df['clean_text'].isin(group)]['page_num'].dropna().astype(int)
+        page = int(pages.mode().iloc[0]) if not pages.empty else None
+        cluster_pages.append(page)
+    # Count frequencies for canonical selections
+    canonical_freq = [sum(sel_df['clean_text'].isin(group)) for group in clusters]
     print(f"\nTotal text selections: {len(sel_df)}")
-    print(f"Unique selections: {freq.size}")
-    print("\nMost frequently selected text:")
-    print(freq.head(5))
-    # Timeline plot
-    plt.figure(figsize=(10,3))
+    print(f"Unique selections after clustering: {len(canonical)}")
+    print("\nMost frequently selected text (clustered):")
+    for txt, freq in sorted(zip(canonical, canonical_freq), key=lambda x: -x[1])[:5]:
+        print(f"{freq} | {txt[:120]}{'...' if len(txt)>120 else ''}")
+    # Timeline plot (clustered)
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(12,3))
     plt.plot(sel_df['timestamp'], range(1, len(sel_df)+1), marker='o', linestyle='-')
     plt.xlabel('Time')
     plt.ylabel('Cumulative Selections')
     plt.title('Timeline of Text Selections')
     plt.tight_layout()
     plt.show()
-    # Bar plot of top selections
+    # Bar plot of top canonical selections
     top_n = 10
-    plt.figure(figsize=(10,4))
-    freq.head(top_n).plot(kind='barh')
+    plt.figure(figsize=(12, max(4, top_n//2)))
+    import matplotlib
+    matplotlib.rcParams.update({'font.size': 10})
+    y_labels = [f"Pg {p}: {txt[:60]}{'...' if len(txt)>60 else ''}" for txt, p in zip(canonical, cluster_pages)]
+    sorted_idx = np.argsort(canonical_freq)[::-1][:top_n]
+    plt.barh([y_labels[i] for i in sorted_idx], [canonical_freq[i] for i in sorted_idx])
     plt.xlabel('Selection Count')
-    plt.title(f'Top {top_n} Most Frequently Selected Text')
+    plt.title(f'Top {top_n} Most Frequently Selected Text (Clustered)')
     plt.tight_layout()
     plt.show()
     # Output deduped selections for flashcards
-    print("\nDeduped selected text for flashcards:")
-    for i, txt in enumerate(deduped, 1):
-        print(f"{i}. {txt[:120]}{'...' if len(txt)>120 else ''}")
+    print("\nDeduped selected text for flashcards (clustered):")
+    for i, (txt, p) in enumerate(zip(canonical, cluster_pages), 1):
+        print(f"{i}. [Pg {p}] {txt[:120]}{'...' if len(txt)>120 else ''}")
+    # Export to file
+    out_path = os.path.join(os.path.dirname(__file__), 'anki_flashcards.txt')
+    with open(out_path, 'w', encoding='utf-8') as f:
+        for txt, p in zip(canonical, cluster_pages):
+            f.write(f"[Pg {p}] {txt}\n")
+    print(f"\nExported {len(canonical)} flashcard candidates to {out_path}")
 
 
 def main():
