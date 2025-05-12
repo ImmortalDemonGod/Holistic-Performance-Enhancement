@@ -2,6 +2,30 @@
 let ws = null;
 let sessionArxivId = null;
 
+// Patch PDFViewerApplication to guarantee highlight event handler is present
+document.addEventListener("DOMContentLoaded", function() {
+  if (window.PDFViewerApplication) {
+    window.PDFViewerApplication.handleAnnotationEditorStatesChanged = async function(event) {
+      const { AnnotationType } = globalThis.pdfjsLib || {};
+      const { type, value } = event.detail || {};
+      if (type === 'add' && value && AnnotationType && value.annotationType === AnnotationType.HIGHLIGHT) {
+        const highlightData = {
+          event_type: 'highlight_created',
+          timestamp: new Date().toISOString(),
+          pageNumber: (typeof value.pageIndex === 'number') ? value.pageIndex + 1 : undefined,
+          textContent: value.textContent || '',
+          color: value.color,
+          rects: value.rects,
+          quadPoints: value.quadPoints,
+          annotationId: value.id
+        };
+        console.log('Persistent Highlight Created Event:', highlightData);
+        // Backend send placeholder
+      }
+    };
+  }
+});
+
 function connectWS(arxiv_id) {
   ws = new WebSocket(`ws://${window.location.host}/ws?arxiv_id=${arxiv_id}`);
   ws.onopen = () => {

@@ -521,6 +521,11 @@ See https://github.com/adobe-type-tools/cmap-resources
       }
       document.addEventListener('webviewerloaded', function() {
         console.log('[PDF.js bridge] webviewerloaded event fired');
+        if (window.PDFViewerApplicationOptions && typeof window.PDFViewerApplicationOptions.set === 'function') {
+          window.PDFViewerApplicationOptions.set('enableHighlightEditor', true);
+          window.PDFViewerApplicationOptions.set('enableHighlightFloatingButton', true);
+          window.PDFViewerApplicationOptions.set('annotationEditorMode', 2);
+        }
         hookBus(window.PDFViewerApplication);
       });
       document.addEventListener('DOMContentLoaded', function() {
