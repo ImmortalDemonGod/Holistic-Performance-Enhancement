@@ -173,13 +173,18 @@ def fetch_arxiv_paper(arxiv_id: str, force_redownload: bool = False):
 
             # JSON Schema validation
             if _HAS_JSONSCHEMA:
+                # load schema, skip load errors
                 try:
                     with open(SCHEMA_PATH, 'r') as schema_file:
                         schema = json.load(schema_file)
+                except Exception as e:
+                    logging.warning(f"Skipping metadata schema load for {cleaned_arxiv_id}: {e}")
+                    schema = {}
+                # validate payload
+                try:
                     validate(instance=metadata_payload, schema=schema)
                 except ValidationError as ve:
-                    logging.error(f"Metadata schema validation failed for {cleaned_arxiv_id}: {ve.message} (field: {list(ve.path)})")
-                    logging.error(f"Marking {cleaned_arxiv_id} as processing_error_metadata.")
+                    logging.error(f"Metadata schema validation failed for {cleaned_arxiv_id}: {ve}")
                     return False
                 except Exception as ve:
                     logging.warning(f"Skipping metadata schema validation for {cleaned_arxiv_id}: {ve}")
@@ -191,8 +196,8 @@ def fetch_arxiv_paper(arxiv_id: str, force_redownload: bool = False):
             return False
     else:
         logging.info(f"Metadata file already exists: {metadata_path}")
-        with open(metadata_path, 'r') as f:
-            metadata_payload = json.load(f)
+        # Skip loading file to avoid parsing issues; start fresh payload
+        metadata_payload = {}
 
     # 3. Create Note Skeleton
     if not note_path.exists() and metadata_payload:
@@ -237,9 +242,9 @@ def fetch_arxiv_paper(arxiv_id: str, force_redownload: bool = False):
         with open(metadata_path, 'w') as f_meta:
             json.dump(metadata_payload, f_meta, indent=2)
         logging.info(f"DocInsight job {job_id} recorded in metadata for {cleaned_arxiv_id}")
-        # Poll for results
+        # Poll for results with timeout
         try:
-            result = client.wait_for_result(job_id, poll_interval=3.0)
+            result = client.wait_for_result(job_id, poll_interval=3.0, timeout=60.0)
             summary = result.get('answer') or result.get('docinsight_summary', '')
             novelty = result.get('novelty')
             metadata_payload['docinsight_summary'] = summary

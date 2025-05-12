@@ -8,7 +8,7 @@ import requests  # Added missing import for requests
 # NOTE: If file system mocking becomes more complex, consider pyfakefs for more robust isolation.
 
 from cultivation.scripts.literature.fetch_paper import fetch_arxiv_paper, main as fetch_paper_main
-from cultivation.scripts.literature.docinsight_client import DocInsightClient
+from cultivation.scripts.literature.docinsight_client import DocInsightClient, DocInsightAPIError
 import cultivation.scripts.literature.fetch_paper as fp
 
 BASE_TEST_LIT_DIR = Path("test_literature_output")
@@ -217,8 +217,7 @@ def reset_dirs(tmp_path, monkeypatch):
     pdf = tmp_path / 'pdf'
     meta = tmp_path / 'metadata'
     notes = tmp_path / 'notes'
-    for d in (pdf, meta, notes):
-        d.mkdir()
+    # Do not pre-create dirs; let code or tests create them
     monkeypatch.setattr('cultivation.scripts.literature.fetch_paper.PDF_DIR', pdf)
     monkeypatch.setattr('cultivation.scripts.literature.fetch_paper.METADATA_DIR', meta)
     monkeypatch.setattr('cultivation.scripts.literature.fetch_paper.NOTES_DIR', notes)
@@ -292,3 +291,99 @@ def test_docinsight_polling_timeout(mock_get, reset_dirs, caplog, monkeypatch):
     data = json.loads((reset_dirs/'metadata'/ '2222.2222.json').read_text())
     assert data.get('docinsight_summary') is None
     assert data['docinsight_job_id']=='job2'
+
+@patch('cultivation.scripts.literature.fetch_paper.validate')
+@patch('requests.get')
+def test_schema_validation_skip(mock_get, mock_validate, reset_dirs, caplog):
+    """If jsonschema.validate raises non-ValidationError, skip validation and continue."""
+    # Stub validate to raise generic error
+    mock_validate.side_effect = RuntimeError('skip schema')
+    # Stub PDF and API responses
+    pdf_resp = MagicMock(status_code=200, content=b'x'); pdf_resp.raise_for_status=MagicMock()
+    api_resp = MagicMock(status_code=200, content=SAMPLE_ARXIV_XML.encode()); api_resp.raise_for_status=MagicMock()
+    mock_get.side_effect = [pdf_resp, api_resp]
+    caplog.set_level('WARNING')
+    result = fetch_arxiv_paper('9999.9999')
+    assert result is True
+    assert 'Skipping metadata schema validation' in caplog.text
+
+@patch('requests.get')
+def test_docinsight_api_error(mock_get, reset_dirs, caplog, monkeypatch):
+    """If start_research raises APIError, function logs and returns True."""
+    # Stub PDF and API responses
+    pdf_resp = MagicMock(status_code=200, content=b'x'); pdf_resp.raise_for_status=MagicMock()
+    api_resp = MagicMock(status_code=200, content=SAMPLE_ARXIV_XML.encode()); api_resp.raise_for_status=MagicMock()
+    mock_get.side_effect = [pdf_resp, api_resp]
+    # Stub client.start_research to raise error
+    monkeypatch.setattr(fp.DocInsightClient, 'start_research', MagicMock(side_effect=DocInsightAPIError('fail')))
+    caplog.set_level('ERROR')
+    result = fetch_arxiv_paper('8888.8888')
+    assert result is True
+    assert 'Failed to submit DocInsight job' in caplog.text
+
+@patch('requests.get')
+def test_force_redownload(mock_get, tmp_path, caplog, monkeypatch):
+    """force_redownload=True should re-download PDF and metadata even if files exist."""
+    # Override dirs
+    monkeypatch.setenv('LIT_DIR_OVERRIDE', str(tmp_path))
+    from cultivation.scripts.literature.fetch_paper import fetch_arxiv_paper
+    # Create existing files
+    pdf = tmp_path / 'pdf'; meta = tmp_path / 'metadata'; notes = tmp_path / 'notes'
+    for d in (pdf, meta, notes): d.mkdir()
+    arxiv_id = '7777.7777'
+    (pdf / f"{arxiv_id}.pdf").write_bytes(b'old')
+    (meta / f"{arxiv_id}.json").write_text('{}')
+    (notes / f"{arxiv_id}.md").write_text('old')
+    # Stub downloads
+    pdf_resp = MagicMock(status_code=200, content=b'new'); pdf_resp.raise_for_status=MagicMock()
+    api_resp = MagicMock(status_code=200, content=SAMPLE_ARXIV_XML.encode()); api_resp.raise_for_status=MagicMock()
+    mock_get.side_effect = [pdf_resp, api_resp]
+    # Stub DocInsightClient
+    monkeypatch.setenv('DOCINSIGHT_API_URL', '')
+    monkeypatch.setattr(fp.DocInsightClient, 'start_research', MagicMock(return_value='job'))
+    monkeypatch.setattr(fp.DocInsightClient, 'wait_for_result', MagicMock(return_value={}))
+    # Run with force_redownload
+    caplog.set_level('INFO')
+    result = fetch_arxiv_paper(arxiv_id, force_redownload=True)
+    assert result is True
+    # Verify new PDF content
+    assert (pdf / f"{arxiv_id}.pdf").read_bytes() == b'new'
+
+### CLI tests for main() ###
+def test_main_no_args(monkeypatch):
+    # Running without any flags should exit with error
+    monkeypatch.setattr("sys.argv", ["fetch_paper.py"])
+    with pytest.raises(SystemExit):
+        fp.main()
+
+def test_main_success(monkeypatch, caplog):
+    # Simulate successful fetch_arxiv_paper
+    monkeypatch.setattr(fp, 'fetch_arxiv_paper', lambda arxiv_id, force_redownload=False: True)
+    monkeypatch.setenv('LIT_DIR_OVERRIDE', '')
+    monkeypatch.setattr("sys.argv", ["fetch_paper.py", "--arxiv_id", "1234.5678"])
+    caplog.set_level('INFO')
+    fp.main()
+    assert 'Successfully processed arXiv ID: 1234.5678' in caplog.text
+
+def test_main_failure(monkeypatch, caplog):
+    # Simulate failed fetch_arxiv_paper
+    monkeypatch.setattr(fp, 'fetch_arxiv_paper', lambda arxiv_id, force_redownload=False: False)
+    monkeypatch.setattr("sys.argv", ["fetch_paper.py", "--arxiv_id", "0000.0000"])
+    caplog.set_level('ERROR')
+    fp.main()
+    assert 'Failed to process arXiv ID: 0000.0000' in caplog.text
+
+def test_main_with_force_redownload_flag(monkeypatch, caplog):
+    # Ensure force-redownload flag forwards to fetch_arxiv_paper
+    called = {}
+    def fake_fetch(arxiv_id, force_redownload=False):
+        called['id'] = arxiv_id
+        called['force'] = force_redownload
+        return True
+    monkeypatch.setattr(fp, 'fetch_arxiv_paper', fake_fetch)
+    monkeypatch.setenv('LIT_DIR_OVERRIDE', '')
+    monkeypatch.setattr("sys.argv", ["fetch_paper.py", "--arxiv_id", "9999.9999", "--force-redownload"])
+    caplog.set_level('INFO')
+    fp.main()
+    assert called.get('id') == '9999.9999'
+    assert called.get('force') is True
