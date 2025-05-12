@@ -16,7 +16,7 @@ def test_missing_column_fails():
         {"iso_week": "2025-W19", "papers_read": 3, "avg_novelty": 0.85} # missing minutes_spent
     ])
     schema = get_schema()
-    with pytest.raises(pa.errors.SchemaError):
+    with pytest.raises(pa.errors.SchemaErrors):
         schema.validate(df)
 
 def test_wrong_type_fails():
@@ -24,5 +24,5 @@ def test_wrong_type_fails():
         {"iso_week": "2025-W19", "papers_read": "three", "avg_novelty": 0.85, "minutes_spent": None}
     ])
     schema = get_schema()
-    with pytest.raises(pa.errors.SchemaError):
+    with pytest.raises(pa.errors.SchemaErrors):
         schema.validate(df)
