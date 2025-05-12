@@ -9,9 +9,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from pathlib import Path
 
-import requests
-
-from cultivation.scripts.literature.fetch_paper import fetch_arxiv_paper
+from cultivation.scripts.literature.fetch_paper import fetch_arxiv_paper, robust_get
 
 ARXIV_API_BASE_URL = "http://export.arxiv.org/api/query?search_query="
 
@@ -32,8 +30,11 @@ def get_new_ids_for_query(query: str, since: datetime) -> list[str]:
     # query and date filter for submissions since 'since'
     date_str = since.strftime('%Y%m%d')
     url = f"{ARXIV_API_BASE_URL}{query}+AND+submittedDate:[{date_str}0000+TO+*]"
-    resp = requests.get(url)
-    resp.raise_for_status()
+    resp = robust_get(url)
+    if resp is None:
+        logging.error(f"Failed to fetch arXiv API for query '{query}' after retries.")
+        return []
+    # status checks and retries handled in robust_get
     root = ET.fromstring(resp.content)
     ns = {'atom': 'http://www.w3.org/2005/Atom'}
     ids: list[str] = []

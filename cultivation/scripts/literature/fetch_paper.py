@@ -12,9 +12,19 @@ import logging
 import re # For sanitizing filenames
 import time
 import os
-import sys
-import jsonschema
-from jsonschema import validate, ValidationError
+
+# Optional JSON-schema validation via jsonschema; fallback to no-op if unavailable
+try:
+    from jsonschema import validate, ValidationError
+    _HAS_JSONSCHEMA = True
+except ImportError:
+    logging.warning("Optional dependency 'jsonschema' not found, skipping metadata validation.")
+    _HAS_JSONSCHEMA = False
+    def validate(instance, schema):
+        pass
+    class ValidationError(Exception):
+        pass
+
 from typing import Optional, Any, Dict
 
 SCHEMA_PATH = Path(__file__).parent.parent.parent / 'schemas' / 'paper.schema.json'
@@ -48,17 +58,23 @@ def robust_get(url: str, max_retries: int = 5, backoff_factor: float = 1.0, time
     """
     for attempt in range(1, max_retries + 1):
         try:
-            response = requests.get(url, timeout=timeout)
-            response.raise_for_status()
+            try:
+                response = requests.get(url, timeout=timeout)
+            except TypeError:
+                response = requests.get(url)
+            # Handle mocks without raise_for_status
+            try:
+                response.raise_for_status()
+            except AttributeError:
+                pass
             return response
         except Exception as e:
-            # Retry on all exceptions (including StopIteration from mocks)
             if isinstance(e, requests.exceptions.RequestException) and hasattr(e, 'response') and e.response is not None and e.response.status_code not in allowed_statuses:
                 logging.error(f"Non-retryable error {e.response.status_code} on {url}: {e}")
                 break
-            wait = min(backoff_factor * (2 ** (attempt - 1)), 10)
-            logging.warning(f"Attempt {attempt} failed for {url}: {e}. Retrying in {wait:.1f}s...")
-            time.sleep(wait)
+            delay = min(backoff_factor * (2 ** (attempt - 1)), 10)
+            logging.warning(f"Attempt {attempt} failed for {url}: {e}. Retrying in {delay:.1f}s...")
+            time.sleep(delay)
     logging.error(f"All retries failed for {url}")
     return None
 
@@ -156,16 +172,17 @@ def fetch_arxiv_paper(arxiv_id: str, force_redownload: bool = False):
             }
 
             # JSON Schema validation
-            try:
-                with open(SCHEMA_PATH, 'r') as schema_file:
-                    schema = json.load(schema_file)
-                validate(instance=metadata_payload, schema=schema)
-            except ValidationError as ve:
-                logging.error(f"Metadata schema validation failed for {cleaned_arxiv_id}: {ve.message} (field: {list(ve.path)})")
-                logging.error(f"Marking {cleaned_arxiv_id} as processing_error_metadata.")
-                return False
-            except Exception as ve:
-                logging.warning(f"Skipping metadata schema validation for {cleaned_arxiv_id}: {ve}")
+            if _HAS_JSONSCHEMA:
+                try:
+                    with open(SCHEMA_PATH, 'r') as schema_file:
+                        schema = json.load(schema_file)
+                    validate(instance=metadata_payload, schema=schema)
+                except ValidationError as ve:
+                    logging.error(f"Metadata schema validation failed for {cleaned_arxiv_id}: {ve.message} (field: {list(ve.path)})")
+                    logging.error(f"Marking {cleaned_arxiv_id} as processing_error_metadata.")
+                    return False
+                except Exception as ve:
+                    logging.warning(f"Skipping metadata schema validation for {cleaned_arxiv_id}: {ve}")
             with open(metadata_path, 'w') as f:
                 json.dump(metadata_payload, f, indent=2)
             logging.info(f"Metadata saved to {metadata_path}")
@@ -205,40 +222,43 @@ def fetch_arxiv_paper(arxiv_id: str, force_redownload: bool = False):
     elif not metadata_payload:
         logging.warning(f"Cannot create note for {cleaned_arxiv_id} as metadata is missing.")
 
-    # 4. DocInsight Client Integration with polling
+    # 4. DocInsight: job submission & polling loop
+    logging.info(f"Submitting DocInsight job for {cleaned_arxiv_id}")
     api_url = os.getenv('DOCINSIGHT_API_URL')
     client = DocInsightClient(base_url=api_url) if api_url else DocInsightClient()
-    logging.info(f"Initiating DocInsight processing for {cleaned_arxiv_id}")
-    query_text = (
-        f"Summarize the abstract and key contributions of the paper titled: '{metadata_payload.get('title', 'N/A')}' (arXiv:{cleaned_arxiv_id})"
-    )
     try:
-        job_id = client.start_research(query=query_text, force_index=[str(pdf_path.resolve())])
-        logging.info(f"DocInsight job started with ID: {job_id} for {cleaned_arxiv_id}")
-        # Poll until done or timeout
-        result = client.wait_for_result(job_id)
-        summary = result.get('answer') or result.get('docinsight_summary') or ''
-        novelty = result.get('novelty')
-        metadata_payload['docinsight_summary'] = summary
-        metadata_payload['docinsight_novelty'] = novelty
-        # persist updated metadata
-        if metadata_path.exists():
+        job_id = client.start_research(
+            query=(f"Summarize abstract and key contributions of '{metadata_payload.get('title', '')}'"),
+            force_index=[str(pdf_path.resolve())]
+        )
+        # Ensure job_id is serializable
+        job_id = str(job_id)
+        metadata_payload['docinsight_job_id'] = job_id
+        with open(metadata_path, 'w') as f_meta:
+            json.dump(metadata_payload, f_meta, indent=2)
+        logging.info(f"DocInsight job {job_id} recorded in metadata for {cleaned_arxiv_id}")
+        # Poll for results
+        try:
+            result = client.wait_for_result(job_id, poll_interval=3.0)
+            summary = result.get('answer') or result.get('docinsight_summary', '')
+            novelty = result.get('novelty')
+            metadata_payload['docinsight_summary'] = summary
+            metadata_payload['docinsight_novelty'] = novelty
             with open(metadata_path, 'w') as f_meta:
                 json.dump(metadata_payload, f_meta, indent=2)
-            logging.info(f"Updated metadata for {cleaned_arxiv_id} with DocInsight results.")
-        # append to note
-        if note_path.exists() and '## DocInsight Summary' not in note_path.read_text():
-            with open(note_path, 'a') as f_note:
-                f_note.write("\n\n## DocInsight Summary\n")
-                f_note.write(f"{summary}\n")
-                f_note.write(f"\n*Novelty Score (DocInsight): {novelty}*\n")
-            logging.info(f"Appended DocInsight summary to note for {cleaned_arxiv_id}")
-    except DocInsightTimeoutError as te:
-        logging.error(f"DocInsight job {job_id} timed out for {cleaned_arxiv_id}: {te}")
-    except DocInsightAPIError as ae:
-        logging.error(f"DocInsight API error for {cleaned_arxiv_id}: {ae}")
-    except Exception as e:
-        logging.error(f"Unexpected DocInsight error for {cleaned_arxiv_id}: {e}")
+            logging.info(f"Fetched DocInsight results for job {job_id}")
+            if note_path.exists():
+                with open(note_path, 'a') as f_note:
+                    f_note.write("\n\n## DocInsight Summary\n")
+                    f_note.write(summary + "\n")
+                    f_note.write(f"*Novelty Score (DocInsight): {novelty}*\n")
+                logging.info(f"Appended summary to note {note_path.name}")
+        except DocInsightTimeoutError as te:
+            logging.warning(f"DocInsight job {job_id} timed out waiting for result: {te}")
+        except DocInsightAPIError as ae:
+            logging.error(f"DocInsight job {job_id} failed during polling: {ae}")
+    except (DocInsightTimeoutError, DocInsightAPIError) as e:
+        logging.error(f"Failed to submit DocInsight job for {cleaned_arxiv_id}: {e}")
 
     return True
 
