@@ -1,0 +1,22 @@
+{
+  "name": "reader_app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "jest --coverage",
+    "e2e": "playwright test",
+    "start": "http-server static -p 8000"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0",
+    "jest-websocket-mock": "^2.0.0",
+    "@testing-library/dom": "^8.0.0",
+    "babel-jest": "^29.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "playwright": "^1.35.0",
+    "http-server": "^14.1.1",
+    "ws": "^8.13.0"
+  }
+}
