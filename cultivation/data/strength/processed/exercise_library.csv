@@ -6,7 +6,7 @@ Plank,front plank,Core,None,Isometric,Hold,Bodyweight,False,duration
 Barbell Back Squat,back squat;BB squat,Quadriceps,Hamstrings;Glutes,Compound,Squat,Barbell,False,reps_x_weight
 Lunge,forward lunge,Lunge,Glutes;Quads,Compound,Lunge,Bodyweight,True,reps_x_weight
 Pull-up,pullup;chin-up,Back;Biceps,None,Compound,Pull_Vertical,Bodyweight,True,reps_x_weight
-Dumbbell Row,DB row,row,Dumbbell,None,Compound,Pull_Horizontal,Dumbbell,True,reps_x_weight
+Dumbbell Row,db row,Back,Biceps,Compound,Pull_Horizontal,Dumbbell,True,reps_x_weight
 Broad Jump,standing broad jump,Broad Jump,Glutes;Quads;Hamstrings,Plyometric,Jump,Bodyweight,False,distance
 Box Jump,low box jump;boxjump,Plyometric,Jump,Box;Bodyweight,False,distance
 Deadlift,barbell deadlift,Posterior Chain,Back;Hamstrings,Compound,Hinge,Barbell,False,reps_x_weight
@@ -20,3 +20,4 @@ Butt Kicks,butt kicks,Full Body,None,Drill,HipFlexion,Bodyweight,False,distance
 Ankle Hops,ankle hops,Lower Body,None,Plyometric,Hop,Bodyweight,False,reps_only
 Pogo Jumps,pogo jumps,Lower Body,None,Plyometric,Jump,Bodyweight,False,reps_only
 Tuck Jumps,tuck jumps,Lower Body,None,Plyometric,Jump,Bodyweight,False,reps_only
+Knee Push-up,knee pushup;assisted pushup,Chest,Triceps;Shoulders,Compound,Push_Horizontal,Bodyweight,False,reps_x_weight
