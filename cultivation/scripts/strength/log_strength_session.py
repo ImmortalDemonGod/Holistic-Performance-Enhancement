@@ -4,7 +4,7 @@ Interactive CLI to log a strength session into Parquet files.
 """
 import argparse
 import uuid
-import pandas as pd  # type: ignore
+import pandas as pd
 from pathlib import Path
 from datetime import datetime
 
@@ -23,11 +23,11 @@ EXERCISES_PATH = PROCESSED_DIR / 'strength_exercises_log.parquet'
 LIB_PATH = PROCESSED_DIR / 'exercise_library.csv'
 
 
-def prompt_session_info(default_dt):
+def prompt_session_info(default_dt, default_plan_id=None):
     print('Enter session-level information (press Enter to accept default):')
     dt_str = safe_input(f'  Session datetime UTC [{default_dt}]: ', default_dt)
     session_dt = pd.to_datetime(dt_str)
-    plan_id = safe_input('  Plan ID (optional): ', '').strip() or None
+    plan_id = safe_input(f'  Plan ID [{default_plan_id}]: ', default_plan_id).strip() or None
     wellness = safe_input('  Wellness light [Green/Amber/Red]: ', '').strip()
     rpe_ub = float(safe_input('  Overall RPE upper body (0-10): ', '0'))
     rpe_lb = float(safe_input('  Overall RPE lower body (0-10): ', '0'))
@@ -93,7 +93,7 @@ def main():
     args = parser.parse_args()
 
     default_dt = args.session_datetime_utc or datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-    session_info = prompt_session_info(default_dt)
+    session_info = prompt_session_info(default_dt, args.plan_id)
     lib_df = pd.read_csv(LIB_PATH)
     exercises = prompt_exercises(lib_df)
 
