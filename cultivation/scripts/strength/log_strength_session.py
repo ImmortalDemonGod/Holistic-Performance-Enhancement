@@ -3,11 +3,17 @@
 Interactive CLI to log a strength session into Parquet files.
 """
 import argparse
-import os
 import uuid
-import pandas as pd
+import pandas as pd  # type: ignore
 from pathlib import Path
 from datetime import datetime
+
+def safe_input(prompt, default=None):
+    try:
+        val = input(prompt)
+        return val or default
+    except EOFError:
+        return default
 
 # Paths
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -19,16 +25,16 @@ LIB_PATH = PROCESSED_DIR / 'exercise_library.csv'
 
 def prompt_session_info(default_dt):
     print('Enter session-level information (press Enter to accept default):')
-    dt_str = input(f'  Session datetime UTC [{default_dt}]: ') or default_dt
+    dt_str = safe_input(f'  Session datetime UTC [{default_dt}]: ', default_dt)
     session_dt = pd.to_datetime(dt_str)
-    plan_id = input('  Plan ID (optional): ').strip() or None
-    wellness = input('  Wellness light [Green/Amber/Red]: ').strip() or ''
-    rpe_ub = float(input('  Overall RPE upper body (0-10): ') or 0)
-    rpe_lb = float(input('  Overall RPE lower body (0-10): ') or 0)
-    rpe_core = input('  Overall RPE core (0-10, optional): ').strip()
+    plan_id = safe_input('  Plan ID (optional): ', '').strip() or None
+    wellness = safe_input('  Wellness light [Green/Amber/Red]: ', '').strip()
+    rpe_ub = float(safe_input('  Overall RPE upper body (0-10): ', '0'))
+    rpe_lb = float(safe_input('  Overall RPE lower body (0-10): ', '0'))
+    rpe_core = safe_input('  Overall RPE core (0-10, optional): ', '').strip()
     rpe_core = float(rpe_core) if rpe_core else None
-    dur_actual = int(input('  Actual duration (min): ') or 0)
-    notes = input('  Session notes: ').strip()
+    dur_actual = int(safe_input('  Actual duration (min): ', '0'))
+    notes = safe_input('  Session notes: ', '').strip()
     return {
         'session_id': f"{session_dt.strftime('%Y%m%d_%H%M%S')}_{plan_id or 'unspecified'}",
         'session_datetime_utc': session_dt,
@@ -47,22 +53,22 @@ def prompt_exercises(lib_df):
     print('\nEnter exercises. Leave name blank to finish.')
     idx = 1
     while True:
-        name = input(f'  Exercise #{idx} name: ').strip()
+        name = safe_input(f'  Exercise #{idx} name: ', '').strip()
         if not name:
             break
         if name not in lib_df['exercise_name'].values:
             print(f"    Warning: '{name}' not in library.")
-        set_num = int(input('    Set number: ') or 1)
-        reps_actual = int(input('    Reps actual: ') or 0)
-        weight_actual = float(input('    Weight kg actual: ') or 0)
-        duration_s = input('    Duration s actual (if timed, else blank): ').strip()
+        set_num = int(safe_input('    Set number: ', '1'))
+        reps_actual = int(safe_input('    Reps actual: ', '0'))
+        weight_actual = float(safe_input('    Weight kg actual: ', '0'))
+        duration_s = safe_input('    Duration s actual (if timed, else blank): ', '').strip()
         duration_s = int(duration_s) if duration_s else None
-        distance_m = input('    Distance m actual (if applicable): ').strip()
+        distance_m = safe_input('    Distance m actual (if applicable): ', '').strip()
         distance_m = float(distance_m) if distance_m else None
-        rpe_set = float(input('    RPE for set (0-10): ') or 0)
-        rir_set = input('    RIR for set (optional): ').strip()
+        rpe_set = float(safe_input('    RPE for set (0-10): ', '0'))
+        rir_set = safe_input('    RIR for set (optional): ', '').strip()
         rir_set = int(rir_set) if rir_set else None
-        notes_set = input('    Set notes: ').strip()
+        notes_set = safe_input('    Set notes: ', '').strip()
         entry = {
             'log_id': str(uuid.uuid4()),
             'exercise_name': name,
