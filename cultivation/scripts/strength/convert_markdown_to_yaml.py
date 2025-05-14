@@ -11,12 +11,12 @@ def parse_markdown(md_path):
     # Extract frontmatter
     if not lines or lines[0].strip() != '---':
         raise ValueError('No YAML frontmatter found')
-    end_idx = next(i for i, l in enumerate(lines[1:], 1) if l.strip() == '---')
+    end_idx = next(i for i, line in enumerate(lines[1:], 1) if line.strip() == '---')
     fm_text = '\n'.join(lines[1:end_idx])
     fm = yaml.safe_load(fm_text)
     # Extract exercises list
     rest = lines[end_idx+1:]
-    start = next((i for i, l in enumerate(rest) if l.strip().lower().startswith('## exercises')), None)
+    start = next((i for i, line in enumerate(rest) if line.strip().lower().startswith('## exercises')), None)
     exercises = []
     if start is not None:
         exer_lines = rest[start+1:]

@@ -4,6 +4,7 @@ Ingest a YAML workout log into Parquet session and exercise logs.
 """
 import argparse
 import yaml
+from cultivation.scripts.strength.convert_markdown_to_yaml import parse_markdown
 import pandas as pd
 from pathlib import Path
 
@@ -16,12 +17,16 @@ exercises_path = processed_dir / 'strength_exercises_log.parquet'
 
 def main():
     parser = argparse.ArgumentParser(description='Ingest YAML workout log to Parquet')
-    parser.add_argument('yaml_file', help='Path to the YAML log file')
+    parser.add_argument('input_file', help='Path to the Markdown or YAML log file')
     args = parser.parse_args()
 
-    # Load YAML
-    with open(args.yaml_file) as f:
-        data = yaml.safe_load(f)
+    # Load YAML or Markdown
+    in_path = Path(args.input_file)
+    if in_path.suffix.lower() == '.md':
+        data = parse_markdown(str(in_path))
+    else:
+        with open(in_path) as f:
+            data = yaml.safe_load(f)
 
     # Session-level
     session = {
@@ -63,7 +68,7 @@ def main():
             ex_df = pd.concat([old_ex, ex_df], ignore_index=True)
         ex_df.to_parquet(exercises_path, index=False)
 
-    print(f'Successfully ingested {args.yaml_file}')
+    print(f'Successfully ingested {args.input_file}')
     print(f'- Sessions logged to: {sessions_path}')
     print(f'- Exercises logged to: {exercises_path}')
 
