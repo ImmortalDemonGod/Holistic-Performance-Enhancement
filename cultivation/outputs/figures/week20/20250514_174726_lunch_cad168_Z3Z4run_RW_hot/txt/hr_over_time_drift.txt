@@ -1,0 +1,4 @@
+hr_drift:
+first_half_hr: 178.92
+second_half_hr: 165.36
+hr_drift_pct: -7.58
