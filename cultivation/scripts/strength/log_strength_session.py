@@ -4,7 +4,7 @@ Interactive CLI to log a strength session into Parquet files.
 """
 import argparse
 import uuid
-import pandas as pd
+import pandas as pd  # type: ignore
 from pathlib import Path
 from datetime import datetime
 

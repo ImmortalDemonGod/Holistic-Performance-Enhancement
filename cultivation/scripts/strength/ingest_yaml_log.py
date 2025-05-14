@@ -3,9 +3,9 @@
 Ingest a YAML workout log into Parquet session and exercise logs.
 """
 import argparse
-import yaml
+import yaml  # type: ignore
 from cultivation.scripts.strength.convert_markdown_to_yaml import parse_markdown
-import pandas as pd
+import pandas as pd  # type: ignore
 from pathlib import Path
 
 # Paths
@@ -13,6 +13,7 @@ dir_base = Path(__file__).resolve().parents[2]
 processed_dir = dir_base / 'data' / 'strength' / 'processed'
 sessions_path = processed_dir / 'strength_sessions.parquet'
 exercises_path = processed_dir / 'strength_exercises_log.parquet'
+lib_path = processed_dir / 'exercise_library.csv'
 
 
 def main():
@@ -27,6 +28,24 @@ def main():
     else:
         with open(in_path) as f:
             data = yaml.safe_load(f)
+
+    # -- Schema validation: session fields
+    required_session_keys = [
+        'session_id', 'session_datetime_utc', 'plan_id', 'wellness_light',
+        'overall_rpe_upper_body', 'overall_rpe_lower_body', 'overall_rpe_core',
+        'session_duration_planned_min', 'session_duration_actual_min',
+        'environment_temp_c', 'location_type', 'video_captured', 'session_notes'
+    ]
+    for key in required_session_keys:
+        if key not in data:
+            raise KeyError(f'Missing required session field: {key}')
+
+    # -- Validate exercise names against library
+    lib_df = pd.read_csv(lib_path)
+    ex_names = [ex.get('exercise_name') for ex in data.get('exercises', [])]
+    unknown = set(ex_names) - set(lib_df['exercise_name'])
+    if unknown:
+        raise ValueError(f'Unknown exercise names in log: {unknown}')
 
     # Session-level
     session = {

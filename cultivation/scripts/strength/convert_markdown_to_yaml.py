@@ -19,8 +19,16 @@ def parse_markdown(md_path):
     start = next((i for i, line in enumerate(rest) if line.strip().lower().startswith('## exercises')), None)
     exercises = []
     if start is not None:
-        exer_lines = rest[start+1:]
-        exer_text = '\n'.join(exer_lines)
+        raw_exer_lines = rest[start+1:]
+        # Collect YAML list until next header or end
+        filtered = []
+        for line in raw_exer_lines:
+            if not line.strip():
+                continue
+            if line.startswith('#'):
+                break
+            filtered.append(line)
+        exer_text = '\n'.join(filtered)
         exercises = yaml.safe_load(exer_text)
     fm['exercises'] = exercises
     return fm
