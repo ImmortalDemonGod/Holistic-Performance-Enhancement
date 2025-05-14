@@ -8,3 +8,4 @@ seaborn>=0.11.0
 requests
 pyarrow
 python-dotenv
+pandas
