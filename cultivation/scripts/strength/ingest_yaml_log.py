@@ -29,6 +29,10 @@ def main():
         with open(in_path) as f:
             data = yaml.safe_load(f)
 
+    # Skip template or files without session_id
+    if 'session_id' not in data or not data.get('session_id'):
+        print(f"Skipping {args.input_file}: no session_id found.")
+        return
     # -- Schema validation: session fields
     required_session_keys = [
         'session_id', 'session_datetime_utc', 'plan_id', 'wellness_light',
@@ -40,10 +44,20 @@ def main():
         if key not in data:
             raise KeyError(f'Missing required session field: {key}')
 
-    # -- Validate exercise names against library
+    # -- Validate exercise names against library (case-insensitive, including aliases)
     lib_df = pd.read_csv(lib_path)
-    ex_names = [ex.get('exercise_name') for ex in data.get('exercises', [])]
-    unknown = set(ex_names) - set(lib_df['exercise_name'])
+    # Build set of canonical names and aliases
+    canon = set(lib_df['exercise_name'].str.lower())
+    aliases = set()
+    lib_df['exercise_alias'].fillna('', inplace=True)
+    for a in lib_df['exercise_alias']:
+        for alias in a.split(';'):
+            if alias.strip():
+                aliases.add(alias.strip().lower())
+    valid = canon.union(aliases)
+    # Check each exercise name lowercased
+    ex_names = [ex.get('exercise_name','').strip() for ex in data.get('exercises', [])]
+    unknown = {n for n in ex_names if n.lower() not in valid}
     if unknown:
         raise ValueError(f'Unknown exercise names in log: {unknown}')
 
@@ -77,6 +91,8 @@ def main():
     sess_df = pd.DataFrame([session])
     if sessions_path.exists():
         old = pd.read_parquet(sessions_path)
+        # Remove any existing records for this session to avoid duplicates
+        old = old[old['session_id'] != session['session_id']]
         sess_df = pd.concat([old, sess_df], ignore_index=True)
     sess_df.to_parquet(sessions_path, index=False)
 
@@ -84,6 +100,8 @@ def main():
     if not ex_df.empty:
         if exercises_path.exists():
             old_ex = pd.read_parquet(exercises_path)
+            # Remove existing exercise rows for this session
+            old_ex = old_ex[old_ex['session_id'] != session['session_id']]
             ex_df = pd.concat([old_ex, ex_df], ignore_index=True)
         ex_df.to_parquet(exercises_path, index=False)
 
