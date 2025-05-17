@@ -1,0 +1,43 @@
+name: Daily Dev Review
+
+on:
+  schedule:
+    - cron: '0 7 * * *'  # Runs daily at 7:00 UTC
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  dev-daily-reflect:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Dev Daily Reflect pipeline
+        run: |
+          bash cultivation/scripts/software/dev_daily_reflect/test_dev_daily_reflect.sh
+
+      - name: Commit and push Markdown report
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions[bot]"
+          git add cultivation/outputs/software/dev_daily_reflect/reports/dev_report_*.md
+          git commit -m "chore: update daily dev report [CI skip]" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

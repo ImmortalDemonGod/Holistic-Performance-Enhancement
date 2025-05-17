@@ -22,8 +22,8 @@ if enriched_files:
 else:
     raw_files = sorted(RAW_DIR.glob('git_commits_*.json'))
     if not raw_files:
-        print('[WARN] No commit JSON found. Exiting.')
-        sys.exit(0)
+        print(f'[WARN] No commit JSON file found for {date_tag}. Exiting.')
+        sys.exit(2)
     json_file = raw_files[-1]
     date_tag = json_file.stem[-10:]
 

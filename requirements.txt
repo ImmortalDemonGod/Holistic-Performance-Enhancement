@@ -16,4 +16,3 @@ pandas
 radon
 ruff
 GitPython
-radon
