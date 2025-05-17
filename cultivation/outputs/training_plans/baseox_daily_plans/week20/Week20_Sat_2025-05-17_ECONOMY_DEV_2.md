@@ -71,3 +71,37 @@ purpose: "Reinforce running mechanics, build reactive strength, apply cadence fo
 ## Notes/Reminders:
 *   This is a longer session with multiple components. Manage energy and focus.
 *   If any specific muscle group feels overly fatigued from Tuesday's calisthenics, choose different exercises for today or reduce sets/reps for that group.
+---
+
+## Logging Instructions for Strength System
+
+When performing your exercises, make sure to record the following for each set, as required by the strength logging system:
+
+**For each set:**
+- Exercise name (as in the library)
+- Set number
+- Reps performed
+- Weight used (kg; 0 for bodyweight)
+- Duration (seconds, if timed)
+- Distance (meters, if applicable)
+- RPE for set (0–10)
+- RIR for set (optional)
+- Set notes (form, pain, modifications, etc.)
+
+**For the overall session:**
+- Session date/time (UTC)
+- Plan ID (optional)
+- Wellness light (Green/Amber/Red)
+- Overall RPE upper body (0–10)
+- Overall RPE lower body (0–10)
+- Overall RPE core (0–10, optional)
+- Planned duration (min)
+- Actual duration (min)
+- Environment temperature (°C, optional)
+- Location type (e.g., gym, home)
+- Video captured (yes/no)
+- Session notes (summary, issues, etc.)
+
+Keeping these details will ensure smooth and complete logging into the Cultivation strength system.
+
+---
