@@ -1,0 +1,58 @@
+session_id: "20250517_170210_W20Sat_DrillPlyoStr"
+session_datetime_utc: "2025-05-17T17:02:10Z"
+plan_id: "W20-Sat-PlyoRun"
+wellness_light: "Green"
+overall_rpe_upper_body: 9
+overall_rpe_lower_body: 8
+overall_rpe_core: 10
+session_duration_planned_min: 60
+session_duration_actual_min: 95
+environment_temp_c: null
+location_type: "outdoor park and home"
+video_captured: false
+session_notes: "Warm-up extended (quad fatigue); cadence-focused run on Cameron loop; high-HR alert muted; metronome at 165–170 spm. Pull-ups done at the park, remainder of calisthenics at home."
+
+exercises:
+  - exercise_name: "Pull-up"
+    set_number: 1
+    reps_actual: 1
+    weight_kg_actual: 0
+    rpe_set: 10
+    set_notes: "Max effort, chin over bar"
+    is_failure_set: false
+
+  - exercise_name: "Pull-up"
+    set_number: 2
+    reps_actual: 0
+    weight_kg_actual: 0
+    rpe_set: 10
+    set_notes: "Failed – halfway up"
+    is_failure_set: true
+
+  - exercise_name: "Hamstring Walkouts"
+    set_number: 1
+    reps_actual: 10
+    weight_kg_actual: 0
+    rpe_set: 7
+    set_notes: ""
+
+  - exercise_name: "Single-Leg Romanian Deadlift (Bodyweight)"
+    set_number: 1
+    reps_actual: 7
+    weight_kg_actual: 0
+    rpe_set: 6
+    set_notes: "7 each leg"
+
+  - exercise_name: "Single-Leg Romanian Deadlift (Bodyweight)"
+    set_number: 1
+    reps_actual: 10
+    weight_kg_actual: 0
+    rpe_set: 7.5
+    set_notes: "Approximate reps; effort ~7–8"
+
+  - exercise_name: "Plank"
+    set_number: 1
+    duration_s_actual: 16
+    weight_kg_actual: 0
+    rpe_set: 10
+    set_notes: "To failure" 
