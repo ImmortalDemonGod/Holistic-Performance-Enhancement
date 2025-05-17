@@ -2,13 +2,13 @@
 # Aggregates commit data per author/day for DevDailyReflect (MVP)
 # Reads raw commit JSON and writes daily rollup CSV
 
+#!/usr/bin/env python3
 import pandas as pd
-import pathlib
-import datetime
 import sys
+from utils import get_repo_root
 
 # --- Configuration ---
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[4]
+REPO_ROOT = get_repo_root()
 RAW_DIR = REPO_ROOT / 'cultivation' / 'outputs' / 'software' / 'dev_daily_reflect' / 'raw'
 ROLLUP_DIR = REPO_ROOT / 'cultivation' / 'outputs' / 'software' / 'dev_daily_reflect' / 'rollup'
 ROLLUP_DIR.mkdir(parents=True, exist_ok=True)

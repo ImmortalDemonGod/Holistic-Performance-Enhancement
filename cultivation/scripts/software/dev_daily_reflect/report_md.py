@@ -2,13 +2,13 @@
 # Writes Markdown report for DevDailyReflect (MVP)
 # Reads rollup CSV and writes Markdown report
 
+#!/usr/bin/env python3
 import pandas as pd
-import pathlib
-import datetime
 import sys
+from utils import get_repo_root
 
 # --- Configuration ---
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[4]
+REPO_ROOT = get_repo_root()
 ROLLUP_DIR = REPO_ROOT / 'cultivation' / 'outputs' / 'software' / 'dev_daily_reflect' / 'rollup'
 REPORTS_DIR = REPO_ROOT / 'cultivation' / 'outputs' / 'software' / 'dev_daily_reflect' / 'reports'
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)

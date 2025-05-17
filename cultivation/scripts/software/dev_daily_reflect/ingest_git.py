@@ -1,16 +1,16 @@
+#!/usr/bin/env python3
 # ingest_git.py
 # Fetches commit data for DevDailyReflect pipeline (MVP)
 # Writes raw commit data as JSON to outputs/software/dev_daily_reflect/raw/
 
 import subprocess
 import datetime
-import pathlib
 import json
-import re
 import sys
+from utils import get_repo_root
 
 # --- Configuration ---
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[4]  # repo root
+REPO_ROOT = get_repo_root()  # repo root
 OUTPUT_DIR = REPO_ROOT / 'cultivation' / 'outputs' / 'software' / 'dev_daily_reflect' / 'raw'
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -43,8 +43,10 @@ for line in raw.splitlines():
         m = re.match(r'^(\d+|-)\t(\d+|-)\t', line)
         if m and cur:
             add, delt = m.group(1), m.group(2)
-            if add.isdigit(): cur['added'] += int(add)
-            if delt.isdigit(): cur['deleted'] += int(delt)
+            if add.isdigit(): 
+                cur['added'] += int(add)
+            if delt.isdigit(): 
+                cur['deleted'] += int(delt)
 if cur:
     records.append(cur)
 
