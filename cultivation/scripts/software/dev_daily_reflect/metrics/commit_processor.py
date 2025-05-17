@@ -59,8 +59,8 @@ def analyze_commits_code_quality(repo_path: str, commits: List[Dict]) -> List[Di
             try:
                 mi = mi_visit(blob, True)
                 mi_scores.append(mi)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"[WARN] Could not compute MI for {fname} in commit {sha}: {e}")
             # Ruff errors
             try:
                 with tempfile.NamedTemporaryFile('w', delete=False, suffix='.py') as tf:
@@ -70,8 +70,8 @@ def analyze_commits_code_quality(repo_path: str, commits: List[Dict]) -> List[Di
                 ruff_json = json.loads(result.stdout) if result.stdout else []
                 total_ruff += len(ruff_json)
                 os.unlink(temp_path)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"[WARN] Could not run Ruff for {fname} in commit {sha}: {e}")
         commit['py_files_changed_count'] = len(files_changed)
         commit['total_cc'] = total_cc
         commit['avg_mi'] = sum(mi_scores) / len(mi_scores) if mi_scores else 0

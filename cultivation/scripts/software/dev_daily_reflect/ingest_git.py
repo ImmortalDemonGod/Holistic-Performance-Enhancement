@@ -8,16 +8,19 @@ import datetime
 import json
 import sys
 import re
-from cultivation.scripts.software.dev_daily_reflect.utils import get_repo_root
+from cultivation.scripts.software.dev_daily_reflect.config_loader import load_config
+from pathlib import Path
 
 # --- Configuration ---
-REPO_ROOT = get_repo_root()  # repo root
+config = load_config()
+REPO_ROOT = (Path(__file__).parent / config["repository_path"]).resolve()
 OUTPUT_DIR = REPO_ROOT / 'cultivation' / 'outputs' / 'software' / 'dev_daily_reflect' / 'raw'
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# --- Calculate time window (last 24h, UTC) ---
+# --- Calculate time window (configurable lookback_days) ---
 now = datetime.datetime.now(datetime.timezone.utc)
-start = now - datetime.timedelta(days=1)
+lookback_days = int(config.get("lookback_days", 1))
+start = now - datetime.timedelta(days=lookback_days)
 SINCE = start.strftime('%Y-%m-%dT%H:%M:%SZ')
 DATE_TAG = now.strftime('%Y-%m-%d')
 
