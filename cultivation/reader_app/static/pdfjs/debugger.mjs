@@ -13,7 +13,13 @@
  * limitations under the License.
  */
 
-const { OPS } = globalThis.pdfjsLib || (await import("pdfjs-lib"));
+let OPS;
+try {
+  OPS = (globalThis.pdfjsLib || (await import("pdfjs-lib"))).OPS;
+} catch (err) {
+  console.error("[PDFBug] Failed to load pdfjs-lib:", err);
+  throw err;
+}
 
 const opMap = Object.create(null);
 for (const key in OPS) {

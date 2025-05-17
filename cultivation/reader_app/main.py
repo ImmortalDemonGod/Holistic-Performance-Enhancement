@@ -11,6 +11,13 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 
+try:
+    from jsonschema import validate, ValidationError
+    _HAS_JSONSCHEMA = True
+except ImportError:
+    _HAS_JSONSCHEMA = False
+
+
 app = FastAPI()
 # Serve static frontend
 static_dir = Path(__file__).parent / "static"
@@ -24,7 +31,14 @@ def index():
 # Serve PDFs from literature/pdf
 @app.get("/pdfs/{arxiv_id}.pdf")
 def get_pdf(arxiv_id: str):
-    pdf_path = Path(__file__).parent.parent / "literature" / "pdf" / f"{arxiv_id}.pdf"
+    pdf_path = (
+        Path(__file__).parent.parent / "literature" / "pdf" / f"{arxiv_id}.pdf"
+    )
+    if not pdf_path.is_file():
+        return JSONResponse(
+            status_code=404,
+            content={"detail": f"PDF for {arxiv_id} not found"},
+        )
     return FileResponse(str(pdf_path), media_type="application/pdf")
 
 # Database for sessions and events
@@ -85,6 +99,36 @@ async def telemetry_ws(ws: WebSocket):
 from fastapi import Query, Response
 import csv
 from io import StringIO
+
+SCHEMA_PATH = Path(__file__).parent.parent / "schemas" / "paper.schema.json"
+
+# Utility: load and validate metadata by arxiv_id
+def load_and_validate_metadata(arxiv_id: str):
+    metadata_path = Path(__file__).parent.parent / "literature" / "metadata" / f"{arxiv_id}.json"
+    if not metadata_path.exists():
+        raise FileNotFoundError(f"Metadata file not found: {metadata_path}")
+    data = json.load(metadata_path.open())
+    if _HAS_JSONSCHEMA:
+        try:
+            schema = json.load(SCHEMA_PATH.open())
+            validate(instance=data, schema=schema)
+        except ValidationError as ve:
+            raise ValueError(f"Metadata schema validation failed: {ve}")
+    return data
+
+# API: GET /metadata/{arxiv_id} (returns validated metadata)
+from fastapi import HTTPException
+@app.get("/metadata/{arxiv_id}")
+def get_metadata(arxiv_id: str):
+    try:
+        data = load_and_validate_metadata(arxiv_id)
+        return JSONResponse(content=data)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {e}")
 
 @app.get("/metrics/{arxiv_id}")
 def get_metrics(
@@ -164,6 +208,10 @@ def get_metrics_summary(arxiv_id: str, session_id: int = Query(None)):
             # Use as fallback for time spent if no page_change
             if "page_num" in payload:
                 pages.add(payload["page_num"])
+    # Final flush: add time spent on last page until now
+    if last_page is not None and last_time is not None:
+        duration = (datetime.utcnow() - datetime.fromisoformat(last_time.replace("Z", ""))).total_seconds()
+        page_times[last_page] = page_times.get(last_page, 0) + duration
     total_time = sum(page_times.values())
     most_viewed = max(page_times, key=page_times.get) if page_times else None
     least_viewed = min(page_times, key=page_times.get) if page_times else None
