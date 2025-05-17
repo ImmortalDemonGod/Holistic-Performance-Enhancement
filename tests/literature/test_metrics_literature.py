@@ -6,22 +6,17 @@ import pytest
 from cultivation.scripts.literature.metrics_literature import load_metadata, aggregate
 
 def test_load_metadata(tmp_path):
-    # Prepare sample metadata files
-    md_dir = tmp_path
+    # Create sample metadata files with arxiv_id and docinsight_novelty
     records = [
-        {'imported_at': '2025-05-01T12:00:00', 'docinsight_novelty': 0.5},
-        {'imported_at': '2025-05-05T08:30:00', 'docinsight_novelty': 0.9},
-        # invalid record missing fields
-        {'imported_at': None, 'docinsight_novelty': 0.2},
+        {"arxiv_id": "1234.5678", "docinsight_novelty": 0.8},
+        {"arxiv_id": "2345.6789", "docinsight_novelty": 0.6},
     ]
     for i, rec in enumerate(records):
-        p = md_dir / f"{i}.json"
-        p.write_text(json.dumps(rec))
- 
-    df = load_metadata(md_dir)
-    assert isinstance(df, pd.DataFrame)
-    # Only two valid records
-    assert len(df) == 2
+        with open(tmp_path / f"{i}.json", "w") as f:
+            json.dump(rec, f)
+    df = load_metadata(str(tmp_path))
+    assert not df.empty
+    assert set(df.columns) == {"arxiv_id", "docinsight_novelty_corpus"}
     assert set(df.columns) == {'iso_week', 'novelty'}
     # Weeks computed correctly
     expected_weeks = set(

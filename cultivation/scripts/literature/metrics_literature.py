@@ -4,11 +4,21 @@ metrics_literature.py - Aggregate literature metadata and instrumented reading s
 """
 import json
 from pathlib import Path
+import argparse
+import logging
 import pandas as pd
 import pandera as pa
 from pandera import Column, DataFrameSchema
-import logging
 import sqlite3
+
+
+def setup_logging(level=logging.INFO):
+    """Configure logging with consistent format."""
+    logging.basicConfig(
+        level=level,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
 
 
 def load_metadata(md_dir: Path) -> pd.DataFrame:
@@ -32,23 +42,31 @@ def load_metadata(md_dir: Path) -> pd.DataFrame:
 
 
 def load_sessions(db_path: Path) -> pd.DataFrame:
-    conn = sqlite3.connect(str(db_path))
-    df = pd.read_sql_query(
-        'SELECT session_id, paper_id AS arxiv_id, started_at, finished_at FROM sessions',
-        conn, parse_dates=['started_at', 'finished_at']
-    )
-    conn.close()
-    return df
+    try:
+        conn = sqlite3.connect(str(db_path))
+        df = pd.read_sql_query(
+            'SELECT session_id, paper_id AS arxiv_id, started_at, finished_at FROM sessions',
+            conn, parse_dates=['started_at', 'finished_at']
+        )
+        conn.close()
+        return df
+    except sqlite3.Error as e:
+        logging.error(f"Database error in load_sessions: {e}")
+        return pd.DataFrame(columns=['session_id', 'arxiv_id', 'started_at', 'finished_at'])
 
 
 def load_events(db_path: Path) -> pd.DataFrame:
-    conn = sqlite3.connect(str(db_path))
-    df = pd.read_sql_query(
-        'SELECT session_id, event_type, timestamp, payload FROM events',
-        conn, parse_dates=['timestamp']
-    )
-    conn.close()
-    return df
+    try:
+        conn = sqlite3.connect(str(db_path))
+        df = pd.read_sql_query(
+            'SELECT session_id, event_type, timestamp, payload FROM events',
+            conn, parse_dates=['timestamp']
+        )
+        conn.close()
+        return df
+    except sqlite3.Error as e:
+        logging.error(f"Database error in load_events: {e}")
+        return pd.DataFrame(columns=['session_id', 'event_type', 'timestamp', 'payload'])
 
 
 def get_schema() -> DataFrameSchema:
@@ -69,10 +87,33 @@ def get_schema() -> DataFrameSchema:
     }, coerce=True)
 
 
+import argparse
+
 def main():
-    md_dir = Path(__file__).parent.parent / 'literature' / 'metadata'
-    db_path = Path(__file__).parent.parent / 'literature' / 'db.sqlite'
-    out = Path(__file__).parent.parent / 'literature' / 'reading_stats.parquet'
+    parser = argparse.ArgumentParser(description='Aggregate literature metadata and reading sessions')
+    parser.add_argument(
+        '--metadata-dir',
+        type=str,
+        default=str(Path(__file__).parent.parent.parent / 'literature' / 'metadata'),
+        help='Directory containing metadata JSON files'
+    )
+    parser.add_argument(
+        '--db-path',
+        type=str,
+        default=str(Path(__file__).parent.parent.parent / 'literature' / 'db.sqlite'),
+        help='Path to SQLite database with session data'
+    )
+    parser.add_argument(
+        '--output',
+        type=str,
+        default=str(Path(__file__).parent.parent.parent / 'literature' / 'reading_stats.parquet'),
+        help='Output path for Parquet file'
+    )
+    args = parser.parse_args()
+
+    md_dir  = Path(args.metadata_dir)
+    db_path = Path(args.db_path)
+    out     = Path(args.output)
     logging.info('Loading metadata and session data')
     metadata_df = load_metadata(md_dir)
     sessions_df = load_sessions(db_path)
@@ -99,7 +140,7 @@ def main():
             'date_read': pd.to_datetime(date_read),
             'iso_week_read': iso_week,
             'time_spent_minutes_actual': metrics.get('actual_time_spent_minutes'),
-            'docinsight_novelty_corpus': metadata_df.set_index('arxiv_id').loc[row['arxiv_id'],'docinsight_novelty_corpus'] if row['arxiv_id'] in metadata_df['arxiv_id'].values else None,
+            'docinsight_novelty_corpus': arxiv_to_novelty.get(row['arxiv_id']),
             'self_rated_novelty_personal': metrics.get('self_rated_novelty_personal'),
             'self_rated_comprehension': metrics.get('self_rated_comprehension'),
             'self_rated_relevance': metrics.get('self_rated_relevance'),
