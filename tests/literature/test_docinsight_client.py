@@ -40,7 +40,7 @@ def test_get_results(monkeypatch):
 
 ### New tests for wait_for_result polling behavior ###
 import pytest
-from cultivation.scripts.literature.docinsight_client import DocInsightClient, DocInsightAPIError, DocInsightTimeoutError
+from cultivation.scripts.literature.docinsight_client import DocInsightAPIError, DocInsightTimeoutError
 
 def test_wait_for_result_immediate(monkeypatch):
     client = DocInsightClient(base_url="http://example")

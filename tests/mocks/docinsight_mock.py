@@ -6,6 +6,11 @@ docinsight_mock.py - Mock server for DocInsight API endpoints for testing purpos
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
+
+@app.route('/health')
+def health():
+    return 'OK'
+
 # In-memory job store
 jobs = {}
 

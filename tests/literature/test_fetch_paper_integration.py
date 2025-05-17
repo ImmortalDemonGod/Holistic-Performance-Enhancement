@@ -16,16 +16,37 @@ NOTES_TEST_DIR = BASE_TEST_LIT_DIR / "notes"
 @pytest.fixture(scope="session")
 def live_mock_docinsight_server():
     host = "127.0.0.1"
-    port = 8008
+    # Dynamically allocate port
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(('', 0))
+    port = s.getsockname()[1]
+    s.close()
+    # Event to signal server is ready
+    import threading
+    server_ready = threading.Event()
+    def run_server():
+        mock_app.config['TESTING'] = True
+        mock_app.run(host=host, port=port, debug=False, use_reloader=False)
+        server_ready.set()
     thread = threading.Thread(
-        target=mock_app.run,
-        kwargs={"host": host, "port": port, "debug": False, "use_reloader": False}
+        target=run_server
     )
     thread.daemon = True
     thread.start()
-    time.sleep(0.5)
+    # Wait for server to start or timeout
+    import requests
+    from requests.exceptions import ConnectionError
+    import time
+    start_time = time.time()
+    while time.time() - start_time < 5:
+        try:
+            requests.get(f"http://{host}:{port}/health")
+            break
+        except ConnectionError:
+            time.sleep(0.1)
     yield f"http://{host}:{port}"
-    # No clean shutdown; daemon thread exits with process
+    # Clean shutdown if available (add mock_app.shutdown() if implemented)
 
 @pytest.fixture
 def setup_dirs(monkeypatch, tmp_path):
