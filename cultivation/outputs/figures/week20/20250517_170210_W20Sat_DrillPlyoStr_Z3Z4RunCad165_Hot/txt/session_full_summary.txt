@@ -1,0 +1,16 @@
+Run Session Summary (Strava-like):
+  start_time: 2025-05-17 17:02:10+00:00
+  end_time: 2025-05-17 18:40:17+00:00
+  duration: 0 days 01:38:07
+  total_distance_km: 7.160753815384954
+  avg_pace_min_per_km: 13.7
+  avg_hr: 141.6
+  max_hr: 190
+  avg_cadence: 89.2567590838643
+  elevation_gain_m: 63.50000000000023
+  distance_km: 7.16
+  duration_min: 98.1
+  efficiency_factor: 0.00859
+  decoupling_%: 21.5
+  hrTSS: 87.9
+  zones_applied: {"Z1 (Recovery)": {"bpm": [0, 145], "pace_min_per_km": [7.0, 999]}, "Z2 (Aerobic)": {"bpm": [145, 160], "pace_min_per_km": [6.85, 8.7]}, "Z3 (Tempo)": {"bpm": [161, 175], "pace_min_per_km": [5.2, 6.85]}, "Z4 (Threshold)": {"bpm": [176, 186], "pace_min_per_km": [4.8, 5.2]}, "Z5 (VO2max)": {"bpm": [187, 201], "pace_min_per_km": [0.0, 4.8]}}
