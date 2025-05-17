@@ -16,7 +16,7 @@ OUTPUT_DIR = REPO_ROOT / 'cultivation' / 'outputs' / 'software' / 'dev_daily_ref
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- Calculate time window (last 24h, UTC) ---
-now = datetime.datetime.utcnow()
+now = datetime.datetime.now(datetime.timezone.utc)
 start = now - datetime.timedelta(days=1)
 SINCE = start.strftime('%Y-%m-%dT%H:%M:%SZ')
 DATE_TAG = now.strftime('%Y-%m-%d')

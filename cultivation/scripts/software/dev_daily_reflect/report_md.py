@@ -18,6 +18,7 @@ REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 rollup_files = sorted(ROLLUP_DIR.glob('dev_metrics_*.csv'))
 if not rollup_files:
     print('[WARN] No rollup CSV found. Exiting.')
+    sys.exit(2)
     sys.exit(0)
 rollup_file = rollup_files[-1]
 date_tag = rollup_file.stem[-10:]

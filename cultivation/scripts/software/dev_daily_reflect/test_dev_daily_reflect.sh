@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-VENV_PY="/Users/tomriddle1/Holistic-Performance-Enhancement/.venv/bin/python"
+VENV_PY="$(which python)"
 
 # Step 1: Ingest git commits (raw + enriched)
 echo "[Step 1] Running ingest_git.py..."
