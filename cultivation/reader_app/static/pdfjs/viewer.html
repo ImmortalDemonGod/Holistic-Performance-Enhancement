@@ -525,7 +525,9 @@ See https://github.com/adobe-type-tools/cmap-resources
       console.log('[PDF.js bridge] Script loaded');
       function send(event_type, payload) {
         console.log('[PDF.js bridge] Sending event to parent:', event_type, payload);
-        window.parent.postMessage(JSON.stringify({event_type, payload}), '*');
+        // SECURITY: Specify the target origin to avoid leaking data to any embedding origin.
+        const TARGET_ORIGIN = window.location.origin; // Adjust if parent is on a different origin
+        window.parent.postMessage(JSON.stringify({event_type, payload}), TARGET_ORIGIN);
       }
       function hookBus(app) {
         if (!app) {
@@ -567,10 +569,9 @@ See https://github.com/adobe-type-tools/cmap-resources
           }
         });
         // Highlight creation events
-        bus.on('annotationeditorstateschanged', function(evt) {
-          console.log('[PDF.js bridge] annotationeditorstateschanged:', evt);
-          const detail = evt.detail || {};
-          send('highlight_created', { type: detail.type, value: detail.value });
+        bus.on('annotationeditorstateschanged', function(data) {
+          console.log('[PDF.js bridge] annotationeditorstateschanged:', data);
+          send('highlight_created', { type: data.type, value: data.value });
         });
       }
       document.addEventListener('webviewerloaded', function() {

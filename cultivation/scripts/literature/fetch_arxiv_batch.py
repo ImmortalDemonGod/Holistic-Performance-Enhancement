@@ -11,7 +11,7 @@ from pathlib import Path
 
 from cultivation.scripts.literature.fetch_paper import fetch_arxiv_paper, robust_get
 
-ARXIV_API_BASE_URL = "http://export.arxiv.org/api/query?search_query="
+ARXIV_API_BASE_URL = "https://export.arxiv.org/api/query?search_query="
 
 
 def load_state(path: Path) -> dict:
@@ -28,8 +28,10 @@ def save_state(path: Path, state: dict) -> None:
 
 def get_new_ids_for_query(query: str, since: datetime) -> list[str]:
     # query and date filter for submissions since 'since'
+    from urllib.parse import quote_plus
     date_str = since.strftime('%Y%m%d')
-    url = f"{ARXIV_API_BASE_URL}{query}+AND+submittedDate:[{date_str}0000+TO+*]"
+    encoded_query = quote_plus(f"{query}+AND+submittedDate:[{date_str}0000+TO+*]")
+    url = f"{ARXIV_API_BASE_URL}{encoded_query}"
     resp = robust_get(url)
     if resp is None:
         logging.error(f"Failed to fetch arXiv API for query '{query}' after retries.")
@@ -55,6 +57,14 @@ def main() -> None:
         '--state-file', type=Path,
         default=Path('.fetch_batch_state.json'),
         help='Path to state file storing last run dates'
+    )
+    parser.add_argument(
+        '--batch-size', type=int, default=100,
+        help='Maximum number of papers to process in a single run'
+    )
+    parser.add_argument(
+        '--rate-limit', type=float, default=3.0,
+        help='Minimum seconds between API requests'
     )
     args = parser.parse_args()
 

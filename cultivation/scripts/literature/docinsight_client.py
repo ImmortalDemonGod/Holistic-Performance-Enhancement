@@ -17,8 +17,15 @@ class DocInsightTimeoutError(Exception):
 
 class DocInsightClient:
     # Poll settings: interval and timeout (defaults: 5s interval, 600s timeout)
-    DEFAULT_POLL_INTERVAL = float(os.getenv('DOCINSIGHT_POLL_INTERVAL_SECONDS', 5))
-    DEFAULT_POLL_TIMEOUT = float(os.getenv('DOCINSIGHT_POLL_TIMEOUT_SECONDS', 600))
+    @staticmethod
+    def _as_float(env_name: str, default: float) -> float:
+        try:
+            return float(os.getenv(env_name, default))
+        except (TypeError, ValueError):
+            logging.warning("Invalid %s – using default %.1f", env_name, default)
+            return default
+    DEFAULT_POLL_INTERVAL = _as_float.__func__('DOCINSIGHT_POLL_INTERVAL_SECONDS', 5.0)
+    DEFAULT_POLL_TIMEOUT  = _as_float.__func__('DOCINSIGHT_POLL_TIMEOUT_SECONDS', 600.0)
 
     def __init__(self, base_url=None):
         # Prefer BASE_SERVER_URL env (matches DocInsight .env), fallback to localhost:52020
@@ -74,7 +81,7 @@ class DocInsightClient:
         start = time.time()
         while time.time() - start < timeout:
             try:
-                results = self.get_results([job_id], timeout=poll_interval)
+                results = self.get_results([job_id], timeout=min(30, poll_interval))
             except DocInsightTimeoutError:
                 continue
             except DocInsightAPIError:
@@ -87,6 +94,8 @@ class DocInsightClient:
                 if status == "error":
                     raise DocInsightAPIError(f"DocInsight job {job_id} failed: {results[0]}")
                 # else status pending or unknown: continue polling
-            time.sleep(poll_interval)
+            elapsed = time.time() - start
+            time_remaining = timeout - elapsed
+            time.sleep(min(poll_interval, max(0, time_remaining)))
         logging.error(f"DocInsight job {job_id} did not complete within {timeout} seconds.")
         raise DocInsightTimeoutError(f"Timeout after {timeout}s waiting on job {job_id}")

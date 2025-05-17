@@ -30,10 +30,11 @@ from typing import Optional, Any, Dict
 SCHEMA_PATH = Path(__file__).parent.parent.parent / 'schemas' / 'paper.schema.json'
 
 # Attempt relative import for DocInsightClient
-try:
-    from .docinsight_client import DocInsightClient, DocInsightAPIError, DocInsightTimeoutError
-except ImportError:
-    from docinsight_client import DocInsightClient, DocInsightAPIError, DocInsightTimeoutError
+from cultivation.scripts.literature.docinsight_client import (
+    DocInsightClient,
+    DocInsightAPIError,
+    DocInsightTimeoutError,
+)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -202,7 +203,7 @@ def fetch_arxiv_paper(arxiv_id: str, force_redownload: bool = False):
     # 3. Create Note Skeleton
     if not note_path.exists() and metadata_payload:
         note_template = f"""# {metadata_payload.get('title', 'N/A')}
-*ArXiv {metadata_payload.get('id', cleaned_arxiv_id)} · {metadata_payload.get('year', 'N/A')}*
+*arXiv {metadata_payload.get('arxiv_id', cleaned_arxiv_id)} · {metadata_payload.get('year', 'N/A')}*
 
 > **Abstract (autofilled):**
 > {metadata_payload.get('abstract', 'N/A')}
