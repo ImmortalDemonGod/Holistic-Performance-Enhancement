@@ -142,6 +142,19 @@ def parse_gpx(path: str | Path) -> pd.DataFrame:
     if debug_hr:
         if VERBOSE: print("[DEBUG] First 5 HR values parsed:", debug_hr)
     if not rows:
+        # Fallback: handle un-namespaced GPX trkpt tags
+        for i, pt in enumerate(root.findall(".//trkpt")):
+            lat = float(pt.attrib.get("lat", 0))
+            lon = float(pt.attrib.get("lon", 0))
+            ele_node = pt.find("ele")
+            ele = float(ele_node.text) if ele_node is not None else np.nan
+            time_node = pt.find("time")
+            ts = pd.to_datetime(time_node.text, utc=True) if time_node is not None else pd.NaT
+            # hr and cadence may be missing
+            hr = np.nan
+            cad = np.nan
+            rows.append((ts, lat, lon, ele, hr, cad, np.nan))
+    if not rows:
         raise ValueError(f"No <trkpt> found in {path}")
     df = (
         pd.DataFrame(rows, columns=["time", "lat", "lon", "ele", "hr", "cadence", "power"])

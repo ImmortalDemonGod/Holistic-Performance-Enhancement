@@ -228,6 +228,15 @@ cultivation/outputs/figures/**/*.svg
 cultivation/outputs/figures/**/*.pdf
 # Optionally, ignore all files except .placeholder
 !cultivation/outputs/figures/.placeholder
+# Optionally, ignore all files except .placeholder
+!cultivation/outputs/figures/.placeholder
+*.png
+#cultivation/reader_app/static/pdfjs/*
+cultivation/reader_app/static/pdfjs/cmaps/*
+cultivation/reader_app/static/pdfjs/images/*
+cultivation/reader_app/static/pdfjs/locale/*
+cultivation/reader_app/static/pdfjs/standard_fonts/*
+cultivation/reader_app/node_modules/*
 
 cultivation/reader_app/
 cultivation/data/processed/

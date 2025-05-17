@@ -341,6 +341,47 @@ Provide examples and instructions on how to use the scripts and notebooks.
 ```bash
 python scripts/running/analyze_pace.py
 ```
+## 📚 Literature Processing Pipeline
+
+We've introduced a set of scripts under `cultivation/scripts/literature/` to fetch, process, and report on arXiv papers:
+
+1. **Fetch a single paper**
+   ```bash
+   python -m cultivation.scripts.literature.fetch_paper --arxiv_id 2310.04822
+   ```
+   - Downloads PDF to `literature/pdf/`.
+   - Writes metadata JSON to `literature/metadata/`.
+   - Generates a markdown note in `literature/notes/`.
+   - Runs DocInsight and appends summary/novelty.
+
+2. **Batch-fetch by query**
+   ```bash
+   python -m cultivation.scripts.literature.fetch_arxiv_batch \
+     --queries "cs.AI" "stat.ML" \
+     --state-file .fetch_batch_state.json
+   ```
+   - Tracks last run dates in the specified state file (default: `.fetch_batch_state.json`).
+   - Calls `fetch_paper` for each new arXiv ID.
+
+3. **Aggregate reading metrics**
+   ```bash
+   python -m cultivation.scripts.literature.metrics_literature
+   ```
+   - Reads all JSON in `literature/metadata/`.
+   - Produces `literature/reading_stats.parquet` with columns:
+     `iso_week`, `papers_read`, `avg_novelty`.
+
+### Advanced Usage
+- **Override DocInsight URL:**
+  ```bash
+  export DOCINSIGHT_API_URL=http://your-docinsight-server:8000
+  ```
+- **Override output directories:**
+  ```bash
+  export LIT_DIR_OVERRIDE=/path/to/custom/literature
+  ```
+
+Use these in your CI or scheduled tasks to automate literature review and reporting.
 
 ### Launching Jupyter Notebooks
 
