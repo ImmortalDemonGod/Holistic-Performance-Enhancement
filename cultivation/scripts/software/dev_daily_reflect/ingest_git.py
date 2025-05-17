@@ -8,7 +8,7 @@ import datetime
 import json
 import sys
 import re
-from utils import get_repo_root
+from cultivation.scripts.software.dev_daily_reflect.utils import get_repo_root
 
 # --- Configuration ---
 REPO_ROOT = get_repo_root()  # repo root

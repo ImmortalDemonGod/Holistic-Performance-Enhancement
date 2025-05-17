@@ -6,7 +6,7 @@
 import pandas as pd
 import sys
 import json
-from utils import get_repo_root
+from cultivation.scripts.software.dev_daily_reflect.utils import get_repo_root
 
 # --- Configuration ---
 REPO_ROOT = get_repo_root()
