@@ -1,5 +1,85 @@
 [
   {
+    "sha": "acd7b48c4c23d4f6f5ebcab741965fe4e5870bdc",
+    "author": "openhands",
+    "timestamp": "2025-05-16 21:02:15 -0500",
+    "message": "\ud83d\udc1b fix(report): change warning to error for missing files",
+    "added": 43,
+    "deleted": 2
+  },
+  {
+    "sha": "9e4bc4153896b1f94e7699be99644fa83e37d1b9",
+    "author": "openhands",
+    "timestamp": "2025-05-16 20:56:30 -0500",
+    "message": "\u2705 test(tests): add integration test for ingest_git.py",
+    "added": 70,
+    "deleted": 0
+  },
+  {
+    "sha": "3c309048aa082a306c7f5ca9aca48d22384f7fac",
+    "author": "openhands",
+    "timestamp": "2025-05-16 20:53:33 -0500",
+    "message": "\ud83d\udd27 chore(commit_metrics): remove unused commit_metrics.py file",
+    "added": 154,
+    "deleted": 85
+  },
+  {
+    "sha": "9c33239abb934ddbf2a55089f267df39e250d411",
+    "author": "openhands",
+    "timestamp": "2025-05-16 20:49:28 -0500",
+    "message": "\u267b\ufe0f refactor(aggregate_daily): clean up main function",
+    "added": 2,
+    "deleted": 13
+  },
+  {
+    "sha": "bb543a675c392b069cc57e7671dc3c91497f86f9",
+    "author": "openhands",
+    "timestamp": "2025-05-16 20:48:40 -0500",
+    "message": "\u2728 feat(ci): add pytest step to daily dev review workflow",
+    "added": 4,
+    "deleted": 0
+  },
+  {
+    "sha": "d5730702df7094b2febd3c2669bfeb647dc1fc64",
+    "author": "openhands",
+    "timestamp": "2025-05-16 20:48:31 -0500",
+    "message": "\u2728 feat(aggregate_daily): refactor daily aggregation logic",
+    "added": 295,
+    "deleted": 40
+  },
+  {
+    "sha": "a5297c477d62c8f3c8fb767c4ad855a68e5cd581",
+    "author": "openhands",
+    "timestamp": "2025-05-16 20:48:07 -0500",
+    "message": "\u267b\ufe0f refactor(dev_daily_reflect): update import paths for utils",
+    "added": 3,
+    "deleted": 3
+  },
+  {
+    "sha": "27b924e229fa0358a3de8efe7d6c105bdd8c91cd",
+    "author": "openhands",
+    "timestamp": "2025-05-16 20:40:21 -0500",
+    "message": "\ud83d\udce6 build(workflow): add daily dev review workflow",
+    "added": 46,
+    "deleted": 4
+  },
+  {
+    "sha": "c43e3f03258e40c6f9fefc28632e211fdfdfde7e",
+    "author": "openhands",
+    "timestamp": "2025-05-16 20:40:08 -0500",
+    "message": "\u2728 feat(ingest_git): update datetime to use timezone aware UTC",
+    "added": 3,
+    "deleted": 2
+  },
+  {
+    "sha": "1cfc3f3dbe3c32d3746c01d0cf2d5a50055b0da9",
+    "author": "openhands",
+    "timestamp": "2025-05-16 20:36:35 -0500",
+    "message": "\u2728 feat(dev_daily_reflect): add daily developer reflection tools",
+    "added": 576,
+    "deleted": 1
+  },
+  {
     "sha": "e165427463b3df5213be3d3c8206d446561e1f88",
     "author": "openhands",
     "timestamp": "2025-05-16 20:31:54 -0500",
