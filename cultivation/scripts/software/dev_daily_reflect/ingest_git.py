@@ -7,6 +7,7 @@ import subprocess
 import datetime
 import json
 import sys
+import re
 from utils import get_repo_root
 
 # --- Configuration ---
