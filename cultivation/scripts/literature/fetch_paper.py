@@ -21,6 +21,12 @@ except ImportError:
     logging.warning("Optional dependency 'jsonschema' not found, skipping metadata validation.")
     _HAS_JSONSCHEMA = False
     def validate(instance, schema):
+        """
+        No-op validation function used when JSON schema validation is unavailable.
+        
+        This function does nothing and is intended as a placeholder when the `jsonschema`
+        library is not installed.
+        """
         pass
     class ValidationError(Exception):
         pass
@@ -49,13 +55,40 @@ ARXIV_PDF_BASE_URL = "https://arxiv.org/pdf/"
 ARXIV_ABS_BASE_URL = "https://arxiv.org/abs/"
 
 def sanitize_filename_component(text, max_length=50):
+    """
+    Sanitizes a string for safe use as a filename component.
+    
+    Removes non-alphanumeric characters, converts spaces and dashes to single dashes,
+    lowercases the text, and truncates the result to a maximum length.
+    
+    Args:
+        text: The input string to sanitize.
+        max_length: Maximum length of the resulting string (default is 50).
+    
+    Returns:
+        A sanitized string suitable for use in filenames.
+    """
     text = re.sub(r'[^\w\s-]', '', text).strip().lower()
     text = re.sub(r'[-\s]+', '-', text)
     return text[:max_length]
 
 def robust_get(url: str, max_retries: int = 5, backoff_factor: float = 1.0, timeout: int = 30, allowed_statuses=(500, 502, 503, 504)) -> Optional[requests.Response]:
     """
-    Robust GET with retries and exponential backoff for transient errors.
+    Performs an HTTP GET request with retries and exponential backoff for transient server errors.
+    
+    Attempts to fetch the specified URL, retrying up to `max_retries` times for server errors
+    (HTTP 500, 502, 503, 504) or network issues. Waits with exponential backoff between attempts,
+    capped at 10 seconds per delay. Returns the successful response or `None` if all retries fail.
+    
+    Args:
+        url: The URL to fetch.
+        max_retries: Maximum number of attempts before giving up.
+        backoff_factor: Base delay (in seconds) for exponential backoff.
+        timeout: Timeout (in seconds) for each request.
+        allowed_statuses: HTTP status codes considered transient and eligible for retry.
+    
+    Returns:
+        The `requests.Response` object if the request succeeds, or `None` if all retries fail.
     """
     for attempt in range(1, max_retries + 1):
         try:
@@ -80,6 +113,16 @@ def robust_get(url: str, max_retries: int = 5, backoff_factor: float = 1.0, time
     return None
 
 def fetch_arxiv_paper(arxiv_id: str, force_redownload: bool = False):
+    """
+    Fetches an arXiv paper by ID, downloads its PDF, extracts and validates metadata, creates a note skeleton, and integrates with DocInsight for summarization.
+    
+    Args:
+        arxiv_id: The arXiv identifier of the paper to fetch.
+        force_redownload: If True, forces re-download of the PDF and metadata even if files exist.
+    
+    Returns:
+        True if all steps complete successfully, False if any critical step fails (e.g., download, metadata extraction, or validation).
+    """
     cleaned_arxiv_id = arxiv_id.replace("arxiv:", "", 1).lower()
     logging.info(f"Processing arXiv ID: {cleaned_arxiv_id}")
 
@@ -269,6 +312,12 @@ def fetch_arxiv_paper(arxiv_id: str, force_redownload: bool = False):
     return True
 
 def main():
+    """
+    Parses command-line arguments and initiates the paper fetching workflow.
+    
+    Handles fetching and processing of an arXiv paper by ID, with options to force re-download.
+    Logs the outcome and notifies if URL or DOI processing is not implemented.
+    """
     parser = argparse.ArgumentParser(description="Fetch a paper by arXiv ID, URL, or DOI.")
     parser.add_argument('--force-redownload', action='store_true', help='Re-download PDF and metadata even if files exist')
     parser.add_argument('--arxiv_id', type=str, help='arXiv ID of the paper (e.g., "2310.01234")')

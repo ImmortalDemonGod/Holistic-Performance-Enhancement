@@ -26,11 +26,19 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 # Endpoint to serve index
 @app.get("/")
 def index():
+    """
+    Serves the main frontend HTML page.
+    """
     return FileResponse(static_dir / "index.html")
 
 # Serve PDFs from literature/pdf
 @app.get("/pdfs/{arxiv_id}.pdf")
 def get_pdf(arxiv_id: str):
+    """
+    Serves the PDF file for a given arXiv ID.
+    
+    Returns a 404 JSON response if the PDF does not exist; otherwise, returns the PDF file.
+    """
     pdf_path = (
         Path(__file__).parent.parent / "literature" / "pdf" / f"{arxiv_id}.pdf"
     )
@@ -45,6 +53,11 @@ def get_pdf(arxiv_id: str):
 DB_PATH = Path(__file__).parent.parent / "literature" / "db.sqlite"
 
 def init_db():
+    """
+    Initializes the SQLite database with tables for sessions and telemetry events if they do not exist.
+    
+    Creates the 'sessions' table to track reading sessions and the 'events' table to store telemetry events linked to sessions.
+    """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('''
@@ -70,6 +83,11 @@ init_db()
 
 @app.websocket("/ws")
 async def telemetry_ws(ws: WebSocket):
+    """
+    Handles a WebSocket connection to receive and store telemetry events for a PDF reading session.
+    
+    Accepts a WebSocket connection with an `arxiv_id` query parameter, creates a new session record, and continuously receives JSON-encoded telemetry events, storing each event in the database. Marks the session as finished when the connection is closed.
+    """
     await ws.accept()
     arxiv_id = ws.query_params.get("arxiv_id", "")
     conn = sqlite3.connect(DB_PATH)
@@ -104,6 +122,19 @@ SCHEMA_PATH = Path(__file__).parent.parent / "schemas" / "paper.schema.json"
 
 # Utility: load and validate metadata by arxiv_id
 def load_and_validate_metadata(arxiv_id: str):
+    """
+    Loads metadata for a given paper and validates it against a JSON schema if available.
+    
+    Args:
+        arxiv_id: The arXiv identifier of the paper.
+    
+    Returns:
+        The metadata as a dictionary.
+    
+    Raises:
+        FileNotFoundError: If the metadata file does not exist.
+        ValueError: If the metadata fails schema validation.
+    """
     metadata_path = Path(__file__).parent.parent / "literature" / "metadata" / f"{arxiv_id}.json"
     if not metadata_path.exists():
         raise FileNotFoundError(f"Metadata file not found: {metadata_path}")
@@ -120,6 +151,16 @@ def load_and_validate_metadata(arxiv_id: str):
 from fastapi import HTTPException
 @app.get("/metadata/{arxiv_id}")
 def get_metadata(arxiv_id: str):
+    """
+    Retrieves and validates metadata for a given paper by arXiv ID.
+    
+    Attempts to load the metadata JSON file for the specified arXiv ID and validates it against a schema if available. Returns the metadata as a JSON response.
+    
+    Raises:
+        HTTPException: 404 if the metadata file is not found.
+        HTTPException: 422 if metadata validation fails.
+        HTTPException: 500 for unexpected errors.
+    """
     try:
         data = load_and_validate_metadata(arxiv_id)
         return JSONResponse(content=data)
@@ -138,6 +179,19 @@ def get_metrics(
     start_time: str = Query(None),
     end_time: str = Query(None),
 ):
+    """
+    Retrieves telemetry events for a specified paper, optionally filtered by event type, session, or time range.
+    
+    Args:
+        arxiv_id: The arXiv identifier of the paper.
+        event_type: Optional event type to filter results.
+        session_id: Optional session ID to filter results.
+        start_time: Optional ISO timestamp to filter events occurring after this time.
+        end_time: Optional ISO timestamp to filter events occurring before this time.
+    
+    Returns:
+        A JSON response containing a list of matching telemetry events, each with event type, timestamp, payload, and session ID. Returns a 404 response if no events are found.
+    """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     query = '''
@@ -172,6 +226,11 @@ def get_metrics(
 
 @app.get("/metrics/{arxiv_id}/summary")
 def get_metrics_summary(arxiv_id: str, session_id: int = Query(None)):
+    """
+    Returns a summary of reading activity for a given paper, optionally filtered by session.
+    
+    Analyzes telemetry events to compute pages read, total time spent reading, most and least viewed pages, and time spent per page. Returns a JSON summary with these analytics. Responds with 404 if no events are found.
+    """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     query = '''
@@ -232,6 +291,11 @@ def metrics_csv(
     start_time: str = Query(None),
     end_time: str = Query(None),
 ):
+    """
+    Returns telemetry events for a given paper as a CSV file.
+    
+    Retrieves events associated with the specified arXiv ID from the database, optionally filtered by event type, session ID, and time range, and returns them in CSV format. If no events are found, returns a CSV header only.
+    """
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     query = '''

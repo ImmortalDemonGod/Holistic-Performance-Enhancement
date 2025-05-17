@@ -53,22 +53,14 @@ def _as_series(arr):
 # ------------------------------------------------------------------ parsing
 def parse_gpx(path: str | Path) -> pd.DataFrame:
     """
-    Parse a GPX file into a tidy **chronologically sorted** DataFrame.
-
-    Returns columns
-    ---------------
-    time  : pandas.Timestamp (UTC)
-    lat   : float  (deg)
-    lon   : float  (deg)
-    ele   : float  (m) – NaN if absent
-    hr    : int    (bpm) – NaN if absent
-    cadence : int  (rpm) – NaN if absent
-    power  : int   (W)   – NaN if absent
-    dt    : float  (s)  – seconds since previous point
-    dist  : float  (m)  – segment distance
-    speed_mps        : raw speed (m/s)
-    speed_mps_smooth : 5-point rolling avg (m/s)
-    pace_sec_km      : time to cover 1 km, smoothed (s/km)
+    Parses a GPX file into a chronologically sorted DataFrame with running metrics.
+    
+    Extracts latitude, longitude, elevation, time, heart rate, cadence, and power from GPX track points, handling both namespaced and un-namespaced files. Computes segment distances, time deltas, instantaneous and smoothed speed, and pace. Returns a DataFrame with columns: time (UTC), lat, lon, ele (meters), hr (bpm), cadence (rpm), power (watts), dt (seconds since previous point), dist (meters), speed_mps, speed_mps_smooth (5-point rolling average), and pace_sec_km (smoothed pace in seconds per km).
+    
+    Raises:
+        ValueError: If no track points are found in the GPX file.
+    Returns:
+        pd.DataFrame: Parsed and enriched track point data.
     """
     ns = {
         "g": "http://www.topografix.com/GPX/1/1",

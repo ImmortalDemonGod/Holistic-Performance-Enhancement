@@ -14,11 +14,25 @@ from datetime import datetime
 import sys
 
 def get_db_path():
+    """
+    Returns the file path to the SQLite database, ensuring the 'literature' directory exists.
+    
+    The database file 'db.sqlite' is located in a 'literature' directory two levels above the script's location. The directory is created if it does not already exist.
+    
+    Returns:
+        Path to the SQLite database file.
+    """
     base = Path(__file__).parent.parent / 'literature'
     base.mkdir(parents=True, exist_ok=True)
     return base / 'db.sqlite'
 
 def init_db(conn):
+    """
+    Initializes the SQLite database schema for reading sessions and event logs.
+    
+    Creates the 'sessions' and 'events' tables if they do not already exist, enabling
+    storage of session metadata and associated event records.
+    """
     c = conn.cursor()
     c.execute('''
         CREATE TABLE IF NOT EXISTS sessions (
@@ -41,6 +55,11 @@ def init_db(conn):
     conn.commit()
 
 def start_reading(args):
+    """
+    Starts a new reading session for a specified arXiv paper ID.
+    
+    Creates a new session entry in the database with the provided arXiv ID and the current UTC timestamp as the start time. Prints the session ID and start time upon successful creation.
+    """
     db = get_db_path()
     conn = sqlite3.connect(db)
     init_db(conn)
@@ -55,6 +74,11 @@ def start_reading(args):
 
 
 def end_reading(args):
+    """
+    Ends a reading session and records user feedback metrics.
+    
+    Marks the specified reading session as finished by updating its completion timestamp. Prompts the user for self-rated metrics (comprehension, relevance, personal novelty, and time spent), validates the input, and logs these metrics as a summary event linked to the session. Exits with an error if the session is not active or if input collection fails.
+    """
     db = get_db_path()
     conn = sqlite3.connect(db)
     init_db(conn)
@@ -76,6 +100,19 @@ def end_reading(args):
     metrics = {}
     try:
         def ask_int(prompt, lo, hi):
+            """
+            Prompts the user to enter an integer within a specified range.
+            
+            Continuously requests input until the user provides an integer value between the given lower and upper bounds (inclusive).
+            
+            Args:
+                prompt: The message displayed to the user.
+                lo: The minimum acceptable integer value.
+                hi: The maximum acceptable integer value.
+            
+            Returns:
+                The validated integer entered by the user.
+            """
             while True:
                 try:
                     val = int(input(prompt))
@@ -85,6 +122,19 @@ def end_reading(args):
                     pass
                 print(f"Enter an integer between {lo} and {hi}.")
         def ask_float(prompt, lo, hi):
+            """
+            Prompts the user to enter a floating-point number within a specified range.
+            
+            Continuously requests input until the user provides a valid float between the given lower and upper bounds (inclusive).
+            
+            Args:
+                prompt: The message displayed to the user.
+                lo: The minimum acceptable value.
+                hi: The maximum acceptable value.
+            
+            Returns:
+                The validated floating-point number entered by the user.
+            """
             while True:
                 try:
                     val = float(input(prompt))
@@ -113,6 +163,11 @@ def end_reading(args):
 
 
 def main():
+    """
+    Parses command-line arguments and dispatches to the appropriate reading session command.
+    
+    Defines and handles the 'start-reading' and 'end-reading' subcommands for managing reading sessions. Exits with status 1 if no command is provided.
+    """
     parser = argparse.ArgumentParser(prog='cultivation literature reading-session')
     sub = parser.add_subparsers(dest='command')
 

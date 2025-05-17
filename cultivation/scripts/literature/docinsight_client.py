@@ -19,6 +19,16 @@ class DocInsightClient:
     # Poll settings: interval and timeout (defaults: 5s interval, 600s timeout)
     @staticmethod
     def _as_float(env_name: str, default: float) -> float:
+        """
+        Reads an environment variable as a float, returning a default value if unset or invalid.
+        
+        Args:
+            env_name: Name of the environment variable to read.
+            default: Value to return if the environment variable is missing or cannot be converted to float.
+        
+        Returns:
+            The float value of the environment variable, or the default if conversion fails.
+        """
         try:
             return float(os.getenv(env_name, default))
         except (TypeError, ValueError):
@@ -29,9 +39,27 @@ class DocInsightClient:
 
     def __init__(self, base_url=None):
         # Prefer BASE_SERVER_URL env (matches DocInsight .env), fallback to localhost:52020
+        """
+        Initializes the DocInsightClient with a base URL.
+        
+        If no base URL is provided, uses the BASE_SERVER_URL environment variable or defaults to 'http://localhost:52020'.
+        """
         self.base_url = (base_url or os.getenv("BASE_SERVER_URL") or "http://localhost:52020").rstrip('/')
 
     def start_research(self, query: str, force_index: list[str] | None = None, timeout: float = 30.0) -> str:
+        """
+        Starts a research job on the DocInsight service and returns the job ID.
+        
+        Sends a POST request to the `/start_research` endpoint with the specified query and optional forced index list. Raises a `DocInsightAPIError` if the request fails or the response does not contain a job ID, and raises a `DocInsightTimeoutError` if the request times out.
+        
+        Args:
+            query: The research query string to submit.
+            force_index: Optional list of index names to force the search on.
+            timeout: Maximum time in seconds to wait for the request.
+        
+        Returns:
+            The job ID assigned to the research task.
+        """
         url = f"{self.base_url}/start_research"
         payload = {"query": query}
         if force_index:
@@ -55,6 +83,20 @@ class DocInsightClient:
             raise DocInsightAPIError(f"start_research request error: {e}")
 
     def get_results(self, job_ids: list[str], timeout: float = 30.0) -> list[dict]:
+        """
+        Retrieves the results for a list of research job IDs from the DocInsight service.
+        
+        Args:
+            job_ids: List of job IDs to fetch results for.
+            timeout: Maximum time in seconds to wait for the request (default is 30.0).
+        
+        Returns:
+            A list of dictionaries containing the results for each requested job ID.
+        
+        Raises:
+            DocInsightAPIError: If the API returns an error or the request fails.
+            DocInsightTimeoutError: If the request times out.
+        """
         url = f"{self.base_url}/get_results"
         payload = {"job_ids": job_ids}
         try:
@@ -73,7 +115,23 @@ class DocInsightClient:
 
     def wait_for_result(self, job_id: str, poll_interval: float = None, timeout: float = None) -> dict:
         """
-        Polls get_results until the job is complete or timeout.
+        Polls for the completion of a DocInsight job until it finishes or a timeout occurs.
+        
+        Repeatedly checks the status of the specified job by calling `get_results` at regular intervals.
+        Returns the result dictionary when the job status is "completed", "done", or "success".
+        Raises `DocInsightAPIError` if the job status is "error", or `DocInsightTimeoutError` if the job does not complete within the timeout period.
+        
+        Args:
+            job_id: The identifier of the DocInsight job to monitor.
+            poll_interval: Optional polling interval in seconds; defaults to the class constant.
+            timeout: Optional maximum time to wait in seconds; defaults to the class constant.
+        
+        Returns:
+            The result dictionary for the completed job.
+        
+        Raises:
+            DocInsightAPIError: If the job fails with an error status.
+            DocInsightTimeoutError: If the job does not complete within the timeout period.
         """
         # use defaults if not provided
         poll_interval = poll_interval or self.DEFAULT_POLL_INTERVAL

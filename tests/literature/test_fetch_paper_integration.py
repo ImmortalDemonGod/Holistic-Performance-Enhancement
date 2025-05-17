@@ -15,6 +15,12 @@ NOTES_TEST_DIR = BASE_TEST_LIT_DIR / "notes"
 
 @pytest.fixture(scope="session")
 def live_mock_docinsight_server():
+    """
+    Pytest fixture that starts a mock DocInsight server in a background thread.
+    
+    Dynamically allocates a free TCP port, launches the mock Flask server, waits for it
+    to become responsive, and yields the server's base URL for use in tests.
+    """
     host = "127.0.0.1"
     # Dynamically allocate port
     import socket
@@ -26,6 +32,11 @@ def live_mock_docinsight_server():
     import threading
     server_ready = threading.Event()
     def run_server():
+        """
+        Runs the mock Flask server for testing purposes.
+        
+        Configures the Flask application for testing and starts it on the specified host and port.
+        """
         mock_app.config['TESTING'] = True
         mock_app.run(host=host, port=port, debug=False, use_reloader=False)
         server_ready.set()
@@ -51,6 +62,15 @@ def live_mock_docinsight_server():
 @pytest.fixture
 def setup_dirs(monkeypatch, tmp_path):
     # Override DocInsight and output directories via env var
+    """
+    Sets up temporary environment variables and directories for test output.
+    
+    Overrides the DocInsight API URL and output directory environment variables to use
+    a local mock server and a temporary directory for the duration of the test.
+    
+    Yields:
+        The temporary directory path for use in tests.
+    """
     monkeypatch.setenv('DOCINSIGHT_API_URL', 'http://127.0.0.1:8008')
     monkeypatch.setenv('LIT_DIR_OVERRIDE', str(tmp_path))
     yield tmp_path
@@ -60,6 +80,13 @@ def test_fetch_arxiv_with_live_mock(
     mock_requests_get, live_mock_docinsight_server, setup_dirs, caplog
 ):
     # Sample arXiv XML
+    """
+    Tests end-to-end fetching and processing of an arXiv paper using a live mock DocInsight server.
+    
+    This integration test verifies that `fetch_arxiv_paper` downloads the paper PDF and metadata,
+    processes them with the mock DocInsight API, and creates the expected metadata JSON and note
+    markdown files with correct content in the overridden directories.
+    """
     SAMPLE_XML = (
         '<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom">'
         '<entry><id>http://arxiv.org/abs/2310.04822</id>'

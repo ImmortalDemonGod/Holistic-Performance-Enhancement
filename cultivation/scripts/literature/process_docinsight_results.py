@@ -20,7 +20,11 @@ NOTES_DIR = LIT_DIR / "notes"
 
 
 def process_pending():
-    """Scan metadata files for pending DocInsight jobs and fetch results."""
+    """
+    Scans metadata files for pending DocInsight jobs, retrieves results, and updates files.
+    
+    For each metadata JSON file containing a pending DocInsight job, fetches the summary and novelty score using the DocInsight API. Updates the metadata file with the retrieved information and appends the summary and novelty score to the corresponding markdown note file if it exists. Logs errors and warnings for file access issues, API errors, and missing data.
+    """
     api_url = None  # picks up default BASE_SERVER_URL
     client = DocInsightClient(base_url=api_url)
     for meta_file in METADATA_DIR.glob("*.json"):

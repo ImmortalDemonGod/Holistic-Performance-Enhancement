@@ -36,6 +36,13 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
+/**
+ * Establishes a WebSocket connection to the server for the specified arXiv ID.
+ *
+ * Closes any existing open WebSocket connection before initiating a new one. Updates the status element in the DOM to reflect the connection state.
+ *
+ * @param {string} arxiv_id - The arXiv identifier used to associate the WebSocket session.
+ */
 function connectWS(arxiv_id) {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.close(1000, 'reloading');
