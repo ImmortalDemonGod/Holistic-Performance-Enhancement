@@ -5,12 +5,14 @@
 #!/usr/bin/env python3
 import pandas as pd
 import sys
-from cultivation.scripts.software.dev_daily_reflect.utils import get_repo_root
+from cultivation.scripts.software.dev_daily_reflect.config_loader import load_config
+from pathlib import Path
 
 # --- Configuration ---
-REPO_ROOT = get_repo_root()
+config = load_config()
+REPO_ROOT = (Path(__file__).parent / config["repository_path"]).resolve()
 RAW_DIR = REPO_ROOT / 'cultivation' / 'outputs' / 'software' / 'dev_daily_reflect' / 'raw'
-ROLLUP_DIR = REPO_ROOT / 'cultivation' / 'outputs' / 'software' / 'dev_daily_reflect' / 'rollup'
+ROLLUP_DIR = REPO_ROOT / config["rollup_dir"]
 ROLLUP_DIR.mkdir(parents=True, exist_ok=True)
 
 def main():
