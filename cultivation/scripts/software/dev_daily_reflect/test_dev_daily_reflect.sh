@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-VENV_PY="$(which python)"
+VENV_PY="$(dirname "$0")/../../../../.venv/bin/python"
 
 # Step 1: Ingest git commits (raw + enriched)
 echo "[Step 1] Running ingest_git.py..."

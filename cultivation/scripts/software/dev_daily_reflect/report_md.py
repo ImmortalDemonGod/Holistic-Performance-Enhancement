@@ -6,12 +6,14 @@
 import pandas as pd
 import sys
 import json
-from cultivation.scripts.software.dev_daily_reflect.utils import get_repo_root
+from cultivation.scripts.software.dev_daily_reflect.config_loader import load_config
+from pathlib import Path
 
 # --- Configuration ---
-REPO_ROOT = get_repo_root()
-ROLLUP_DIR = REPO_ROOT / 'cultivation' / 'outputs' / 'software' / 'dev_daily_reflect' / 'rollup'
-REPORTS_DIR = REPO_ROOT / 'cultivation' / 'outputs' / 'software' / 'dev_daily_reflect' / 'reports'
+config = load_config()
+REPO_ROOT = (Path(__file__).parent / config["repository_path"]).resolve()
+ROLLUP_DIR = REPO_ROOT / config["rollup_dir"]
+REPORTS_DIR = REPO_ROOT / config["report_output_dir"]
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 def get_date_tag():
