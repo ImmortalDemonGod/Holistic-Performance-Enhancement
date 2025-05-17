@@ -9,6 +9,9 @@ app = Flask(__name__)
 
 @app.route('/health')
 def health():
+    """
+    Returns a plain text response indicating the server is healthy.
+    """
     return 'OK'
 
 # In-memory job store
@@ -16,6 +19,11 @@ jobs = {}
 
 @app.route('/start_research', methods=['POST'])
 def start_research():
+    """
+    Handles POST requests to initiate a mock research job.
+    
+    Accepts a JSON payload with a "query" field, generates a unique job ID, stores a completed job record with a mock summary and fixed novelty score, and returns the job ID in the response.
+    """
     data = request.get_json() or {}
     job_id = f"job_{len(jobs) + 1}"
     # Simulate immediate completion
@@ -28,6 +36,11 @@ def start_research():
 
 @app.route('/get_results', methods=['POST'])
 def get_results():
+    """
+    Handles POST requests to retrieve results for specified job IDs.
+    
+    Expects a JSON payload with a "job_ids" list. For each job ID, returns the job's data if found, or an error status if not. The response is a JSON list of results with HTTP status 200.
+    """
     data = request.get_json() or {}
     job_ids = data.get('job_ids', [])
     results = []

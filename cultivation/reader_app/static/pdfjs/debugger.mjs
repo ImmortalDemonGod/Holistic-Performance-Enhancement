@@ -30,18 +30,34 @@ const FontInspector = (function FontInspectorClosure() {
   let fonts;
   let active = false;
   const fontAttribute = "data-font-name";
+  /**
+   * Removes all CSS classes from text spans associated with fonts.
+   *
+   * Clears the class attribute from every <span> element that has the font attribute, effectively resetting their visual state.
+   */
   function removeSelection() {
     const divs = document.querySelectorAll(`span[${fontAttribute}]`);
     for (const div of divs) {
       div.className = "";
     }
   }
+  /**
+   * Hides all text spans associated with fonts by applying the "debuggerHideText" class.
+   *
+   * Resets the visibility of all font-related text elements in the document.
+   */
   function resetSelection() {
     const divs = document.querySelectorAll(`span[${fontAttribute}]`);
     for (const div of divs) {
       div.className = "debuggerHideText";
     }
   }
+  /**
+   * Toggles the visibility of all text spans rendered with a specific font.
+   *
+   * @param {string} fontName - The name of the font to select.
+   * @param {boolean} show - If true, shows the text spans; otherwise, hides them.
+   */
   function selectFont(fontName, show) {
     const divs = document.querySelectorAll(
       `span[${fontAttribute}=${fontName}]`
@@ -50,6 +66,13 @@ const FontInspector = (function FontInspectorClosure() {
       div.className = show ? "debuggerShowText" : "debuggerHideText";
     }
   }
+  /**
+   * Handles click events on text spans to toggle the visibility of text rendered with a specific font.
+   *
+   * When a span element with a `data-font-name` attribute is clicked, this function toggles the corresponding font's checkbox and updates the display of text using that font.
+   *
+   * @param {MouseEvent} e - The click event object.
+   */
   function textLayerClick(e) {
     if (
       !e.target.dataset.fontName ||
@@ -103,6 +126,13 @@ const FontInspector = (function FontInspectorClosure() {
     },
     // FontInspector specific functions.
     fontAdded(fontObj, url) {
+      /**
+       * Creates an HTML table displaying specified properties and their values from an object.
+       *
+       * @param {Object} obj - The object containing the properties to display.
+       * @param {string[]} list - Array of property names to include in the table.
+       * @returns {HTMLTableElement} A table element with property names and their corresponding values.
+       */
       function properties(obj, list) {
         const moreInfo = document.createElement("table");
         for (const entry of list) {
@@ -316,6 +346,11 @@ class Stepper {
   updateOperatorList(operatorList) {
     const self = this;
 
+    /**
+     * Handles checkbox click events to add or remove a breakpoint for the current page.
+     *
+     * Updates the internal breakpoints list and persists changes via {@link StepperManager.saveBreakPoints}.
+     */
     function cboxOnClick() {
       const x = +this.dataset.idx;
       if (this.checked) {
@@ -454,9 +489,20 @@ class Stepper {
 
 const Stats = (function Stats() {
   let stats = [];
+  /**
+   * Removes all content from the specified DOM node.
+   *
+   * @param {Node} node - The DOM node to clear.
+   */
   function clear(node) {
     node.textContent = ""; // Remove any `node` contents from the DOM.
   }
+  /**
+   * Returns the index of the stats entry for the specified page number.
+   *
+   * @param {number} pageNumber - The page number to search for.
+   * @returns {number|false} The index of the stats entry if found, or false if not present.
+   */
   function getStatIndex(pageNumber) {
     for (const [i, stat] of stats.entries()) {
       if (stat.pageNumber === pageNumber) {

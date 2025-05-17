@@ -12,6 +12,20 @@ from datetime import datetime
 API_BASE = "http://127.0.0.1:8000"
 
 def fetch_metrics(arxiv_id, session_id=None, event_type=None):
+    """
+    Fetches telemetry event data for a specified arXiv paper from the API.
+    
+    Args:
+        arxiv_id: The arXiv identifier of the paper.
+        session_id: Optional session identifier to filter events.
+        event_type: Optional event type to filter events.
+    
+    Returns:
+        A list of event dictionaries retrieved from the API.
+    
+    Raises:
+        HTTPError: If the API request fails.
+    """
     params = {}
     if session_id:
         params['session_id'] = session_id
@@ -23,6 +37,15 @@ def fetch_metrics(arxiv_id, session_id=None, event_type=None):
     return r.json()
 
 def parse_events(events):
+    """
+    Converts a list of event dictionaries into a pandas DataFrame with flattened payload fields.
+    
+    Args:
+        events: A list of event dictionaries, each containing a 'timestamp' and a nested 'payload'.
+    
+    Returns:
+        A pandas DataFrame with timestamps as datetime objects and payload fields expanded into separate columns. Returns an empty DataFrame if the input list is empty.
+    """
     df = pd.DataFrame(events)
     if df.empty:
         return df
@@ -33,6 +56,11 @@ def parse_events(events):
     return df
 
 def plot_reading_path(df, arxiv_id):
+    """
+    Plots the reading path as page number over time for a given arXiv paper.
+    
+    Displays a line plot showing how the reader navigated through the document's pages during the session. If the DataFrame lacks page number information, the function prints a message and exits.
+    """
     if 'page_num' not in df:
         print("No page_num in events; nothing to plot.")
         return
@@ -45,6 +73,11 @@ def plot_reading_path(df, arxiv_id):
     plt.show()
 
 def plot_time_on_page(df, arxiv_id):
+    """
+    Plots estimated time spent on each page of a paper based on reading telemetry.
+    
+    Calculates time spent per page using consecutive 'view_area_update' events and visualizes the results as a bar chart. If sufficient data is available, also displays a heatmap of time spent per page. Prints total estimated reading time and the list of pages visited.
+    """
     if 'page_num' not in df:
         print("No page_num in events; cannot compute time per page.")
         return
@@ -81,7 +114,20 @@ import os
 
 
 def cluster_similar_texts(texts, threshold=90):
-    """Cluster texts using fuzzy matching (rapidfuzz) with a similarity threshold."""
+    """
+    Clusters similar texts based on fuzzy string matching.
+    
+    Groups texts into clusters where each member has a similarity score above the specified threshold, using rapidfuzz's ratio metric. Returns the longest text from each cluster as the canonical representative along with all clusters.
+    
+    Args:
+        texts: List of text strings to cluster.
+        threshold: Minimum similarity score (0-100) for texts to be grouped together.
+    
+    Returns:
+        A tuple containing:
+            - List of canonical texts (longest in each cluster).
+            - List of clusters, each a list of similar texts.
+    """
     clusters = []
     used = set()
     for i, t in enumerate(texts):
@@ -104,6 +150,19 @@ def cluster_similar_texts(texts, threshold=90):
 
 def assign_page_numbers(sel_df, full_df):
     # For each selection, find the latest view_area_update event before it (by timestamp)
+    """
+    Assigns page numbers to text selection events based on preceding page view updates.
+    
+    For each selection event in sel_df, finds the most recent 'view_area_update' event in full_df
+    that occurred at or before the selection's timestamp, and assigns its page number to the selection.
+    
+    Args:
+    	sel_df: DataFrame containing text selection events with timestamps.
+    	full_df: DataFrame containing all events, including 'view_area_update' events with page numbers.
+    
+    Returns:
+    	A DataFrame of selections with an added 'page_num' column indicating the assigned page number.
+    """
     view_df = full_df[full_df['event_type'] == 'view_area_update'][['timestamp', 'page_num']].copy()
     view_df = view_df.sort_values('timestamp')
     sel_df = sel_df.sort_values('timestamp')
@@ -121,6 +180,11 @@ def assign_page_numbers(sel_df, full_df):
 
 def analyze_text_selections(df):
     # Filter for text_selected events
+    """
+    Analyzes and visualizes text selection events, clusters similar selections, and exports deduplicated selections as flashcard candidates.
+    
+    Filters for text selection events, cleans and deduplicates selected texts, assigns page numbers, clusters similar selections using fuzzy matching, and determines the most common page for each cluster. Visualizes the timeline and frequency of selections, prints summary statistics, and exports deduplicated selections to a text file for flashcard creation.
+    """
     sel_df = df[df['event_type'] == 'text_selected'].copy()
     if sel_df.empty or 'selected_text' not in sel_df:
         print("No text selections found.")
@@ -180,6 +244,11 @@ def analyze_text_selections(df):
 
 
 def main():
+    """
+    Parses command-line arguments, fetches reading telemetry data, and generates visualizations and analyses for a specified arXiv paper.
+    
+    This function retrieves event data for the given arXiv ID (and optional session ID), processes it into a DataFrame, and sequentially produces plots of reading behavior and text selection analyses. If no data is found, it prints a message and exits.
+    """
     parser = argparse.ArgumentParser(description='Plot reading metrics for a given arxiv_id.')
     parser.add_argument('arxiv_id', help='arXiv ID of the paper')
     parser.add_argument('--session_id', type=int, default=None, help='Session ID (optional)')

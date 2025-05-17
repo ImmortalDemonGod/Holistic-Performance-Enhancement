@@ -33,6 +33,11 @@ SAMPLE_ARXIV_XML = """<?xml version="1.0" encoding="UTF-8"?>
 
 @pytest.fixture
 def mock_arxiv_paths(monkeypatch):
+    """
+    Pytest fixture that monkeypatches arXiv-related directory paths for isolated testing.
+    
+    Temporarily overrides the PDF, metadata, and notes directories in the target module to use test-specific paths. Cleans up these directories before and after each test to ensure a clean test environment.
+    """
     monkeypatch.setattr("cultivation.scripts.literature.fetch_paper.PDF_DIR", PDF_TEST_DIR)
     monkeypatch.setattr("cultivation.scripts.literature.fetch_paper.METADATA_DIR", METADATA_TEST_DIR)
     monkeypatch.setattr("cultivation.scripts.literature.fetch_paper.NOTES_DIR", NOTES_TEST_DIR)
@@ -56,6 +61,13 @@ def mock_arxiv_paths(monkeypatch):
 def test_fetch_arxiv_paper_success(
     mock_mkdir, mock_open, mock_get, mock_arxiv_paths, monkeypatch
 ):
+    """
+    Tests that fetch_arxiv_paper successfully downloads the PDF and metadata, writes files,
+    and interacts with DocInsightClient as expected.
+    
+    Simulates successful HTTP responses for PDF and metadata, verifies file creation,
+    and asserts correct calls to DocInsightClient methods.
+    """
     arxiv_id = "2310.04822"
     cleaned_arxiv_id = "2310.04822"
 
@@ -157,6 +169,13 @@ def test_fetch_arxiv_paper_metadata_fetch_fails(
 def test_fetch_arxiv_paper_files_already_exist(
     mock_mkdir, mock_open, mock_get, mock_arxiv_paths, monkeypatch
 ):
+    """
+    Tests that fetch_arxiv_paper does not re-download files if they already exist, but still
+    invokes DocInsightClient to start research and update metadata as needed.
+    
+    Ensures no HTTP requests are made for existing files, and verifies correct arguments are
+    passed to DocInsightClient methods even when files are present.
+    """
     arxiv_id = "2310.04822"
     cleaned_arxiv_id = "2310.04822"
     pdf_path = PDF_TEST_DIR / f"{cleaned_arxiv_id}.pdf"
@@ -170,6 +189,12 @@ def test_fetch_arxiv_paper_files_already_exist(
     })
     m = mock_open()
     def custom_open_side_effect(path_arg, mode='r'):
+        """
+        Provides a side effect function for mocking open() calls with custom behavior.
+        
+        Returns a mock file object that reads predefined metadata content when opening
+        the metadata file in read mode; otherwise, returns a generic mock file object.
+        """
         if path_arg == metadata_path and mode == 'r':
             return mock_open(read_data=mock_metadata_content).return_value
         return mock_open().return_value
@@ -201,6 +226,11 @@ def test_main_function_calls_fetch_arxiv_paper(mock_fetch_arxiv, capsys, monkeyp
 
 @patch('cultivation.scripts.literature.fetch_paper.fetch_arxiv_paper')
 def test_main_function_no_args(mock_fetch_arxiv, capsys, monkeypatch):
+    """
+    Tests that the main CLI function exits with an error when no arguments are provided.
+    
+    Asserts that `fetch_arxiv_paper` is not called and a `SystemExit` is raised.
+    """
     monkeypatch.setattr("sys.argv", ["fetch_paper.py"])
     with pytest.raises(SystemExit):
         fetch_paper_main()
@@ -214,6 +244,12 @@ from cultivation.scripts.literature.docinsight_client import DocInsightTimeoutEr
 @pytest.fixture(autouse=True)
 def reset_dirs(tmp_path, monkeypatch):
     # Override directories to use tmp_path
+    """
+    Configures test directories for PDFs, metadata, and notes to use a temporary path.
+    
+    Overrides the default storage directories in the target module with subdirectories under
+    the provided pytest `tmp_path` fixture, ensuring test isolation. Returns the base temporary path.
+    """
     pdf = tmp_path / 'pdf'
     meta = tmp_path / 'metadata'
     notes = tmp_path / 'notes'
@@ -230,6 +266,11 @@ def reset_dirs(tmp_path, monkeypatch):
 def test_schema_validation_failure(
     mock_validate, mock_mkdir, mock_open, mock_get, reset_dirs, caplog
 ):
+    """
+    Tests that fetch_arxiv_paper returns False and logs an error when metadata schema validation fails.
+    
+    Simulates a ValidationError during metadata validation and verifies that no metadata JSON file is created.
+    """
     from cultivation.scripts.literature.fetch_paper import fetch_arxiv_paper
     # Force validate() to raise ValidationError
     mock_validate.side_effect = ValidationError('fail')
@@ -248,6 +289,10 @@ def test_schema_validation_failure(
 from unittest.mock import patch, MagicMock
 @patch('requests.get')
 def test_docinsight_polling_success(mock_get, reset_dirs, monkeypatch):
+    """
+    Tests that fetch_arxiv_paper successfully fetches a paper, processes metadata, and updates
+    the metadata JSON with DocInsight summary and novelty score when DocInsight polling succeeds.
+    """
     from cultivation.scripts.literature.fetch_paper import fetch_arxiv_paper
     # Mock GET for PDF and XML
     pdf_resp = MagicMock(status_code=200, content=b'x')
@@ -271,6 +316,13 @@ def test_docinsight_polling_success(mock_get, reset_dirs, monkeypatch):
 
 @patch('requests.get')
 def test_docinsight_polling_timeout(mock_get, reset_dirs, caplog, monkeypatch):
+    """
+    Tests that fetch_arxiv_paper handles DocInsight polling timeouts gracefully.
+    
+    Simulates a scenario where the DocInsightClient's wait_for_result method raises a
+    DocInsightTimeoutError. Verifies that the function logs a warning, returns True,
+    and writes the job ID but not the summary to the metadata JSON file.
+    """
     from cultivation.scripts.literature.fetch_paper import fetch_arxiv_paper
     # Mock GET
     pdf_resp = MagicMock(status_code=200, content=b'x')
@@ -295,7 +347,11 @@ def test_docinsight_polling_timeout(mock_get, reset_dirs, caplog, monkeypatch):
 @patch('cultivation.scripts.literature.fetch_paper.validate')
 @patch('requests.get')
 def test_schema_validation_skip(mock_get, mock_validate, reset_dirs, caplog):
-    """If jsonschema.validate raises non-ValidationError, skip validation and continue."""
+    """
+    Tests that fetch_arxiv_paper skips metadata schema validation and continues when jsonschema.validate raises a non-ValidationError.
+    
+    Simulates a generic exception during schema validation and verifies that the function logs a warning and returns True.
+    """
     # Stub validate to raise generic error
     mock_validate.side_effect = RuntimeError('skip schema')
     # Stub PDF and API responses
@@ -309,7 +365,9 @@ def test_schema_validation_skip(mock_get, mock_validate, reset_dirs, caplog):
 
 @patch('requests.get')
 def test_docinsight_api_error(mock_get, reset_dirs, caplog, monkeypatch):
-    """If start_research raises APIError, function logs and returns True."""
+    """
+    Tests that fetch_arxiv_paper logs an error and returns True if DocInsightClient.start_research raises a DocInsightAPIError.
+    """
     # Stub PDF and API responses
     pdf_resp = MagicMock(status_code=200, content=b'x'); pdf_resp.raise_for_status=MagicMock()
     api_resp = MagicMock(status_code=200, content=SAMPLE_ARXIV_XML.encode()); api_resp.raise_for_status=MagicMock()
@@ -323,7 +381,10 @@ def test_docinsight_api_error(mock_get, reset_dirs, caplog, monkeypatch):
 
 @patch('requests.get')
 def test_force_redownload(mock_get, tmp_path, caplog, monkeypatch):
-    """force_redownload=True should re-download PDF and metadata even if files exist."""
+    """
+    Tests that setting force_redownload=True causes existing PDF, metadata, and notes files
+    to be overwritten with newly downloaded content.
+    """
     # Override dirs
     monkeypatch.setenv('LIT_DIR_OVERRIDE', str(tmp_path))
     from cultivation.scripts.literature.fetch_paper import fetch_arxiv_paper
@@ -375,8 +436,24 @@ def test_main_failure(monkeypatch, caplog):
 
 def test_main_with_force_redownload_flag(monkeypatch, caplog):
     # Ensure force-redownload flag forwards to fetch_arxiv_paper
+    """
+    Tests that the --force-redownload CLI flag is correctly passed to fetch_arxiv_paper.
+    
+    Verifies that when the main function is run with the --force-redownload flag, the
+    fetch_arxiv_paper function receives force_redownload=True and the correct arXiv ID.
+    """
     called = {}
     def fake_fetch(arxiv_id, force_redownload=False):
+        """
+        Simulates fetching an arXiv paper and records the provided arguments.
+        
+        Args:
+            arxiv_id: The arXiv identifier of the paper to fetch.
+            force_redownload: If True, simulates forcing a redownload.
+        
+        Returns:
+            True, indicating the simulated fetch was successful.
+        """
         called['id'] = arxiv_id
         called['force'] = force_redownload
         return True

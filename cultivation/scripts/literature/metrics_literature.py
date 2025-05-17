@@ -13,7 +13,12 @@ import sqlite3
 
 
 def setup_logging(level=logging.INFO):
-    """Configure logging with consistent format."""
+    """
+    Configures logging with a timestamped format at the specified log level.
+    
+    Args:
+        level: The logging level to use (e.g., logging.INFO, logging.DEBUG).
+    """
     logging.basicConfig(
         level=level,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -22,6 +27,11 @@ def setup_logging(level=logging.INFO):
 
 
 def load_metadata(md_dir: Path) -> pd.DataFrame:
+    """
+    Loads metadata from JSON files in a directory and extracts arXiv IDs and novelty scores.
+    
+    Each JSON file is expected to contain 'arxiv_id' and 'docinsight_novelty' fields. Files missing these fields or containing invalid JSON are skipped with a warning. Returns a DataFrame with columns 'arxiv_id' and 'docinsight_novelty_corpus'.
+    """
     records = []
     for fp in md_dir.glob('*.json'):
         try:
@@ -42,6 +52,17 @@ def load_metadata(md_dir: Path) -> pd.DataFrame:
 
 
 def load_sessions(db_path: Path) -> pd.DataFrame:
+    """
+    Loads reading session data from a SQLite database.
+    
+    Connects to the specified database and retrieves session IDs, associated arXiv IDs, and session start and finish timestamps from the `sessions` table. If a database error occurs, returns an empty DataFrame with the expected columns.
+    
+    Args:
+        db_path: Path to the SQLite database file.
+    
+    Returns:
+        A DataFrame with columns: 'session_id', 'arxiv_id', 'started_at', and 'finished_at'.
+    """
     try:
         conn = sqlite3.connect(str(db_path))
         df = pd.read_sql_query(
@@ -56,6 +77,17 @@ def load_sessions(db_path: Path) -> pd.DataFrame:
 
 
 def load_events(db_path: Path) -> pd.DataFrame:
+    """
+    Loads event data from the specified SQLite database.
+    
+    Connects to the database at the given path and retrieves all records from the `events` table, including session ID, event type, timestamp, and payload. If a database error occurs, returns an empty DataFrame with the expected columns.
+    
+    Args:
+        db_path: Path to the SQLite database file.
+    
+    Returns:
+        A DataFrame containing event records with columns: 'session_id', 'event_type', 'timestamp', and 'payload'.
+    """
     try:
         conn = sqlite3.connect(str(db_path))
         df = pd.read_sql_query(
@@ -70,6 +102,11 @@ def load_events(db_path: Path) -> pd.DataFrame:
 
 
 def get_schema() -> DataFrameSchema:
+    """
+    Defines and returns the Pandera schema for the aggregated reading statistics DataFrame.
+    
+    The schema specifies required columns, data types, and nullability for fields such as arXiv ID, reading date, ISO week, session metrics, and various counts.
+    """
     return DataFrameSchema({
         'arxiv_id': Column(pa.String, nullable=False),
         'date_read': Column(pa.DateTime, nullable=False),
@@ -90,6 +127,11 @@ def get_schema() -> DataFrameSchema:
 import argparse
 
 def main():
+    """
+    Aggregates literature metadata and reading session metrics into a Parquet file.
+    
+    Parses command-line arguments for metadata directory, SQLite database path, and output file location. Loads metadata, session, and event data, then processes each completed reading session to extract reading dates, ISO weeks, user metrics, and event counts. Combines these with metadata novelty scores and writes the validated results to a Parquet file. Logs progress and errors throughout execution.
+    """
     parser = argparse.ArgumentParser(description='Aggregate literature metadata and reading sessions')
     parser.add_argument(
         '--metadata-dir',

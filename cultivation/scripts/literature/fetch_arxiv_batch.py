@@ -15,6 +15,17 @@ ARXIV_API_BASE_URL = "https://export.arxiv.org/api/query?search_query="
 
 
 def load_state(path: Path) -> dict:
+    """
+    Loads and returns the state dictionary from a JSON file if it exists.
+    
+    If the specified file does not exist, returns an empty dictionary.
+    
+    Args:
+        path: Path to the JSON state file.
+    
+    Returns:
+        The loaded state as a dictionary, or an empty dictionary if the file is missing.
+    """
     if path.exists():
         with open(path, 'r') as f:
             return json.load(f)
@@ -22,12 +33,29 @@ def load_state(path: Path) -> dict:
 
 
 def save_state(path: Path, state: dict) -> None:
+    """
+    Saves the given state dictionary as a JSON file at the specified path.
+    
+    Args:
+        path: The file path where the state should be saved.
+        state: The dictionary representing the state to persist.
+    """
     with open(path, 'w') as f:
         json.dump(state, f, indent=2)
 
 
 def get_new_ids_for_query(query: str, since: datetime) -> list[str]:
     # query and date filter for submissions since 'since'
+    """
+    Fetches new arXiv paper IDs matching a query submitted since a given date.
+    
+    Args:
+        query: The arXiv search query string.
+        since: Only papers submitted on or after this date are considered.
+    
+    Returns:
+        A list of arXiv paper IDs matching the query and date filter. Returns an empty list if the API request fails.
+    """
     from urllib.parse import quote_plus
     date_str = since.strftime('%Y%m%d')
     encoded_query = quote_plus(f"{query}+AND+submittedDate:[{date_str}0000+TO+*]")
@@ -48,6 +76,11 @@ def get_new_ids_for_query(query: str, since: datetime) -> list[str]:
 
 
 def main() -> None:
+    """
+    Parses command-line arguments and batch fetches new arXiv papers for each query.
+    
+    For each provided search query, retrieves arXiv paper IDs submitted since the last recorded fetch, processes each new paper, and updates the state file to track the latest fetch time. Handles errors per query to ensure continued processing.
+    """
     parser = argparse.ArgumentParser(description="Batch fetch arXiv papers.")
     parser.add_argument(
         '--queries', nargs='+', required=True,

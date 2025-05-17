@@ -4,8 +4,9 @@ import math
 
 def filter_gps_jitter(df, pace_col, cad_col, cad_thr):
     """
-    Remove GPS jitter points: drop rows where pace < 8.7 min/km AND cadence < cad_thr spm.
-    Keep points where pace >= 8.7 OR cadence >= cad_thr.
+    Filters out GPS jitter points from a DataFrame based on pace and cadence thresholds.
+    
+    Rows are retained if pace is at least 8.7 min/km or cadence is at least the specified threshold; rows where both pace is below 8.7 min/km and cadence is below the threshold are removed.
     """
     pace_flag = df[pace_col] >= 8.7
     cad_flag = df[cad_col] >= cad_thr
@@ -13,7 +14,16 @@ def filter_gps_jitter(df, pace_col, cad_col, cad_thr):
 
 
 def drop_short_segments(segments, min_duration=5):
-    """Drop segments shorter than min_duration seconds."""
+    """
+    Removes segments with a duration shorter than the specified minimum.
+    
+    Args:
+        segments: List of segment dictionaries, each containing a 'dur_s' key for duration in seconds.
+        min_duration: Minimum duration in seconds for a segment to be retained.
+    
+    Returns:
+        A list of segments with duration equal to or greater than min_duration.
+    """
     return [s for s in segments if s['dur_s'] >= min_duration]
 
 
