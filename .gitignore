@@ -228,7 +228,6 @@ cultivation/outputs/figures/**/*.svg
 cultivation/outputs/figures/**/*.pdf
 # Optionally, ignore all files except .placeholder
 !cultivation/outputs/figures/.placeholder
-*.png
 
-cultivation/reader_app/*
-cultivation/data/processed
+cultivation/reader_app/
+cultivation/data/processed/

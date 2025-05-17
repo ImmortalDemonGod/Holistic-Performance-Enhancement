@@ -28,12 +28,65 @@ def prompt_session_info(default_dt, default_plan_id=None):
     dt_str = safe_input(f'  Session datetime UTC [{default_dt}]: ', default_dt)
     session_dt = pd.to_datetime(dt_str)
     plan_id = safe_input(f'  Plan ID [{default_plan_id}]: ', default_plan_id).strip() or None
-    wellness = safe_input('  Wellness light [Green/Amber/Red]: ', '').strip()
-    rpe_ub = float(safe_input('  Overall RPE upper body (0-10): ', '0'))
-    rpe_lb = float(safe_input('  Overall RPE lower body (0-10): ', '0'))
+    # wellness light must be empty or one of Green/Amber/Red
+    while True:
+        wellness = safe_input('  Wellness light [Green/Amber/Red]: ', '').strip()
+        if not wellness or wellness.lower() in ('green', 'amber', 'red'):
+            break
+        print("  Please enter 'Green', 'Amber', or 'Red'")
+    wellness = wellness.capitalize() if wellness else None
+
+    # overall RPE upper body (0–10)
+    while True:
+        rpe_ub_str = safe_input('  Overall RPE upper body (0-10): ', '0')
+        try:
+            rpe_ub = float(rpe_ub_str)
+            if 0 <= rpe_ub <= 10:
+                break
+            print("  RPE must be between 0 and 10")
+        except ValueError:
+            print("  Please enter a valid number")
+
+    # overall RPE lower body (0–10)
+    while True:
+        rpe_lb_str = safe_input('  Overall RPE lower body (0-10): ', '0')
+        try:
+            rpe_lb = float(rpe_lb_str)
+            if 0 <= rpe_lb <= 10:
+                break
+            print("  RPE must be between 0 and 10")
+        except ValueError:
+            print("  Please enter a valid number")
+
+    # optional core RPE (0–10)
     rpe_core = safe_input('  Overall RPE core (0-10, optional): ', '').strip()
-    rpe_core = float(rpe_core) if rpe_core else None
+    if rpe_core:
+        try:
+            rpe_core = float(rpe_core)
+            if not (0 <= rpe_core <= 10):
+                print("  RPE core outside valid range (0-10), setting to null")
+                rpe_core = None
+        except ValueError:
+            print("  Invalid RPE core value, setting to null")
+            rpe_core = None
+    else:
+        rpe_core = None
+    # planned duration (min)
+    dur_planned = int(safe_input('  Planned duration (min): ', '0'))
     dur_actual = int(safe_input('  Actual duration (min): ', '0'))
+    # environment temperature (°C)
+    env_temp_str = safe_input('  Environment temperature (°C): ', '').strip()
+    env_temp = None
+    if env_temp_str:
+        try:
+            env_temp = float(env_temp_str)
+        except ValueError:
+            print('  Invalid temperature, setting to null')
+            env_temp = None
+    # location type
+    location = safe_input('  Location type: ', '').strip()
+    # video captured
+    video = safe_input('  Video captured (true/false): ', 'false').lower() in ('true', 't', 'yes', 'y', '1')
     notes = safe_input('  Session notes: ', '').strip()
     return {
         'session_id': f"{session_dt.strftime('%Y%m%d_%H%M%S')}_{plan_id or 'unspecified'}",
@@ -43,7 +96,11 @@ def prompt_session_info(default_dt, default_plan_id=None):
         'overall_rpe_upper_body': rpe_ub,
         'overall_rpe_lower_body': rpe_lb,
         'overall_rpe_core': rpe_core,
+        'session_duration_planned_min': dur_planned,
         'session_duration_actual_min': dur_actual,
+        'environment_temp_c': env_temp,
+        'location_type': location,
+        'video_captured': video,
         'session_notes': notes
     }
 
@@ -56,8 +113,28 @@ def prompt_exercises(lib_df):
         name = safe_input(f'  Exercise #{idx} name: ', '').strip()
         if not name:
             break
-        if name not in lib_df['exercise_name'].values:
-            print(f"    Warning: '{name}' not in library.")
+        # Build set of canonical names and aliases (case-insensitive)
+        canon = set(lib_df['exercise_name'].str.lower())
+        if 'exercise_alias' in lib_df.columns:
+            lib_df['exercise_alias'].fillna('', inplace=True)
+            aliases = set()
+            for a in lib_df['exercise_alias']:
+                if isinstance(a, str):
+                    for alias in a.split(';'):
+                        if alias.strip():
+                            aliases.add(alias.strip().lower())
+            valid = canon.union(aliases)
+            if name.lower() not in valid:
+                print(f"    Warning: '{name}' not in library.")
+                continue_anyway = safe_input("    Continue anyway? (y/n): ", "n").strip().lower()
+                if continue_anyway != 'y':
+                    continue
+        else:
+            if name.lower() not in set(lib_df['exercise_name'].str.lower()):
+                print(f"    Warning: '{name}' not in library.")
+                continue_anyway = safe_input("    Continue anyway? (y/n): ", "n").strip().lower()
+                if continue_anyway != 'y':
+                    continue
         set_num = int(safe_input('    Set number: ', '1'))
         reps_actual = int(safe_input('    Reps actual: ', '0'))
         weight_actual = float(safe_input('    Weight kg actual: ', '0'))
@@ -94,8 +171,16 @@ def main():
 
     default_dt = args.session_datetime_utc or datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
     session_info = prompt_session_info(default_dt, args.plan_id)
-    lib_df = pd.read_csv(LIB_PATH)
-    exercises = prompt_exercises(lib_df)
+    try:
+        lib_df = pd.read_csv(LIB_PATH)
+        exercises = prompt_exercises(lib_df)
+    except FileNotFoundError:
+        print(f"Error: Exercise library not found at {LIB_PATH}")
+        print("Please ensure the library file exists before logging a session.")
+        return
+    except Exception as e:
+        print(f"Error loading exercise library: {e}")
+        return
 
     # Prepare DataFrames
     sessions_df = pd.DataFrame([session_info])
@@ -104,20 +189,37 @@ def main():
     exercises_df = pd.DataFrame(exercises)
     exercises_df['session_id'] = session_info['session_id']
 
-    # Append or create Parquet files
+    # Append or create Parquet files with error handling
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-    if SESSIONS_PATH.exists():
-        old = pd.read_parquet(SESSIONS_PATH)
-        sessions_df = pd.concat([old, sessions_df], ignore_index=True)
-    sessions_df.to_parquet(SESSIONS_PATH, index=False)
+    try:
+        if SESSIONS_PATH.exists():
+            old = pd.read_parquet(SESSIONS_PATH)
+            # Check for schema compatibility
+            missing_cols = set(sessions_df.columns) - set(old.columns)
+            if missing_cols:
+                print(f"Warning: New session data contains columns not in existing file: {missing_cols}")
+                print("Adding these columns to the existing data with null values.")
+                for col in missing_cols:
+                    old[col] = None
+            sessions_df = pd.concat([old, sessions_df], ignore_index=True)
+        sessions_df.to_parquet(SESSIONS_PATH, index=False)
 
-    if EXERCISES_PATH.exists():
-        old_ex = pd.read_parquet(EXERCISES_PATH)
-        exercises_df = pd.concat([old_ex, exercises_df], ignore_index=True)
-    exercises_df.to_parquet(EXERCISES_PATH, index=False)
+        if EXERCISES_PATH.exists():
+            old_ex = pd.read_parquet(EXERCISES_PATH)
+            # Check for schema compatibility
+            missing_cols = set(exercises_df.columns) - set(old_ex.columns)
+            if missing_cols:
+                print(f"Warning: New exercise data contains columns not in existing file: {missing_cols}")
+                print("Adding these columns to the existing data with null values.")
+                for col in missing_cols:
+                    old_ex[col] = None
+            exercises_df = pd.concat([old_ex, exercises_df], ignore_index=True)
+        exercises_df.to_parquet(EXERCISES_PATH, index=False)
 
-    print('\nLogged session to:', SESSIONS_PATH)
-    print('Logged exercises to:', EXERCISES_PATH)
+        print('\nLogged session to:', SESSIONS_PATH)
+        print('Logged exercises to:', EXERCISES_PATH)
+    except Exception as e:
+        print(f"Error saving data: {e}")
 
 
 if __name__ == '__main__':

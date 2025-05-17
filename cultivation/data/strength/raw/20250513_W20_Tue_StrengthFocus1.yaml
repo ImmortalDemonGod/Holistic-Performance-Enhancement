@@ -10,9 +10,7 @@ session_duration_actual_min: 70
 environment_temp_c: 31
 location_type: unfamiliar park
 video_captured: false
-session_notes: HR spike 175 bpm; quad burn; early dip failure; heat & logistics inflated
-  duration
-exercises:
+session_notes: HR spike 175 bpm; quad burn; early dip failure; heat & logistics inflatedexercises:
 - exercise_name: Dynamic Warm-up
   set_number: 1
   reps_planned: null
