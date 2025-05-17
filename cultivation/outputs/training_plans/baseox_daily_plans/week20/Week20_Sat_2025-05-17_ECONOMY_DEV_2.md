@@ -31,8 +31,10 @@ purpose: "Reinforce running mechanics, build reactive strength, apply cadence fo
 **4. Plyometrics (Progression - Focus: Reactivity & Form):**
     *   Ankle Hops (vertical, minimal knee bend, 2 sets x 12-15 reps).
     *   Pogo Jumps (in place, focus on stiffness and quick ground contact, 2 sets x 12-15 reps).
-    *   Low Box Jumps (onto a very low, stable surface - 6-12 inches): 2 sets x 6-8 reps. Focus on explosive jump up, land softly, STEP DOWN. (If feeling good and form is excellent, can progress to jumping down if landing is impeccable and impact minimal).
-    *   Standing Broad Jumps: 2 sets x 4-6 reps. Focus on explosive jump forward, stick the landing softly, hold for 2s.
+    *   Tuck Jumps: 2 sets x 6-8 reps. Focus on jumping explosively, bringing knees to chest, and landing softly. 
+    *   _Note: Substituted for Low Box Jumps due to lack of box/equipment._
+    *   Lateral Bounds (Skater Jumps): 2 sets x 4-6 reps/side. Jump explosively side-to-side, land softly on one foot, focus on hip drive and glute activation, minimize deep knee bend.
+    *   _Note: Substituted for Standing Broad Jumps due to quad fatigue. Emphasizes glutes and lateral hip stability._
     *   *(Optional if feeling very good & experienced): Small Hurdle Hops (over very low objects, 2x6-8 hops, focus quick ground contact).* 
     *   *Rest 60-90s between plyo sets. If any pain, stop that exercise.*
 
@@ -43,7 +45,9 @@ purpose: "Reinforce running mechanics, build reactive strength, apply cadence fo
 
 **6. Calisthenics Strength (Pull/Leg Focus, ~15-20 min, 2-3 sets per exercise):**
     *   Rows (Incline/Bent/Straight Leg) OR Pull-up progression: 6-12 reps.
-    *   Bodyweight Squats OR Walking Lunges (8-12/leg): 10-15 reps.
+    *   Hamstring Walkouts: 10-15 reps (start in a glute bridge, slowly walk your heels out and back in, keeping hips up).
+    *   Single-Leg Romanian Deadlift (Bodyweight): 8-12/leg, 10-15 reps (stand on one leg, hinge at the hips, keep back flat, reach hands toward the floor, return to standing).
+    *   _Note: Substituted for Bodyweight Squats/Walking Lunges due to quad fatigue._
     *   Single-Leg Glute Bridges: 10-15 reps/leg.
     *   Hollow Body Hold: 20-40s.
 

@@ -21,3 +21,6 @@ Ankle Hops,ankle hops,Lower Body,None,Plyometric,Hop,Bodyweight,False,reps_only
 Pogo Jumps,pogo jumps,Lower Body,None,Plyometric,Jump,Bodyweight,False,reps_only
 Tuck Jumps,tuck jumps,Lower Body,None,Plyometric,Jump,Bodyweight,False,reps_only
 Knee Push-up,knee pushup;assisted pushup;knee push-ups,Chest,Triceps;Shoulders,Compound,Push_Horizontal,Bodyweight,False,reps_x_weight
+Hamstring Walkouts,hamstring walkout;walkouts,Hamstrings,Glutes;Core,Isolation,Hip_Extension,Bodyweight,False,reps_only
+Single-Leg Romanian Deadlift (Bodyweight),single leg rdl;SL RDL;bodyweight rdl,Hamstrings,Glutes;Core,Isolation,Hip_Hinge,Bodyweight,True,reps_only
+Lateral Bounds (Skater Jumps),lateral bound;skater jump;skater hops,Glutes,Hip Abductors;Hamstrings,Plyometric,Jump_Lateral,Bodyweight,True,reps_only
