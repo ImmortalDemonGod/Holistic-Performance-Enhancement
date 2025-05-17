@@ -23,7 +23,7 @@ def main():
     else:
         raw_files = sorted(RAW_DIR.glob('git_commits_*.json'))
         if not raw_files:
-            print(f'[WARN] No commit JSON file found for {date_tag}. Exiting.')
+            print(f'[ERROR] No commit JSON file found for {date_tag}. Exiting.')
             sys.exit(2)
         json_file = raw_files[-1]
         date_tag = json_file.stem[-10:]
