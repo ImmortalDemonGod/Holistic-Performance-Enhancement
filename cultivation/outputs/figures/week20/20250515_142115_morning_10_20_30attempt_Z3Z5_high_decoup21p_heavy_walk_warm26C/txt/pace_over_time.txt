@@ -1,0 +1,5 @@
+{
+  "first_half_pace": 6.772691268611628,
+  "second_half_pace": 5.35611809881251,
+  "strategy": "negative"
+}
