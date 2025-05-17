@@ -1,6 +1,6 @@
 # 🧙🏾‍♂️ Holistic Performance Enhancement (Cultivation)
 
-Welcome to the **Holistic Performance Enhancement** project repository! This initiative aims to integrate multiple domains—**Running**, **Biology**, **Software Development**, and **Synergy**—to enhance overall performance through data-driven insights and a structured framework.
+Welcome to the **Holistic Performance Enhancement** project repository! This initiative aims to integrate multiple domains—**Running**, **Biology**, **Software Development**, **Synergy**, and **Strength Training**—to enhance overall performance through data-driven insights and a structured framework.
 
 ![Cultivation Banner](path_to_your_banner_image)
 
@@ -52,17 +52,20 @@ cultivation/
 │   ├── running/
 │   ├── biology/
 │   ├── software/
-│   └── synergy/
+│   ├── synergy/
+│   └── strength/
 ├── scripts/
 │   ├── running/
 │   ├── biology/
 │   ├── software/
-│   └── synergy/
+│   ├── synergy/
+│   └── strength/
 ├── notebooks/
 │   ├── running/
 │   ├── biology/
 │   ├── software/
-│   └── synergy/
+│   ├── synergy/
+│   └── strength/
 ├── ci_cd/
 │   └── ...
 ├── README.md
@@ -90,6 +93,7 @@ cultivation/
   - **`biology/`**: Research logs, quiz/test results, raw data sets from lab experiments.
   - **`software/`**: Code metrics like commit logs, bug counts, lint/test coverage outputs.
   - **`synergy/`**: Combined datasets merging variables from multiple domains (e.g., merged CSV with run data and commit frequency).
+  - **`strength/`**: CSV/JSON files for strength workout logs, exercise data, and progress metrics.
 
 #### 3. `scripts/` - Automation Scripts
 - **Purpose**: Contains Python or Bash scripts for data cleaning, analysis, and synergy calculations.
@@ -97,6 +101,7 @@ cultivation/
   - **`biology/`**: Scripts for summarizing paper readings, analyzing quiz performance, scraping research databases.
   - **`software/`**: Automation scripts for analyzing commit logs, testing coverage, generating summaries.
   - **`synergy/`**: Specialized scripts that cross-reference running performance with code quality improvements.
+  - **`strength/`**: Scripts for logging strength workouts, calculating progress metrics, and analyzing exercise data.
 
 #### 4. `notebooks/` - Jupyter Notebooks
 - **Purpose**: Interactive notebooks for exploratory data analysis, visualization, and synergy prototyping.
@@ -104,6 +109,7 @@ cultivation/
   - **`biology/`**: Analyzing reading logs, quiz scores, research data sets.
   - **`software/`**: Exploring commit or code review metrics, identifying trends over time.
   - **`synergy/`**: Consolidating data from all domains to test synergy hypotheses (e.g., running’s impact on coding output).
+  - **`strength/`**: Analyzing strength workout data, visualizing progress, and identifying trends.
 
 #### 5. `ci_cd/` - Continuous Integration/Continuous Deployment
 - **Purpose**: Configuration files for CI/CD pipelines (e.g., GitHub Actions, Jenkins) that automate tests and data analyses on commits or schedules.
@@ -147,6 +153,29 @@ This project supports robust, scalable ingestion and analysis of running data fi
 
 - If a file cannot be auto-renamed (e.g., missing date in metadata), it will be skipped and a message will be printed.
 - For best results, use devices that embed timestamps in FIT/GPX files.
+
+## 🏋️‍♂️ Strength Training Data Ingestion & Logging
+
+Follow these steps to log strength workouts:
+
+1. Place raw Markdown logs in `cultivation/data/strength/raw/`, each with YAML frontmatter including `session_id`.
+2. To rebuild all sessions from raw logs, run:
+   ```bash
+   make rebuild-strength-data
+   ```
+3. To ingest a single log (idempotent):
+   ```bash
+   .venv/bin/python -m cultivation.scripts.strength.ingest_yaml_log \
+     cultivation/data/strength/raw/<log>.md
+   ```
+4. For interactive entry (auto-generates `session_id`):
+   ```bash
+   .venv/bin/python -m cultivation.scripts.strength.log_strength_session \
+     --session_datetime_utc <ISO_DATETIME> \
+     --plan_id <PLAN_ID>
+   ```
+
+Processed data is saved as Parquet in `cultivation/data/strength/processed/`, including `strength_sessions.parquet` and `strength_exercises_log.parquet`. Ensure `cultivation/data/strength/processed/exercise_library.csv` contains your exercise definitions.
 
 ## 🛠️ Requirements
 

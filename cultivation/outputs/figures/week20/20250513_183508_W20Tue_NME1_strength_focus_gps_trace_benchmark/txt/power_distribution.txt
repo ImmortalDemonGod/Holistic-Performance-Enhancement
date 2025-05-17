@@ -1,0 +1,11 @@
+Power Distribution (W):
+count    0.0
+mean     NaN
+std      NaN
+min      NaN
+10%      NaN
+25%      NaN
+50%      NaN
+75%      NaN
+90%      NaN
+max      NaN
