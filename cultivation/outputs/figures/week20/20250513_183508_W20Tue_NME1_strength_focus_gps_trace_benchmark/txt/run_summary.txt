@@ -32,16 +32,16 @@ Run Summary:
   RHR (Garmin): 48.0 bpm (Δ1d: -5.9%, Δ7d: -7.7%)
   Recovery Score (Whoop): 91.0 % (Δ1d: n/a, Δ7d: +75.0%)
   Sleep Score (Whoop): 77.0 % (Δ1d: n/a, Δ7d: -7.2%)
-  Body Battery (Garmin): 71.3 % (Δ1d: +201.3%, Δ7d: +26.9%)
+  Body Battery (Garmin): 55.2 % (Δ1d: +133.5%, Δ7d: -1.7%)
   Avg Stress (Garmin, Prev Day): n/a
   Sleep Duration (Whoop): 11.7 h (Δ1d: n/a, Δ7d: +34.9%)
   Sleep Consistency (Whoop): 28.0 % (Δ1d: n/a, Δ7d: -51.7%)
   Sleep Disturbances/hr (Whoop): 0.5  (Δ1d: n/a, Δ7d: +14.1%)
-  Strain Score (Whoop): n/a
+  Strain Score (Whoop): 15.3  (Δ1d: n/a, Δ7d: +93.9%)
   Skin Temp (Whoop): 92.1 °F (Δ1d: n/a, Δ7d: +180.9%)
   Resp Rate (Whoop): 16.6 rpm (Δ1d: n/a, Δ7d: +0.0%)
-  Steps (Garmin): 6947.0  (Δ1d: +300%+, Δ7d: +300%+)
-  Total Activity (Garmin): 94.4 min (Δ1d: +64.5%, Δ7d: +159.8%)
+  Steps (Garmin): 8137.0  (Δ1d: +300%+, Δ7d: +300%+)
+  Total Activity (Garmin): 146.6 min (Δ1d: +155.7%, Δ7d: +300%+)
   Resp Rate (Garmin): 14.7 rpm (Δ1d: +3.8%, Δ7d: +6.6%)
   VO2max (Garmin): n/a
   ---
