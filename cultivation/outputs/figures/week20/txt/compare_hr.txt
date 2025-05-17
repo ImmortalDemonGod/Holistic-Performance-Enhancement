@@ -1,0 +1,3 @@
+Heart Rate Comparison (Week 20):
+20250514_174726_lunch_cad168_Z3Z4run_RW_hot: mean=175.0, max=188
+20250513_183508_W20Tue_NME1_strength_focus_gps_trace_benchmark: mean=135.3, max=161

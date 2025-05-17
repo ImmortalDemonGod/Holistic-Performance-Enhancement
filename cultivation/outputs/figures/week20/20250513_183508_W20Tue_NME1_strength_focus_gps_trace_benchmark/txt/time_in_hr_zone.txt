@@ -1,0 +1,4 @@
+zone_hr	seconds	percent
+Z1 (Recovery)	2690.0	92.40810717966335
+Z2 (Aerobic)	219.0	7.523187907935418
+Z3 (Tempo)	2.0	0.06870491240123669
