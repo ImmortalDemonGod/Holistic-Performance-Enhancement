@@ -4,7 +4,7 @@ Ingest a YAML workout log into Parquet session and exercise logs.
 """
 import argparse
 import yaml  # type: ignore
-from cultivation.scripts.strength.convert_markdown_to_yaml import parse_markdown
+from convert_markdown_to_yaml import parse_markdown
 import pandas as pd  # type: ignore
 from pathlib import Path
 
