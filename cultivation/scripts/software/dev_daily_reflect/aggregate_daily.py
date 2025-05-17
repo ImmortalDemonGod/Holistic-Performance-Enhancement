@@ -74,17 +74,6 @@ def main():
     rollup_file = ROLLUP_DIR / f'dev_metrics_{date_tag}.csv'
     grouped.to_csv(rollup_file, index=False)
     print(f'[✓] wrote {rollup_file}')
-if 'ruff_errors' in df.columns:
-    agg_dict['ruff_errors'] = 'sum'
-gb = df.groupby('author').agg(agg_dict).reset_index()
-gb = gb.rename(columns={
-    'sha': 'commits',
-    'added': 'loc_add',
-    'deleted': 'loc_del'
-})
-gb['loc_net'] = gb['loc_add'] - gb['loc_del']
 
-# --- Write rollup CSV ---
-rollup_file = ROLLUP_DIR / f'dev_metrics_{date_tag}.csv'
-gb.to_csv(rollup_file, index=False)
-print(f'[✓] wrote {rollup_file}')
+if __name__ == "__main__":
+    main()
