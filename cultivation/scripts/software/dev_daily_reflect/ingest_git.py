@@ -55,3 +55,14 @@ outfile = OUTPUT_DIR / f'git_commits_{DATE_TAG}.json'
 with open(outfile, 'w') as f:
     json.dump(records, f, indent=2)
 print(f'[✓] wrote {outfile} ({len(records)} commits)')
+
+# --- Enrich with code quality metrics ---
+try:
+    from metrics.commit_processor import analyze_commits_code_quality
+    enriched = analyze_commits_code_quality(str(REPO_ROOT), records)
+    enriched_outfile = OUTPUT_DIR / f'git_commits_enriched_{DATE_TAG}.json'
+    with open(enriched_outfile, 'w') as f:
+        json.dump(enriched, f, indent=2)
+    print(f'[✓] wrote {enriched_outfile} (enriched with code metrics)')
+except Exception as e:
+    print(f'[WARN] Could not enrich with code metrics: {e}')
