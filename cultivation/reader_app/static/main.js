@@ -5,29 +5,43 @@ let sessionArxivId = null;
 // Patch PDFViewerApplication to guarantee highlight event handler is present
 document.addEventListener("DOMContentLoaded", function() {
   if (window.PDFViewerApplication) {
-    window.PDFViewerApplication.handleAnnotationEditorStatesChanged = async function(event) {
-      const { AnnotationType } = globalThis.pdfjsLib || {};
-      const { type, value } = event.detail || {};
-      if (type === 'add' && value && AnnotationType && value.annotationType === AnnotationType.HIGHLIGHT) {
+    const originalHandler = window.PDFViewerApplication.handleAnnotationEditorStatesChanged?.bind(window.PDFViewerApplication);
+    window.PDFViewerApplication.handleAnnotationEditorStatesChanged = function(event) {
+      // Preserve original PDF.js behavior
+      if (typeof originalHandler === 'function') {
+        originalHandler(event);
+      }
+      if (
+        event &&
+        event.source &&
+        event.source.annotationType === 8 &&
+        event.states &&
+        event.states.includes('persistent')
+      ) {
+        const value = event.source;
         const highlightData = {
-          event_type: 'highlight_created',
-          timestamp: new Date().toISOString(),
-          pageNumber: (typeof value.pageIndex === 'number') ? value.pageIndex + 1 : undefined,
-          textContent: value.textContent || '',
+          type: 'highlight',
+          page: value.pageIndex + 1,
           color: value.color,
-          rects: value.rects,
           quadPoints: value.quadPoints,
+          text: value.contents,
           annotationId: value.id
         };
         console.log('Persistent Highlight Created Event:', highlightData);
-        // Backend send placeholder
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify(highlightData));
+        }
       }
     };
   }
 });
 
 function connectWS(arxiv_id) {
-  ws = new WebSocket(`ws://${window.location.host}/ws?arxiv_id=${arxiv_id}`);
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.close(1000, 'reloading');
+  }
+  const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${window.location.host}/ws?arxiv_id=${encodeURIComponent(arxiv_id)}`);
   ws.onopen = () => {
     document.getElementById('status').textContent = 'WebSocket connected';
   };

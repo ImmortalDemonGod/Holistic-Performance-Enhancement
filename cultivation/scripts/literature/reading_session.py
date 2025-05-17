@@ -61,16 +61,42 @@ def end_reading(args):
     c = conn.cursor()
     # update session finished_at
     now = datetime.utcnow().isoformat() + 'Z'
-    c.execute('UPDATE sessions SET finished_at = ? WHERE session_id = ?', (now, args.session_id))
+    c.execute(
+        'UPDATE sessions SET finished_at = ? WHERE session_id = ? AND finished_at IS NULL',
+        (now, args.session_id),
+    )
+    if c.rowcount == 0:
+        print(f"No active session with id {args.session_id}", file=sys.stderr)
+        conn.close()
+        sys.exit(1)
     conn.commit()
+    print(f"Session {args.session_id} marked finished at {now}")
     print(f"Session {args.session_id} marked finished at {now}")
     # prompt for self-rated metrics
     metrics = {}
     try:
-        metrics['self_rated_comprehension'] = int(input('Self-rated comprehension (0-5): '))
-        metrics['self_rated_relevance'] = int(input('Self-rated relevance (0-5): '))
-        metrics['self_rated_novelty_personal'] = float(input('Self-rated novelty personal (0-1): '))
-        metrics['actual_time_spent_minutes'] = float(input('Actual time spent (minutes): '))
+        def ask_int(prompt, lo, hi):
+            while True:
+                try:
+                    val = int(input(prompt))
+                    if lo <= val <= hi:
+                        return val
+                except ValueError:
+                    pass
+                print(f"Enter an integer between {lo} and {hi}.")
+        def ask_float(prompt, lo, hi):
+            while True:
+                try:
+                    val = float(input(prompt))
+                    if lo <= val <= hi:
+                        return val
+                except ValueError:
+                    pass
+                print(f"Enter a number between {lo} and {hi}.")
+        metrics['self_rated_comprehension'] = ask_int('Self-rated comprehension (0-5): ', 0, 5)
+        metrics['self_rated_relevance'] = ask_int('Self-rated relevance (0-5): ', 0, 5)
+        metrics['self_rated_novelty_personal'] = ask_float('Self-rated novelty personal (0-1): ', 0.0, 1.0)
+        metrics['actual_time_spent_minutes'] = ask_float('Actual time spent (minutes): ', 0.0, 10000.0)
     except Exception as e:
         print(f"Error reading input: {e}")
         conn.close()
