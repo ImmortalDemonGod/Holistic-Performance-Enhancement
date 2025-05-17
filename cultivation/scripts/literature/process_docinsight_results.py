@@ -26,7 +26,7 @@ def process_pending():
     for meta_file in METADATA_DIR.glob("*.json"):
         try:
             data = json.loads(meta_file.read_text())
-        except Exception as e:
+        except (json.JSONDecodeError, IOError) as e:
             logging.error(f"Failed to read metadata {meta_file}: {e}")
             continue
         job_id = data.get('docinsight_job_id')
@@ -38,6 +38,11 @@ def process_pending():
             result = client.wait_for_result(job_id)
             summary = result.get('answer') or result.get('docinsight_summary', '')
             novelty = result.get('novelty')
+            if not summary:
+                logging.warning(f"Empty summary received for job {job_id}")
+            if novelty is None:
+                logging.warning(f"Missing novelty score for job {job_id}")
+                novelty = 0.0
             data['docinsight_summary'] = summary
             data['docinsight_novelty'] = novelty
             meta_file.write_text(json.dumps(data, indent=2))
@@ -45,11 +50,14 @@ def process_pending():
             # append to note
             note_file = NOTES_DIR / f"{meta_file.stem}.md"
             if note_file.exists():
-                with open(note_file, 'a') as nf:
-                    nf.write("\n\n## DocInsight Summary\n")
-                    nf.write(summary + "\n")
-                    nf.write(f"\n*Novelty Score (DocInsight): {novelty}*\n")
-                logging.info(f"Appended summary to note {note_file.name}")
+                try:
+                    with open(note_file, 'a') as nf:
+                        nf.write("\n\n## DocInsight Summary\n")
+                        nf.write(summary + "\n")
+                        nf.write(f"\n*Novelty Score (DocInsight): {novelty}*\n")
+                    logging.info(f"Appended summary to note {note_file.name}")
+                except (IOError, OSError) as e:
+                    logging.error(f"Failed to update note file {note_file}: {e}")
         except DocInsightTimeoutError as te:
             logging.warning(f"Job {job_id} not ready: {te}")
         except DocInsightAPIError as ae:
