@@ -10,6 +10,7 @@ on:
 
 jobs:
   dev-daily-reflect:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,3 +46,9 @@ jobs:
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Daily Report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-daily-report
+          path: cultivation/outputs/software/dev_daily_reflect/reports/dev_report_*.md
