@@ -19,7 +19,11 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- Calculate time window (configurable lookback_days) ---
 now = datetime.datetime.now(datetime.timezone.utc)
-lookback_days = int(config.get("lookback_days", 1))
+try:
+    lookback_days = int(config.get("lookback_days", 1))
+except ValueError:
+    print(f"[ERROR] Invalid lookback_days value in config: {config.get('lookback_days')}")
+    lookback_days = 1  # Default to 1 day if invalid
 start = now - datetime.timedelta(days=lookback_days)
 SINCE = start.strftime('%Y-%m-%dT%H:%M:%SZ')
 DATE_TAG = now.strftime('%Y-%m-%d')
@@ -62,11 +66,13 @@ print(f'[✓] wrote {outfile} ({len(records)} commits)')
 
 # --- Enrich with code quality metrics ---
 try:
-    from metrics.commit_processor import analyze_commits_code_quality
+    from cultivation.scripts.software.dev_daily_reflect.metrics.commit_processor import analyze_commits_code_quality
     enriched = analyze_commits_code_quality(str(REPO_ROOT), records)
     enriched_outfile = OUTPUT_DIR / f'git_commits_enriched_{DATE_TAG}.json'
     with open(enriched_outfile, 'w') as f:
         json.dump(enriched, f, indent=2)
     print(f'[✓] wrote {enriched_outfile} (enriched with code metrics)')
 except Exception as e:
-    print(f'[WARN] Could not enrich with code metrics: {e}')
+    print(f'[WARN] Could not enrich with code metrics: {e.__class__.__name__}: {e}')
+    import traceback
+    print(f'Traceback: {traceback.format_exc()}')

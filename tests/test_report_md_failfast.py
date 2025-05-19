@@ -24,6 +24,6 @@ def test_report_md_fails_on_missing_rollup():
             f.unlink()
         result = subprocess.run([sys.executable, str(script)], cwd=project_root, capture_output=True, text=True, env=env)
         assert result.returncode == 2
-        assert "No rollup CSV found" in result.stdout or result.stderr
+        assert "No rollup CSV found" in result.stderr
     finally:
         shutil.rmtree(temp_root)

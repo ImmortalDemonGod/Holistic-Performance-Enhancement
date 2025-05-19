@@ -7,7 +7,7 @@ from importlib import import_module
 import shutil
 
 # Ensure cultivation is on sys.path for import
-sys.path.insert(0, str(pathlib.Path(__file__).parents[0]))
+sys.path.insert(0, str(pathlib.Path(__file__).parents[1]))  # Use parent of tests dir
 agg_mod = import_module("cultivation.scripts.software.dev_daily_reflect.aggregate_daily")
 
 def test_aggregate_daily_basic_rollup(monkeypatch):

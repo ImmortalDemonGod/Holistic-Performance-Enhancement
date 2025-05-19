@@ -11,9 +11,10 @@ Okay, this is a fantastic set of information! You've got a working prototype (`c
 
 Let's outline a program, which we can call **"DevDailyReflect"** (building on your `dev_daily_reflect` directory), that consolidates these efforts into a cohesive system for daily work review and next-day planning.
 
-**Program: DevDailyReflect**
+## Program: DevDailyReflect
 
-**Goal:** To provide a daily automated review of software development activity, highlighting achievements, potential risks, quality trends, and suggesting actionable next steps to inform the user's (developer's) next day.
+### Goal
+To provide a daily automated review of software development activity, highlighting achievements, potential risks, quality trends, and suggesting actionable next steps to inform the developer’s next day.
 
 **Core Philosophy:**
 *   **Automated Data Collection:** Minimize manual input.

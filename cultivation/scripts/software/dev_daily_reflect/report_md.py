@@ -102,7 +102,9 @@ def main():
                     md_lines.append(
                         f"| {c.get('sha','')[:7]} | {c.get('author','')} | {c.get('added',0)} | {c.get('deleted',0)} | "
                         f"{c.get('py_files_changed_count','')} | {c.get('total_cc','')} | "
-                        f"{c.get('avg_mi',''):.2f} | {c.get('ruff_errors','')} |"
+                        f"{float(c.get('avg_mi')):.2f} | {c.get('ruff_errors','')} |" if c.get('avg_mi') not in (None, '', 'NA') and isinstance(c.get('avg_mi'), (int, float, str)) and str(c.get('avg_mi')).replace('.', '', 1).isdigit() else
+                        f"| {c.get('sha','')[:7]} | {c.get('author','')} | {c.get('added',0)} | {c.get('deleted',0)} | "
+                        f"{c.get('py_files_changed_count','')} | {c.get('total_cc','')} |  | {c.get('ruff_errors','')} |"
                     )
             except Exception as e:
                 md_lines.append(f"\n[WARN] Could not load per-commit metrics: {e}")

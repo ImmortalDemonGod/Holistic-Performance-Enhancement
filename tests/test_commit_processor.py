@@ -5,7 +5,7 @@ import sys
 import pytest
 
 # Ensure cultivation is on sys.path for import
-sys.path.insert(0, str(pathlib.Path(__file__).parents[0]))
+sys.path.insert(0, str(pathlib.Path(__file__).parents[1]))
 from cultivation.scripts.software.dev_daily_reflect.metrics import commit_processor
 
 def test_analyze_commits_code_quality_handles_basic_commit(monkeypatch):
