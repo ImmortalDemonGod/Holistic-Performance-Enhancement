@@ -1,0 +1,5 @@
+# Dev Daily Reflect configuration
+repository_path: ../../../..
+lookback_days: 1
+rollup_dir: cultivation/outputs/software/dev_daily_reflect/rollup
+report_output_dir: cultivation/outputs/software/dev_daily_reflect/reports

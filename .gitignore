@@ -240,3 +240,5 @@ cultivation/reader_app/node_modules/*
 
 cultivation/reader_app/
 cultivation/data/processed/
+cultivation/outputs/software/dev_daily_reflect/raw/*.json
+cultivation/outputs/software/dev_daily_reflect/rollup/*.csv

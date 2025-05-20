@@ -12,3 +12,8 @@ jsonschema>=4.0.0
 pandera>=0.14.0
 flask>=2.0.0
 pandas-stubs
+radon
+ruff
+GitPython
+PyYAML
+pytest==7.4.0

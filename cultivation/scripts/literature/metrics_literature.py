@@ -87,8 +87,75 @@ def get_schema() -> DataFrameSchema:
     }, coerce=True)
 
 
-import argparse
+def aggregate(metadata_df: pd.DataFrame, sessions_df: pd.DataFrame, events_df: pd.DataFrame) -> pd.DataFrame:
+    """Aggregates metadata, session, and event data into a structured DataFrame."""
+    
+    schema_cols = list(get_schema().columns.keys())
 
+    if sessions_df.empty:
+        return pd.DataFrame(columns=schema_cols)
+
+    arxiv_to_novelty = metadata_df.set_index('arxiv_id')['docinsight_novelty_corpus'].to_dict()
+    records = []
+    for _, row in sessions_df.iterrows():
+        sess_id = row['session_id']
+        arxiv_id = row['arxiv_id']
+
+        # Skip session if its arxiv_id is not in metadata_df (novelty would be None)
+        if arxiv_id not in arxiv_to_novelty:
+            logging.debug(f"Skipping session {sess_id} for arxiv_id {arxiv_id} as it's not in metadata.")
+            continue
+
+        if pd.isna(row['finished_at']):
+            logging.debug(f"Skipping session {sess_id} due to missing finished_at time.")
+            continue
+        finished = row['finished_at']
+        date_read = finished.date()
+        iso_week = finished.strftime('%G-W%V')
+        # parse session_summary_user
+        evt = events_df[events_df['session_id']==sess_id]
+        summary = evt[evt['event_type']=='session_summary_user']
+        metrics = {}
+        if not summary.empty:
+            try:
+                payload_str = summary.iloc[-1]['payload']
+                if isinstance(payload_str, str):
+                    metrics = json.loads(payload_str)
+                elif isinstance(payload_str, dict): # Already a dict, no need to parse
+                    metrics = payload_str
+                else:
+                    logging.warning(f"Session {sess_id} summary payload is not a string or dict: {type(payload_str)}")
+            except json.JSONDecodeError as e:
+                logging.warning(f"Failed to parse session_summary_user payload for session {sess_id}: {e}. Payload: {summary.iloc[-1]['payload']}")
+            except Exception as e:
+                logging.error(f"Unexpected error parsing summary for session {sess_id}: {e}")
+
+        fc_from_payload = metrics.get('flashcards_created')
+        flashcards_count = fc_from_payload if fc_from_payload is not None else len(evt[evt['event_type']=='flashcard_staged'])
+
+        records.append({
+            'arxiv_id': row['arxiv_id'],
+            'date_read': pd.to_datetime(date_read),
+            'iso_week_read': iso_week,
+            'time_spent_minutes_actual': (finished - row['started_at']).total_seconds() / 60.0 if pd.notna(row['started_at']) and pd.notna(finished) else None,
+            'docinsight_novelty_corpus': arxiv_to_novelty.get(row['arxiv_id']),
+            'self_rated_novelty_personal': metrics.get('self_rated_novelty_personal'),
+            'self_rated_comprehension': metrics.get('self_rated_comprehension'),
+            'self_rated_relevance': metrics.get('self_rated_relevance'),
+            'flashcards_created': flashcards_count,
+            'docinsight_queries_during_session': len(evt[evt['event_type']=='docinsight_query']),
+            'notes_length_chars_final': metrics.get('notes_length_chars_final'), 
+            'pages_viewed_count': metrics.get('pages_read_count'), 
+            'highlights_made_count': len(evt[evt['event_type']=='highlight_created']) 
+        })
+    
+    if not records:
+        return pd.DataFrame(columns=schema_cols)
+        
+    return pd.DataFrame(records)
+
+
+# Constants for output columns - consider defining these via the schema directly if possible
 def main():
     parser = argparse.ArgumentParser(description='Aggregate literature metadata and reading sessions')
     parser.add_argument(
@@ -118,39 +185,35 @@ def main():
     metadata_df = load_metadata(md_dir)
     sessions_df = load_sessions(db_path)
     events_df = load_events(db_path)
-    records = []
-    for _, row in sessions_df.iterrows():
-        sess_id = row['session_id']
-        if pd.isna(row['finished_at']):
-            continue
-        finished = row['finished_at']
-        date_read = finished.date()
-        iso_week = finished.strftime('%Y-W%V')
-        # parse session_summary_user
-        evt = events_df[events_df['session_id']==sess_id]
-        summary = evt[evt['event_type']=='session_summary_user']
-        metrics = {}
-        if not summary.empty:
-            try:
-                metrics = json.loads(summary.iloc[-1]['payload'])
-            except Exception:
-                metrics = {}
-        records.append({
-            'arxiv_id': row['arxiv_id'],
-            'date_read': pd.to_datetime(date_read),
-            'iso_week_read': iso_week,
-            'time_spent_minutes_actual': metrics.get('actual_time_spent_minutes'),
-            'docinsight_novelty_corpus': arxiv_to_novelty.get(row['arxiv_id']),
-            'self_rated_novelty_personal': metrics.get('self_rated_novelty_personal'),
-            'self_rated_comprehension': metrics.get('self_rated_comprehension'),
-            'self_rated_relevance': metrics.get('self_rated_relevance'),
-            'flashcards_created': len(evt[evt['event_type']=='flashcard_staged']),
-            'docinsight_queries_during_session': len(evt[evt['event_type']=='docinsight_query']),
-            'notes_length_chars_final': None,
-            'pages_viewed_count': None,
-            'highlights_made_count': None
-        })
-    df = pd.DataFrame(records)
+    
+    # Call the new aggregate function
+    df = aggregate(metadata_df, sessions_df, events_df)
+
+    # Validate and write the DataFrame
+    if df.empty:
+        logging.info("No data to process after aggregation. Output file will not be created.")
+        print("No data to process after aggregation. Output file will not be created.")
+        # Still, we might want to ensure an empty parquet with schema is written if that's desired
+        # For now, exiting if no records post-aggregation. Or, handle schema for empty df.
+        # Create an empty DataFrame with the correct columns if df is empty
+        # to ensure schema validation doesn't fail and an empty parquet is written as expected.
+        empty_cols = get_schema().columns.keys()
+        df = pd.DataFrame(columns=empty_cols) 
+        # Ensure dtypes for empty df match schema to prevent validation issues
+        for col, col_obj in get_schema().columns.items():
+            if col in df.columns:
+                 # Attempt to cast to the pandera type's corresponding pandas dtype
+                try:
+                    if str(col_obj.dtype) == 'datetime64[ns]': # Pandera uses 'datetime64[ns]' for DateTime
+                        df[col] = pd.to_datetime(df[col])
+                    elif str(col_obj.dtype) == 'string': # For Pandera String
+                        df[col] = df[col].astype(pd.StringDtype())
+                    else: # For float, int etc.
+                        df[col] = df[col].astype(str(col_obj.dtype).lower())
+                except Exception as e:
+                    logging.debug(f"Could not cast empty column {col} to {col_obj.dtype}: {e}")
+                    pass # Keep it as object if casting fails for empty
+
     schema = get_schema()
     try:
         schema.validate(df, lazy=True)
@@ -163,4 +226,5 @@ def main():
 
 
 if __name__ == '__main__':
+    setup_logging() # Add setup_logging call
     main()
