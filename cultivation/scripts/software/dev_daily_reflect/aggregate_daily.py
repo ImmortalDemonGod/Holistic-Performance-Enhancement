@@ -5,6 +5,8 @@
 #!/usr/bin/env python3
 import pandas as pd
 import sys
+import argparse
+import datetime
 from cultivation.scripts.software.dev_daily_reflect.config_loader import load_config
 from pathlib import Path
 
@@ -15,20 +17,49 @@ RAW_DIR = REPO_ROOT / 'cultivation' / 'outputs' / 'software' / 'dev_daily_reflec
 ROLLUP_DIR = REPO_ROOT / config["rollup_dir"]
 ROLLUP_DIR.mkdir(parents=True, exist_ok=True)
 
+# --- Argument Parser ---
+parser = argparse.ArgumentParser(description='Aggregate daily dev metrics for a specific date or the latest available data.')
+parser.add_argument('--date', type=str, help='Target date in YYYY-MM-DD format. If not provided, processes the latest raw data file.')
+args = parser.parse_args()
+
 def main():
-    # --- Find latest enriched or raw JSON file ---
+    # --- Determine input file and date_tag ---
     date_tag = None
-    enriched_files = sorted(RAW_DIR.glob('git_commits_enriched_*.json'))
-    if enriched_files:
-        json_file = enriched_files[-1]
-        date_tag = json_file.stem[-10:]
+    json_file = None
+
+    if args.date:
+        try:
+            # Validate date format, though we mainly use it for filenames here
+            datetime.datetime.strptime(args.date, '%Y-%m-%d') 
+            date_tag = args.date
+            # Prefer enriched, fall back to raw for the specific date
+            specific_enriched_file = RAW_DIR / f'git_commits_enriched_{date_tag}.json'
+            specific_raw_file = RAW_DIR / f'git_commits_{date_tag}.json'
+            if specific_enriched_file.exists():
+                json_file = specific_enriched_file
+            elif specific_raw_file.exists():
+                json_file = specific_raw_file
+            else:
+                print(f'[ERROR] No commit JSON file found for date {date_tag} in {RAW_DIR}. Exiting.')
+                sys.exit(2)
+            print(f"[INFO] Processing data for specific date: {date_tag} from {json_file.name}")
+        except ValueError:
+            print(f"[ERROR] Invalid date format for --date: {args.date}. Please use YYYY-MM-DD.")
+            sys.exit(1)
     else:
-        raw_files = sorted(RAW_DIR.glob('git_commits_*.json'))
-        if not raw_files:
-            print(f'[ERROR] No commit JSON files found in {RAW_DIR}. Exiting.')
-            sys.exit(2)
-        json_file = raw_files[-1]
-        date_tag = json_file.stem[-10:]
+        # --- Find latest enriched or raw JSON file (Original behavior) ---
+        enriched_files = sorted(RAW_DIR.glob('git_commits_enriched_*.json'))
+        if enriched_files:
+            json_file = enriched_files[-1]
+            date_tag = json_file.stem.split('_')[-1] # Extract date from filename like git_commits_enriched_YYYY-MM-DD
+        else:
+            raw_files = sorted(RAW_DIR.glob('git_commits_*.json'))
+            if not raw_files:
+                print(f'[ERROR] No commit JSON files found in {RAW_DIR}. Exiting.')
+                sys.exit(2)
+            json_file = raw_files[-1]
+            date_tag = json_file.stem.split('_')[-1] # Extract date from filename like git_commits_YYYY-MM-DD
+        print(f"[INFO] Processing latest available data: {date_tag} from {json_file.name}")
 
     # --- Load commit data ---
     try:
