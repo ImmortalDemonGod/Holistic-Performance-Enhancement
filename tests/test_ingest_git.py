@@ -17,6 +17,28 @@ SCRIPT_REL_PATH = pathlib.Path('../cultivation/scripts/software/dev_daily_reflec
 SCRIPT = (pathlib.Path(__file__).parent / SCRIPT_REL_PATH).resolve()
 
 
+def create_fake_git_repo(tmpdir):
+    """
+    Creates a temporary Git repository with an initial Python file and commit.
+    
+    Args:
+        tmpdir: The temporary directory in which to create the repository.
+    
+    Returns:
+        The path to the created Git repository.
+    """
+    repo_path = tmpdir / "repo"
+    repo_path.mkdir()
+    subprocess.run(["git", "init"], cwd=repo_path, check=True)
+    # Add a Python file and commit
+    (repo_path / "foo.py").write_text("print('hello world')\n")
+    subprocess.run(["git", "add", "foo.py"], cwd=repo_path, check=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo_path, check=True)
+    subprocess.run(["git", "config", "user.name", "Test User"], cwd=repo_path, check=True)
+    subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=repo_path, check=True)
+    return repo_path
+
+
 @pytest.mark.skipif(shutil.which("git") is None, reason="git not installed")
 def test_ingest_git_basic(monkeypatch, tmp_path):
     """Integration: ingest_git.py produces expected JSON output from a minimal repo using default date (lookback)."""
