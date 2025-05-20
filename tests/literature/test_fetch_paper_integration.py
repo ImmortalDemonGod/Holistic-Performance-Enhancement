@@ -1,7 +1,7 @@
-import threading
-import time
 import json
 import pytest
+import threading
+import time
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from tests.mocks.docinsight_mock import app as mock_app
@@ -23,7 +23,6 @@ def live_mock_docinsight_server():
     port = s.getsockname()[1]
     s.close()
     # Event to signal server is ready
-    import threading
     server_ready = threading.Event()
     def run_server():
         mock_app.config['TESTING'] = True
@@ -37,7 +36,6 @@ def live_mock_docinsight_server():
     # Wait for server to start or timeout
     import requests
     from requests.exceptions import ConnectionError
-    import time
     start_time = time.time()
     while time.time() - start_time < 5:
         try:
@@ -57,8 +55,13 @@ def setup_dirs(monkeypatch, tmp_path):
 
 @patch('requests.get')
 def test_fetch_arxiv_with_live_mock(
-    mock_requests_get, live_mock_docinsight_server, setup_dirs, caplog
+    mock_requests_get, live_mock_docinsight_server, setup_dirs, caplog, monkeypatch
 ):
+    # Set the override environment variable for DocInsight base URL
+    monkeypatch.setenv('DOCINSIGHT_BASE_URL_OVERRIDE', live_mock_docinsight_server)
+    # Remove DOCINSIGHT_API_URL to prevent conflict, as setup_dirs sets it to 8008
+    monkeypatch.delenv('DOCINSIGHT_API_URL', raising=False)
+
     # Sample arXiv XML
     SAMPLE_XML = (
         '<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom">'

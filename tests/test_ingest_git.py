@@ -5,15 +5,17 @@ import json
 import subprocess
 import shutil
 import os
-import types
 import pytest
+import re # Ensure re is imported
 
 # Patch sys.path to allow absolute imports
 sys.path.insert(0, str(pathlib.Path(__file__).parents[1]))  # Parent of tests dir = project root
 
 # Path to the script under test
-SCRIPT = pathlib.Path(__file__).parents[0] / "../cultivation/scripts/software/dev_daily_reflect/ingest_git.py"
-SCRIPT = SCRIPT.resolve()
+# Corrected SCRIPT path definition
+SCRIPT_REL_PATH = pathlib.Path('../cultivation/scripts/software/dev_daily_reflect/ingest_git.py')
+SCRIPT = (pathlib.Path(__file__).parent / SCRIPT_REL_PATH).resolve()
+
 
 def create_fake_git_repo(tmpdir):
     """
@@ -36,45 +38,110 @@ def create_fake_git_repo(tmpdir):
     subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=repo_path, check=True)
     return repo_path
 
+
 @pytest.mark.skipif(shutil.which("git") is None, reason="git not installed")
 def test_ingest_git_basic(monkeypatch, tmp_path):
-    """Integration: ingest_git.py produces expected JSON output from a minimal repo."""
-    # Use pytest's tmp_path for the repo base directory
+    """Integration: ingest_git.py produces expected JSON output from a minimal repo using default date (lookback)."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir(exist_ok=True)
     subprocess.run(["git", "init"], cwd=repo_path, check=True)
-    (repo_path / "foo.py").write_text("print('hello world')\n")
+    (repo_path / "foo.py").write_text("print('hello world basic')\n")
     subprocess.run(["git", "add", "foo.py"], cwd=repo_path, check=True)
     subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo_path, check=True)
     subprocess.run(["git", "config", "user.name", "Test User"], cwd=repo_path, check=True)
-    subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=repo_path, check=True)
+    subprocess.run(["git", "commit", "-m", "Initial basic commit"], cwd=repo_path, check=True)
 
-    # Monkeypatch get_repo_root to return our temp repo
-    sys.modules.pop('cultivation.scripts.software.dev_daily_reflect.utils', None)
-    import importlib.util
-    utils_path = SCRIPT.parent / "utils.py"
-    spec = importlib.util.spec_from_file_location("cultivation.scripts.software.dev_daily_reflect.utils", utils_path)
-    utils_mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(utils_mod)
-    monkeypatch.setattr(utils_mod, "get_repo_root", lambda start_path=None: repo_path)
-    sys.modules["cultivation.scripts.software.dev_daily_reflect.utils"] = utils_mod
-
-    # Set env and CWD to tmp_path
     env = os.environ.copy()
-    # Set PYTHONPATH to include both the project root and tmp_path
     project_root = pathlib.Path(__file__).parents[1].resolve()
-    env["PYTHONPATH"] = os.pathsep.join([str(project_root), str(tmp_path)])
-    result = subprocess.run([sys.executable, str(SCRIPT)], cwd=tmp_path, capture_output=True, text=True, env=env)
-    print("STDOUT:\n", result.stdout)
-    print("STDERR:\n", result.stderr)
-    assert result.returncode == 0
+    env["PYTHONPATH"] = str(project_root)
+    env['CULTIVATION_REPO_ROOT_OVERRIDE'] = str(repo_path)
 
-    # Check that output JSON exists and is valid
-    raw_files = list((repo_path / "cultivation/outputs/software/dev_daily_reflect/raw").glob("git_commits_*.json"))
-    assert raw_files, "No output JSON found"
-    with open(raw_files[0]) as f:
+    script_absolute_path = SCRIPT.resolve()
+    result = subprocess.run(
+        [sys.executable, str(script_absolute_path)],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        env=env
+    )
+    print("STDOUT (basic):\n", result.stdout)
+    print("STDERR (basic):\n", result.stderr)
+    assert result.returncode == 0, f"Script failed with stderr: {result.stderr}"
+
+    output_json_dir = repo_path / "cultivation" / "outputs" / "software" / "dev_daily_reflect" / "raw"
+    
+    date_tag_from_stdout = None
+    for line in result.stdout.splitlines():
+        if "current date tag:" in line:
+            match = re.search(r"current date tag: (\d{4}-\d{2}-\d{2})", line)
+            if match:
+                date_tag_from_stdout = match.group(1)
+                break
+    assert date_tag_from_stdout, "Could not determine date_tag from script stdout for basic test"
+
+    expected_raw_file = output_json_dir / f"git_commits_{date_tag_from_stdout}.json"
+    assert expected_raw_file.exists(), f"Expected raw output file {expected_raw_file} not found in {output_json_dir}. Files: {list(output_json_dir.glob('*'))}"
+
+    with open(expected_raw_file) as f:
         data = json.load(f)
     assert isinstance(data, list)
-    assert data and "sha" in data[0] and "author" in data[0]
-    # Cleanup
-    shutil.rmtree(repo_path)
+    assert len(data) >= 1
+    assert data[0]['message'] == "Initial basic commit"
+    # shutil.rmtree(repo_path) # tmp_path handles cleanup
+
+
+@pytest.mark.skipif(shutil.which("git") is None, reason="git not installed")
+def test_ingest_git_date_arg(monkeypatch, tmp_path):
+    """Integration: ingest_git.py produces expected JSON for a specific --date argument."""
+    repo_path = tmp_path / "repo_date_arg" # Use a different subdir to avoid conflicts
+    repo_path.mkdir(exist_ok=True)
+    
+    # Create a commit with a specific, old date
+    commit_date_str = "2024-01-15T12:00:00"
+    env_for_commit = os.environ.copy()
+    env_for_commit['GIT_AUTHOR_DATE'] = commit_date_str
+    env_for_commit['GIT_COMMITTER_DATE'] = commit_date_str
+
+    subprocess.run(["git", "init"], cwd=repo_path, check=True)
+    (repo_path / "bar.py").write_text("print('hello from past')\n")
+    subprocess.run(["git", "add", "bar.py"], cwd=repo_path, check=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo_path, check=True)
+    subprocess.run(["git", "config", "user.name", "Test User"], cwd=repo_path, check=True)
+    subprocess.run(["git", "commit", "-m", "Commit for specific date"], cwd=repo_path, check=True, env=env_for_commit)
+
+    target_date_arg = "2024-01-15" # The date we want the script to process
+
+    env_for_script = os.environ.copy()
+    project_root = pathlib.Path(__file__).parents[1].resolve()
+    env_for_script["PYTHONPATH"] = str(project_root)
+    env_for_script['CULTIVATION_REPO_ROOT_OVERRIDE'] = str(repo_path)
+
+    script_absolute_path = SCRIPT.resolve()
+    result = subprocess.run(
+        [sys.executable, str(script_absolute_path), f"--date={target_date_arg}"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        env=env_for_script
+    )
+    print("STDOUT (date_arg):\n", result.stdout)
+    print("STDERR (date_arg):\n", result.stderr)
+    assert result.returncode == 0, f"Script failed with stderr: {result.stderr}"
+
+    output_json_dir = repo_path / "cultivation" / "outputs" / "software" / "dev_daily_reflect" / "raw"
+    
+    # For --date arg, the date_tag in filename should match the argument
+    expected_raw_file = output_json_dir / f"git_commits_{target_date_arg}.json"
+    assert expected_raw_file.exists(), f"Expected raw output file {expected_raw_file} not found in {output_json_dir}. Files: {list(output_json_dir.glob('*'))}"
+    
+    # Verify the enriched file for the specific date also exists
+    expected_enriched_file = output_json_dir / f"git_commits_enriched_{target_date_arg}.json"
+    assert expected_enriched_file.exists(), f"Expected enriched file {expected_enriched_file} not found."
+
+    with open(expected_raw_file) as f:
+        data = json.load(f)
+    assert isinstance(data, list)
+    assert len(data) >= 1, "No commits found in output for specific date"
+    assert data[0]['message'] == "Commit for specific date"
+    assert target_date_arg in data[0]['timestamp'] # Check if commit date matches target date
+    # shutil.rmtree(repo_path) # tmp_path handles cleanup

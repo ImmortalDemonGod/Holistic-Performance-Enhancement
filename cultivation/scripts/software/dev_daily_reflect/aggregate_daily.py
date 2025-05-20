@@ -17,12 +17,12 @@ RAW_DIR = REPO_ROOT / 'cultivation' / 'outputs' / 'software' / 'dev_daily_reflec
 ROLLUP_DIR = REPO_ROOT / config["rollup_dir"]
 ROLLUP_DIR.mkdir(parents=True, exist_ok=True)
 
-# --- Argument Parser ---
-parser = argparse.ArgumentParser(description='Aggregate daily dev metrics for a specific date or the latest available data.')
-parser.add_argument('--date', type=str, help='Target date in YYYY-MM-DD format. If not provided, processes the latest raw data file.')
-args = parser.parse_args()
+def main(argv=None):
+    # --- Argument Parser ---
+    parser = argparse.ArgumentParser(description='Aggregate daily dev metrics for a specific date or the latest available data.')
+    parser.add_argument('--date', type=str, help='Target date in YYYY-MM-DD format. If not provided, processes the latest raw data file.')
+    args = parser.parse_args(argv)
 
-def main():
     # --- Determine input file and date_tag ---
     """
     Aggregates daily commit data per author and writes a rollup CSV file.

@@ -2,7 +2,6 @@ import os
 import sys
 import subprocess
 import pathlib
-import pytest
 
 def test_report_md_fails_on_missing_rollup():
     """
@@ -21,7 +20,7 @@ def test_report_md_fails_on_missing_rollup():
         script = script.resolve()
         env = os.environ.copy()
         env["PYTHONPATH"] = str(project_root)
-        env["DEV_DAILY_REFLECT_REPO_ROOT"] = str(temp_root)
+        env["CULTIVATION_REPO_ROOT_OVERRIDE"] = str(temp_root)
         rollup_dir = temp_root / "cultivation/outputs/software/dev_daily_reflect/rollup"
         rollup_dir.mkdir(parents=True, exist_ok=True)
         for f in rollup_dir.glob("*.csv"):

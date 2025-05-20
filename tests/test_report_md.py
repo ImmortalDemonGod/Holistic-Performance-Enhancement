@@ -49,12 +49,12 @@ def test_report_md_basic(monkeypatch):
         # Monkeypatch module constants to use temp dir
         monkeypatch.setattr(report_mod, "ROLLUP_DIR", rollup_dir)
         # Monkeypatch date_tag to match test file
-        monkeypatch.setattr(report_mod, "get_date_tag", lambda: (rollup_file, "2025-05-16"))
+        monkeypatch.setattr(report_mod, "get_date_tag_and_file", lambda target_date=None: (rollup_file, "2025-05-16"))
         # Debug: show ROLLUP_DIR and its files
         print(f"ROLLUP_DIR used by report_mod: {report_mod.ROLLUP_DIR}")
         print(f"Files in ROLLUP_DIR: {list(report_mod.ROLLUP_DIR.glob('*'))}")
         # Run report generation
-        report_mod.main()
+        report_mod.main([])
         # Read the generated Markdown file
         report_path = report_mod.REPORTS_DIR / 'dev_report_2025-05-16.md'
         with open(report_path) as f:

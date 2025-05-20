@@ -230,8 +230,14 @@ def fetch_arxiv_paper(arxiv_id: str, force_redownload: bool = False):
 
     # 4. DocInsight: job submission & polling loop
     logging.info(f"Submitting DocInsight job for {cleaned_arxiv_id}")
-    api_url = os.getenv('DOCINSIGHT_API_URL')
-    client = DocInsightClient(base_url=api_url) if api_url else DocInsightClient()
+    
+    docinsight_override_url = os.getenv("DOCINSIGHT_BASE_URL_OVERRIDE")
+    docinsight_api_url = os.getenv("DOCINSIGHT_API_URL")
+    
+    # Prioritize override, then API_URL. If both are None, DocInsightClient will use its own defaults.
+    final_docinsight_url = docinsight_override_url or docinsight_api_url
+    client = DocInsightClient(base_url=final_docinsight_url)
+
     try:
         job_id = client.start_research(
             query=(f"Summarize abstract and key contributions of '{metadata_payload.get('title', '')}'"),
