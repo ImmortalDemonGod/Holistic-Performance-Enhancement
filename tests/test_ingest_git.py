@@ -9,7 +9,7 @@ import types
 import pytest
 
 # Patch sys.path to allow absolute imports
-sys.path.insert(0, str(pathlib.Path(__file__).parents[0]))
+sys.path.insert(0, str(pathlib.Path(__file__).parents[1]))  # Parent of tests dir = project root
 
 # Path to the script under test
 SCRIPT = pathlib.Path(__file__).parents[0] / "../cultivation/scripts/software/dev_daily_reflect/ingest_git.py"
@@ -52,7 +52,9 @@ def test_ingest_git_basic(monkeypatch, tmp_path):
 
     # Set env and CWD to tmp_path
     env = os.environ.copy()
-    env["PYTHONPATH"] = str(tmp_path)
+    # Set PYTHONPATH to include both the project root and tmp_path
+    project_root = pathlib.Path(__file__).parents[1].resolve()
+    env["PYTHONPATH"] = os.pathsep.join([str(project_root), str(tmp_path)])
     result = subprocess.run([sys.executable, str(SCRIPT)], cwd=tmp_path, capture_output=True, text=True, env=env)
     print("STDOUT:\n", result.stdout)
     print("STDERR:\n", result.stderr)
