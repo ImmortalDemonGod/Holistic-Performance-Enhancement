@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 VENV_PY="$(dirname "$0")/../../../../.venv/bin/python"
+
+# Ensure the virtual environment exists
+if [ ! -f "$VENV_PY" ]; then
+    echo "[ERROR] Python virtual environment not found at $VENV_PY. Please set it up using 'python3 -m venv .venv' in the project root, then install dependencies with 'source .venv/bin/activate && pip install -r requirements.txt'." >&2
+    exit 1
+fi
+
 SCRIPT_DIR="$(dirname "$0")"
 REPORTS_DIR="${SCRIPT_DIR}/../../outputs/software/dev_daily_reflect/reports"
 
