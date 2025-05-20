@@ -1,14 +1,14 @@
-import tempfile
 import json
-import csv
+import tempfile
 import pathlib
 import sys
-from importlib import import_module
-import shutil
+import csv
+import pandas as pd
+import pytest
+from cultivation.scripts.software.dev_daily_reflect import aggregate_daily as agg_mod
 
 # Ensure cultivation is on sys.path for import
 sys.path.insert(0, str(pathlib.Path(__file__).parents[1]))  # Use parent of tests dir
-agg_mod = import_module("cultivation.scripts.software.dev_daily_reflect.aggregate_daily")
 
 def test_aggregate_daily_basic_rollup(monkeypatch):
     """Integration: aggregate_daily.py produces correct CSV from enriched JSON."""
@@ -54,7 +54,7 @@ def test_aggregate_daily_basic_rollup(monkeypatch):
         monkeypatch.setattr(agg_mod, "RAW_DIR", raw_dir)
         monkeypatch.setattr(agg_mod, "ROLLUP_DIR", rollup_dir)
         # Run main aggregation logic
-        agg_mod.main()
+        agg_mod.main([])
         # Check output CSV
         csv_files = list(rollup_dir.glob("dev_metrics_*.csv"))
         assert csv_files, "No rollup CSV produced"
