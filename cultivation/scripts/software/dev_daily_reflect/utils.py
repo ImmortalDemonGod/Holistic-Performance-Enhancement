@@ -6,7 +6,11 @@ import pathlib
 import os
 
 def get_repo_root(start_path=None):
-    """Ascend from start_path (or this file) until a .git directory is found, or use DEV_DAILY_REFLECT_REPO_ROOT env var if set."""
+    """
+    Returns the root directory of the Git repository.
+    
+    If the DEV_DAILY_REFLECT_REPO_ROOT environment variable is set, its resolved path is returned. Otherwise, ascends from the given start_path (or the current file's location) until a directory containing a .git folder is found. Raises RuntimeError if no such directory exists.
+    """
     repo_env = os.environ.get("DEV_DAILY_REFLECT_REPO_ROOT")
     if repo_env:
         return pathlib.Path(repo_env).resolve()

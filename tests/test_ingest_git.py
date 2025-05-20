@@ -16,6 +16,15 @@ SCRIPT = pathlib.Path(__file__).parents[0] / "../cultivation/scripts/software/de
 SCRIPT = SCRIPT.resolve()
 
 def create_fake_git_repo(tmpdir):
+    """
+    Creates a temporary Git repository with an initial Python file and commit.
+    
+    Args:
+        tmpdir: The temporary directory in which to create the repository.
+    
+    Returns:
+        The path to the created Git repository.
+    """
     repo_path = tmpdir / "repo"
     repo_path.mkdir()
     subprocess.run(["git", "init"], cwd=repo_path, check=True)

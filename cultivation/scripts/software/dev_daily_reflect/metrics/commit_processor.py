@@ -17,12 +17,9 @@ except ImportError:
 
 def analyze_commits_code_quality(repo_path: str, commits: List[Dict]) -> List[Dict]:
     """
-    For each commit, for each changed .py file, compute:
-      - Cyclomatic Complexity (total)
-      - Maintainability Index (average)
-      - Ruff errors (total)
-      - py_files_changed_count
-    Returns enriched commit dicts.
+    Enriches commit dictionaries with code quality metrics for changed Python files.
+    
+    For each commit, analyzes all changed `.py` files to compute total cyclomatic complexity, average maintainability index, total Ruff linter errors, and the count of changed Python files. Returns the list of commit dictionaries with these metrics added.
     """
     repo = Repo(repo_path)
     enriched_commits = []

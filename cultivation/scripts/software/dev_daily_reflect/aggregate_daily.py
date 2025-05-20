@@ -24,6 +24,11 @@ args = parser.parse_args()
 
 def main():
     # --- Determine input file and date_tag ---
+    """
+    Aggregates daily commit data per author and writes a rollup CSV file.
+    
+    Determines the appropriate commit JSON file (enriched or raw) for a specified date or the latest available, loads the data, and aggregates metrics such as commit count, lines added, lines deleted, net lines changed, and optional metrics if present. Outputs the aggregated results to a CSV file in the configured rollup directory. Handles missing files, invalid dates, and empty data gracefully with informative messages and appropriate exit codes.
+    """
     date_tag = None
     json_file = None
 

@@ -24,6 +24,17 @@ parser.add_argument('--date', type=str, help='Target date in YYYY-MM-DD format. 
 args = parser.parse_args()
 
 def get_date_tag_and_file(target_date=None):
+    """
+    Determines the rollup CSV file and date tag to use for the report.
+    
+    If a target date is provided, validates its format and checks for the existence of the corresponding rollup CSV file. If no date is given, selects the latest available rollup CSV file in the directory. Exits the program with an error message if the date is invalid or the file is missing.
+    
+    Args:
+        target_date: Optional; a string in 'YYYY-MM-DD' format specifying the desired report date.
+    
+    Returns:
+        A tuple containing the Path to the rollup CSV file and the date tag as a string.
+    """
     if target_date:
         try:
             # Validate date format
@@ -50,6 +61,11 @@ def get_date_tag_and_file(target_date=None):
 
 def main():
     # --- Determine input file and date_tag ---
+    """
+    Generates a Markdown report summarizing developer activity and code quality metrics for a specified date or the latest available data.
+    
+    Reads a rollup CSV file containing per-author commit and code metrics, computes summary statistics, and writes a formatted Markdown report. If enriched per-commit JSON data is available, includes a detailed per-commit metrics table. The report is saved to the reports directory with a filename reflecting the report date.
+    """
     rollup_file, date_tag = get_date_tag_and_file(args.date)
 
     # --- Load rollup data ---

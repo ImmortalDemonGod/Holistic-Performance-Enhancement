@@ -7,14 +7,16 @@ from pathlib import Path
 
 def load_config():
     """
-    Load configuration from YAML file with environment variable overrides.
-
+    Loads and validates the application configuration from a YAML file, applying environment variable overrides.
+    
+    Reads configuration settings from a YAML file, merges them with defaults, applies environment variable overrides for select keys, and validates required fields. Raises an error if the configuration file is missing or if required values are invalid.
+    
     Returns:
-        dict: Configuration dictionary with all settings
-
+        dict: The final configuration dictionary with all settings applied.
+    
     Raises:
-        FileNotFoundError: If the configuration file doesn't exist
-        ValueError: If required configuration is missing or invalid
+        FileNotFoundError: If the configuration file does not exist.
+        ValueError: If required configuration is missing or invalid.
     """
     # Default configuration
     default_config = {

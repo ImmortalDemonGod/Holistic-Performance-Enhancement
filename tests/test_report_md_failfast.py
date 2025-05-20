@@ -5,7 +5,11 @@ import pathlib
 import pytest
 
 def test_report_md_fails_on_missing_rollup():
-    """Test that report_md.py exits with code 2 and error if no rollup CSV exists."""
+    """
+    Verifies that report_md.py exits with code 2 and outputs an error when no rollup CSV files are present.
+    
+    This test sets up a temporary environment with the expected directory structure but ensures the rollup directory contains no CSV files. It runs the report_md.py script as a subprocess and asserts that it fails with the correct exit code and error message.
+    """
     import shutil
     project_root = pathlib.Path(__file__).parent.parent.resolve()
     temp_root = project_root / "tmp_test_report_md_failfast"

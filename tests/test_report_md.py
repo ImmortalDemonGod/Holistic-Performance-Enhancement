@@ -9,7 +9,11 @@ sys.path.insert(0, str(pathlib.Path(__file__).parents[0]))
 report_mod = import_module("cultivation.scripts.software.dev_daily_reflect.report_md")
 
 def test_report_md_basic(monkeypatch):
-    """Integration: report_md.py produces expected Markdown from rollup CSV."""
+    """
+    Tests that the report_md.py script generates a Markdown report with expected content from a sample rollup CSV.
+    
+    Creates a temporary rollup CSV file with sample developer metrics, monkeypatches the report module to use the test data, runs the report generation, and asserts that the resulting Markdown includes the correct author names and metric headers.
+    """
     # Prepare a fake rollup CSV
     rows = [
         {
