@@ -44,8 +44,10 @@ def run_ingestion_logic(repo_root_path: Path, output_dir_path: Path, script_args
         now = datetime.datetime.now(datetime.timezone.utc)
         try:
             lookback_days = int(config.get("lookback_days", 1))
+            if lookback_days <= 0:
+                raise ValueError("lookback_days must be > 0")
         except ValueError:
-            print(f"[ERROR] Invalid lookback_days value in config: {config.get('lookback_days')}")
+            print(f"[ERROR] Invalid lookback_days value in config: {config.get('lookback_days')}, defaulting to 1")
             lookback_days = 1
         start_dt = now - datetime.timedelta(days=lookback_days)
         SINCE_ISO = start_dt.strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -73,7 +75,9 @@ def run_ingestion_logic(repo_root_path: Path, output_dir_path: Path, script_args
     msg_str: str
 
     for line in raw.splitlines():
-        if '|' in line:
+        # Detect commit header more strictly: 40-char SHA followed by exactly three pipes.
+        # This avoids mis-classifying file paths that legitimately contain '|'.
+        if re.match(r'^[0-9a-f]{40}\|[^|]+\|[^|]+\|', line):
             if cur is not None:
                 records.append(cur)
             sha_str, author_str, ts_str, msg_str = line.split('|', 3)

@@ -111,7 +111,7 @@ def aggregate(metadata_df: pd.DataFrame, sessions_df: pd.DataFrame, events_df: p
             continue
         finished = row['finished_at']
         date_read = finished.date()
-        iso_week = finished.strftime('%Y-W%V')
+        iso_week = finished.strftime('%G-W%V')
         # parse session_summary_user
         evt = events_df[events_df['session_id']==sess_id]
         summary = evt[evt['event_type']=='session_summary_user']

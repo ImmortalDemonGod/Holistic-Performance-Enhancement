@@ -3,8 +3,6 @@ import tempfile
 import pathlib
 import sys
 import csv
-import pandas as pd
-import pytest
 from cultivation.scripts.software.dev_daily_reflect import aggregate_daily as agg_mod
 
 # Ensure cultivation is on sys.path for import
