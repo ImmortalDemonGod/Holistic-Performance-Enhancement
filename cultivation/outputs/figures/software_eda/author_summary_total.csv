@@ -1,0 +1,3 @@
+author,total_commits,total_loc_added,total_loc_deleted,total_loc_net,days_active,py_files_changed,total_cc,avg_mi,ruff_errors,commits_per_day,net_loc_per_day
+openhands,280,689640,54534,635106,12,220,4628,25.132635,0,23.333333333333332,52925.5
+ImmortalDemonGod,13,3911,0,3911,4,58,1482,39.094696,0,3.25,977.75
