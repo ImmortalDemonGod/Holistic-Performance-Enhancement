@@ -1,6 +1,58 @@
 #!/bin/bash
 set -e
 VENV_PY="$(dirname "$0")/../../../../.venv/bin/python"
+SCRIPT_DIR="$(dirname "$0")"
+REPORTS_DIR="${SCRIPT_DIR}/../../outputs/software/dev_daily_reflect/reports"
+
+# Ensure PYTHONPATH includes the project root for imports like 'from cultivation...'
+export PYTHONPATH=".:$PYTHONPATH"
+
+# --- Configuration for Backfill ---
+BACKFILL_DAYS=7 # Number of past days to check for missing reports (e.g., 7 for a week)
+
+# --- Backfill Logic ---
+echo "\n[Phase 1] Checking for and backfilling missing reports from the last ${BACKFILL_DAYS} days..."
+
+# Determine the OS for date command compatibility
+if [[ "$(uname)" == "Darwin" ]]; then # macOS
+    DATE_CMD="gdate" # Requires GNU date, install with 'brew install coreutils'
+    # Check if gdate is installed
+    if ! command -v gdate &> /dev/null; then
+        echo "[ERROR] GNU date (gdate) not found. On macOS, please install with 'brew install coreutils'."
+        echo "Skipping backfill."
+        BACKFILL_DAYS=0 # Skip backfill if gdate is not available
+    fi
+else # Linux
+    DATE_CMD="date"
+fi
+
+if [[ ${BACKFILL_DAYS} -gt 0 ]]; then
+    for i in $(seq ${BACKFILL_DAYS} -1 1); do # Loop from N days ago to 1 day ago
+        TARGET_DATE=$(${DATE_CMD} -d "-${i} days" +%Y-%m-%d)
+        REPORT_FILE="${REPORTS_DIR}/dev_report_${TARGET_DATE}.md"
+
+        if [ ! -f "${REPORT_FILE}" ]; then
+            echo "\n[Backfill] Report for ${TARGET_DATE} not found. Generating..."
+            echo "  [Step 1 - Backfill ${TARGET_DATE}] Running ingest_git.py --date ${TARGET_DATE}..."
+            $VENV_PY "${SCRIPT_DIR}/ingest_git.py" --date "${TARGET_DATE}"
+            if [ $? -ne 0 ]; then echo "[ERROR] ingest_git.py failed for ${TARGET_DATE}"; continue; fi
+
+            echo "  [Step 2 - Backfill ${TARGET_DATE}] Running aggregate_daily.py --date ${TARGET_DATE}..."
+            $VENV_PY "${SCRIPT_DIR}/aggregate_daily.py" --date "${TARGET_DATE}"
+            if [ $? -ne 0 ]; then echo "[ERROR] aggregate_daily.py failed for ${TARGET_DATE}"; continue; fi
+
+            echo "  [Step 3 - Backfill ${TARGET_DATE}] Running report_md.py --date ${TARGET_DATE}..."
+            $VENV_PY "${SCRIPT_DIR}/report_md.py" --date "${TARGET_DATE}"
+            if [ $? -ne 0 ]; then echo "[ERROR] report_md.py failed for ${TARGET_DATE}"; fi
+        else
+            echo "[Backfill] Report for ${TARGET_DATE} already exists. Skipping."
+        fi
+    done
+fi
+echo "\n[Phase 1] Backfill check complete."
+
+# --- Original Pipeline Run (for current/latest period) ---
+echo "\n[Phase 2] Running pipeline for current/latest period..."
 
 # Step 1: Ingest git commits (raw + enriched)
 echo "[Step 1] Running ingest_git.py..."

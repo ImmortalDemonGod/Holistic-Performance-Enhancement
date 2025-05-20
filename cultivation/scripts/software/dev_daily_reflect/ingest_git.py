@@ -8,6 +8,7 @@ import datetime
 import json
 import sys
 import re
+import argparse
 from cultivation.scripts.software.dev_daily_reflect.config_loader import load_config
 from pathlib import Path
 
@@ -17,20 +18,46 @@ REPO_ROOT = (Path(__file__).parent / config["repository_path"]).resolve()
 OUTPUT_DIR = REPO_ROOT / 'cultivation' / 'outputs' / 'software' / 'dev_daily_reflect' / 'raw'
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# --- Calculate time window (configurable lookback_days) ---
-now = datetime.datetime.now(datetime.timezone.utc)
-try:
-    lookback_days = int(config.get("lookback_days", 1))
-except ValueError:
-    print(f"[ERROR] Invalid lookback_days value in config: {config.get('lookback_days')}")
-    lookback_days = 1  # Default to 1 day if invalid
-start = now - datetime.timedelta(days=lookback_days)
-SINCE = start.strftime('%Y-%m-%dT%H:%M:%SZ')
-DATE_TAG = now.strftime('%Y-%m-%d')
+# --- Argument Parser ---
+parser = argparse.ArgumentParser(description='Ingest git commits for a specific date or the configured lookback period.')
+parser.add_argument('--date', type=str, help='Target date in YYYY-MM-DD format. If not provided, uses lookback_days from config.')
+args = parser.parse_args()
 
-# --- Run git log to get commits since SINCE ---
+# --- Calculate time window --- 
+if args.date:
+    try:
+        target_date_obj = datetime.datetime.strptime(args.date, '%Y-%m-%d').replace(tzinfo=datetime.timezone.utc)
+        # For a specific date, we want commits *on* that day.
+        # SINCE is the beginning of the target_date, UNTIL is the beginning of the next day.
+        SINCE_DT = target_date_obj.replace(hour=0, minute=0, second=0, microsecond=0)
+        UNTIL_DT = SINCE_DT + datetime.timedelta(days=1)
+        SINCE_ISO = SINCE_DT.isoformat()
+        UNTIL_ISO = UNTIL_DT.isoformat()
+        DATE_TAG = args.date
+        git_cmd_time_args = [f'--since={SINCE_ISO}', f'--until={UNTIL_ISO}']
+        print(f"[INFO] Processing git logs for specific date: {DATE_TAG} (from {SINCE_ISO} to {UNTIL_ISO})")
+    except ValueError:
+        print(f"[ERROR] Invalid date format for --date: {args.date}. Please use YYYY-MM-DD.")
+        sys.exit(1)
+else:
+    # --- Calculate time window (configurable lookback_days) --- (Original behavior)
+    now = datetime.datetime.now(datetime.timezone.utc)
+    try:
+        lookback_days = int(config.get("lookback_days", 1))
+    except ValueError:
+        print(f"[ERROR] Invalid lookback_days value in config: {config.get('lookback_days')}")
+        lookback_days = 1  # Default to 1 day if invalid
+    start_dt = now - datetime.timedelta(days=lookback_days)
+    SINCE_ISO = start_dt.strftime('%Y-%m-%dT%H:%M:%SZ') # Original format for lookback
+    DATE_TAG = now.strftime('%Y-%m-%d')
+    git_cmd_time_args = [f'--since={SINCE_ISO}']
+    print(f"[INFO] Processing git logs since {SINCE_ISO} (lookback: {lookback_days} days, current date tag: {DATE_TAG})")
+
+# --- Run git log to get commits --- 
 cmd = [
-    'git', 'log', f'--since={SINCE}', '--pretty=format:%H|%an|%ai|%s', '--numstat'
+    'git', 'log', 
+    *git_cmd_time_args, # Use the determined time arguments
+    '--pretty=format:%H|%an|%ai|%s', '--numstat'
 ]
 try:
     raw = subprocess.check_output(cmd, text=True, cwd=REPO_ROOT)

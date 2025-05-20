@@ -6,6 +6,8 @@
 import pandas as pd
 import sys
 import json
+import argparse
+import datetime
 from cultivation.scripts.software.dev_daily_reflect.config_loader import load_config
 from pathlib import Path
 
@@ -16,17 +18,39 @@ ROLLUP_DIR = REPO_ROOT / config["rollup_dir"]
 REPORTS_DIR = REPO_ROOT / config["report_output_dir"]
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
-def get_date_tag():
-    rollup_files = sorted(ROLLUP_DIR.glob('dev_metrics_*.csv'))
-    if not rollup_files:
-        print('[ERROR] No rollup CSV found. Exiting.')
-        sys.exit(2)
-    rollup_file = rollup_files[-1]
-    return rollup_file, rollup_file.stem[-10:]
+# --- Argument Parser ---
+parser = argparse.ArgumentParser(description='Generate Markdown developer report for a specific date or the latest available data.')
+parser.add_argument('--date', type=str, help='Target date in YYYY-MM-DD format. If not provided, processes the latest rollup data file.')
+args = parser.parse_args()
+
+def get_date_tag_and_file(target_date=None):
+    if target_date:
+        try:
+            # Validate date format
+            datetime.datetime.strptime(target_date, '%Y-%m-%d')
+            rollup_file = ROLLUP_DIR / f'dev_metrics_{target_date}.csv'
+            if not rollup_file.exists():
+                print(f'[ERROR] Rollup CSV file not found for date {target_date} at {rollup_file}. Exiting.')
+                sys.exit(2)
+            print(f"[INFO] Generating report for specific date: {target_date} from {rollup_file.name}")
+            return rollup_file, target_date
+        except ValueError:
+            print(f"[ERROR] Invalid date format for --date: {target_date}. Please use YYYY-MM-DD.")
+            sys.exit(1)
+    else:
+        # Original behavior: find latest rollup file
+        rollup_files = sorted(ROLLUP_DIR.glob('dev_metrics_*.csv'))
+        if not rollup_files:
+            print('[ERROR] No rollup CSV found. Exiting.')
+            sys.exit(2)
+        rollup_file = rollup_files[-1]
+        date_tag = rollup_file.stem.split('_')[-1] # Extract date from filename
+        print(f"[INFO] Generating report for latest available data: {date_tag} from {rollup_file.name}")
+        return rollup_file, date_tag
 
 def main():
-    # --- Find latest rollup CSV file ---
-    rollup_file, date_tag = get_date_tag()
+    # --- Determine input file and date_tag ---
+    rollup_file, date_tag = get_date_tag_and_file(args.date)
 
     # --- Load rollup data ---
     try:
