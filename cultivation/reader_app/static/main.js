@@ -66,12 +66,40 @@ function connectWS(arxiv_id) {
   doConnect();
 }
 
-document.getElementById('loadBtn').onclick = () => {
-  const arxiv_id = document.getElementById('arxiv_id').value.trim();
-  if (!arxiv_id) return;
-  sessionArxivId = arxiv_id;
-  document.getElementById('viewer').src = `/static/pdfjs/viewer.html?file=/pdfs/${arxiv_id}.pdf`;
-};
+// Populate paper dropdown on load
+window.addEventListener('DOMContentLoaded', async function() {
+  const select = document.getElementById('paperSelect');
+  select.innerHTML = '<option>Loading...</option>';
+  try {
+    const resp = await fetch('/papers/list');
+    const papers = await resp.json();
+    select.innerHTML = '';
+    for (const paper of papers) {
+      const opt = document.createElement('option');
+      opt.value = paper.arxiv_id;
+      opt.textContent = paper.title + ' [' + paper.arxiv_id + ']';
+      select.appendChild(opt);
+    }
+  } catch (e) {
+    select.innerHTML = '<option>Error loading papers</option>';
+  }
+});
+
+// Load PDF by selected paper
+document.getElementById('loadBtn').addEventListener('click', async function() {
+  const select = document.getElementById('paperSelect');
+  const arxivId = select.value;
+  if (!arxivId) {
+    setStatus('Please select a paper.', 'error');
+    return;
+  }
+  await loadPDF(arxivId);
+});
+
+async function loadPDF(arxivId) {
+  sessionArxivId = arxivId;
+  document.getElementById('viewer').src = `/static/pdfjs/viewer.html?file=/pdfs/${arxivId}.pdf`;
+}
 
 document.getElementById('viewer').addEventListener('load', () => {
   if (sessionArxivId) {
