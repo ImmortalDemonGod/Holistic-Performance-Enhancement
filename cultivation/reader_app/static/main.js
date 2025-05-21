@@ -1,4 +1,5 @@
 // main.js -- Instrumented PDF.js loader and telemetry bridge
+// WebSocket is now opened automatically on PDF load and will auto-reconnect unless the PDF is manually reloaded.
 let ws = null;
 let sessionArxivId = null;
 
@@ -41,16 +42,28 @@ function connectWS(arxiv_id) {
     ws.close(1000, 'reloading');
   }
   const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
-  ws = new WebSocket(`${proto}://${window.location.host}/ws?arxiv_id=${encodeURIComponent(arxiv_id)}`);
-  ws.onopen = () => {
-    document.getElementById('status').textContent = 'WebSocket connected';
-  };
-  ws.onclose = () => {
-    document.getElementById('status').textContent = 'WebSocket closed';
-  };
-  ws.onerror = (e) => {
-    document.getElementById('status').textContent = 'WebSocket error';
-  };
+  function doConnect() {
+    console.log('[WS] Attempting connection for', arxiv_id);
+    ws = new WebSocket(`${proto}://${window.location.host}/ws?arxiv_id=${encodeURIComponent(arxiv_id)}`);
+    ws.onopen = () => {
+      console.log('[WS] Connected');
+      document.getElementById('status').textContent = 'WebSocket connected';
+    };
+    ws.onclose = (event) => {
+      console.log('[WS] Closed', event);
+      document.getElementById('status').textContent = 'WebSocket closed';
+      // If not a manual reload, auto-reconnect after 1s
+      if (event.code !== 1000 || event.reason !== 'reloading') {
+        console.log('[WS] Reconnecting in 1s...');
+        setTimeout(doConnect, 1000);
+      }
+    };
+    ws.onerror = (e) => {
+      console.error('[WS] Error', e);
+      document.getElementById('status').textContent = 'WebSocket error';
+    };
+  }
+  doConnect();
 }
 
 document.getElementById('loadBtn').onclick = () => {
@@ -58,7 +71,51 @@ document.getElementById('loadBtn').onclick = () => {
   if (!arxiv_id) return;
   sessionArxivId = arxiv_id;
   document.getElementById('viewer').src = `/static/pdfjs/viewer.html?file=/pdfs/${arxiv_id}.pdf`;
-  connectWS(arxiv_id);
+};
+
+document.getElementById('viewer').addEventListener('load', () => {
+  if (sessionArxivId) {
+    connectWS(sessionArxivId);
+  }
+});
+
+document.getElementById('finishBtn').onclick = async () => {
+  if (!sessionArxivId || !ws || ws.readyState !== WebSocket.OPEN) {
+    alert('No active session to finish.');
+    return;
+  }
+  // Prompt for metrics
+  const comprehension = window.prompt('Self-rated comprehension (0-5)?');
+  if (comprehension === null) return;
+  const relevance = window.prompt('Self-rated relevance (0-5)?');
+  if (relevance === null) return;
+  const novelty = window.prompt('Self-rated novelty personal (0-1)?');
+  if (novelty === null) return;
+  const timeSpent = window.prompt('Actual time spent (minutes)?');
+  if (timeSpent === null) return;
+  const metrics = {
+    self_rated_comprehension: parseFloat(comprehension),
+    self_rated_relevance: parseFloat(relevance),
+    self_rated_novelty_personal: parseFloat(novelty),
+    actual_time_spent_minutes: parseFloat(timeSpent)
+  };
+  // POST to backend
+  try {
+    const resp = await fetch('/finish_session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ arxiv_id: sessionArxivId, metrics })
+    });
+    if (resp.ok) {
+      ws.close(1000, 'finished');
+      document.getElementById('status').textContent = 'Session finished';
+      alert('Session finished and metrics logged.');
+    } else {
+      alert('Failed to finish session.');
+    }
+  } catch (e) {
+    alert('Error finishing session: ' + e);
+  }
 };
 
 // Telemetry bridge: inject into PDF.js viewer iframe
