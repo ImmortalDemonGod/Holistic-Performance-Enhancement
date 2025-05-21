@@ -1,0 +1,23 @@
+{
+  "arxiv_id": "2403.00043",
+  "title": "RiNALMo: General-Purpose RNA Language Models Can Generalize Well on  Structure Prediction Tasks",
+  "authors": [
+    "Rafael Josip Peni\u0107",
+    "Tin Vla\u0161i\u0107",
+    "Roland G. Huber",
+    "Yue Wan",
+    "Mile \u0160iki\u0107"
+  ],
+  "year": 2024,
+  "month": 11,
+  "day": 12,
+  "source": "arXiv",
+  "abstract": "While RNA has recently been recognized as an interesting small-molecule drug target, many challenges remain to be addressed before we take full advantage of it. This emphasizes the necessity to improve our understanding of its structures and functions. Over the years, sequencing technologies have produced an enormous amount of unlabeled RNA data, which hides a huge potential. Motivated by the successes of protein language models, we introduce RiboNucleic Acid Language Model (RiNALMo) to unveil the hidden code of RNA. RiNALMo is the largest RNA language model to date, with 650M parameters pre-trained on 36M non-coding RNA sequences from several databases. It can extract hidden knowledge and capture the underlying structure information implicitly embedded within the RNA sequences. RiNALMo achieves state-of-the-art results on several downstream tasks. Notably, we show that its generalization capabilities overcome the inability of other deep learning methods for secondary structure prediction to generalize on unseen RNA families.",
+  "pdf_path": "/Users/tomriddle1/Holistic-Performance-Enhancement/cultivation/literature/pdf/2403.00043.pdf",
+  "note_path": "/Users/tomriddle1/Holistic-Performance-Enhancement/cultivation/literature/notes/2403.00043.md",
+  "pdf_link": "https://arxiv.org/pdf/2403.00043.pdf",
+  "abs_link": "https://arxiv.org/abs/2403.00043",
+  "primary_category": "q-bio.BM",
+  "tags": [],
+  "imported_at": "2025-05-21T03:20:15.173294Z"
+}
