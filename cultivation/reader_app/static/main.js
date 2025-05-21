@@ -69,8 +69,8 @@ function connectWS(arxiv_id) {
 // Store paper progress globally
 let paperProgress = {};
 
-// Populate paper dropdown on load
-window.addEventListener('DOMContentLoaded', async function() {
+// Populate paper dropdown (refactored for reuse)
+async function refreshPaperDropdown() {
   const select = document.getElementById('paperSelect');
   select.innerHTML = '<option>Loading...</option>';
   try {
@@ -104,6 +104,32 @@ window.addEventListener('DOMContentLoaded', async function() {
     }
   } catch (e) {
     select.innerHTML = '<option>Error loading papers</option>';
+  }
+}
+window.addEventListener('DOMContentLoaded', refreshPaperDropdown);
+
+// Add Paper logic
+const addArxivBtn = document.getElementById('addArxivBtn');
+const addArxivInput = document.getElementById('addArxivInput');
+addArxivBtn.addEventListener('click', async function() {
+  const arxivId = addArxivInput.value.trim();
+  if (!arxivId) {
+    setStatus('Please enter an arXiv ID.', 'error');
+    return;
+  }
+  setStatus('Adding paper...');
+  try {
+    // Assume backend: GET /metadata/{arxiv_id} triggers fetch/add if not present
+    const resp = await fetch(`/metadata/${arxivId}`);
+    if (resp.ok) {
+      setStatus('Paper added or already exists.');
+      await refreshPaperDropdown();
+      addArxivInput.value = '';
+    } else {
+      setStatus('Failed to add paper: ' + (await resp.text()), 'error');
+    }
+  } catch (e) {
+    setStatus('Error adding paper: ' + e, 'error');
   }
 });
 
