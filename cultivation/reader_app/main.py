@@ -116,6 +116,19 @@ def load_and_validate_metadata(arxiv_id: str):
             raise ValueError(f"Metadata schema validation failed: {ve}")
     return data
 
+# List all papers (arxiv_id and title)
+@app.get("/papers/list")
+def list_papers():
+    meta_dir = Path(__file__).parent.parent / "literature" / "metadata"
+    papers = []
+    for f in meta_dir.glob("*.json"):
+        try:
+            data = json.load(f.open())
+            papers.append({"arxiv_id": data["arxiv_id"], "title": data["title"]})
+        except Exception:
+            continue
+    return JSONResponse(content=papers)
+
 # Finish session and log metrics
 from fastapi import Request
 @app.post("/finish_session")
