@@ -12,6 +12,12 @@
 <body>
   <div id="toolbar">
     <select id="paperSelect" style="min-width:300px"></select>
+    <input type="text" id="addArxivInput" placeholder="Add new arXiv ID" style="margin-left:10px;width:160px">
+    <button id="addArxivBtn">Add Paper</button>
+    <span style="margin-left:10px">
+      <label><input type="radio" name="loadMode" id="resumeRadio" value="resume" checked> Resume from last page</label>
+      <label style="margin-left:8px"><input type="radio" name="loadMode" id="firstRadio" value="first"> Start from first page</label>
+    </span>
     <button id="loadBtn">Load PDF</button>
     <button id="finishBtn">Finish Session</button>
     <span id="status"></span>
