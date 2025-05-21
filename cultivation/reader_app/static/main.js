@@ -3,6 +3,13 @@
 let ws = null;
 let sessionArxivId = null;
 
+// Status helper
+function setStatus(msg, cls) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = cls || '';
+}
+
 // Patch PDFViewerApplication to guarantee highlight event handler is present
 document.addEventListener("DOMContentLoaded", function() {
   if (window.PDFViewerApplication) {

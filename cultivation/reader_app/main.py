@@ -129,6 +129,65 @@ def list_papers():
             continue
     return JSONResponse(content=papers)
 
+# Paper progress for filtering/resume
+@app.get("/papers/progress")
+def papers_progress():
+    meta_dir = Path(__file__).parent.parent / "literature" / "metadata"
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    results = []
+    for f in meta_dir.glob("*.json"):
+        try:
+            data = json.load(f.open())
+            arxiv_id = data["arxiv_id"]
+            # Get all unique pages visited
+            c.execute("""
+                SELECT e.payload FROM sessions s JOIN events e ON s.session_id = e.session_id
+                WHERE s.paper_id = ? AND e.event_type = 'page_change'
+            """, (arxiv_id,))
+            page_events = c.fetchall()
+            unique_pages = set()
+            for r in page_events:
+                try:
+                    unique_pages.add(json.loads(r[0])["new_page_num"])
+                except Exception:
+                    continue
+
+            # Get last page read (latest event)
+            last_page = None
+            if page_events:
+                try:
+                    last_page = json.loads(page_events[-1][0])["new_page_num"]
+                except Exception:
+                    pass
+
+            # Get total pages (from metadata if available)
+            total_pages = data.get("num_pages")
+            # If not in metadata, try to estimate from events
+            if not total_pages and unique_pages:
+                total_pages = max(unique_pages)
+
+            # Compute completion percentage (unique pages visited / total pages)
+            completion = None
+            if total_pages and unique_pages:
+                completion = round(100 * len(unique_pages) / total_pages, 1)
+                # Only show 100% if all pages visited
+                if len(unique_pages) == total_pages:
+                    completion = 100.0
+                elif completion > 100:
+                    completion = 100.0
+            results.append({
+                "arxiv_id": arxiv_id,
+                "title": data["title"],
+                "last_page": last_page,
+                "total_pages": total_pages,
+                "completion": completion
+            })
+        except Exception:
+            continue
+    conn.close()
+    return JSONResponse(content=results)
+
 # Finish session and log metrics
 from fastapi import Request
 @app.post("/finish_session")
@@ -166,7 +225,22 @@ def get_metadata(arxiv_id: str):
         data = load_and_validate_metadata(arxiv_id)
         return JSONResponse(content=data)
     except FileNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        # Try to fetch the paper and metadata using fetch_arxiv_paper
+        try:
+            import sys
+            from pathlib import Path
+            fetch_script_dir = Path(__file__).parent.parent / 'scripts' / 'literature'
+            if str(fetch_script_dir) not in sys.path:
+                sys.path.insert(0, str(fetch_script_dir))
+            from fetch_paper import fetch_arxiv_paper
+            success = fetch_arxiv_paper(arxiv_id)
+            if success:
+                data = load_and_validate_metadata(arxiv_id)
+                return JSONResponse(content=data)
+            else:
+                raise HTTPException(status_code=404, detail=f"Paper {arxiv_id} could not be fetched from arXiv.")
+        except Exception as ex:
+            raise HTTPException(status_code=500, detail=f"Error fetching paper {arxiv_id}: {ex}")
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
