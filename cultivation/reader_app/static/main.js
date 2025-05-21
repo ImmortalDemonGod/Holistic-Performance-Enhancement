@@ -66,18 +66,40 @@ function connectWS(arxiv_id) {
   doConnect();
 }
 
+// Store paper progress globally
+let paperProgress = {};
+
 // Populate paper dropdown on load
 window.addEventListener('DOMContentLoaded', async function() {
   const select = document.getElementById('paperSelect');
   select.innerHTML = '<option>Loading...</option>';
   try {
-    const resp = await fetch('/papers/list');
-    const papers = await resp.json();
+    const [papersResp, progressResp] = await Promise.all([
+      fetch('/papers/list'),
+      fetch('/papers/progress')
+    ]);
+    const papers = await papersResp.json();
+    const progressList = await progressResp.json();
+    // Build progress lookup: arxiv_id -> progress object
+    paperProgress = {};
+    for (const p of progressList) {
+      paperProgress[p.arxiv_id] = p;
+    }
+    // Optionally sort papers by completion percentage (incomplete first)
+    papers.sort((a, b) => {
+      const compA = paperProgress[a.arxiv_id]?.completion ?? 0;
+      const compB = paperProgress[b.arxiv_id]?.completion ?? 0;
+      return compA - compB;
+    });
     select.innerHTML = '';
     for (const paper of papers) {
+      const prog = paperProgress[paper.arxiv_id];
       const opt = document.createElement('option');
       opt.value = paper.arxiv_id;
       opt.textContent = paper.title + ' [' + paper.arxiv_id + ']';
+      if (prog && prog.completion !== null && prog.completion !== undefined) {
+        opt.textContent += ` (${prog.completion}% read)`;
+      }
       select.appendChild(opt);
     }
   } catch (e) {
@@ -86,6 +108,9 @@ window.addEventListener('DOMContentLoaded', async function() {
 });
 
 // Load PDF by selected paper
+// Use radio buttons to determine mode
+// Remove old checkbox/resume button logic
+
 document.getElementById('loadBtn').addEventListener('click', async function() {
   const select = document.getElementById('paperSelect');
   const arxivId = select.value;
@@ -93,12 +118,30 @@ document.getElementById('loadBtn').addEventListener('click', async function() {
     setStatus('Please select a paper.', 'error');
     return;
   }
-  await loadPDF(arxivId);
+  const resumeRadio = document.getElementById('resumeRadio');
+  const prog = paperProgress[arxivId];
+  if (resumeRadio.checked && prog && prog.last_page) {
+    await loadPDF(arxivId, prog.last_page);
+    setStatus(`Resumed at page ${prog.last_page}`);
+  } else {
+    await loadPDF(arxivId);
+    setStatus('Loaded from first page');
+  }
 });
 
-async function loadPDF(arxivId) {
+
+async function loadPDF(arxivId, page=null) {
   sessionArxivId = arxivId;
+  // Always reload iframe
   document.getElementById('viewer').src = `/static/pdfjs/viewer.html?file=/pdfs/${arxivId}.pdf`;
+  // If page provided, jump after iframe loads
+  if (page) {
+    document.getElementById('viewer').addEventListener('load', function handler() {
+      document.getElementById('viewer').removeEventListener('load', handler);
+      // PDF.js expects 1-based page numbers
+      document.getElementById('viewer').contentWindow.postMessage(JSON.stringify({event_type: 'jump_to_page', payload: {page}}), '*');
+    });
+  }
 }
 
 document.getElementById('viewer').addEventListener('load', () => {
