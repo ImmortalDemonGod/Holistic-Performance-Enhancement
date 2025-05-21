@@ -6,7 +6,7 @@ Serves static frontend and WebSocket endpoint for telemetry events.
 import json
 import sqlite3
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, UTC
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -68,7 +68,7 @@ def init_db():
 
 init_db()
 
-@app.websocket("/ws")
+@app.websocket("/ws")  # WebSocket connection/disconnection is logged for systematic debugging
 async def telemetry_ws(ws: WebSocket):
     await ws.accept()
     arxiv_id = ws.query_params.get("arxiv_id", "")
@@ -92,7 +92,7 @@ async def telemetry_ws(ws: WebSocket):
             conn.commit()
     except WebSocketDisconnect:
         finish_ts = datetime.utcnow().isoformat() + "Z"
-        c.execute("UPDATE sessions SET finished_at=? WHERE session_id=?", (finish_ts, session_id))
+        c.execute("UPDATE sessions SET finished_at=? WHERE session_id=? AND finished_at IS NULL", (finish_ts, session_id))
         conn.commit()
         conn.close()
 
@@ -115,6 +115,35 @@ def load_and_validate_metadata(arxiv_id: str):
         except ValidationError as ve:
             raise ValueError(f"Metadata schema validation failed: {ve}")
     return data
+
+# Finish session and log metrics
+from fastapi import Request
+@app.post("/finish_session")
+async def finish_session(request: Request):
+    data = await request.json()
+    arxiv_id = data.get("arxiv_id")
+    metrics = data.get("metrics", {})
+    if not arxiv_id or not metrics:
+        return JSONResponse(content={"error": "Missing arxiv_id or metrics"}, status_code=400)
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    # Find latest open session for this arxiv_id
+    c.execute("SELECT session_id FROM sessions WHERE paper_id=? AND finished_at IS NULL ORDER BY started_at DESC LIMIT 1", (arxiv_id,))
+    row = c.fetchone()
+    if not row:
+        conn.close()
+        return JSONResponse(content={"error": "No open session found for this arxiv_id"}, status_code=404)
+    session_id = row[0]
+    finish_ts = datetime.now(UTC).isoformat().replace('+00:00', 'Z')
+    # Only update if finished_at is NULL
+    c.execute("UPDATE sessions SET finished_at=? WHERE session_id=? AND finished_at IS NULL", (finish_ts, session_id))
+    # Insert metrics as session_summary_user event
+    payload = json.dumps(metrics)
+    c.execute("INSERT INTO events(session_id, event_type, timestamp, payload) VALUES (?, ?, ?, ?)",
+              (session_id, 'session_summary_user', finish_ts, payload))
+    conn.commit()
+    conn.close()
+    return JSONResponse(content={"status": "success", "session_id": session_id})
 
 # API: GET /metadata/{arxiv_id} (returns validated metadata)
 from fastapi import HTTPException
