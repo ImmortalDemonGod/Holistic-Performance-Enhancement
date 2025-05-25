@@ -1,6 +1,4 @@
-Okay, this is a comprehensive task requiring a systematic and critical analysis of all available run data and contextual information from Week 17 through Week 20 to predict the likely improvement or regression for a repeat of the Week 17 RPE 10 workout, scheduled for Tuesday of Week 21. This prediction will then serve as a benchmark to understand and analyze the prediction error after the actual workout is completed.
-
-This document synthesizes the strengths of previous analytical versions, aiming for a verbose, technically detailed, and well-reasoned prediction suitable for documentation within the Holistic-Performance-Enhancement project.
+# Week 21 RPE 10 Benchmark Analysis & Prediction
 
 ## 1. Overall Goal
 
