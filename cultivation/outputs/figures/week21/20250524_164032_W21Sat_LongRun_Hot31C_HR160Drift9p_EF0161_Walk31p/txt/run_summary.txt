@@ -1,0 +1,54 @@
+
+Run Summary:
+  Start time: 2025-05-24 16:41:18+00:00
+  End time: 2025-05-24 19:07:43+00:00
+  Duration: 0 days 02:26:25
+  Total distance (km): 17.71
+  Avg pace (min/km): 6.69
+  Avg HR: 159.6
+  Max HR: 193.0
+  Avg cadence: 158.3
+  Elevation gain (m): N/A
+
+  --- Advanced Metrics (run_metrics) ---
+    distance_km: 13.73
+    duration_min: 89.0
+    avg_pace_min_per_km: 6.48
+    avg_hr: 159.6
+    efficiency_factor: 0.01611
+    decoupling_%: 8.69
+    hrTSS: 114.1
+    zones_applied:
+      Z1 (Recovery): {'bpm': [0, 145], 'pace_min_per_km': [7.0, 999]}
+      Z2 (Aerobic): {'bpm': [145, 160], 'pace_min_per_km': [6.85, 8.7]}
+      Z3 (Tempo): {'bpm': [161, 175], 'pace_min_per_km': [5.2, 6.85]}
+      Z4 (Threshold): {'bpm': [176, 186], 'pace_min_per_km': [4.8, 5.2]}
+      Z5 (VO2max): {'bpm': [187, 201], 'pace_min_per_km': [0.0, 4.8]}
+
+
+--- Pre-Run Wellness Context (Data for 2025-05-24) ---
+  HRV (Whoop): 111.7 ms (Δ1d: +26.5%, Δ7d: -0.2%)
+  RHR (Whoop): 51.0 bpm (Δ1d: -15.0%, Δ7d: -3.8%)
+  RHR (Garmin): 48.0 bpm (Δ1d: -7.7%, Δ7d: -4.0%)
+  Recovery Score (Whoop): 91.0 % (Δ1d: +78.4%, Δ7d: +2.2%)
+  Sleep Score (Whoop): 78.0 % (Δ1d: -2.5%, Δ7d: -4.9%)
+  Body Battery (Garmin): 74.2 % (Δ1d: +54.7%, Δ7d: +55.0%)
+  Avg Stress (Garmin, Prev Day): n/a
+  Sleep Duration (Whoop): 7.8 h (Δ1d: -20.7%, Δ7d: +14.0%)
+  Sleep Consistency (Whoop): 37.0 % (Δ1d: -37.3%, Δ7d: -43.9%)
+  Sleep Disturbances/hr (Whoop): 1.0  (Δ1d: +194.4%, Δ7d: +8.8%)
+  Strain Score (Whoop): n/a
+  Skin Temp (Whoop): 93.4 °F (Δ1d: +180.5%, Δ7d: +175.5%)
+  Resp Rate (Whoop): 16.8 rpm (Δ1d: -3.7%, Δ7d: -0.7%)
+  Steps (Garmin): 20407.0  (Δ1d: +300%+, Δ7d: +83.5%)
+  Total Activity (Garmin): 195.3 min (Δ1d: +147.5%, Δ7d: +33.2%)
+  Resp Rate (Garmin): 14.7 rpm (Δ1d: +1.3%, Δ7d: -8.5%)
+  VO2max (Garmin): 54.0 ml/kg/min (Δ1d: n/a, Δ7d: +0.0%)
+  ---
+  Start location: (34.60704, -98.42586)
+  Weather at start:
+    Temperature: 31.5 °C (feels like N/A)
+    Precipitation: 0.0 mm
+    Humidity: N/A %
+    Wind speed: 21.1 km/h
+    Description: Clear sky
