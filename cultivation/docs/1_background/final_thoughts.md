@@ -1,5 +1,3 @@
-🧙🏾‍♂️: We’re aligned on your concern that these three domains—running performance, biological knowledge, and software engineering—might not be the most “optimized” for synergy or overall development.  
-[emoji]: Here are some reflections on why these domains may or may not be ideal, plus some considerations for a more “optimized” selection:
 
 ---
 
