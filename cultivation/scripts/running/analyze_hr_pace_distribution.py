@@ -52,25 +52,56 @@ if __name__ == '__main__':
 
     # Plot pace distribution (less spread, more readable bins)
     plt.figure(figsize=(10, 5))
-    pace_values = pace_df['pace_min_per_km']
-    lower, upper = pace_values.quantile(0.01), pace_values.quantile(0.99)
-    trimmed_pace = pace_values[(pace_values >= lower) & (pace_values <= upper)]
-    bin_width = 0.1
-    bins = int((upper - lower) / bin_width)
-    sns.histplot(trimmed_pace, bins=bins, kde=True, color='blue')
-    plt.title('Pace Distribution (min/km)')
-    plt.xlabel('Pace (min/km)')
-    plt.ylabel('Frequency')
+    pace_values = pace_df['pace_min_per_km'] # pace_df has NaNs dropped from this column
+
+    if pace_values.empty:
+        print(f"No pace data available in {args.input} after NaN removal. Plotting placeholder.")
+        plt.text(0.5, 0.5, "No pace data available", horizontalalignment='center', verticalalignment='center', transform=plt.gca().transAxes)
+        plt.title('Pace Distribution (min/km)')
+        plt.xlabel('Pace (min/km)')
+        plt.ylabel('Frequency')
+    else:
+        lower, upper = pace_values.quantile(0.01), pace_values.quantile(0.99)
+        
+        # Check if quantiles are valid for bin calculation
+        if pd.notna(lower) and pd.notna(upper) and upper > lower:
+            trimmed_pace = pace_values[(pace_values >= lower) & (pace_values <= upper)]
+            
+            # If trimming results in an empty series or too few points for a meaningful distribution
+            if trimmed_pace.empty or len(trimmed_pace) < 2:
+                 print(f"Trimmed pace data is empty or too small (lower={lower}, upper={upper}, len={len(trimmed_pace)}). Using all pace values with default bins.")
+                 bins = 20 # Default bins
+                 sns.histplot(pace_values, bins=bins, kde=True, color='blue')
+            else:
+                bin_width = 0.1
+                num_bins_float = (upper - lower) / bin_width
+                bins = max(1, int(num_bins_float)) # Ensure bins is at least 1
+                sns.histplot(trimmed_pace, bins=bins, kde=True, color='blue')
+        else:
+            # Fallback if quantiles are problematic (e.g., all values are the same, lower=upper, or NaN)
+            print(f"Could not determine a valid range from quantiles for pace (lower={lower}, upper={upper}). Using all pace values with default bins.")
+            bins = 20 # Default bins
+            sns.histplot(pace_values, bins=bins, kde=True, color='blue')
+            
+        plt.title('Pace Distribution (min/km)')
+        plt.xlabel('Pace (min/km)')
+        plt.ylabel('Frequency')
+
     plt.tight_layout()
     plt.savefig(f"{img_dir}/pace_distribution.png")
     plt.close()
 
-    # Pace Distribution
-    pace_desc = pace_df['pace_min_per_km'].describe(percentiles=[0.1, 0.25, 0.5, 0.75, 0.9])
-    with open(f"{txt_dir}/pace_distribution.txt", "w") as f:
-        f.write("Pace Distribution (min/km):\n")
-        f.write(pace_desc.to_string())
-        f.write("\n")
+    # Pace Distribution text summary
+    if not pace_df.empty:
+        pace_desc = pace_df['pace_min_per_km'].describe(percentiles=[0.1, 0.25, 0.5, 0.75, 0.9])
+        with open(f"{txt_dir}/pace_distribution.txt", "w") as f:
+            f.write("Pace Distribution (min/km):\n")
+            f.write(pace_desc.to_string())
+            f.write("\n")
+    else:
+        with open(f"{txt_dir}/pace_distribution.txt", "w") as f:
+            f.write("Pace Distribution (min/km):\n")
+            f.write("No pace data available for summary.\n")
 
     # 2D joint distribution: Heart Rate vs. Pace
     subset = df[['pace_min_per_km', 'heart_rate']].dropna()
