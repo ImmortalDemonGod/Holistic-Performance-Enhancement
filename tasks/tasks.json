@@ -75,7 +75,7 @@
         "learning_objective_summary": "Orient to Week 1 learning, prepare the learning environment, and set up Task Master & flashcard system for RNA foundations topics.",
         "estimated_effort_tshirt": "S",
         "estimated_effort_hours_raw": "1-1.5 hours",
-        "estimated_effort_hours_min": 1.0,
+        "estimated_effort_hours_min": 1,
         "estimated_effort_hours_max": 1.5,
         "mastery_criteria_summary": "Task Master entries for Week 1 created. Knowledge base section for 'Pillar 1 Foundations' initialized. Flashcard authoring environment ready.",
         "activity_type": "planning_setup",
@@ -188,7 +188,7 @@
         "estimated_effort_tshirt": "M",
         "estimated_effort_hours_raw": "1.5-2 hours",
         "estimated_effort_hours_min": 1.5,
-        "estimated_effort_hours_max": 2.0,
+        "estimated_effort_hours_max": 2,
         "mastery_criteria_summary": "Accurate drawings of generic RNA nucleotide and the four standard RNA bases. Comprehensive notes covering components, properties, and nucleoside/nucleotide distinction. Initial flashcards for structures and terms created.",
         "activity_type": "drawing_diagramming_notetaking_flashcard_creation",
         "recommended_block": "active_learning",
@@ -304,7 +304,7 @@
         "learning_objective_summary": "Explain phosphodiester backbone formation, RNA 5'-3' directionality, its implications, and illustrate with a dinucleotide drawing.",
         "estimated_effort_tshirt": "S",
         "estimated_effort_hours_raw": "1-1.5 hours",
-        "estimated_effort_hours_min": 1.0,
+        "estimated_effort_hours_min": 1,
         "estimated_effort_hours_max": 1.5,
         "mastery_criteria_summary": "Accurate drawing of an A-U dinucleotide showing phosphodiester bond and 5'/3' ends (Task 1.3 PRD). Clear explanation of directionality and backbone properties. Flashcards created.",
         "activity_type": "drawing_explanation_writing_flashcard_creation",
@@ -432,8 +432,8 @@
         "learning_objective_summary": "Explain thermodynamic principles relevant to RNA folding, including Gibbs Free Energy, spontaneity, and Minimum Free Energy structures.",
         "estimated_effort_tshirt": "M",
         "estimated_effort_hours_raw": "2-3 hours",
-        "estimated_effort_hours_min": 2.0,
-        "estimated_effort_hours_max": 3.0,
+        "estimated_effort_hours_min": 2,
+        "estimated_effort_hours_max": 3,
         "mastery_criteria_summary": "Clear explanations of ΔG, ΔH, ΔS, and their relationship. Accurate examples illustrating spontaneity and MFE concepts in RNA folding.",
         "activity_type": "explanatory_writing_flashcard_creation",
         "recommended_block": "active_learning",
@@ -543,8 +543,8 @@
         "learning_objective_summary": "Explain the roles of base stacking and hydrogen bonding in RNA stability, including their relative energetic contributions and how they work together.",
         "estimated_effort_tshirt": "M",
         "estimated_effort_hours_raw": "2-3 hours",
-        "estimated_effort_hours_min": 2.0,
-        "estimated_effort_hours_max": 3.0,
+        "estimated_effort_hours_min": 2,
+        "estimated_effort_hours_max": 3,
         "mastery_criteria_summary": "Clear written explanations of base stacking and hydrogen bonding in RNA stability. Flashcards for base stacking and hydrogen bonding concepts created.",
         "activity_type": "explanatory_writing_flashcard_creation",
         "recommended_block": "active_learning",
@@ -653,7 +653,7 @@
         "learning_objective_summary": "Explain loop penalties as an entropic cost in RNA folding and the role of electrostatic repulsion from the phosphate backbone, including mitigation by counterions.",
         "estimated_effort_tshirt": "S",
         "estimated_effort_hours_raw": "1-1.5 hours",
-        "estimated_effort_hours_min": 1.0,
+        "estimated_effort_hours_min": 1,
         "estimated_effort_hours_max": 1.5,
         "mastery_criteria_summary": "Clear explanation of why forming a hairpin loop is entropically unfavorable (Task 2.3 PRD). Notes on electrostatic repulsion and counterions. Flashcards created.",
         "activity_type": "focused_reading_explanation_writing_flashcard_creation",
@@ -798,7 +798,7 @@
         "estimated_effort_tshirt": "S",
         "estimated_effort_hours_raw": "0.5-1 hour",
         "estimated_effort_hours_min": 0.5,
-        "estimated_effort_hours_max": 1.0,
+        "estimated_effort_hours_max": 1,
         "mastery_criteria_summary": "Notes summarizing effects of temperature, salt, and pH. Short summary on relevance to RNA structure prediction tools. Flashcards created.",
         "activity_type": "focused_reading_summary_writing_flashcard_creation",
         "recommended_block": "passive_review",
@@ -909,7 +909,7 @@
         "learning_objective_summary": "Integrate all reflection, progress tracking, and flashcard systems. Test the complete workflow for supporting learning and HPE integration.",
         "estimated_effort_tshirt": "M",
         "estimated_effort_hours_raw": "1-1.5 hours",
-        "estimated_effort_hours_min": 1.0,
+        "estimated_effort_hours_min": 1,
         "estimated_effort_hours_max": 1.5,
         "mastery_criteria_summary": "End-to-end workflow tested. Data consistency and HPE integration points verified. Usability and effectiveness for supporting learning confirmed.",
         "activity_type": "integration_testing_reflection_reporting",
@@ -966,7 +966,7 @@
         "estimated_effort_tshirt": "S",
         "estimated_effort_hours_raw": "0.5-1 hour",
         "estimated_effort_hours_min": 0.5,
-        "estimated_effort_hours_max": 1.0,
+        "estimated_effort_hours_max": 1,
         "mastery_criteria_summary": "Reflection, flashcards, and logging complete.",
         "activity_type": "reflection_flashcard_review_logging",
         "recommended_block": "passive_review",
@@ -994,6 +994,38 @@
         "activity:flashcard_review",
         "activity:hpe_logging",
         "plan_day:7"
+      ],
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Draft structured Week 1 learning reflection",
+          "description": "Create a comprehensive reflection document analyzing Week 1 learning experiences, key insights, and areas for improvement",
+          "dependencies": [],
+          "details": "1. Create a new document with clear sections for: a) Summary of topics covered, b) Key concepts learned, c) Challenges encountered, d) Successful learning strategies, e) Areas for improvement, f) Questions that arose, g) Goals for next week\n2. For each section, write 2-3 paragraphs with specific examples from Week 1\n3. Include references to specific resources, lectures, or assignments that were particularly valuable\n4. Conclude with actionable next steps for Week 2\n5. Test by reviewing for completeness, clarity, and actionable insights",
+          "status": "pending",
+          "parentTaskId": 10
+        },
+        {
+          "id": 2,
+          "title": "Review and organize Week 1 flashcards",
+          "description": "Systematically review all Week 1 flashcards, tag them by topic, and organize them into a spaced repetition system for ongoing study",
+          "dependencies": [],
+          "details": "1. Gather all flashcards created during Week 1\n2. Review each flashcard for accuracy, clarity, and completeness\n3. Tag each flashcard with appropriate topic categories (e.g., key concepts, definitions, formulas)\n4. Organize flashcards into digital format if not already done (using Anki, Quizlet, or similar tool)\n5. Set up spaced repetition schedule for ongoing review\n6. Create backup of all flashcards\n7. Test the system by doing a practice review session with the organized flashcards",
+          "status": "pending",
+          "parentTaskId": 10
+        },
+        {
+          "id": 3,
+          "title": "Log Week 1 study activities in Task Master",
+          "description": "Document all Week 1 study time, activities, and deliverables in Task Master according to tracking guidelines",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "1. Open Task Master logging system\n2. Create entries for each study session from Week 1, including: a) Date and duration, b) Topics covered, c) Resources used, d) Deliverables completed\n3. Upload or link to all Week 1 deliverables, including the learning reflection document from Subtask 1\n4. Tag all flashcards as completed from Subtask 2\n5. Calculate and record total study hours for Week 1\n6. Add notes on effectiveness of different study methods\n7. Verify all entries for accuracy and completeness\n8. Generate Week 1 summary report if Task Master has this feature\n9. Test by reviewing all entries to ensure nothing is missing",
+          "status": "pending",
+          "parentTaskId": 10
+        }
       ]
     },
     {
@@ -1001,7 +1033,9 @@
       "title": "Complete Week 1 Self-Assessments (Quiz & Practical)",
       "description": "Complete the self-created quiz and practical assessment for Week 1 RNA foundations.",
       "status": "pending",
-      "dependencies": [9],
+      "dependencies": [
+        9
+      ],
       "priority": "high",
       "details": "Take the quiz created in Task 9.1. Complete the practical drawing/explanation task from Task 9.2. Self-grade using rubrics from Task 9.3.",
       "testStrategy": "Achieve >=85% on quiz. Achieve satisfactory self-grade on practical task based on rubric.",
@@ -1014,7 +1048,7 @@
         "learning_objective_summary": "Complete self-quiz and practical assessment for Week 1.",
         "estimated_effort_tshirt": "M",
         "estimated_effort_hours_raw": "1-1.5 hours",
-        "estimated_effort_hours_min": 1.0,
+        "estimated_effort_hours_min": 1,
         "estimated_effort_hours_max": 1.5,
         "mastery_criteria_summary": "Quiz and practical assessment completed and scored.",
         "activity_type": "self_assessment_active",
@@ -1039,10 +1073,42 @@
         "block:active_learning",
         "activity:self_assessment_active",
         "plan_day:6"
+      ],
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Complete and Score Self-Created Week 1 RNA Quiz",
+          "description": "Take the previously created Week 1 RNA foundations quiz (from Task 9.1), record your answers, and calculate your initial score.",
+          "dependencies": [],
+          "details": "Implementation steps:\n1. Retrieve the quiz created in Task 9.1\n2. Set aside 30-45 minutes of uninterrupted time to complete the quiz\n3. Answer all questions without referring to notes or external resources\n4. Record your answers in a document\n5. Calculate your raw score based on the answer key\n6. Document any questions you found particularly challenging\n7. Save your completed quiz with answers and initial score for later review\n\nTesting approach: Verify all questions have been answered and initial scoring is complete before proceeding to the next subtask.",
+          "status": "pending",
+          "parentTaskId": 11
+        },
+        {
+          "id": 2,
+          "title": "Complete and Document Practical RNA Drawing/Explanation Task",
+          "description": "Perform the practical assessment created in Task 9.2 that involves drawing RNA structures and explaining key RNA concepts.",
+          "dependencies": [],
+          "details": "Implementation steps:\n1. Retrieve the practical assessment instructions from Task 9.2\n2. Gather necessary materials (paper, drawing tools, or digital drawing tools)\n3. Set aside 45-60 minutes of focused time for the practical task\n4. Complete all required drawings of RNA structures (may include secondary structures, base pairing, etc.)\n5. Write explanations for all required RNA concepts as specified in the assessment\n6. Take clear photos/scans of hand-drawn work or save digital files\n7. Compile all drawings and explanations into a single document\n8. Ensure all parts of the practical assessment are complete and properly documented\n\nTesting approach: Review the completed practical work against the original requirements to ensure all components have been addressed.",
+          "status": "pending",
+          "parentTaskId": 11
+        },
+        {
+          "id": 3,
+          "title": "Self-Grade Assessments and Create Improvement Plan",
+          "description": "Using the rubrics from Task 9.3, evaluate your quiz and practical assessment performance, record results, and develop a targeted improvement plan.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implementation steps:\n1. Retrieve the grading rubrics created in Task 9.3\n2. Re-review your quiz answers and apply the quiz rubric criteria\n3. Evaluate your practical assessment using the practical task rubric\n4. Calculate final scores for both assessments\n5. Compare your initial quiz score with the rubric-based evaluation\n6. Document specific strengths demonstrated in both assessments\n7. Identify knowledge gaps and areas for improvement\n8. Create a specific improvement plan with:\n   - List of RNA concepts needing further study\n   - Specific resources to review (textbook sections, videos, etc.)\n   - Timeline for addressing each improvement area\n   - Method to re-test understanding after review\n9. Compile all assessment results and improvement plan into a final report\n\nTesting approach: Ensure the improvement plan addresses all identified weaknesses and includes concrete, actionable steps with specific resources and timelines.",
+          "status": "pending",
+          "parentTaskId": 11
+        }
       ]
     },
     {
-      "id": 11,
+      "id": 12,
       "title": "Create Learning Reflection and Progress Tracking System",
       "description": "Develop a system for reflecting on the learning process, tracking progress, and integrating with the Holistic Performance Enhancement (HPE) system.",
       "status": "pending",
@@ -1107,7 +1173,7 @@
         "estimated_effort_tshirt": "M",
         "estimated_effort_hours_raw": "1.5-2 hours",
         "estimated_effort_hours_min": 1.5,
-        "estimated_effort_hours_max": 2.0,
+        "estimated_effort_hours_max": 2,
         "mastery_criteria_summary": "Self-quiz completed with score (target >=85%). Practical task completed and self-graded against rubric. Written learning reflection completed. All Week 1 flashcards finalized. All study time and deliverables logged in Task Master.",
         "activity_type": "self_assessment_reflection_flashcard_review_logging",
         "recommended_block": "passive_review",
