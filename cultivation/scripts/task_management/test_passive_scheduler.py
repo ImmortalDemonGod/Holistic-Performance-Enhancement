@@ -74,10 +74,12 @@ class TestPassiveLearningBlockScheduler(unittest.TestCase):
                                 current = current.setdefault(key, {})
                     break
 
-    def _run_scheduler(self, tasks_list, target_date_str):
+    def _run_scheduler(self, tasks_list, target_date_str, strict_on_day_only=False):
         day_of_week = scheduler.get_today_day_of_week(target_date_str)
         task_statuses = scheduler.build_task_status_map(tasks_list)
-        passive_candidates = scheduler.filter_passive_tasks(tasks_list, day_of_week, task_statuses)
+        passive_candidates = scheduler.filter_passive_tasks(
+            tasks_list, day_of_week, task_statuses, allow_off_day_fill=(not strict_on_day_only)
+        )
         prioritized_tasks = scheduler.prioritize_tasks(passive_candidates)
         scheduled_block = scheduler.schedule_tasks(prioritized_tasks)
         return scheduled_block
@@ -128,7 +130,7 @@ class TestPassiveLearningBlockScheduler(unittest.TestCase):
             "status": "pending"
         })
         self._modify_tasks(modifications)
-        scheduled = self._run_scheduler(self.current_tasks_data, target_date)
+        scheduled = self._run_scheduler(self.current_tasks_data, target_date, strict_on_day_only=True)
         self.assertEqual(len(scheduled), 1)
         self.assertEqual(scheduled[0]["id"], "Default.Passive.Review")
 
@@ -153,7 +155,7 @@ class TestPassiveLearningBlockScheduler(unittest.TestCase):
             "status": "pending"
         })
         self._modify_tasks(modifications)
-        scheduled = self._run_scheduler(self.current_tasks_data, target_date)
+        scheduled = self._run_scheduler(self.current_tasks_data, target_date, strict_on_day_only=True)
         self.assertEqual(len(scheduled), 1)
         self.assertEqual(scheduled[0]["id"], "Default.Passive.Review")
 
