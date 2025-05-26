@@ -1,3 +1,4 @@
+# cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md
 Okay, I will now construct the fully updated, comprehensive document for the first week's learning unit. This version synthesizes the strengths and addresses the weaknesses of the previous iterations, aiming for a verbose, detailed, and technically sound guide that is "better than the sum of its parts."
 
 The chosen starting point, based on critical analysis and the "Foundational First" philosophy, is the **Prerequisite Knowledge Review within Pillar 1 (Biophysical RNA Modeling)**. This directly addresses the biochemical and thermodynamic underpinnings essential for RNA modeling *before* engaging with predictive tools.
