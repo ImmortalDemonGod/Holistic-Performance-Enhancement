@@ -186,6 +186,10 @@ def filter_active_tasks(
                         augmented_subtask["_parent_title"] = task.get("title")
                         augmented_subtask["_parent_priority"] = task.get("priority", "medium")
                         augmented_subtask["_is_promoted_subtask"] = True
+                        # Patch: Add required fields for weekly_schedule_simulator
+                        augmented_subtask["_parent_numeric_id"] = task_id
+                        augmented_subtask["_subtask_local_id"] = subtask_id_local
+
                         effective_sub_meta = {
                             **hpe_learning_meta,
                             **subtask_hpe_learning_meta,
@@ -364,6 +368,7 @@ def format_schedule_for_print(scheduled_tasks: List[Dict[str, Any]]) -> str:
             if task_notes:
                  lines.append(f"   - Notes: {str(task_notes)[:100]}...") # Truncate long notes
             lines.append("") 
+    return "\n".join(lines)
 
 # --- Main Execution Logic ---
 
