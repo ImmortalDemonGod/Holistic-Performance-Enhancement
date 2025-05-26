@@ -163,18 +163,30 @@ def print_schedule(scheduled: List[Dict[str, Any]], output_md: str = None):
         except Exception as e:
             logger.error(f"Failed to write markdown output: {e}")
 
+def generate_passive_plan(
+    all_tasks_data: List[Dict[str, Any]],
+    target_date_str: str,
+    min_required: int = 2
+) -> List[Dict[str, Any]]:
+    """
+    Generates the passive learning block plan for a given date and task list.
+    Returns a list of scheduled task dicts (not printed output).
+    """
+    day_of_week = get_today_day_of_week(target_date_str)
+    task_statuses = build_task_status_map(all_tasks_data)
+    passive_tasks = filter_passive_tasks(all_tasks_data, day_of_week, task_statuses, min_required)
+    prioritized = prioritize_tasks(passive_tasks)
+    scheduled = schedule_tasks(prioritized)
+    return scheduled
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Schedule Passive Learning Block Tasks")
-    parser.add_argument("--tasks", type=str, default="tasks.json", help="Path to enriched tasks.json")
+    parser.add_argument("--tasks", type=str, default="/Users/tomriddle1/Holistic-Performance-Enhancement/tasks/tasks.json", help="Path to enriched tasks.json")
     parser.add_argument("--date", type=str, default=None, help="Target date (YYYY-MM-DD), default: today")
     parser.add_argument("--output-md", type=str, default=None, help="If set, write output to markdown file")
     args = parser.parse_args()
 
     tasks = load_tasks(args.tasks)
-    day_of_week = get_today_day_of_week(args.date)
-    task_statuses = build_task_status_map(tasks)
-    passive_tasks = filter_passive_tasks(tasks, day_of_week, task_statuses)
-    prioritized = prioritize_tasks(passive_tasks)
-    scheduled = schedule_tasks(prioritized)
+    scheduled = generate_passive_plan(tasks, args.date)
     print_schedule(scheduled, args.output_md)

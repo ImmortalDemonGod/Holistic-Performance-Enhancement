@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 import argparse
+import copy
 
 # --- Configuration ---
 ACTIVE_BLOCK_MINUTES: int = 60
@@ -98,6 +99,15 @@ def filter_active_tasks(
             logger.debug(f"Task {task_id} skipped: dependencies not met.")
             continue
 
+        if str(task_id) == "2": # Specific debug for parent task 2
+            logger.info(f"[DEBUG_TASK_2] Inspecting parent task ID 2 in filter_active_tasks.")
+            logger.info(f"[DEBUG_TASK_2] Raw task data: {task}")
+            parent_hpe_meta_content = task.get("hpe_learning_meta", "PARENT_HPE_META_MISSING")
+            logger.info(f"[DEBUG_TASK_2] Content of task.get('hpe_learning_meta'): {parent_hpe_meta_content}")
+            if isinstance(parent_hpe_meta_content, dict):
+                logger.info(f"[DEBUG_TASK_2] hpe_meta.get('est_effort'): {parent_hpe_meta_content.get('estimated_effort_hours_min', 'KEY_MISSING_IN_HPE_META')}")
+            logger.info(f"[DEBUG_TASK_2] task.get('est_effort_top_level'): {task.get('estimated_effort_hours_min', 'KEY_MISSING_TOP_LEVEL')}")
+
         hpe_learning_meta = task.get("hpe_learning_meta", {})
         recommended_block = hpe_learning_meta.get("recommended_block", "").lower()
         activity_type = hpe_learning_meta.get("activity_type", "").lower()
@@ -116,71 +126,86 @@ def filter_active_tasks(
 
         if is_active_task_type:
             min_effort_hours = hpe_learning_meta.get("estimated_effort_hours_min")
-            if min_effort_hours is None or not isinstance(min_effort_hours, (int, float)):
-                logger.debug(f"Task {task_id} skipped: 'estimated_effort_hours_min' is missing or invalid ({min_effort_hours}).")
+            if min_effort_hours is None:
+                min_effort_hours = task.get('estimated_effort_hours_min', float('inf'))
+            if not isinstance(min_effort_hours, (int, float)):
+                logger.warning(f"Task {task_id} has invalid min_effort_hours type: {type(min_effort_hours)}. Skipping.")
                 continue
-            
-            if min_effort_hours * 60 > ACTIVE_BLOCK_MINUTES:
+
+            is_oversized = (min_effort_hours * 60 > ACTIVE_BLOCK_MINUTES)
+
+            if is_oversized:
                 logger.debug(f"Task {task_id} (min_effort: {min_effort_hours}hr) inherently too large for {ACTIVE_BLOCK_MINUTES}min active block. Checking subtasks for promotion.")
                 # --- Subtask Promotion Logic ---
-                subtasks = task.get("subtasks", [])
-                pending_subtasks = [st for st in subtasks if st.get("status") == "pending" and dependencies_met(st, task_statuses)]
-                num_pending = len(pending_subtasks)
-                for subtask in pending_subtasks:
-                    subtask_effort = None
-                    # Prefer explicit subtask effort if present
-                    subtask_meta = subtask.get("hpe_learning_meta", {})
-                    # Prefer explicit subtask effort (in hours or minutes), fallback if missing
-                    explicit_effort_hr = subtask_meta.get("estimated_effort_hours_min")
-                    explicit_effort_min = subtask.get("effort_minutes_planned")
-                    if explicit_effort_hr is not None:
-                        effort_minutes = float(explicit_effort_hr) * 60
-                        logger.debug(f"[DEBUG] Subtask {subtask.get('id')} explicit effort: {explicit_effort_hr} hr ({effort_minutes} min)")
-                    elif explicit_effort_min is not None:
-                        effort_minutes = float(explicit_effort_min)
-                        logger.debug(f"[DEBUG] Subtask {subtask.get('id')} explicit effort: {effort_minutes} min")
-                    else:
-                        # Fallback effort: use parent min effort divided by pending subtasks
-                        total_subtasks = len(subtasks)
-                        logger.debug(f"[DEBUG] Parent {task_id} subtask details:")
-                        for st in subtasks:
-                            logger.debug(f"  Subtask id={st.get('id')}, status={st.get('status')}")
-                        logger.debug(f"[DEBUG] Parent {task_id} has {total_subtasks} total subtasks, {num_pending} pending subtasks.")
-                        if total_subtasks == 0 or num_pending == 0:
-                            effort_minutes = 30  # Default 30 min if no subtasks or none pending
-                            logger.debug(f"[DEBUG] No subtasks or no pending subtasks for parent {task_id}, using default fallback effort: {effort_minutes} min.")
+                # Only promote subtasks that are pending and whose sibling dependencies are met.
+                # Fallback effort is distributed among only these eligible subtasks.
+                eligible_subtasks_for_promotion = []
+                all_subtasks_in_parent = task.get("subtasks", [])
+                # Subtask promotion logic: parent is oversized
+                eligible_subtasks_for_promotion = []
+                for subtask in all_subtasks_in_parent:
+                    if subtask.get("status") != "pending":
+                        continue
+                    subtask_id_local = subtask.get("id")
+                    sibling_dependencies = subtask.get("dependencies", [])
+                    if all(
+                        next((st for st in all_subtasks_in_parent if st.get("id") == dep_id), {"status": "done"}).get("status") == "done"
+                        for dep_id in sibling_dependencies
+                    ):
+                        eligible_subtasks_for_promotion.append(subtask)
+
+                num_eligible_pending_subtasks = len(eligible_subtasks_for_promotion)
+                # NEW: Calculate total pending subtasks for fallback effort distribution
+                all_pending_subtasks_for_effort_calc = [
+                    st for st in all_subtasks_in_parent if st.get("status", "pending") == "pending"
+                ]
+                num_total_pending_subtasks_for_effort_fallback = len(all_pending_subtasks_for_effort_calc)
+                if num_total_pending_subtasks_for_effort_fallback == 0:
+                    num_total_pending_subtasks_for_effort_fallback = 1  # Avoid division by zero
+                logger.debug(f"  Parent Task {task_id}: Found {num_eligible_pending_subtasks} pending subtasks with met sibling dependencies.")
+
+                for subtask in eligible_subtasks_for_promotion:
+                    subtask_id_local = subtask.get("id", "UnknownSub")
+                    subtask_hpe_learning_meta = subtask.get("hpe_learning_meta", {})
+                    sub_min_effort_hours = subtask_hpe_learning_meta.get("estimated_effort_hours_min")
+                    if sub_min_effort_hours is None:
+                        logger.debug(f"Subtask {task_id}.{subtask_id_local} has no explicit min_effort_hours. Using fallback: parent_min_effort {min_effort_hours} / {num_total_pending_subtasks_for_effort_fallback} total pending subtasks.")
+                        if num_total_pending_subtasks_for_effort_fallback > 0 and isinstance(min_effort_hours, (int, float)) and min_effort_hours != float('inf'):
+                            sub_min_effort_hours = min_effort_hours / num_total_pending_subtasks_for_effort_fallback
+                            logger.debug(f"    Subtask {task_id}.{subtask_id_local}: No explicit effort. Inferred min_effort: {sub_min_effort_hours:.2f}hr (parent {min_effort_hours}hr / {num_total_pending_subtasks_for_effort_fallback} pending subtasks).")
                         else:
-                            # Use parent min effort (from task data) divided by number of pending subtasks
-                            effort_minutes = (min_effort_hours / num_pending) * 60
-                            logger.debug(f"[DEBUG] Fallback effort for subtask {subtask.get('id')} of parent {task_id}: parent_min_effort {min_effort_hours} / pending {num_pending} = {effort_minutes / 60} hr.")
-                    logger.debug(f"Evaluating subtask {subtask.get('id')} (parent {task_id}): chosen effort={effort_minutes} min")
-                    # Only promote subtask if it fits in the block and has valid effort
-                    if effort_minutes is not None and effort_minutes <= ACTIVE_BLOCK_MINUTES:
-                        # Augment subtask for scheduling
-                        promoted = {
-                            **subtask,
-                            "_parent_task_id": task_id,
-                            "_parent_title": task.get("title"),
-                            "_parent_priority": task.get("priority"),
-                            "_parent_hpe_csm_reference": task.get("hpe_csm_reference"),
-                            "_parent_hpe_scheduling_meta": task.get("hpe_scheduling_meta"),
+                            logger.warning(f"    Subtask {task_id}.{subtask_id_local}: No explicit effort and no pending subtasks for fallback calculation. Skipping.")
+                            continue
+                    if sub_min_effort_hours is None or not isinstance(sub_min_effort_hours, (int, float)) or sub_min_effort_hours <= 0:
+                        logger.warning(f"    Subtask {task_id}.{subtask_id_local} has invalid or non-positive calculated min_effort_hours: {sub_min_effort_hours}. Skipping.")
+                        continue
+                    logger.debug(f"    Subtask {task_id}.{subtask_id_local}: Final min_effort_hours to check: {sub_min_effort_hours}hr (block limit: {ACTIVE_BLOCK_MINUTES/60}hr)")
+                    if (sub_min_effort_hours * 60) <= ACTIVE_BLOCK_MINUTES:
+                        augmented_subtask = copy.deepcopy(subtask)
+                        augmented_subtask["_parent_task_id"] = task_id
+                        augmented_subtask["_parent_title"] = task.get("title")
+                        augmented_subtask["_parent_priority"] = task.get("priority", "medium")
+                        augmented_subtask["_is_promoted_subtask"] = True
+                        effective_sub_meta = {
+                            **hpe_learning_meta,
+                            **subtask_hpe_learning_meta,
+                            "estimated_effort_hours_min": sub_min_effort_hours,
+                            "estimated_effort_hours_max": subtask_hpe_learning_meta.get("estimated_effort_hours_max", sub_min_effort_hours + 0.25)
                         }
-                        candidate_tasks.append(promoted)
-                        # Log actual effort and units
-                        if explicit_effort_hr is not None:
-                            effort_str = f"{explicit_effort_hr}hr"
-                        elif explicit_effort_min is not None:
-                            effort_str = f"{explicit_effort_min}min"
-                        else:
-                            effort_str = f"{effort_minutes/60:.2f}hr"
-                        logger.info(f"Promoted subtask {subtask.get('id')} (parent {task_id}) as candidate (min_effort: {effort_str}). Candidate_tasks now: {[t.get('id') for t in candidate_tasks]}")
+                        augmented_subtask["hpe_learning_meta"] = effective_sub_meta
+                        augmented_subtask["hpe_scheduling_meta"] = task.get("hpe_scheduling_meta", {})
+                        augmented_subtask["hpe_csm_reference"] = task.get("hpe_csm_reference", {})
+                        candidate_tasks.append(augmented_subtask)
+                        logger.info(f"    Promoted Subtask {task_id}.{subtask_id_local} added as candidate (min_effort: {sub_min_effort_hours:.2f}hr).")
                     else:
-                        logger.info(f"Subtask {subtask.get('id')} (parent {task_id}) too large for block (min_effort: {subtask_effort}hr), not promoted.")
+                        logger.info(f"    Subtask {task_id}.{subtask_id_local} (min_effort: {sub_min_effort_hours:.2f}hr) too large for block. Not promoted.")
+                # --- END Subtask Promotion Logic ---
+                        
                 logger.info(f"Parent task {task_id} skipped for scheduling due to being oversized. No parent appended.")
-                continue
-            candidate_tasks.append(task)
-            logger.info(f"Task {task_id} added to initial candidates (min_effort: {min_effort_hours}hr). Candidate_tasks now: {[t.get('id') for t in candidate_tasks]}")
-            logger.info(f"Task {task_id} added to initial candidates (min_effort: {min_effort_hours}hr). Candidate_tasks now: {[t.get('id', t.get('_parent_task_id')) for t in candidate_tasks]}")
+            # If the task itself is not oversized and is an active learning task, add it.
+            elif not is_oversized:
+                candidate_tasks.append(task)
+                logger.info(f"Task {task_id} added to initial candidates (min_effort: {min_effort_hours}hr). Candidate_tasks now: {[t.get('id', t.get('_parent_task_id')) for t in candidate_tasks]}")
         else:
             logger.debug(f"Task {task_id} skipped: not an active_learning task (block: '{recommended_block}', activity: '{activity_type}').")
 
@@ -195,7 +220,8 @@ def filter_active_tasks(
             on_day_tasks.append(task)
             
     logger.info(f"{len(on_day_tasks)} on-day active tasks found.")
-    for t in on_day_tasks: logger.debug(f"  On-day candidate: {t.get('id')} (parent: {t.get('_parent_task_id', None)})")
+    for t in on_day_tasks: 
+        logger.debug(f"  On-day candidate: {t.get('id')} (parent: {t.get('_parent_task_id', None)})")
 
     if len(on_day_tasks) >= min_tasks_for_day_focus:
         logger.info(f"Sufficient on-day active tasks ({len(on_day_tasks)}). Prioritizing these.")
@@ -208,7 +234,8 @@ def filter_active_tasks(
     # Tasks not planned for today but still eligible active tasks
     off_day_tasks = [task for task in candidate_tasks if task not in on_day_tasks]
     logger.info(f"{len(off_day_tasks)} off-day active tasks found as potential additions.")
-    for t in off_day_tasks: logger.debug(f"  Off-day candidate: {t.get('id')} (parent: {t.get('_parent_task_id', None)})")
+    for t in off_day_tasks: 
+        logger.debug(f"  Off-day candidate: {t.get('id')} (parent: {t.get('_parent_task_id', None)})")
 
     # Combine and ensure no duplicates (though logic should prevent it)
     # The order matters for prioritization later if planned_day_of_week is a primary sort key
@@ -248,8 +275,10 @@ def schedule_active_tasks_into_block(
     scheduled_tasks_for_output: List[Dict[str, Any]] = []
     time_left_in_block = float(total_block_minutes) # Use float for precision
     
-    logger.info(f"Attempting to schedule active tasks. Candidates:")
-    for t in prioritized_tasks:
+    logger.info("Attempting to schedule active tasks. Candidates:")
+    for t_idx, t in enumerate(prioritized_tasks):
+        logger.debug(f"[SCHEDULE_DEBUG] Candidate {t_idx + 1} for scheduling (Full Data): {t}")
+        logger.debug(f"[SCHEDULE_DEBUG]   Candidate {t_idx + 1} hpe_learning_meta: {t.get('hpe_learning_meta')}")
         logger.info(f"  Candidate: id={t.get('id')} parent={t.get('_parent_task_id', None)} effort={t.get('hpe_learning_meta',{}).get('estimated_effort_hours_min')}hr")
     logger.info(f"Total block time: {total_block_minutes} min.")
 
@@ -258,31 +287,51 @@ def schedule_active_tasks_into_block(
         task_title = task.get("title", "No Title")
         hpe_learning_meta = task.get("hpe_learning_meta", {})
         min_effort_hours = hpe_learning_meta.get("estimated_effort_hours_min")
+        logger.debug(f"[SCHEDULE_DEBUG] Task {task_id} ('{task_title}'): Initial min_effort_hours from hpe_learning_meta: {min_effort_hours}")
 
         if min_effort_hours is None:
-            logger.warning(f"Task {task_id} ('{task_title[:30]}...') missing 'estimated_effort_hours_min'. Skipping.")
-            continue
-        
-        task_duration_minutes = float(min_effort_hours * 60)
+            min_effort_hours = task.get('estimated_effort_hours_min', float('inf'))
+            logger.debug(f"[SCHEDULE_DEBUG] Task {task_id}: min_effort_hours was None, fallback from task.get('estimated_effort_hours_min'): {min_effort_hours}")
 
-        if task_duration_minutes <= 0:
-            logger.debug(f"Task {task_id} ('{task_title[:30]}...') has non-positive min effort ({task_duration_minutes} min). Skipping.")
+        if min_effort_hours is None: # Should not happen if float('inf') is default
+            logger.warning(f"Task {task_id} ('{task_title}') still has None for min_effort_hours. Defaulting to infinity.")
+            min_effort_hours = float('inf')
+        
+        # Convert hours to minutes for comparison
+        try:
+            min_effort_minutes = float(min_effort_hours) * 60
+        except (ValueError, TypeError):
+            logger.warning(f"Task {task_id} ('{task_title}') has invalid min_effort_hours value: {min_effort_hours}. Skipping.")
             continue
-            
-        if task_duration_minutes <= time_left_in_block:
+
+        logger.debug(f"[SCHEDULE_DEBUG] Task {task_id}: Final min_effort_minutes for scheduling: {min_effort_minutes:.2f}")
+
+        if min_effort_minutes == float('inf'):
+            logger.info(f"  SKIPPED: Task {task_id} ('{task_title[:30]}...') (min effort: inf min) due to effectively infinite effort.")
+            continue
+
+        if min_effort_minutes <= 0:
+            logger.info(f"  SKIPPED: Task {task_id} ('{task_title[:30]}...') (min effort: {min_effort_minutes:.2f} min) due to zero or negative effort.")
+            continue
+
+        if min_effort_minutes <= time_left_in_block:
             # Preserve all fields, especially subtask promotion metadata
             scheduled_task = dict(task)  # shallow copy
-            scheduled_task["effort_minutes_planned"] = task_duration_minutes
+            scheduled_task["effort_minutes_planned"] = min_effort_minutes
             # Set 'id' to CSM ID string if present, else fallback to integer
             scheduled_task["id"] = task.get("hpe_csm_reference", {}).get("csm_id", task_id)
             scheduled_tasks_for_output.append(scheduled_task)
-            time_left_in_block -= task_duration_minutes
-            logger.info(f"  SCHEDULED: Task {task_id} ('{task_title[:30]}...') for {task_duration_minutes:.0f} min. Time left: {time_left_in_block:.0f} min.")
+            time_left_in_block -= min_effort_minutes
+            logger.info(f"  SCHEDULED: Task {task_id} ('{task_title[:30]}...') for {min_effort_minutes:.0f} min. Time left: {time_left_in_block:.0f} min.")
             if time_left_in_block <= 0: # Using "<= 0" as even 0 time left means block is full
                 logger.info("Active learning block is now full.")
                 break
         else:
-            logger.info(f"  SKIPPED: Task {task_id} ('{task_title[:30]}...') (min effort: {task_duration_minutes:.0f} min) too large for remaining time ({time_left_in_block:.0f} min).")
+            logger.info(f"  SKIPPED: Task {task_id} ('{task_title[:30]}...') (min effort: {min_effort_minutes:.2f} min) too large for remaining time ({time_left_in_block:.2f} min).")
+            # Flag oversized tasks and subtasks for manual review
+            if min_effort_hours > 1.0:
+                task['flagged_for_review'] = True
+                logger.warning(f"Task {task_id} ('{task_title}') flagged for review: estimated effort {min_effort_hours} exceeds block size.")
             
     if not scheduled_tasks_for_output:
         logger.info("No tasks were scheduled for the active learning block.")
@@ -299,7 +348,7 @@ def format_schedule_for_print(scheduled_tasks: List[Dict[str, Any]]) -> str:
     lines.append(separator)
     
     if not scheduled_tasks:
-        lines.append("No tasks scheduled for this block.")
+        lines.append("No active tasks scheduled for this block.")
     else:
         total_planned_time = sum(task.get('effort_minutes_planned', 0) for task in scheduled_tasks)
         lines.append(f"Total Planned Time: {total_planned_time:.0f} min / {ACTIVE_BLOCK_MINUTES} min")
@@ -307,17 +356,40 @@ def format_schedule_for_print(scheduled_tasks: List[Dict[str, Any]]) -> str:
         for i, task_detail in enumerate(scheduled_tasks, 1):
             lines.append(f"{i}. Task ID: [{task_detail.get('id', 'N/A')}]")
             lines.append(f"   - Title: {task_detail.get('title', 'No Title')}")
-            lines.append(f"   - Activity Type: {task_detail.get('activity_type', 'N/A')}")
-            lines.append(f"   - Est. Effort (Raw): {task_detail.get('estimated_effort_hours_raw', 'N/A')}")
+            hpe_meta = task_detail.get("hpe_learning_meta", {})
+            lines.append(f"   - Activity Type: {hpe_meta.get('activity_type', 'N/A')}")
+            lines.append(f"   - Est. Effort (Raw): {hpe_meta.get('estimated_effort_hours_raw', 'N/A')}")
             lines.append(f"   - Planned Duration: {task_detail.get('effort_minutes_planned', 0):.0f} min")
             task_notes = task_detail.get('notes')
             if task_notes:
                  lines.append(f"   - Notes: {str(task_notes)[:100]}...") # Truncate long notes
             lines.append("") 
 
-    return "\n".join(lines)
-
 # --- Main Execution Logic ---
+
+def generate_active_plan(
+    all_tasks_data: List[Dict[str, Any]],
+    target_date_str: Optional[str],
+    min_focus_tasks: int = MIN_REQUIRED_TASKS_FOR_DAY_FOCUS
+) -> List[Dict[str, Any]]:
+    """
+    Generates the active learning block plan for a given date and task list.
+    Returns a list of scheduled task dicts (not printed output).
+    """
+    current_day = get_day_of_week(target_date_str)
+    task_completion_statuses = build_task_status_map(all_tasks_data)
+    eligible_active_tasks = filter_active_tasks(
+        all_tasks_data,
+        current_day,
+        task_completion_statuses,
+        min_focus_tasks
+    )
+    if not eligible_active_tasks:
+        logger.info("No eligible active tasks found after filtering for active plan.")
+        return []
+    final_prioritized_tasks = prioritize_active_tasks(eligible_active_tasks, current_day)
+    scheduled_block_plan = schedule_active_tasks_into_block(final_prioritized_tasks)
+    return scheduled_block_plan
 
 def main():
     """Main function to orchestrate the scheduling process."""
@@ -325,7 +397,7 @@ def main():
     parser.add_argument(
         "--tasks", 
         type=str, 
-        default="tasks/tasks.json", 
+        default="/Users/tomriddle1/Holistic-Performance-Enhancement/tasks/tasks.json", 
         help="Path to the enriched tasks.json file. Default: %(default)s"
     )
     parser.add_argument(
@@ -338,13 +410,13 @@ def main():
         "--output-md", 
         type=str, 
         default=None, 
-        help="Optional path to write the schedule to a Markdown file."
+        help="If set, write output to Markdown file."
     )
     parser.add_argument(
         "--min-focus-tasks",
         type=int,
         default=MIN_REQUIRED_TASKS_FOR_DAY_FOCUS,
-        help="Minimum number of on-day tasks required before pulling from other days. Default: %(default)s"
+        help="Minimum on-day tasks before pulling from other days. Default: %(default)s"
     )
     parser.add_argument(
         '--verbose', '-v', action='store_true', help='Enable debug logging'
@@ -357,9 +429,6 @@ def main():
         for handler in logging.root.handlers: # Apply to all existing handlers
             handler.setLevel(logging.DEBUG)
 
-
-    logger.info(f"Running Active Learning Block Scheduler for date: {args.date or 'today'}")
-    
     all_tasks = load_tasks(args.tasks)
     if not all_tasks:
         logger.warning("No tasks loaded. Exiting.")
