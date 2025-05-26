@@ -1,6 +1,40 @@
 {
   "tasks": [
     {
+      "id": 13,
+      "title": "P1.W1.Day1 Passive: Intro to Nucleotides (Reading & Initial Notes)",
+      "description": "Focused reading on RNA nucleotide components (phosphate, ribose, bases) and creating initial notes/flashcards.",
+      "status": "pending",
+      "dependencies": [1],
+      "priority": "high",
+      "details": "Refer to CSM Day 1, Passive Block, Task 1.A. Read relevant sections from chosen resources on nucleotide structure. Summarize key concepts. Start creating flashcards for basic definitions.",
+      "testStrategy": "Key concepts of nucleotide structure noted. Initial flashcards for base definitions created.",
+      "subtasks": [],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Day1.Passive.NucleotideIntro",
+        "anchor_link": "#day-1-e-g-monday---focus-orientation--initial-biochemistry-dive"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Gain initial understanding of RNA nucleotide components through focused reading and note-taking.",
+        "estimated_effort_tshirt": "M",
+        "estimated_effort_hours_raw": "1.0-1.5 hours",
+        "estimated_effort_hours_min": 1.0,
+        "estimated_effort_hours_max": 1.5,
+        "mastery_criteria_summary": "Completed reading on nucleotide structure. Initial notes and basic flashcards created.",
+        "activity_type": "focused_reading_initial_notetaking_flashcard_creation",
+        "recommended_block": "passive_review",
+        "deliverables": ["Initial notes on nucleotide structure.", "First batch of basic definition flashcards."]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 1,
+        "curriculum_part_title": "Day 1 Passive: Nucleotide Introduction",
+        "csm_tags": ["rna_modeling", "biochemistry", "nucleotides", "initial_reading", "day1_passive"]
+      },
+      "labels": []
+    },
+
+    {
       "id": 1,
       "title": "Set up RNA Biophysics Knowledge Base Structure",
       "description": "Create the initial knowledge base structure for organizing RNA biochemistry and thermodynamics concepts, including sections for notes, diagrams, and summaries.",
