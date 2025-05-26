@@ -43,7 +43,7 @@ class TestPassiveLearningBlockScheduler(unittest.TestCase):
         self._modify_tasks(modifications)
 
         scheduled_block = self._run_scheduler(self.current_tasks_data, target_date)
-        scheduled_ids = [t.get("hpe_csm_reference", {}).get("csm_id") or t.get("id") for t in scheduled_block["tasks"]]
+        scheduled_ids = [t.get("hpe_csm_reference", {}).get("csm_id") or t.get("id") for t in scheduled_block]
 
         # Check Task 10 is scheduled
         self.assertIn("RNA.P1.Foundations.W1.Part3.ReflectFinalizeLog", scheduled_ids)
