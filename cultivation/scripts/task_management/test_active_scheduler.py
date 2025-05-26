@@ -131,6 +131,8 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         })
         self._modify_tasks(modifications)
         scheduled_block = self._run_scheduler(self.current_tasks_data, target_date)
+        print("[DEBUG] test_empty_block_if_no_fitting_active_tasks scheduled_block:", scheduled_block)
+        print("[DEBUG] test_empty_block_if_no_fitting_active_tasks candidate_tasks:", [t.get("id") for t in scheduler.filter_active_tasks(self.current_tasks_data, scheduler.get_day_of_week(target_date), scheduler.build_task_status_map(self.current_tasks_data))])
         self.assertEqual(len(scheduled_block), 0, "Block should be empty if no fitting tasks.")
 
     def test_subtask_promotion_parent_too_large_subtask_fits(self):
@@ -197,7 +199,7 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
                         del st["hpe_learning_meta"]
         self._modify_tasks(modifications)
         scheduled_block = self._run_scheduler(self.current_tasks_data, target_date)
-        print("[DEBUG] scheduled_block (subtask no explicit effort):", scheduled_block)
+        print("[DEBUG] test_subtask_promotion_subtask_no_explicit_effort scheduled_block:", scheduled_block)
         # Should schedule at least one subtask, with fallback effort 1.2/len(subtasks)
         subtasks = [t for t in scheduled_block if t.get("_parent_task_id") == 2]
         self.assertTrue(len(subtasks) > 0, "Should schedule promoted subtasks with fallback effort.")
