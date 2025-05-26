@@ -787,6 +787,47 @@
           "status": "pending",
           "parentTaskId": 8
         }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part2.Thermo.EnvFactors",
+        "anchor_link": "#part-2-mastering-foundational-thermodynamic-principles-for-rna-folding-days-3-5---approx-4-5-hours-total-study--activity-time"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Explain how environmental factors like temperature, salt concentration, and pH affect RNA folding and stability, and their relevance to prediction tools.",
+        "estimated_effort_tshirt": "S",
+        "estimated_effort_hours_raw": "0.5-1 hour",
+        "estimated_effort_hours_min": 0.5,
+        "estimated_effort_hours_max": 1.0,
+        "mastery_criteria_summary": "Notes summarizing effects of temperature, salt, and pH. Short summary on relevance to RNA structure prediction tools. Flashcards created.",
+        "activity_type": "focused_reading_summary_writing_flashcard_creation",
+        "recommended_block": "passive_review",
+        "deliverables": [
+          "Notes on how temperature, salt concentration, and pH affect RNA stability.",
+          "Short summary of the relevance of these environmental factors to RNA structure prediction tools.",
+          "Flashcards for temperature, salt concentration, and pH effects on RNA."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 5,
+        "curriculum_part_title": "Part 2: Thermodynamics - Environmental Factors",
+        "csm_tags": [
+          "rna_modeling",
+          "thermodynamics",
+          "temperature_effects",
+          "salt_effects",
+          "ph_effects",
+          "rna_stability"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:5",
+        "activity:summary_writing",
+        "block:passive_review",
+        "effort_tshirt:S"
       ]
     },
     {
@@ -858,6 +899,50 @@
           "status": "pending",
           "parentTaskId": 9
         }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part3.Reflection.Integration",
+        "anchor_link": "#part-3-consolidation-self-assessment--reflection-days-6-7---approx-3-4-hours-total"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Integrate all reflection, progress tracking, and flashcard systems. Test the complete workflow for supporting learning and HPE integration.",
+        "estimated_effort_tshirt": "M",
+        "estimated_effort_hours_raw": "1-1.5 hours",
+        "estimated_effort_hours_min": 1.0,
+        "estimated_effort_hours_max": 1.5,
+        "mastery_criteria_summary": "End-to-end workflow tested. Data consistency and HPE integration points verified. Usability and effectiveness for supporting learning confirmed.",
+        "activity_type": "integration_testing_reflection_reporting",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Unified interface connecting reflection, progress tracking, and flashcard systems.",
+          "Cross-component functionality (e.g., flashcard generation from reflections) implemented.",
+          "Comprehensive HPE integration (Task Master and Flash-Memory Layer) verified.",
+          "Holistic report combining insights from all components.",
+          "Usability and effectiveness tested with a full learning cycle."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 7,
+        "curriculum_part_title": "Part 3: Self-Assessment - Completion, Reflection & Integration",
+        "csm_tags": [
+          "rna_modeling",
+          "self_assessment",
+          "reflection",
+          "hpe_integration",
+          "flashcard_review",
+          "consolidation"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:7",
+        "activity:integration_testing",
+        "activity:reflection",
+        "block:active_learning",
+        "effort_tshirt:M"
       ]
     },
     {
