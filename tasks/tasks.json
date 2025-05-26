@@ -947,6 +947,102 @@
     },
     {
       "id": 10,
+      "title": "Week 1 Learning Reflection, Flashcard Finalization & HPE Logging",
+      "description": "Reflect on Week 1 learning, finalize and organize all flashcards, and log all study time and deliverables in Task Master.",
+      "status": "pending",
+      "dependencies": [
+        11
+      ],
+      "priority": "medium",
+      "details": "Write a reflection on Week 1 learning. Finalize and organize all flashcards for the week. Log all study time and deliverables for Week 1 in Task Master.",
+      "testStrategy": "Written reflection completed. Flashcards finalized. All progress logged.",
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part3.ReflectFinalizeLog",
+        "anchor_link": "#part3g"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Reflect, finalize flashcards, and log Week 1 progress.",
+        "estimated_effort_tshirt": "S",
+        "estimated_effort_hours_raw": "0.5-1 hour",
+        "estimated_effort_hours_min": 0.5,
+        "estimated_effort_hours_max": 1.0,
+        "mastery_criteria_summary": "Reflection, flashcards, and logging complete.",
+        "activity_type": "reflection_flashcard_review_logging",
+        "recommended_block": "passive_review",
+        "deliverables": [
+          "Written learning reflection for Week 1",
+          "Finalized flashcard set",
+          "All study time and deliverables logged"
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 7,
+        "curriculum_part_title": "Part 3: Reflection, Finalization & Logging",
+        "csm_tags": [
+          "rna_modeling",
+          "reflection",
+          "hpe_logging",
+          "flashcard_review",
+          "consolidation",
+          "week1_wrapup"
+        ]
+      },
+      "labels": [
+        "block:passive_review",
+        "activity:reflection",
+        "activity:flashcard_review",
+        "activity:hpe_logging",
+        "plan_day:7"
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Complete Week 1 Self-Assessments (Quiz & Practical)",
+      "description": "Complete the self-created quiz and practical assessment for Week 1 RNA foundations.",
+      "status": "pending",
+      "dependencies": [9],
+      "priority": "high",
+      "details": "Take the quiz created in Task 9.1. Complete the practical drawing/explanation task from Task 9.2. Self-grade using rubrics from Task 9.3.",
+      "testStrategy": "Achieve >=85% on quiz. Achieve satisfactory self-grade on practical task based on rubric.",
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part3.ExecuteAssessments",
+        "anchor_link": "#part3-quiz-practical"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Complete self-quiz and practical assessment for Week 1.",
+        "estimated_effort_tshirt": "M",
+        "estimated_effort_hours_raw": "1-1.5 hours",
+        "estimated_effort_hours_min": 1.0,
+        "estimated_effort_hours_max": 1.5,
+        "mastery_criteria_summary": "Quiz and practical assessment completed and scored.",
+        "activity_type": "self_assessment_active",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Completed self-quiz with score",
+          "Completed practical assessment and self-graded result"
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 6,
+        "curriculum_part_title": "Part 3: Execute Self-Assessments",
+        "csm_tags": [
+          "rna_modeling",
+          "self_assessment",
+          "quiz_completion",
+          "practical_completion",
+          "week1_review"
+        ]
+      },
+      "labels": [
+        "block:active_learning",
+        "activity:self_assessment_active",
+        "plan_day:6"
+      ]
+    },
+    {
+      "id": 11,
       "title": "Create Learning Reflection and Progress Tracking System",
       "description": "Develop a system for reflecting on the learning process, tracking progress, and integrating with the Holistic Performance Enhancement (HPE) system.",
       "status": "pending",
