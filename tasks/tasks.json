@@ -902,45 +902,38 @@
       ],
       "hpe_csm_reference": {
         "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
-        "csm_id": "RNA.P1.Foundations.W1.Part3.Reflection.Integration",
+        "csm_id": "RNA.P1.Foundations.W1.Part3.Assessment.Creation",
         "anchor_link": "#part-3-consolidation-self-assessment--reflection-days-6-7---approx-3-4-hours-total"
       },
       "hpe_learning_meta": {
-        "learning_objective_summary": "Integrate all reflection, progress tracking, and flashcard systems. Test the complete workflow for supporting learning and HPE integration.",
+        "learning_objective_summary": "Create a comprehensive self-quiz (15-20 questions) and design a practical assessment task (drawing/explanation) covering Week 1's RNA biochemistry and thermodynamics. Develop associated grading rubrics.",
         "estimated_effort_tshirt": "M",
-        "estimated_effort_hours_raw": "1-1.5 hours",
-        "estimated_effort_hours_min": 1,
-        "estimated_effort_hours_max": 1.5,
-        "mastery_criteria_summary": "End-to-end workflow tested. Data consistency and HPE integration points verified. Usability and effectiveness for supporting learning confirmed.",
-        "activity_type": "integration_testing_reflection_reporting",
+        "estimated_effort_hours_raw": "1.5-2 hours",
+        "estimated_effort_hours_min": 1.5,
+        "estimated_effort_hours_max": 2.0,
+        "mastery_criteria_summary": "Comprehensive 15-20 question quiz created with answer key. Practical assessment task designed with clear instructions. Detailed grading rubrics for both developed, targeting >=85% for mastery.",
+        "activity_type": "assessment_design_quiz_creation_rubric_development",
         "recommended_block": "active_learning",
         "deliverables": [
-          "Unified interface connecting reflection, progress tracking, and flashcard systems.",
-          "Cross-component functionality (e.g., flashcard generation from reflections) implemented.",
-          "Comprehensive HPE integration (Task Master and Flash-Memory Layer) verified.",
-          "Holistic report combining insights from all components.",
-          "Usability and effectiveness tested with a full learning cycle."
+          "Self-created comprehensive quiz (15-20 questions) with answer key (maps to PRD Task 3.1).",
+          "Design for practical assessment task (drawing a nucleotide & explaining energetic contributions) (maps to PRD Task 3.3 design part).",
+          "Grading rubrics for both the quiz and the practical assessment."
         ]
       },
       "hpe_scheduling_meta": {
-        "planned_day_of_week": 7,
-        "curriculum_part_title": "Part 3: Self-Assessment - Completion, Reflection & Integration",
+        "planned_day_of_week": 6,
+        "curriculum_part_title": "Part 3: Self-Assessment - Material Creation",
         "csm_tags": [
-          "rna_modeling",
-          "self_assessment",
-          "reflection",
-          "hpe_integration",
-          "flashcard_review",
-          "consolidation"
+          "rna_modeling", "self_assessment", "quiz_design", "rubric_creation", "pedagogy", "week1_review_prep"
         ]
       },
       "labels": [
         "domain:rna_modeling",
         "pillar:1",
         "curriculum_week:1",
-        "plan_day:7",
-        "activity:integration_testing",
-        "activity:reflection",
+        "plan_day:6",
+        "activity:assessment_design",
+        "activity:quiz_creation",
         "block:active_learning",
         "effort_tshirt:M"
       ]
@@ -959,41 +952,40 @@
       "hpe_csm_reference": {
         "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
         "csm_id": "RNA.P1.Foundations.W1.Part3.ReflectFinalizeLog",
-        "anchor_link": "#part3g"
+        "anchor_link": "#part-3-consolidation-self-assessment--reflection-days-6-7---approx-3-4-hours-total"
       },
       "hpe_learning_meta": {
-        "learning_objective_summary": "Reflect, finalize flashcards, and log Week 1 progress.",
+        "learning_objective_summary": "Reflect on Week 1 learning process and outcomes, finalize and organize all flashcards for the week, and ensure all study time and deliverables are logged in HPE Task Master.",
         "estimated_effort_tshirt": "S",
         "estimated_effort_hours_raw": "0.5-1 hour",
         "estimated_effort_hours_min": 0.5,
-        "estimated_effort_hours_max": 1,
-        "mastery_criteria_summary": "Reflection, flashcards, and logging complete.",
-        "activity_type": "reflection_flashcard_review_logging",
+        "estimated_effort_hours_max": 1.0,
+        "mastery_criteria_summary": "Written learning reflection completed. Week 1 flashcards finalized and organized for SRS. All study time and deliverables for Week 1 logged in Task Master.",
+        "activity_type": "reflection_flashcard_review_logging_consolidation",
         "recommended_block": "passive_review",
         "deliverables": [
-          "Written learning reflection for Week 1",
-          "Finalized flashcard set",
-          "All study time and deliverables logged"
+          "Written learning reflection for Week 1 (PRD Task 3.G).",
+          "Finalized and organized flashcard set for Week 1 material (ready for SRS).",
+          "All study time and deliverables for Week 1 logged and status updated in Task Master."
         ]
       },
       "hpe_scheduling_meta": {
         "planned_day_of_week": 7,
         "curriculum_part_title": "Part 3: Reflection, Finalization & Logging",
         "csm_tags": [
-          "rna_modeling",
-          "reflection",
-          "hpe_logging",
-          "flashcard_review",
-          "consolidation",
-          "week1_wrapup"
+          "rna_modeling", "reflection", "hpe_logging", "flashcard_review", "consolidation", "week1_wrapup"
         ]
       },
       "labels": [
-        "block:passive_review",
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:7",
         "activity:reflection",
         "activity:flashcard_review",
         "activity:hpe_logging",
-        "plan_day:7"
+        "block:passive_review",
+        "effort_tshirt:S"
       ],
       "subtasks": [
         {
@@ -1003,7 +995,7 @@
           "dependencies": [],
           "details": "1. Create a new document with clear sections for: a) Summary of topics covered, b) Key concepts learned, c) Challenges encountered, d) Successful learning strategies, e) Areas for improvement, f) Questions that arose, g) Goals for next week\n2. For each section, write 2-3 paragraphs with specific examples from Week 1\n3. Include references to specific resources, lectures, or assignments that were particularly valuable\n4. Conclude with actionable next steps for Week 2\n5. Test by reviewing for completeness, clarity, and actionable insights",
           "status": "pending",
-          "parentTaskId": 10
+          "parentTaskId": 12
         },
         {
           "id": 2,
@@ -1012,7 +1004,7 @@
           "dependencies": [],
           "details": "1. Gather all flashcards created during Week 1\n2. Review each flashcard for accuracy, clarity, and completeness\n3. Tag each flashcard with appropriate topic categories (e.g., key concepts, definitions, formulas)\n4. Organize flashcards into digital format if not already done (using Anki, Quizlet, or similar tool)\n5. Set up spaced repetition schedule for ongoing review\n6. Create backup of all flashcards\n7. Test the system by doing a practice review session with the organized flashcards",
           "status": "pending",
-          "parentTaskId": 10
+          "parentTaskId": 12
         },
         {
           "id": 3,
@@ -1024,7 +1016,7 @@
           ],
           "details": "1. Open Task Master logging system\n2. Create entries for each study session from Week 1, including: a) Date and duration, b) Topics covered, c) Resources used, d) Deliverables completed\n3. Upload or link to all Week 1 deliverables, including the learning reflection document from Subtask 1\n4. Tag all flashcards as completed from Subtask 2\n5. Calculate and record total study hours for Week 1\n6. Add notes on effectiveness of different study methods\n7. Verify all entries for accuracy and completeness\n8. Generate Week 1 summary report if Task Master has this feature\n9. Test by reviewing all entries to ensure nothing is missing",
           "status": "pending",
-          "parentTaskId": 10
+          "parentTaskId": 12
         }
       ]
     },
@@ -1042,37 +1034,37 @@
       "hpe_csm_reference": {
         "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
         "csm_id": "RNA.P1.Foundations.W1.Part3.ExecuteAssessments",
-        "anchor_link": "#part3-quiz-practical"
+        "anchor_link": "#part-3-consolidation-self-assessment--reflection-days-6-7---approx-3-4-hours-total"
       },
       "hpe_learning_meta": {
-        "learning_objective_summary": "Complete self-quiz and practical assessment for Week 1.",
+        "learning_objective_summary": "Complete the self-created quiz and the practical assessment task for Week 1 RNA foundations, aiming for >=85% mastery, and self-grade.",
         "estimated_effort_tshirt": "M",
-        "estimated_effort_hours_raw": "1-1.5 hours",
-        "estimated_effort_hours_min": 1,
+        "estimated_effort_hours_raw": "1.0-1.5 hours",
+        "estimated_effort_hours_min": 1.0,
         "estimated_effort_hours_max": 1.5,
-        "mastery_criteria_summary": "Quiz and practical assessment completed and scored.",
-        "activity_type": "self_assessment_active",
+        "mastery_criteria_summary": "Self-quiz completed and scored (>=85% target). Practical task completed and self-graded against rubric (satisfactory).",
+        "activity_type": "self_assessment_active_execution",
         "recommended_block": "active_learning",
         "deliverables": [
-          "Completed self-quiz with score",
-          "Completed practical assessment and self-graded result"
+          "Completed self-quiz with score (maps to PRD Task 3.2).",
+          "Completed practical assessment (drawing/explanation) and self-graded result (maps to PRD Task 3.3 completion part)."
         ]
       },
       "hpe_scheduling_meta": {
         "planned_day_of_week": 6,
         "curriculum_part_title": "Part 3: Execute Self-Assessments",
         "csm_tags": [
-          "rna_modeling",
-          "self_assessment",
-          "quiz_completion",
-          "practical_completion",
-          "week1_review"
+          "rna_modeling", "self_assessment", "quiz_taking", "practical_execution", "week1_mastery_check"
         ]
       },
       "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:6",
+        "activity:self_assessment_execution",
         "block:active_learning",
-        "activity:self_assessment_active",
-        "plan_day:6"
+        "effort_tshirt:M"
       ],
       "subtasks": [
         {
@@ -1126,7 +1118,7 @@
           "dependencies": [],
           "details": "Implementation steps:\n1. Design a template structure with 4 main sections: 'Easy Concepts', 'Challenging Concepts', 'Effective Strategies', and 'Areas for Improvement'\n2. Implement the template as a digital form (e.g., markdown template, HTML form, or document template)\n3. Add guiding questions for each section to prompt thoughtful reflection\n4. Include a timestamp field and subject/topic identifier\n5. Create a storage system for completed reflections\n6. Add tagging functionality to categorize reflections by subject/topic\n\nTesting approach:\n- Create sample reflections using the template\n- Verify all sections prompt useful reflections\n- Test storage and retrieval of completed reflections",
           "status": "pending",
-          "parentTaskId": 10
+          "parentTaskId": 12
         },
         {
           "id": 2,
@@ -1137,7 +1129,7 @@
           ],
           "details": "Implementation steps:\n1. Create a data structure to store study sessions with fields for date, start time, end time, duration, topic, and notes\n2. Implement a timer functionality for tracking active study time\n3. Develop a deliverable tracking component with fields for deliverable description, due date, completion status, and quality self-assessment\n4. Design API endpoints or integration hooks for the Task Master component of HPE\n5. Implement data export functionality for analysis\n6. Create a dashboard view showing study time trends and deliverable completion rates\n\nTesting approach:\n- Test timer functionality for accuracy\n- Verify data persistence across sessions\n- Test the integration points with mock HPE Task Master data\n- Validate dashboard visualizations with sample data",
           "status": "pending",
-          "parentTaskId": 10
+          "parentTaskId": 12
         },
         {
           "id": 3,
@@ -1148,7 +1140,7 @@
           ],
           "details": "Implementation steps:\n1. Design a flashcard data structure with fields for question, answer, category, difficulty rating, and metadata (creation date, last reviewed date)\n2. Implement tagging and categorization features for flashcards\n3. Create an interface for adding, editing, and reviewing flashcards\n4. Develop a spaced repetition algorithm that schedules reviews based on difficulty ratings and review history\n5. Design integration points with the HPE Flash-Memory Layer\n6. Implement export/import functionality for flashcard decks\n7. Add analytics to track retention rates and identify difficult cards\n\nTesting approach:\n- Test the spaced repetition algorithm with sample flashcards\n- Verify proper scheduling of reviews\n- Test integration with HPE Flash-Memory Layer\n- Validate analytics calculations",
           "status": "pending",
-          "parentTaskId": 10
+          "parentTaskId": 12
         },
         {
           "id": 4,
@@ -1160,52 +1152,49 @@
           ],
           "details": "Implementation steps:\n1. Create a unified interface that connects the reflection template, progress tracking, and flashcard systems\n2. Implement cross-component functionality (e.g., automatically generating flashcards from challenging concepts in reflections)\n3. Ensure consistent data flow between all components\n4. Develop comprehensive HPE integration by connecting to both Task Master and Flash-Memory Layer\n5. Create holistic reporting that combines insights from all components\n6. Implement user settings for customizing the system\n7. Develop a notification system for scheduled reflections and reviews\n\nTesting approach:\n- Conduct end-to-end testing of the complete workflow\n- Test data consistency across all components\n- Verify all HPE integration points function correctly\n- Perform usability testing to ensure the system effectively supports learning\n- Test the system with a complete learning cycle on a real subject",
           "status": "pending",
-          "parentTaskId": 10
+          "parentTaskId": 12
         }
       ],
       "hpe_csm_reference": {
-        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
-        "csm_id": "RNA.P1.Foundations.W1.Part3.Assessment.CompletionReflection",
-        "anchor_link": "#part-3-consolidation-self-assessment--reflection-days-6-7---approx-3-4-hours-total"
+        "source_document": "cultivation/docs/HPE_SYSTEM/HPE_Reflection_Progress_Tracking_PRD.md",
+        "csm_id": "HPE.ToolDev.ReflectionSystem.V1",
+        "anchor_link": "#reflection-progress-tracking-system-design"
       },
       "hpe_learning_meta": {
-        "learning_objective_summary": "Complete self-assessments (quiz and practical task), reflect on learning process and outcomes for Week 1, finalize flashcards, and log all progress in HPE Task Master.",
-        "estimated_effort_tshirt": "M",
-        "estimated_effort_hours_raw": "1.5-2 hours",
-        "estimated_effort_hours_min": 1.5,
-        "estimated_effort_hours_max": 2,
-        "mastery_criteria_summary": "Self-quiz completed with score (target >=85%). Practical task completed and self-graded against rubric. Written learning reflection completed. All Week 1 flashcards finalized. All study time and deliverables logged in Task Master.",
-        "activity_type": "self_assessment_reflection_flashcard_review_logging",
-        "recommended_block": "passive_review",
+        "learning_objective_summary": "Design, implement, and validate a learning reflection and progress tracking system for the HPE platform, supporting integration with Task Master and flashcard tools.",
+        "estimated_effort_tshirt": "XL",
+        "estimated_effort_hours_raw": "8-16 hours",
+        "estimated_effort_hours_min": 8.0,
+        "estimated_effort_hours_max": 16.0,
+        "mastery_criteria_summary": "Fully functional reflection and tracking system deployed, passing all integration and usability tests.",
+        "activity_type": "software_development",
+        "recommended_block": "deep_work",
         "deliverables": [
-          "Completed self-quiz with score (Task 3.2 PRD for Day 6/7).",
-          "Completed practical assessment (drawing/explanation) and self-graded result (Task 3.3 PRD for Day 6/7).",
-          "Written learning reflection for Week 1 (Task 3.G PRD for Day 7).",
-          "Finalized and organized flashcard set for Week 1 material.",
-          "All study time and deliverables for Week 1 logged and status updated in Task Master."
+          "User-facing reflection template and interface",
+          "Integrated progress tracking dashboard",
+          "Automated flashcard generation from reflections",
+          "Comprehensive system documentation",
+          "End-to-end integration with Task Master and flashcard tools"
         ]
       },
       "hpe_scheduling_meta": {
-        "planned_day_of_week": 7,
-        "curriculum_part_title": "Part 3: Self-Assessment - Completion, Reflection & Integration",
+        "planned_day_of_week": null,
+        "curriculum_part_title": "HPE System Development",
         "csm_tags": [
-          "rna_modeling",
-          "self_assessment",
-          "reflection",
-          "hpe_logging",
-          "flashcard_review",
-          "consolidation"
+          "hpe_system_dev",
+          "reflection_tool",
+          "progress_tracking",
+          "integration",
+          "software_development"
         ]
       },
       "labels": [
-        "domain:rna_modeling",
-        "pillar:1",
-        "curriculum_week:1",
-        "plan_day:7",
-        "activity:self_assessment",
-        "activity:reflection",
-        "block:passive_review",
-        "effort_tshirt:M"
+        "domain:hpe_system",
+        "pillar:platform",
+        "project:reflection_tracker",
+        "block:deep_work",
+        "activity:software_development",
+        "effort_tshirt:XL"
       ]
     }
   ],
