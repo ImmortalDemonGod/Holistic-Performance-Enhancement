@@ -43,7 +43,7 @@ def dependencies_met(task: Dict[str, Any], task_statuses: Dict[Any, str]) -> boo
             return False
     return True
 
-def filter_passive_tasks(tasks: List[Dict[str, Any]], day_of_week: int, task_statuses: Dict[Any, str], min_required: int = 2) -> List[Dict[str, Any]]:
+def filter_passive_tasks(tasks: List[Dict[str, Any]], day_of_week: int, task_statuses: Dict[Any, str], min_required: int = 2, allow_off_day_fill: bool = True) -> List[Dict[str, Any]]:
     keywords = ["flashcard_review", "note_review", "summary_writing", "consolidation", "light_reading", "audio_learning"]
     filtered = []
     logger.info(f"[filter_passive_tasks] First pass: strict planned_day_of_week={day_of_week}")
@@ -61,7 +61,7 @@ def filter_passive_tasks(tasks: List[Dict[str, Any]], day_of_week: int, task_sta
                 logger.info(f"  [PASS1] Adding task {task.get('id')} (planned_day_of_week={planned_day})")
                 filtered.append(task)
     logger.info(f"[filter_passive_tasks] First pass found {len(filtered)} tasks.")
-    if len(filtered) < min_required:
+    if len(filtered) < min_required and allow_off_day_fill:
         logger.info(f"[filter_passive_tasks] Second pass: add all suitable passive tasks not already included.")
         for task in tasks:
             if task.get("status") != "pending":
@@ -76,6 +76,8 @@ def filter_passive_tasks(tasks: List[Dict[str, Any]], day_of_week: int, task_sta
                 if task not in filtered:
                     logger.info(f"  [PASS2] Adding task {task.get('id')} (planned_day_of_week={planned_day})")
                     filtered.append(task)
+    elif len(filtered) < min_required and not allow_off_day_fill:
+        logger.info(f"[filter_passive_tasks] Second pass skipped (allow_off_day_fill=False). Only on-day tasks considered.")
     logger.info(f"[filter_passive_tasks] Final filtered tasks: {[task.get('id') for task in filtered]}")
     return filtered
 
