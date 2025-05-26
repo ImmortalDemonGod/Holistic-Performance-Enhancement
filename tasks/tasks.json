@@ -1000,6 +1000,50 @@
           "status": "pending",
           "parentTaskId": 10
         }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part3.Assessment.CompletionReflection",
+        "anchor_link": "#part-3-consolidation-self-assessment--reflection-days-6-7---approx-3-4-hours-total"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Complete self-assessments (quiz and practical task), reflect on learning process and outcomes for Week 1, finalize flashcards, and log all progress in HPE Task Master.",
+        "estimated_effort_tshirt": "M",
+        "estimated_effort_hours_raw": "1.5-2 hours",
+        "estimated_effort_hours_min": 1.5,
+        "estimated_effort_hours_max": 2.0,
+        "mastery_criteria_summary": "Self-quiz completed with score (target >=85%). Practical task completed and self-graded against rubric. Written learning reflection completed. All Week 1 flashcards finalized. All study time and deliverables logged in Task Master.",
+        "activity_type": "self_assessment_reflection_flashcard_review_logging",
+        "recommended_block": "passive_review",
+        "deliverables": [
+          "Completed self-quiz with score (Task 3.2 PRD for Day 6/7).",
+          "Completed practical assessment (drawing/explanation) and self-graded result (Task 3.3 PRD for Day 6/7).",
+          "Written learning reflection for Week 1 (Task 3.G PRD for Day 7).",
+          "Finalized and organized flashcard set for Week 1 material.",
+          "All study time and deliverables for Week 1 logged and status updated in Task Master."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 7,
+        "curriculum_part_title": "Part 3: Self-Assessment - Completion, Reflection & Integration",
+        "csm_tags": [
+          "rna_modeling",
+          "self_assessment",
+          "reflection",
+          "hpe_logging",
+          "flashcard_review",
+          "consolidation"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:7",
+        "activity:self_assessment",
+        "activity:reflection",
+        "block:passive_review",
+        "effort_tshirt:M"
       ]
     }
   ],
