@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "generatedAt": "2025-05-26T02:19:43.454Z",
+    "tasksAnalyzed": 12,
+    "thresholdScore": 5,
+    "projectName": "Your Project Name",
+    "usedResearch": true
+  },
+  "complexityAnalysis": [
+    {
+      "taskId": 1,
+      "taskTitle": "Set up RNA Biophysics Knowledge Base Structure",
+      "complexityScore": 5,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "List and describe the sequential steps required to set up a foundational knowledge base structure in your chosen platform, including initial section creation, placeholder file setup for diagrams and quizzes, and organization of all content areas.",
+      "reasoning": "This is a moderately complex organizational task with clear structure and defined subsections. The challenge lies in ensuring logical navigation and thorough coverage, but it does not involve deep technical implementation or advanced integration."
+    },
+    {
+      "taskId": 2,
+      "taskTitle": "Develop RNA Nucleotide Structure Materials",
+      "complexityScore": 7,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Break down the process for creating comprehensive educational materials on RNA nucleotide structure, covering diagram creation, base structure detailing, explanatory notes, purine/pyrimidine identification, and flashcard development.",
+      "reasoning": "This requires accurate scientific illustration, clear explanations, and pedagogical structuring. The need to synthesize visual, textual, and interactive elements increases complexity."
+    },
+    {
+      "taskId": 3,
+      "taskTitle": "Document RNA Polymer Structure and Backbone",
+      "complexityScore": 6,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Outline the steps to produce explanatory content and visuals on RNA backbone structure and directionality, including diagramming, functional notes, and flashcard creation.",
+      "reasoning": "This task involves both conceptual explanation and technical diagramming, with the additional requirement of creating effective study aids."
+    },
+    {
+      "taskId": 4,
+      "taskTitle": "Develop RNA vs. DNA Comparison Materials",
+      "complexityScore": 7,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Decompose the comparison process into subtasks: researching differences, creating explanatory text, illustrating sugar puckers, and developing flashcards for structural and functional contrasts.",
+      "reasoning": "Comparative analysis demands careful research, synthesis of subtle differences, and the creation of explanatory and visual resources for effective learning."
+    },
+    {
+      "taskId": 5,
+      "taskTitle": "Develop Thermodynamic Principles Materials",
+      "complexityScore": 7,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "List the key steps for developing educational materials on RNA-related thermodynamic principles, including explanatory writing, equation documentation, practical examples, and flashcard creation.",
+      "reasoning": "Requires strong grasp of thermodynamic concepts, precise scientific communication, and effective assessment design to ensure comprehension."
+    },
+    {
+      "taskId": 6,
+      "taskTitle": "Document Base Stacking and Hydrogen Bonding in RNA",
+      "complexityScore": 8,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Specify the steps for documenting base stacking and hydrogen bonding, including literature review, explanatory writing, comparative analysis, scenario construction, and flashcard development.",
+      "reasoning": "In-depth explanation of advanced molecular interactions and their energetic implications, requiring both scientific rigor and clarity for educational use."
+    },
+    {
+      "taskId": 7,
+      "taskTitle": "Document Loop Penalties and Electrostatic Effects in RNA",
+      "complexityScore": 7,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Break down the documentation into steps: conceptual explanation, case examples, integration of electrostatic concepts, and educational flashcard creation.",
+      "reasoning": "Involves translating complex physical chemistry concepts into accessible educational materials and integrating multiple factors influencing RNA stability."
+    },
+    {
+      "taskId": 8,
+      "taskTitle": "Document Environmental Influences on RNA Stability",
+      "complexityScore": 6,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Detail the subtasks for researching, explaining, and illustrating the effects of temperature, salt, and pH on RNA stability, along with summary and flashcard development.",
+      "reasoning": "The scientific content is moderately complex, but focusing on environmental parameters keeps the scope manageable for educational breakdown."
+    },
+    {
+      "taskId": 9,
+      "taskTitle": "Develop Comprehensive Self-Assessment Materials",
+      "complexityScore": 8,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Enumerate the subtasks for designing a comprehensive quiz, practical assessment, grading rubric, and review template for RNA biochemistry concepts.",
+      "reasoning": "Comprehensive assessment creation involves synthesizing all prior materials, designing varied question types, and ensuring effective self-evaluation mechanisms."
+    },
+    {
+      "taskId": 10,
+      "taskTitle": "Week 1 Learning Reflection, Flashcard Finalization & HPE Logging",
+      "complexityScore": 5,
+      "recommendedSubtasks": 3,
+      "expansionPrompt": "List the steps required to write a learning reflection, finalize and organize flashcards, and log all study activities in the tracking system.",
+      "reasoning": "This is primarily organizational and reflective, with moderate complexity due to the integration of learning logs and flashcard management."
+    },
+    {
+      "taskId": 11,
+      "taskTitle": "Complete Week 1 Self-Assessments (Quiz & Practical)",
+      "complexityScore": 6,
+      "recommendedSubtasks": 3,
+      "expansionPrompt": "Break down the self-assessment process into quiz completion, practical task execution, and grading using rubrics.",
+      "reasoning": "Execution-focused task with moderate complexity, as it requires careful self-evaluation and application of established assessment criteria."
+    },
+    {
+      "taskId": 12,
+      "taskTitle": "Create Learning Reflection and Progress Tracking System",
+      "complexityScore": 7,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Detail the process for designing a learning reflection template, building a progress tracking system, integrating with HPE, and organizing flashcards for spaced repetition.",
+      "reasoning": "Involves designing structured reflection and tracking systems that integrate with existing frameworks, requiring both design and technical integration work."
+    }
+  ]
+}
