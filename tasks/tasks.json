@@ -177,6 +177,50 @@
           "status": "pending",
           "parentTaskId": 2
         }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part1.Biochem.NucleotideStructure",
+        "anchor_link": "#part-1-mastering-rna-biochemistry-fundamentals-days-1-3---approx-4-5-hours-total-study--activity-time"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Master the chemical composition of RNA nucleotides, accurately draw generic nucleotide and base structures, and create related explanatory notes and flashcards.",
+        "estimated_effort_tshirt": "M",
+        "estimated_effort_hours_raw": "1.5-2 hours",
+        "estimated_effort_hours_min": 1.5,
+        "estimated_effort_hours_max": 2.0,
+        "mastery_criteria_summary": "Accurate drawings of generic RNA nucleotide and the four standard RNA bases. Comprehensive notes covering components, properties, and nucleoside/nucleotide distinction. Initial flashcards for structures and terms created.",
+        "activity_type": "drawing_diagramming_notetaking_flashcard_creation",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Completed drawing of a generic RNA nucleotide (Task 1.1 from PRD).",
+          "Completed detailed chemical structures of Adenine, Guanine, Cytosine, and Uracil (Task 1.2 from PRD).",
+          "Notes on nucleosides vs. nucleotides and chemical properties of components.",
+          "Initial batch of flashcards for nucleotide structures and related terms."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 1,
+        "curriculum_part_title": "Part 1: RNA Biochemistry - Nucleotide & Base Structures",
+        "csm_tags": [
+          "rna_modeling",
+          "biochemistry",
+          "nucleotides",
+          "chemical_structure",
+          "purines",
+          "pyrimidines"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:1",
+        "activity:drawing",
+        "activity:notetaking",
+        "activity:flashcards",
+        "block:active_learning",
+        "effort_tshirt:M"
       ]
     },
     {
@@ -250,6 +294,49 @@
           "status": "pending",
           "parentTaskId": 3
         }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part1.Biochem.BackboneDirectionality",
+        "anchor_link": "#part-1-mastering-rna-biochemistry-fundamentals-days-1-3---approx-4-5-hours-total-study--activity-time"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Explain phosphodiester backbone formation, RNA 5'-3' directionality, its implications, and illustrate with a dinucleotide drawing.",
+        "estimated_effort_tshirt": "S",
+        "estimated_effort_hours_raw": "1-1.5 hours",
+        "estimated_effort_hours_min": 1.0,
+        "estimated_effort_hours_max": 1.5,
+        "mastery_criteria_summary": "Accurate drawing of an A-U dinucleotide showing phosphodiester bond and 5'/3' ends (Task 1.3 PRD). Clear explanation of directionality and backbone properties. Flashcards created.",
+        "activity_type": "drawing_explanation_writing_flashcard_creation",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Drawing of A-U dinucleotide with labeled 5'-3' phosphodiester bond, 5' end, and 3' end (Task 1.3 PRD).",
+          "Documentation on phosphodiester backbone formation and its properties (charge, etc.).",
+          "Explanation of RNA 5'-to-3' directionality significance.",
+          "Flashcards for phosphodiester bond characteristics and RNA directionality."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 2,
+        "curriculum_part_title": "Part 1: RNA Biochemistry - Polymer Structure & Backbone",
+        "csm_tags": [
+          "rna_modeling",
+          "biochemistry",
+          "phosphodiester_backbone",
+          "directionality",
+          "polymer_structure"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:2",
+        "activity:drawing",
+        "activity:explanation_writing",
+        "activity:flashcards",
+        "block:active_learning",
+        "effort_tshirt:S"
       ]
     },
     {
@@ -335,6 +422,46 @@
           "status": "pending",
           "parentTaskId": 5
         }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part1.Biochem.Thermodynamics",
+        "anchor_link": "#part-1-mastering-rna-biochemistry-fundamentals-days-1-3---approx-4-5-hours-total-study--activity-time"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Explain thermodynamic principles relevant to RNA folding, including Gibbs Free Energy, spontaneity, and Minimum Free Energy structures.",
+        "estimated_effort_tshirt": "M",
+        "estimated_effort_hours_raw": "2-3 hours",
+        "estimated_effort_hours_min": 2.0,
+        "estimated_effort_hours_max": 3.0,
+        "mastery_criteria_summary": "Clear explanations of ΔG, ΔH, ΔS, and their relationship. Accurate examples illustrating spontaneity and MFE concepts in RNA folding.",
+        "activity_type": "explanatory_writing_flashcard_creation",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Comprehensive explanations of thermodynamic principles (ΔG, ΔH, ΔS, spontaneity, MFE).",
+          "Flashcards covering key thermodynamic concepts for RNA folding."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 4,
+        "curriculum_part_title": "Part 1: RNA Biochemistry - Thermodynamic Principles",
+        "csm_tags": [
+          "rna_modeling",
+          "biochemistry",
+          "thermodynamics",
+          "gibbs_free_energy",
+          "rna_folding"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:4",
+        "activity:explanatory_writing",
+        "activity:flashcard_creation",
+        "block:active_learning",
+        "effort_tshirt:M"
       ]
     },
     {
