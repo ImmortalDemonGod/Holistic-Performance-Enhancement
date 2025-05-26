@@ -87,25 +87,26 @@ class TestPassiveLearningBlockScheduler(unittest.TestCase):
         modifications = []
         for i in range(1, 10):
             modifications.append({"id": i, "status": "done"})
+        modifications.append({"id": 11, "status": "done"})  # Ensure Task 11 is done for Task 10 dependency
         modifications.append({
-            "csm_id": "RNA.P1.Foundations.W1.Part3.Assessment.CompletionReflection",
+            "csm_id": "RNA.P1.Foundations.W1.Part3.ReflectFinalizeLog",
             "field_path": ("hpe_learning_meta", "estimated_effort_hours_min"),
             "value": 1.0
         })
         modifications.append({
-            "csm_id": "RNA.P1.Foundations.W1.Part3.Assessment.CompletionReflection",
+            "csm_id": "RNA.P1.Foundations.W1.Part3.ReflectFinalizeLog",
             "field_path": ("hpe_learning_meta", "estimated_effort_hours_max"),
             "value": 1.5
         })
         modifications.append({
-            "csm_id": "RNA.P1.Foundations.W1.Part3.Assessment.CompletionReflection",
+            "csm_id": "RNA.P1.Foundations.W1.Part3.ReflectFinalizeLog",
             "status": "pending"
         })
         self._modify_tasks(modifications)
         scheduled = self._run_scheduler(self.current_tasks_data, target_date)
         self.assertTrue(len(scheduled) >= 1)
-        self.assertEqual(scheduled[0]["id"], "RNA.P1.Foundations.W1.Part3.Assessment.CompletionReflection")
-        self.assertAlmostEqual(scheduled[0]["effort_minutes_planned"], 75.0)
+        self.assertEqual(scheduled[0]["id"], "RNA.P1.Foundations.W1.Part3.ReflectFinalizeLog")
+        self.assertAlmostEqual(scheduled[0]["effort_minutes_planned"], 75.0)  # (1.0 + 1.5)/2 * 60 = 75
 
     def test_task10_eligible_too_large(self):
         target_date = "2025-05-25"
@@ -113,17 +114,17 @@ class TestPassiveLearningBlockScheduler(unittest.TestCase):
         for i in range(1, 10):
             modifications.append({"id": i, "status": "done"})
         modifications.append({
-            "csm_id": "RNA.P1.Foundations.W1.Part3.Assessment.CompletionReflection",
+            "csm_id": "RNA.P1.Foundations.W1.Part3.ReflectFinalizeLog",
             "field_path": ("hpe_learning_meta", "estimated_effort_hours_min"),
             "value": 1.5
         })
         modifications.append({
-            "csm_id": "RNA.P1.Foundations.W1.Part3.Assessment.CompletionReflection",
+            "csm_id": "RNA.P1.Foundations.W1.Part3.ReflectFinalizeLog",
             "field_path": ("hpe_learning_meta", "estimated_effort_hours_max"),
             "value": 2.0
         })
         modifications.append({
-            "csm_id": "RNA.P1.Foundations.W1.Part3.Assessment.CompletionReflection",
+            "csm_id": "RNA.P1.Foundations.W1.Part3.ReflectFinalizeLog",
             "status": "pending"
         })
         self._modify_tasks(modifications)
@@ -138,17 +139,17 @@ class TestPassiveLearningBlockScheduler(unittest.TestCase):
             modifications.append({"id": i, "status": "done"})
         modifications.append({"id": 9, "status": "pending"})
         modifications.append({
-            "csm_id": "RNA.P1.Foundations.W1.Part3.Assessment.CompletionReflection",
+            "csm_id": "RNA.P1.Foundations.W1.Part3.ReflectFinalizeLog",
             "field_path": ("hpe_learning_meta", "estimated_effort_hours_min"),
             "value": 1.0
         })
         modifications.append({
-            "csm_id": "RNA.P1.Foundations.W1.Part3.Assessment.CompletionReflection",
+            "csm_id": "RNA.P1.Foundations.W1.Part3.ReflectFinalizeLog",
             "field_path": ("hpe_learning_meta", "estimated_effort_hours_max"),
             "value": 1.5
         })
         modifications.append({
-            "csm_id": "RNA.P1.Foundations.W1.Part3.Assessment.CompletionReflection",
+            "csm_id": "RNA.P1.Foundations.W1.Part3.ReflectFinalizeLog",
             "status": "pending"
         })
         self._modify_tasks(modifications)

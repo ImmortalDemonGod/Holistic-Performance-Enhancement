@@ -89,11 +89,16 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         modifications = [
             {"id": 1, "status": "done"}
         ]
+        # Also make all subtasks of Task 2 oversized so nothing is scheduled
+        for task in self.current_tasks_data:
+            if task.get("id") == 2:
+                for st in task.get("subtasks", []):
+                    st.setdefault("hpe_learning_meta", {})["estimated_effort_hours_min"] = 2.0
         self._modify_tasks(modifications)
         scheduled_block = self._run_scheduler(self.current_tasks_data, target_date)
         scheduled_csm_ids = [t.get("id") for t in scheduled_block]
         self.assertNotIn("RNA.P1.Foundations.W1.Part1.Biochem.NucleotideStructure", scheduled_csm_ids, "Task 2 should not be scheduled as its min effort (1.5hr) exceeds block size (1hr).")
-        self.assertEqual(len(scheduled_block), 0, "Expected no tasks to be scheduled if Task 2 is too large and Task 1 done.")
+        self.assertEqual(len(scheduled_block), 0, "Expected no tasks to be scheduled if Task 2 and all its subtasks are too large and Task 1 done.")
 
     def test_task3_blocked_by_dependency(self):
         target_date = "2025-05-20"
@@ -124,7 +129,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         modifications = [
             {"id": task_id, "status": "done"} for task_id in [1, 3, 4, 7, 11]
         ]
-        # Patch: Use id: 5 directly since csm_id may be missing or mismatched
+        # Make all subtasks of Task 2 and 5 oversized so no promoted subtask fits
+        for task in self.current_tasks_data:
+            if task.get("id") in [2, 5]:
+                for st in task.get("subtasks", []):
+                    st.setdefault("hpe_learning_meta", {})["estimated_effort_hours_min"] = 2.0
         modifications.append({
             "id": 5,
             "field_path": ("hpe_learning_meta", "estimated_effort_hours_min"), "value": 2.0
@@ -204,7 +213,12 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         subtasks = [t for t in scheduled_block if t.get("_parent_task_id") == 2]
         self.assertTrue(len(subtasks) > 0, "Should schedule promoted subtasks with fallback effort.")
         for subtask in subtasks:
-            self.assertAlmostEqual(subtask["hpe_learning_meta"]["estimated_effort_hours_min"], 1.2/len([st for st in task.get("subtasks", []) if st["status"] == "pending"]))
+            # Find the parent task object and count pending subtasks to match scheduler logic
+            parent_task_for_assertion = next(t for t in self.current_tasks_data if t.get("id") == 2)
+            num_pending_for_assertion = len([st for st in parent_task_for_assertion.get("subtasks", []) if st.get("status") == "pending"])
+            if num_pending_for_assertion == 0:
+                num_pending_for_assertion = 1
+            self.assertAlmostEqual(subtask["hpe_learning_meta"]["estimated_effort_hours_min"], 1.2/num_pending_for_assertion)
 
     def test_subtask_promotion_reporting_and_labeling(self):
         """
