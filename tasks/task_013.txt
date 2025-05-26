@@ -1,0 +1,11 @@
+# Task ID: 13
+# Title: P1.W1.Day1 Passive: Intro to Nucleotides (Reading & Initial Notes)
+# Status: pending
+# Dependencies: 1
+# Priority: high
+# Description: Focused reading on RNA nucleotide components (phosphate, ribose, bases) and creating initial notes/flashcards.
+# Details:
+Refer to CSM Day 1, Passive Block, Task 1.A. Read relevant sections from chosen resources on nucleotide structure. Summarize key concepts. Start creating flashcards for basic definitions.
+
+# Test Strategy:
+Key concepts of nucleotide structure noted. Initial flashcards for base definitions created.
