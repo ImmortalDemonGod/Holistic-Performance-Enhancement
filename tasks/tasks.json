@@ -643,6 +643,47 @@
           "status": "pending",
           "parentTaskId": 7
         }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part2.Thermo.LoopsElectrostatics",
+        "anchor_link": "#part-2-mastering-foundational-thermodynamic-principles-for-rna-folding-days-3-5---approx-4-5-hours-total-study--activity-time"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Explain loop penalties as an entropic cost in RNA folding and the role of electrostatic repulsion from the phosphate backbone, including mitigation by counterions.",
+        "estimated_effort_tshirt": "S",
+        "estimated_effort_hours_raw": "1-1.5 hours",
+        "estimated_effort_hours_min": 1.0,
+        "estimated_effort_hours_max": 1.5,
+        "mastery_criteria_summary": "Clear explanation of why forming a hairpin loop is entropically unfavorable (Task 2.3 PRD). Notes on electrostatic repulsion and counterions. Flashcards created.",
+        "activity_type": "focused_reading_explanation_writing_flashcard_creation",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Written explanation of why forming a hairpin loop is entropically unfavorable and factors influencing this contribution (Task 2.3 PRD for Day 5).",
+          "Notes on electrostatic repulsion from the phosphate backbone and the mitigating role of counterions.",
+          "Flashcards for loop penalties, electrostatic repulsion, and counterions."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 5,
+        "curriculum_part_title": "Part 2: Thermodynamics - Loop Penalties & Electrostatics",
+        "csm_tags": [
+          "rna_modeling",
+          "thermodynamics",
+          "loop_entropy",
+          "electrostatics",
+          "counterions",
+          "rna_stability"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:5",
+        "activity:focused_reading",
+        "block:active_learning",
+        "effort_tshirt:S"
       ]
     },
     {
