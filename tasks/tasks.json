@@ -533,6 +533,46 @@
           "status": "pending",
           "parentTaskId": 6
         }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part2.Biochem.BaseStacking",
+        "anchor_link": "#part-2-mastering-foundational-biochemical-principles-for-rna-folding-days-3-5---approx-4-5-hours-total-study--activity-time"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Explain the roles of base stacking and hydrogen bonding in RNA stability, including their relative energetic contributions and how they work together.",
+        "estimated_effort_tshirt": "M",
+        "estimated_effort_hours_raw": "2-3 hours",
+        "estimated_effort_hours_min": 2.0,
+        "estimated_effort_hours_max": 3.0,
+        "mastery_criteria_summary": "Clear written explanations of base stacking and hydrogen bonding in RNA stability. Flashcards for base stacking and hydrogen bonding concepts created.",
+        "activity_type": "explanatory_writing_flashcard_creation",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Written explanations of base stacking and hydrogen bonding in RNA stability.",
+          "Flashcards defining base stacking and hydrogen bonding concepts."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 5,
+        "curriculum_part_title": "Part 2: Biochemistry - Base Stacking and Hydrogen Bonding",
+        "csm_tags": [
+          "rna_modeling",
+          "biochemistry",
+          "base_stacking",
+          "hydrogen_bonding",
+          "rna_stability"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:5",
+        "activity:explanatory_writing",
+        "activity:flashcard_creation",
+        "block:active_learning",
+        "effort_tshirt:M"
       ]
     },
     {
