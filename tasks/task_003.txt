@@ -1,0 +1,103 @@
+# Task ID: 3
+# Title: Document RNA Polymer Structure and Backbone
+# Status: pending
+# Dependencies: 2
+# Priority: high
+# Description: Create materials explaining the phosphodiester backbone, RNA directionality, and polymer structure.
+# Details:
+Draw a short RNA dinucleotide (e.g., A-U) showing and labeling the 5'-3' phosphodiester bond, the 5' end, and the 3' end. Document the formation of the phosphodiester backbone, including the directionality of an RNA strand and its implications. Include notes on the overall charge and properties of the backbone. Create a concise explanation of why RNA's 5'-to-3' directionality matters functionally and structurally. Develop flashcards for phosphodiester bond characteristics and RNA directionality concepts.
+
+# Test Strategy:
+Verify the dinucleotide drawing shows correct linkage between nucleotides with properly labeled 5' and 3' ends. Check that the explanation of directionality is clear and accurate. Ensure flashcards effectively capture key concepts about the phosphodiester backbone.
+
+# Subtasks:
+## 1. Create Detailed Illustration of RNA Dinucleotide [pending]
+### Dependencies: None
+### Description: Produce a clear, labeled illustration of an A-U dinucleotide showing the phosphodiester bond and directional elements
+### Details:
+1. Draw an adenine (A) and uracil (U) nucleotide connected by a phosphodiester bond
+2. Clearly label the following components:
+   - The 5' end (phosphate group)
+   - The 3' end (hydroxyl group)
+   - The phosphodiester bond connecting the nucleotides
+   - Ribose sugar components
+   - Nitrogenous bases (adenine and uracil)
+   - Phosphate groups
+3. Use color coding to distinguish different molecular components
+4. Include a small legend explaining the color scheme
+5. Ensure chemical accuracy in bond angles and molecular structures
+6. Create both a detailed technical version and a simplified schematic version
+7. Test by having a colleague with biochemistry knowledge verify accuracy
+
+## 2. Document Phosphodiester Backbone Formation and Properties [pending]
+### Dependencies: 3.1
+### Description: Create comprehensive documentation on the formation, structure, and properties of the RNA phosphodiester backbone
+### Details:
+1. Explain the chemical reaction that forms phosphodiester bonds between nucleotides
+2. Document the step-by-step process of RNA polymerization
+3. Describe the overall negative charge of the backbone and explain its source
+4. Detail key physical properties of the backbone:
+   - Stability in various pH conditions
+   - Susceptibility to hydrolysis compared to DNA
+   - Structural flexibility
+5. Include diagrams showing how multiple phosphodiester bonds form the backbone
+6. Reference the illustration from subtask 1 to show how individual bonds contribute to the overall structure
+7. Create a table summarizing backbone properties
+8. Test by verifying against current biochemistry textbooks and having a subject matter expert review
+
+## 3. Explain RNA 5'-to-3' Directionality Significance [pending]
+### Dependencies: 3.1, 3.2
+### Description: Develop a clear explanation of why RNA's directional structure matters functionally and structurally
+### Details:
+1. Define what 5'-to-3' directionality means in practical terms
+2. Explain the functional significance of directionality in:
+   - RNA synthesis (transcription)
+   - Translation processes
+   - Interaction with ribosomes and other cellular machinery
+   - RNA degradation mechanisms
+3. Describe structural implications of directionality:
+   - Impact on secondary structure formation
+   - Influence on tertiary structure
+   - Effects on RNA-protein interactions
+4. Include specific examples of how directionality affects RNA function in biological systems
+5. Create a diagram showing how directionality influences RNA folding
+6. Test by having biology students review for clarity and comprehension
+
+## 4. Develop Educational Flashcards on RNA Structure [pending]
+### Dependencies: 3.1, 3.2, 3.3
+### Description: Create a comprehensive set of flashcards covering phosphodiester bonds and RNA directionality concepts
+### Details:
+1. Design 15-20 flashcards covering key concepts:
+   - Phosphodiester bond formation and structure
+   - RNA backbone properties
+   - 5'-to-3' directionality
+   - Functional significance of RNA structure
+   - Common misconceptions about RNA structure
+2. Format each flashcard with:
+   - A clear question or prompt on front
+   - A concise answer with a small diagram where helpful on back
+   - Reference to more detailed materials
+3. Include cards with both recall questions and application problems
+4. Organize cards in a logical learning sequence
+5. Create digital versions (PDF and interactive format)
+6. Test flashcards with students or colleagues to verify effectiveness
+7. Revise based on feedback for clarity and educational value
+
+## 5. Compile and Review Complete RNA Structure Documentation [pending]
+### Dependencies: 3.1, 3.2, 3.3, 3.4
+### Description: Assemble all materials into a cohesive educational package and conduct comprehensive review
+### Details:
+1. Compile all materials from previous subtasks into a unified document/package
+2. Create a table of contents and consistent formatting throughout
+3. Add cross-references between related sections
+4. Develop a glossary of key terms
+5. Conduct a thorough review process:
+   - Check for scientific accuracy against current literature
+   - Verify consistency in terminology throughout all materials
+   - Review for pedagogical effectiveness and clarity
+   - Have at least two subject matter experts review content
+   - Test materials with the intended audience (students/learners)
+6. Make revisions based on feedback
+7. Finalize materials in multiple formats (print-ready PDF, web-based interactive version, presentation slides)
+8. Create a brief instructor guide with suggestions for using the materials
+
