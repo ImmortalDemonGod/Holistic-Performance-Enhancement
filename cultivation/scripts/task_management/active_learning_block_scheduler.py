@@ -247,14 +247,12 @@ def schedule_active_tasks_into_block(
             continue
             
         if task_duration_minutes <= time_left_in_block:
-            scheduled_tasks_for_output.append({
-                "id": task.get("hpe_csm_reference", {}).get("csm_id", task_id),
-                "title": task_title,
-                "activity_type": hpe_learning_meta.get("activity_type"),
-                "estimated_effort_hours_raw": hpe_learning_meta.get("estimated_effort_hours_raw"),
-                "effort_minutes_planned": task_duration_minutes, # Scheduled for its minimum duration
-                "notes": task.get("details", "")
-            })
+            # Preserve all fields, especially subtask promotion metadata
+            scheduled_task = dict(task)  # shallow copy
+            scheduled_task["effort_minutes_planned"] = task_duration_minutes
+            # Set 'id' to CSM ID string if present, else fallback to integer
+            scheduled_task["id"] = task.get("hpe_csm_reference", {}).get("csm_id", task_id)
+            scheduled_tasks_for_output.append(scheduled_task)
             time_left_in_block -= task_duration_minutes
             logger.info(f"  SCHEDULED: Task {task_id} ('{task_title[:30]}...') for {task_duration_minutes:.0f} min. Time left: {time_left_in_block:.0f} min.")
             if time_left_in_block <= 0: # Using "<= 0" as even 0 time left means block is full

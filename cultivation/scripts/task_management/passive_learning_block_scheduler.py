@@ -1,3 +1,4 @@
+# cultivation/scripts/task_management/passive_learning_block_scheduler.py
 import json
 import logging
 from datetime import datetime
@@ -44,8 +45,8 @@ def dependencies_met(task: Dict[str, Any], task_statuses: Dict[Any, str]) -> boo
 
 def filter_passive_tasks(tasks: List[Dict[str, Any]], day_of_week: int, task_statuses: Dict[Any, str], min_required: int = 2) -> List[Dict[str, Any]]:
     keywords = ["flashcard_review", "note_review", "summary_writing", "consolidation", "light_reading", "audio_learning"]
-    # First pass: strict planned_day_of_week
     filtered = []
+    logger.info(f"[filter_passive_tasks] First pass: strict planned_day_of_week={day_of_week}")
     for task in tasks:
         if task.get("status") != "pending":
             continue
@@ -57,9 +58,11 @@ def filter_passive_tasks(tasks: List[Dict[str, Any]], day_of_week: int, task_sta
         planned_day = task.get("hpe_scheduling_meta", {}).get("planned_day_of_week")
         if (block == "passive_review" or any(k in activity for k in keywords)):
             if planned_day == day_of_week:
+                logger.info(f"  [PASS1] Adding task {task.get('id')} (planned_day_of_week={planned_day})")
                 filtered.append(task)
-    # If not enough, add from all suitable passive tasks
+    logger.info(f"[filter_passive_tasks] First pass found {len(filtered)} tasks.")
     if len(filtered) < min_required:
+        logger.info(f"[filter_passive_tasks] Second pass: add all suitable passive tasks not already included.")
         for task in tasks:
             if task.get("status") != "pending":
                 continue
@@ -71,7 +74,9 @@ def filter_passive_tasks(tasks: List[Dict[str, Any]], day_of_week: int, task_sta
             planned_day = task.get("hpe_scheduling_meta", {}).get("planned_day_of_week")
             if (block == "passive_review" or any(k in activity for k in keywords)):
                 if task not in filtered:
+                    logger.info(f"  [PASS2] Adding task {task.get('id')} (planned_day_of_week={planned_day})")
                     filtered.append(task)
+    logger.info(f"[filter_passive_tasks] Final filtered tasks: {[task.get('id') for task in filtered]}")
     return filtered
 
 def prioritize_tasks(tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -101,6 +106,7 @@ def prioritize_tasks(tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 def schedule_tasks(tasks: List[Dict[str, Any]], total_minutes: int = PASSIVE_BLOCK_MINUTES) -> List[Dict[str, Any]]:
     scheduled = []
     time_left = total_minutes
+    logger.info(f"[schedule_tasks] Starting block fill: {len(tasks)} tasks to consider, total_minutes={total_minutes}")
     for task in tasks:
         meta = task.get("hpe_learning_meta", {})
         min_eff_hours = meta.get("estimated_effort_hours_min", 0)
@@ -108,7 +114,9 @@ def schedule_tasks(tasks: List[Dict[str, Any]], total_minutes: int = PASSIVE_BLO
         min_eff_minutes = min_eff_hours * 60
         max_eff_minutes = max_eff_hours * 60
         avg_eff_minutes = (min_eff_minutes + max_eff_minutes) / 2
+        logger.info(f"  Considering task {task.get('id')} (min={min_eff_minutes}, max={max_eff_minutes}, avg={avg_eff_minutes}, time_left={time_left})")
         if avg_eff_minutes <= time_left and avg_eff_minutes > 0:
+            logger.info(f"    [SCHEDULED] Task {task.get('id')} for {avg_eff_minutes} min")
             scheduled.append({
                 "id": task.get("hpe_csm_reference", {}).get("csm_id", task.get("id")),
                 "title": task.get("title"),
@@ -118,13 +126,18 @@ def schedule_tasks(tasks: List[Dict[str, Any]], total_minutes: int = PASSIVE_BLO
                 "notes": task.get("details", "")
             })
             time_left -= avg_eff_minutes
+        else:
+            logger.info(f"    [SKIPPED] Task {task.get('id')} (avg_eff_minutes={avg_eff_minutes}) does not fit in time_left={time_left}")
         if time_left <= 0:
+            logger.info(f"[schedule_tasks] Block filled (time_left={time_left})")
             break
     # Add default task if >15 min left and it fits
     if time_left > 15 and time_left >= DEFAULT_TASK["effort_minutes_planned"]:
+        logger.info(f"  [DEFAULT] Adding default passive review task for {min(time_left, DEFAULT_TASK['effort_minutes_planned'])} min")
         default_task = DEFAULT_TASK.copy()
         default_task["effort_minutes_planned"] = min(time_left, DEFAULT_TASK["effort_minutes_planned"])
         scheduled.append(default_task)
+    logger.info(f"[schedule_tasks] Final scheduled tasks: {[t['id'] for t in scheduled]}")
     return scheduled
 
 def print_schedule(scheduled: List[Dict[str, Any]], output_md: str = None):
