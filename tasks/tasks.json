@@ -31,7 +31,18 @@
         "curriculum_part_title": "Day 1 Passive: Nucleotide Introduction",
         "csm_tags": ["rna_modeling", "biochemistry", "nucleotides", "initial_reading", "day1_passive"]
       },
-      "labels": []
+      "labels": [
+        "passive",
+        "reading",
+        "notetaking",
+        "flashcard_creation",
+        "rna_modeling",
+        "biochemistry",
+        "nucleotides",
+        "week1",
+        "day1",
+        "curriculum-aligned"
+      ]
     },
 
     {
