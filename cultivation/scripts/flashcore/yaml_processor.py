@@ -291,6 +291,7 @@ def _process_single_yaml_file(
         else:
             errors_in_file.append(transformed_result)
             
+    print(f"[DEBUG] _process_single_yaml_file({file_path}): errors_in_file={errors_in_file}")
     return cards_in_file, errors_in_file
 
 def load_and_process_flashcard_yamls(
@@ -330,6 +331,7 @@ def load_and_process_flashcard_yamls(
     logger.info(f"Found {len(yaml_files)} YAML files to process in {source_directory}")
 
     for yaml_file_path in yaml_files:
+        print(f"[DEBUG] Processing file: {yaml_file_path}")
         logger.debug(f"Processing file: {yaml_file_path}")
         try:
             cards_from_file, errors_from_file = _process_single_yaml_file(
@@ -341,6 +343,7 @@ def load_and_process_flashcard_yamls(
             all_processed_cards.extend(cards_from_file)
             all_errors.extend(errors_from_file)
             if fail_fast and errors_from_file:
+                print(f"[DEBUG] Raising error from file: {type(errors_from_file[0])} - {errors_from_file[0]}")
                 raise errors_from_file[0]
         except YAMLProcessingError as e:
             all_errors.append(e)

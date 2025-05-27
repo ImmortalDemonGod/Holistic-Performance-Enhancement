@@ -361,7 +361,7 @@ cards:
   - q: ValidQ
     a: ValidA
   - q: InvalidQSecret
-    a: My secret is supersecretvalue1234567890
+    a: "api_key: sk_live_verylongtestkey1234567890"
 """
         create_yaml_file(source_dir, "card_error.yaml", content_card_error)
 
