@@ -18,6 +18,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("PassiveLearningBlockScheduler")
 
 def load_tasks(tasks_json_path: str) -> List[Dict[str, Any]]:
+    """
+    Loads a list of tasks from a JSON file at the specified path.
+    
+    If the file cannot be read or parsed, returns an empty list.
+    """
     try:
         with open(tasks_json_path, 'r') as f:
             return json.load(f)["tasks"]
@@ -26,6 +31,15 @@ def load_tasks(tasks_json_path: str) -> List[Dict[str, Any]]:
         return []
 
 def get_today_day_of_week(target_date: str = None) -> int:
+    """
+    Returns the ISO weekday number for a given date or today.
+    
+    Args:
+        target_date: Optional date string in 'YYYY-MM-DD' format. If not provided, uses the current date.
+    
+    Returns:
+        An integer representing the ISO weekday (Monday=1, Sunday=7).
+    """
     if target_date:
         dt = datetime.strptime(target_date, "%Y-%m-%d")
     else:
@@ -33,9 +47,28 @@ def get_today_day_of_week(target_date: str = None) -> int:
     return dt.isoweekday()  # Monday=1, Sunday=7
 
 def build_task_status_map(tasks: List[Dict[str, Any]]) -> Dict[Any, str]:
+    """
+    Creates a mapping of task IDs to their status from a list of task dictionaries.
+    
+    Args:
+        tasks: List of task dictionaries, each containing at least "id" and "status" keys.
+    
+    Returns:
+        A dictionary mapping each task's ID to its status.
+    """
     return {task.get("id"): task.get("status") for task in tasks}
 
 def dependencies_met(task: Dict[str, Any], task_statuses: Dict[Any, str]) -> bool:
+    """
+    Checks whether all dependencies of a task are marked as completed.
+    
+    Args:
+        task: The task dictionary, potentially containing a "dependencies" list.
+        task_statuses: A mapping of task IDs to their current status.
+    
+    Returns:
+        True if all dependencies are marked "done" in the status map, False otherwise.
+    """
     deps = task.get("dependencies", [])
     for dep_id in deps:
         if task_statuses.get(dep_id) != "done":
@@ -44,6 +77,21 @@ def dependencies_met(task: Dict[str, Any], task_statuses: Dict[Any, str]) -> boo
     return True
 
 def filter_passive_tasks(tasks: List[Dict[str, Any]], day_of_week: int, task_statuses: Dict[Any, str], min_required: int = 2, allow_off_day_fill: bool = True) -> List[Dict[str, Any]]:
+    """
+    Filters tasks to select those suitable for passive learning on a given day.
+    
+    Selects pending tasks with all dependencies met, recommended for passive review or matching passive activity keywords, and planned for the specified day of the week. If fewer than the minimum required tasks are found and off-day fill is allowed, a second pass adds additional suitable passive tasks regardless of planned day.
+    
+    Args:
+        tasks: List of task dictionaries to filter.
+        day_of_week: ISO weekday number (1=Monday, 7=Sunday) for which to filter tasks.
+        task_statuses: Mapping of task IDs to their current status.
+        min_required: Minimum number of tasks to select before considering off-day fill.
+        allow_off_day_fill: Whether to include suitable tasks not planned for the target day if needed.
+    
+    Returns:
+        A list of filtered tasks suitable for passive learning on the specified day.
+    """
     keywords = ["flashcard_review", "note_review", "summary_writing", "consolidation", "light_reading", "audio_learning"]
     filtered = []
     logger.info(f"[filter_passive_tasks] First pass: strict planned_day_of_week={day_of_week}")
@@ -82,6 +130,11 @@ def filter_passive_tasks(tasks: List[Dict[str, Any]], day_of_week: int, task_sta
     return filtered
 
 def prioritize_tasks(tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Sorts tasks by priority for passive learning scheduling.
+    
+    Tasks are ranked by tier based on tags or activity type, explicit priority label, and estimated minimum effort hours (descending). Returns the sorted list with highest-priority tasks first.
+    """
     TIER_SCORES = {1: 400, 2: 300, 3: 200, 4: 100, "default_priority": 0}
     keywords_tiers = {
         1: ["consolidation", "review"],  # tags
@@ -90,6 +143,11 @@ def prioritize_tasks(tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         4: ["audio_learning", "light_reading"]
     }
     def get_task_tier(task):
+        """
+        Determines the priority tier score for a task based on its tags and activity type.
+        
+        Returns the corresponding tier score if any tier keywords are found in the task's tags or activity type; otherwise, returns the default priority score.
+        """
         tags = task.get("hpe_scheduling_meta", {}).get("csm_tags", [])
         activity = task.get("hpe_learning_meta", {}).get("activity_type", "")
         for tier, keywords in keywords_tiers.items():
@@ -97,6 +155,11 @@ def prioritize_tasks(tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 return TIER_SCORES[tier]
         return TIER_SCORES["default_priority"]
     def priority_value(p):
+        """
+        Returns a numeric score corresponding to a priority label.
+        
+        The function maps 'high', 'medium', and 'low' (case-insensitive) to 30, 20, and 10 respectively. Any unrecognized label defaults to 20.
+        """
         return {"high": 30, "medium": 20, "low": 10}.get(p.lower(), 20)
     tasks.sort(key=lambda t: (
         get_task_tier(t),
@@ -106,6 +169,18 @@ def prioritize_tasks(tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return tasks
 
 def schedule_tasks(tasks: List[Dict[str, Any]], total_minutes: int = PASSIVE_BLOCK_MINUTES) -> List[Dict[str, Any]]:
+    """
+    Schedules tasks into a fixed-duration passive learning block based on estimated effort.
+    
+    Iterates through prioritized tasks, adding each to the schedule if its average estimated effort fits within the remaining block time. If significant time remains after scheduling all tasks, a default passive review task is added to fill the block.
+    
+    Args:
+        tasks: List of task dictionaries to consider for scheduling.
+        total_minutes: Total available minutes for the passive learning block.
+    
+    Returns:
+        A list of scheduled task dictionaries, each including planned effort in minutes.
+    """
     scheduled = []
     time_left = total_minutes
     logger.info(f"[schedule_tasks] Starting block fill: {len(tasks)} tasks to consider, total_minutes={total_minutes}")
@@ -143,6 +218,11 @@ def schedule_tasks(tasks: List[Dict[str, Any]], total_minutes: int = PASSIVE_BLO
     return scheduled
 
 def print_schedule(scheduled: List[Dict[str, Any]], output_md: str = None):
+    """
+    Prints a formatted summary of the scheduled passive learning block.
+    
+    If an output file path is provided, also writes the schedule to a markdown file.
+    """
     lines = []
     header = "Learning Block (Passive Review & Consolidation) | 23:15 – 00:45 CT (90 minutes)"
     sep = "-" * 80
@@ -171,8 +251,17 @@ def generate_passive_plan(
     min_required: int = 2
 ) -> List[Dict[str, Any]]:
     """
-    Generates the passive learning block plan for a given date and task list.
-    Returns a list of scheduled task dicts (not printed output).
+    Generates a scheduled plan of passive learning tasks for a specified date.
+    
+    Determines the appropriate day of week, filters and prioritizes passive learning tasks based on readiness and scheduling constraints, and fits them into a fixed time block. Returns the list of scheduled tasks for the target date.
+     
+    Args:
+        all_tasks_data: List of all available task dictionaries.
+        target_date_str: Target date in 'YYYY-MM-DD' format.
+        min_required: Minimum number of passive tasks to schedule (default is 2).
+    
+    Returns:
+        A list of scheduled task dictionaries for the passive learning block.
     """
     day_of_week = get_today_day_of_week(target_date_str)
     task_statuses = build_task_status_map(all_tasks_data)
