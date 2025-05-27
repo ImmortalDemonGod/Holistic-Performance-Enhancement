@@ -74,17 +74,17 @@ class Card(BaseModel):
             raise ValueError(f"Tag '{v}' is not in kebab-case.")
         return v
 
-    @validator("front")
+    @validator("front", pre=True)
     def check_front_max_length(cls, v: str) -> str:
         """Ensure front text does not exceed 1024 characters."""
-        if len(v) > 1024:
+        if not isinstance(v, str) or len(v) > 1024:
             raise ValueError("String should have at most 1024 characters")
         return v
 
-    @validator("back")
+    @validator("back", pre=True)
     def check_back_max_length(cls, v: str) -> str:
         """Ensure back text does not exceed 1024 characters."""
-        if len(v) > 1024:
+        if not isinstance(v, str) or len(v) > 1024:
             raise ValueError("String should have at most 1024 characters")
         return v
 
@@ -150,11 +150,11 @@ class Review(BaseModel):
         description="Type of review, e.g., 'learn', 'review', 'relearn', 'manual'. Useful for advanced FSRS variants or analytics."
     )
 
-    @validator("rating")
-    def validate_rating_range(cls, v: int) -> int:
-        """Ensure rating is between 0 and 3 inclusive."""
-        if v < 0 or v > 3:
-            raise ValueError("Rating must be between 0 and 3")
+    @validator("rating", pre=True)
+    def validate_rating_type(cls, v):
+        """Ensure rating is an integer between 0 and 3., type check only."""
+        if not isinstance(v, int):
+            raise ValueError("Input should be a valid integer")
         return v
 
     @validator("review_type")

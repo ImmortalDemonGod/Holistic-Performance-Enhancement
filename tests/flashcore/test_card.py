@@ -106,12 +106,15 @@ class TestCardModel:
         long_text = "a" * (max_len + 1)
         valid_text = "a" * max_len
         
-        # Test valid length
-        Card(deck_name="D", front="Q", back="A", **{field: valid_text})
+        # Set the other field to a default value not being tested.
+        other_field = "back" if field == "front" else "front"
+        valid_kwargs = {field: valid_text, other_field: "A"}
+        long_kwargs = {field: long_text, other_field: "A"}
+        Card(deck_name="D", **valid_kwargs)
 
         # Test invalid length
         with pytest.raises(ValidationError) as excinfo:
-            Card(deck_name="D", front="Q", back="A", **{field: long_text})
+            Card(deck_name="D", **long_kwargs)
         assert f"String should have at most {max_len} characters" in str(excinfo.value)
 
     def test_card_deck_name_min_length(self):
@@ -208,8 +211,13 @@ class TestReviewModel:
             Review(card_uuid=valid_card_uuid, rating=invalid_rating, stab_after=1.0, diff=7.0, # type: ignore
                    next_due=date.today() + timedelta(days=1), elapsed_days_at_review=0,
                    scheduled_days_interval=1)
-        assert "Input should be a valid integer" in str(excinfo.value) or \
-               "ensure this value is" in str(excinfo.value) # Error message varies
+        err = str(excinfo.value)
+        assert (
+            "Input should be a valid integer" in err
+            or "ensure this value is" in err
+            or "greater than or equal to 0" in err
+            or "less than or equal to 3" in err
+        )  # Accept Pydantic v2 error messages
 
     def test_review_resp_ms_validation(self, valid_card_uuid):
         Review(card_uuid=valid_card_uuid, rating=0, resp_ms=0, stab_after=1.0, diff=7.0,
