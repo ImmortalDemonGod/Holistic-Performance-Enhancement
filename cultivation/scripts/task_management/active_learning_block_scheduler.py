@@ -21,7 +21,11 @@ logger = logging.getLogger("ActiveLearningBlockScheduler")
 # --- Helper Functions (Potentially refactor into a shared utility module) ---
 
 def load_tasks(tasks_json_path: str) -> List[Dict[str, Any]]:
-    """Loads tasks from the specified JSON file."""
+    """
+    Loads a list of tasks from a JSON file at the given path.
+    
+    If the file is missing, contains invalid JSON, or another error occurs, returns an empty list.
+    """
     try:
         with open(tasks_json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -35,7 +39,11 @@ def load_tasks(tasks_json_path: str) -> List[Dict[str, Any]]:
     return []
 
 def get_day_of_week(target_date_str: Optional[str] = None) -> int:
-    """Gets the ISO day of the week (Monday=1, Sunday=7) for a target date string or current date."""
+    """
+    Returns the ISO weekday number (Monday=1, Sunday=7) for a given date string or for today if no date is provided.
+    
+    If the input date string is invalid, defaults to the current date.
+    """
     try:
         if target_date_str:
             dt = datetime.strptime(target_date_str, "%Y-%m-%d")
@@ -47,7 +55,11 @@ def get_day_of_week(target_date_str: Optional[str] = None) -> int:
         return datetime.now().isoweekday()
 
 def build_task_status_map(tasks: List[Dict[str, Any]]) -> Dict[Any, str]:
-    """Builds a map of task IDs to their statuses."""
+    """
+    Creates a dictionary mapping each task's ID to its status.
+    
+    If a task does not have a status, it defaults to "pending".
+    """
     status_map: Dict[Any, str] = {}
     for task in tasks:
         task_id = task.get("id")
@@ -56,7 +68,12 @@ def build_task_status_map(tasks: List[Dict[str, Any]]) -> Dict[Any, str]:
     return status_map
 
 def dependencies_met(task: Dict[str, Any], task_statuses: Dict[Any, str]) -> bool:
-    """Checks if all dependencies for a given task are met (status: 'done')."""
+    """
+    Determines whether all dependencies of a task have been completed.
+    
+    Returns:
+        True if the task has no dependencies or all dependencies have status 'done'; otherwise, False.
+    """
     deps = task.get("dependencies", [])
     if not deps:
         return True
@@ -75,9 +92,18 @@ def filter_active_tasks(
     min_tasks_for_day_focus: int = MIN_REQUIRED_TASKS_FOR_DAY_FOCUS
 ) -> List[Dict[str, Any]]:
     """
-    Filters tasks suitable for the Active Learning Block, including subtask promotion for oversized tasks.
-    Considers 'recommended_block', 'activity_type', dependencies, status, and minimum effort fitting.
-    Uses a two-pass system for day preference. If a parent task is too large, considers eligible subtasks.
+    Filters and selects tasks suitable for inclusion in an active learning block, promoting eligible subtasks when parent tasks exceed the block's duration.
+    
+    Considers task status, dependency completion, explicit or inferred active learning suitability, and estimated effort. Oversized parent tasks are excluded in favor of promoting pending subtasks with met sibling dependencies, distributing effort estimates as needed. Applies a two-pass system: first prioritizing tasks planned for the current day, then supplementing with other eligible active tasks if the minimum required is not met.
+    
+    Args:
+        all_tasks: List of all task dictionaries to consider.
+        current_day_of_week: ISO weekday number (Monday=1, Sunday=7) for filtering tasks planned for the current day.
+        task_statuses: Mapping of task IDs to their current status.
+        min_tasks_for_day_focus: Minimum number of on-day tasks to select before considering tasks from other days.
+    
+    Returns:
+        A list of candidate tasks and promoted subtasks eligible for scheduling into the active learning block.
     """
     candidate_tasks: List[Dict[str, Any]] = []
     
@@ -250,12 +276,33 @@ def filter_active_tasks(
 
 
 def prioritize_active_tasks(tasks: List[Dict[str, Any]], current_day_of_week: int) -> List[Dict[str, Any]]:
-    """Prioritizes active tasks: 1. On-day, 2. Taskmaster Priority, 3. Min Effort."""
+    """
+    Sorts active tasks by planned day, priority, and minimum estimated effort.
+    
+    Tasks are prioritized in the following order: those planned for the current day, higher priority levels ("high" > "medium" > "low"), lower minimum estimated effort, and finally by task ID for tie-breaking.
+    
+    Args:
+        tasks: List of task dictionaries to prioritize.
+        current_day_of_week: ISO weekday number (Monday=1, Sunday=7) representing the current day.
+    
+    Returns:
+        A list of tasks sorted by on-day status, priority, minimum effort, and ID.
+    """
     
     def get_priority_score(priority_str: Optional[str]) -> int:
+        """
+        Returns a numeric score for a given priority string.
+        
+        The score is 3 for "high", 2 for "medium" (default), and 1 for "low". If the input is not recognized, returns 2.
+        """
         return {"high": 3, "medium": 2, "low": 1}.get(str(priority_str).lower(), 2) # Default to medium
 
     def sort_key(task: Dict[str, Any]):
+        """
+        Generates a sorting key for tasks based on scheduling relevance, priority, effort, and ID.
+        
+        The key prioritizes tasks planned for the current day, then by descending priority, then by minimum estimated effort, and finally by task ID for consistent ordering.
+        """
         is_on_day = task.get("hpe_scheduling_meta", {}).get("planned_day_of_week") == current_day_of_week
         priority_score = get_priority_score(task.get("priority"))
         min_effort = task.get("hpe_learning_meta", {}).get("estimated_effort_hours_min", float('inf'))
@@ -275,7 +322,18 @@ def schedule_active_tasks_into_block(
     prioritized_tasks: List[Dict[str, Any]],
     total_block_minutes: int = ACTIVE_BLOCK_MINUTES
 ) -> List[Dict[str, Any]]:
-    """Schedules tasks into the active learning block based on their minimum effort."""
+    """
+    Schedules prioritized tasks into the active learning block until the block's time limit is reached.
+    
+    Each task is added if its minimum estimated effort fits within the remaining block time. Tasks with infinite, zero, or negative effort are skipped. Tasks exceeding the block duration are flagged for manual review if their estimated effort is greater than one hour. The function preserves all task metadata, including subtask promotion details, in the scheduled output.
+    
+    Args:
+        prioritized_tasks: List of tasks sorted by scheduling priority.
+        total_block_minutes: Total duration of the active learning block in minutes.
+    
+    Returns:
+        A list of scheduled tasks, each annotated with the planned effort in minutes.
+    """
     scheduled_tasks_for_output: List[Dict[str, Any]] = []
     time_left_in_block = float(total_block_minutes) # Use float for precision
     
@@ -343,7 +401,17 @@ def schedule_active_tasks_into_block(
     return scheduled_tasks_for_output
 
 def format_schedule_for_print(scheduled_tasks: List[Dict[str, Any]]) -> str:
-    """Formats the list of scheduled tasks into a string for printing or file output."""
+    """
+    Formats a list of scheduled tasks into a human-readable string for display or file output.
+    
+    The output includes a header, total planned time, and details for each scheduled task such as ID, title, activity type, estimated effort, planned duration, and truncated notes. If no tasks are scheduled, indicates that the block is empty.
+    
+    Args:
+        scheduled_tasks: List of task dictionaries to be formatted.
+    
+    Returns:
+        A formatted string representing the scheduled tasks for the active learning block.
+    """
     lines = []
     header = "Learning Block (Active Acquisition & Practice) | 22:00 – 23:00 CT (60 minutes)"
     separator = "-" * len(header)
@@ -378,8 +446,9 @@ def generate_active_plan(
     min_focus_tasks: int = MIN_REQUIRED_TASKS_FOR_DAY_FOCUS
 ) -> List[Dict[str, Any]]:
     """
-    Generates the active learning block plan for a given date and task list.
-    Returns a list of scheduled task dicts (not printed output).
+    Generates a scheduled plan of active learning tasks for a specified date.
+    
+    Determines the current day, filters and prioritizes eligible active tasks, and schedules them into a fixed-duration block. Returns a list of scheduled task dictionaries for the active learning session.
     """
     current_day = get_day_of_week(target_date_str)
     task_completion_statuses = build_task_status_map(all_tasks_data)
@@ -397,7 +466,11 @@ def generate_active_plan(
     return scheduled_block_plan
 
 def main():
-    """Main function to orchestrate the scheduling process."""
+    """
+    Runs the command-line interface for the Active Learning Block Scheduler.
+    
+    Parses arguments, loads tasks, filters and prioritizes them, schedules tasks into the active learning block, and outputs the resulting schedule to the console and optionally to a Markdown file.
+    """
     parser = argparse.ArgumentParser(description="Schedule Active Learning Block Tasks.")
     parser.add_argument(
         "--tasks", 

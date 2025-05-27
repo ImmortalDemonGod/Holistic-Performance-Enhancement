@@ -17,6 +17,11 @@ BASELINE_TASKS_PATH = os.path.join(os.path.dirname(__file__), '../../..', 'tasks
 class TestActiveLearningBlockScheduler(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        """
+        Loads baseline task data from a JSON file before any tests are run.
+        
+        If the file is missing or contains invalid JSON, sets the baseline data to an empty list and prints an error message.
+        """
         try:
             with open(BASELINE_TASKS_PATH, 'r', encoding='utf-8') as f:
                 cls.baseline_tasks_data = json.load(f)["tasks"]
@@ -28,12 +33,22 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
             cls.baseline_tasks_data = []
 
     def setUp(self):
+        """
+        Prepares a fresh copy of baseline task data and sets logging levels before each test.
+        
+        Creates a deep copy of the baseline tasks to ensure test isolation and configures logging to the INFO level for both the scheduler and root handlers.
+        """
         self.current_tasks_data = copy.deepcopy(self.baseline_tasks_data)
         scheduler.logger.setLevel(logging.INFO)
         for handler in logging.root.handlers:
             handler.setLevel(logging.INFO)
 
     def _modify_tasks(self, modifications: List[Dict[str, Any]]):
+        """
+        Applies a list of modifications to the current tasks data.
+        
+        Each modification can target a task by `csm_id` or numeric `id` and update fields such as status, priority, or nested fields specified by a `field_path`. If a target task is not found, a warning is printed. The test fails if a specified `field_path` cannot be traversed due to an invalid structure.
+        """
         for mod in modifications:
             task_found = False
             for task in self.current_tasks_data:
@@ -63,6 +78,19 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
                 print(f"Warning: Modification target not found in tasks: {mod}")
 
     def _run_scheduler(self, tasks_list: List[Dict[str, Any]], target_date_str: str, min_focus_tasks: int = 1) -> List[Dict[str, Any]]:
+        """
+        Runs the active learning block scheduler pipeline for a given date and task list.
+        
+        Executes the full scheduling process: determines the day of week, builds task status mappings, filters for active tasks, prioritizes them, and schedules the prioritized tasks into a block.
+        
+        Args:
+            tasks_list: List of task dictionaries to be considered for scheduling.
+            target_date_str: Date string (YYYY-MM-DD) representing the scheduling target.
+            min_focus_tasks: Minimum number of focus tasks required for the day.
+        
+        Returns:
+            A list of scheduled task dictionaries representing the scheduled block for the given date.
+        """
         day_of_week = scheduler.get_day_of_week(target_date_str)
         task_statuses = scheduler.build_task_status_map(tasks_list)
         candidate_tasks = scheduler.filter_active_tasks(
@@ -76,6 +104,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         return scheduled_block
 
     def test_task1_scheduled_on_day1(self):
+        """
+        Verifies that Task 1 is scheduled on the specified date with the correct planned effort.
+        
+        This test asserts that Task 1 (identified by its CSM ID) appears in the scheduled block for the given date and that its planned effort matches the minimum expected value.
+        """
         target_date = "2025-05-19"
         scheduled_block = self._run_scheduler(self.current_tasks_data, target_date)
         self.assertTrue(len(scheduled_block) >= 1, "Expected at least one task to be scheduled.")
@@ -85,6 +118,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         self.assertEqual(task1_scheduled_details.get("effort_minutes_planned"), 1.0 * 60, "Task 1 planned for its min effort.")
 
     def test_task2_not_scheduled_due_to_effort(self):
+        """
+        Tests that Task 2 and its subtasks are not scheduled when their minimum effort exceeds the block size.
+        
+        Marks Task 1 as done and sets all subtasks of Task 2 to have an estimated minimum effort greater than the allowed block size. Asserts that Task 2 is not scheduled and that the scheduled block is empty.
+        """
         target_date = "2025-05-19"
         modifications = [
             {"id": 1, "status": "done"}
@@ -101,6 +139,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         self.assertEqual(len(scheduled_block), 0, "Expected no tasks to be scheduled if Task 2 and all its subtasks are too large and Task 1 done.")
 
     def test_task3_blocked_by_dependency(self):
+        """
+        Tests that Task 3 is not scheduled when its dependency (Task 1) is marked as done but other dependencies remain unmet.
+        
+        Marks Task 1 as done, runs the scheduler for the target date, and asserts that Task 3 is excluded from the scheduled block due to unresolved dependencies.
+        """
         target_date = "2025-05-20"
         modifications = [
             {"id": 1, "status": "done"}
@@ -111,6 +154,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         self.assertNotIn("RNA.P1.Foundations.W1.Part1.Biochem.BackboneDirectionality", scheduled_csm_ids, "Task 3 should not be scheduled due to unmet dependency.")
 
     def test_task3_scheduled_when_dependencies_met(self):
+        """
+        Tests that Task 3 is scheduled when its dependencies (Tasks 1 and 2) are marked as done.
+        
+        Marks Tasks 1 and 2 as completed, runs the scheduler for the target date, and asserts that Task 3 is included in the scheduled block with the correct planned effort.
+        """
         target_date = "2025-05-20"
         modifications = [
             {"id": 1, "status": "done"},
@@ -125,6 +173,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         self.assertEqual(task3_scheduled_details.get("effort_minutes_planned"), 1.0 * 60)
 
     def test_empty_block_if_no_fitting_active_tasks(self):
+        """
+        Verifies that no tasks are scheduled when all active tasks and their subtasks exceed the allowed effort.
+        
+        Marks several tasks as done and inflates the estimated effort of remaining tasks and their subtasks so that none fit within the scheduling block. Asserts that the resulting scheduled block is empty.
+        """
         target_date = "2025-05-25"
         modifications = [
             {"id": task_id, "status": "done"} for task_id in [1, 3, 4, 7, 11]
@@ -146,7 +199,9 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
 
     def test_subtask_promotion_parent_too_large_subtask_fits(self):
         """
-        Parent task min effort > block, but one subtask fits (should be scheduled)
+        Tests that when a parent task's minimum effort exceeds the block size but a subtask's effort fits, the scheduler promotes and schedules the subtask.
+        
+        The test marks the parent task's dependency as complete, sets the parent effort above the block limit, and ensures a subtask with fitting effort is scheduled with correct parent metadata.
         """
         target_date = "2025-05-26"
         # Pick Task 2 (RNA.P1.Foundations.W1.Part1.Biochem.NucleotideStructure), min effort 1.5hr, has subtasks
@@ -173,7 +228,9 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
 
     def test_subtask_promotion_all_subtasks_too_large(self):
         """
-        Parent and all subtasks have min effort > block (should schedule nothing)
+        Tests that no subtasks are scheduled when both the parent task and all its subtasks have minimum effort exceeding the block size.
+        
+        Verifies that the scheduler excludes all subtasks if their estimated effort is too large to fit within a scheduling block.
         """
         target_date = "2025-05-27"
         # Pick Task 2, set parent and all subtasks to 2hr
@@ -193,7 +250,7 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
 
     def test_subtask_promotion_subtask_no_explicit_effort(self):
         """
-        Subtask lacks explicit effort, should use parent divided by number of pending subtasks
+        Tests that when subtasks lack explicit effort values, the scheduler assigns each promoted subtask a fallback effort equal to the parent task's effort divided by the number of pending subtasks.
         """
         target_date = "2025-05-28"
         modifications = [
@@ -222,7 +279,7 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
 
     def test_subtask_promotion_reporting_and_labeling(self):
         """
-        Scheduled subtask should include parent ID, parent title, and correct labeling.
+        Verifies that a promoted subtask in the scheduled block includes parent task ID, parent title, and correct labeling fields.
         """
         target_date = "2025-05-29"
         modifications = [
@@ -244,6 +301,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         self.assertIsInstance(subtask["_parent_title"], str)
 
     def test_prioritization_on_day_vs_off_day(self):
+        """
+        Tests that tasks recommended for the current day are prioritized over off-day tasks.
+        
+        This test marks several tasks as done, sets recommended blocks for specific tasks, and ensures that the scheduler places on-day tasks before off-day tasks in the scheduled block.
+        """
         target_date = "2025-05-23"
         modifications = []
         for i in range(1, 7):
@@ -271,6 +333,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
             self.assertEqual(scheduled_csm_ids[0], task7_id)
 
     def test_prioritization_by_taskmaster_priority(self):
+        """
+        Tests that tasks with higher taskmaster priority are scheduled before lower priority tasks.
+        
+        Adds dummy tasks with high and low priority, modifies an existing task's priority, and verifies that the scheduler orders the high priority task before the low priority task in the scheduled block.
+        """
         target_date = "2025-05-19"
         dummy_high_prio = {
             "id": 101, "title": "High Prio Active Task", "status": "pending", "dependencies": [],
@@ -299,6 +366,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         self.assertLess(scheduled_csm_ids.index("DUMMY.HIGH"), scheduled_csm_ids.index("DUMMY.LOW"), "High priority task should be scheduled before low priority task.")
 
     def test_prioritization_by_min_effort(self):
+        """
+        Tests that tasks with smaller estimated effort are prioritized before larger ones when scheduled, and verifies correct planned effort values in minutes for each.
+        
+        This test adds two dummy tasks with different effort estimates, modifies an existing task's priority, and asserts that the scheduler orders the smaller effort task before the larger one, with both fitting exactly into the schedule.
+        """
         target_date = "2025-05-19"
         dummy_small_effort = {
             "id": 201, "title": "Small Effort Task", "status": "pending", "dependencies": [],
@@ -328,6 +400,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         self.assertEqual(len(scheduled_block), 2, "Only the two dummy tasks should fit perfectly.")
 
     def test_exclusion_of_passive_review_task(self):
+        """
+        Tests that tasks marked as passive review with a non-active activity type are excluded from scheduling.
+        
+        Ensures that when all other tasks are marked as done and the remaining candidate is a passive review task with a non-active activity type, the scheduler does not include it in the scheduled block.
+        """
         target_date = "2025-05-23"
         modifications = []
         for i in range(1, 8): modifications.append({"id": i, "status": "done"})
@@ -348,6 +425,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         self.assertEqual(len(scheduled_block), 0, "Expected no tasks to be scheduled if only passive tasks are candidates.")
 
     def test_task_considered_active_by_activity_type_keyword(self):
+        """
+        Tests that a task with an empty recommended block but an active activity type keyword is scheduled.
+        
+        Verifies that the scheduler considers the activity type keyword when determining task activeness, ensuring the task is included in the scheduled block even if its recommended block is empty.
+        """
         target_date = "2025-05-19"
         modifications = [
             {"id": 1, "status": "pending"},

@@ -27,8 +27,12 @@ DAYS_TO_SIMULATE = 7
 # --- Helper: Mark scheduled tasks as done in in-memory list ---
 def mark_tasks_done(sim_tasks_list, scheduled_tasks_details, current_day_str):
     """
-    Mark tasks as 'done' in-place in sim_tasks_list based on scheduled_tasks_details.
-    Handles both parent tasks and promoted subtasks.
+    Marks scheduled tasks as 'done' in the in-memory task list for a given day.
+    
+    Updates the status of tasks in `sim_tasks_list` to 'done' based on the provided
+    `schedule_tasks_details` for the specified simulation day. Handles both parent
+    tasks and promoted subtasks, ensuring that parent tasks are marked as 'done'
+    when all their subtasks are complete. Modifies `sim_tasks_list` in-place.
     """
     import logging
     sim_logger = logging.getLogger("WeeklyScheduleSimulator")
@@ -98,6 +102,11 @@ def mark_tasks_done(sim_tasks_list, scheduled_tasks_details, current_day_str):
 # --- Main Simulation ---
 def main():
     # Load initial tasks
+    """
+    Simulates a full week's active and passive learning schedules and outputs the results to a markdown file.
+    
+    Loads tasks from a JSON file, simulates daily active and passive learning plans for a configurable week, and marks scheduled tasks as done in-memory. Aggregates formatted daily schedules into a consolidated markdown report without modifying the original tasks file. Exits with an error if tasks cannot be loaded.
+    """
     initial_tasks = load_tasks(TASKS_JSON_PATH)
     if not initial_tasks:
         print(f"ERROR: Could not load tasks from {TASKS_JSON_PATH}. Exiting.")
