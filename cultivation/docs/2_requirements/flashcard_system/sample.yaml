@@ -1,0 +1,5 @@
+# Sample flashcard YAML file for flashcore system
+- uuid: sample-uuid-1
+  front: What is spaced repetition?
+  back: A learning technique that incorporates increasing intervals of time between subsequent review of previously learned material.
+  tags: [memory, learning]
