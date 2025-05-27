@@ -87,7 +87,7 @@ class _RawYAMLDeckFile(PydanticBaseModel):
 
 # --- Custom Error Reporting Dataclass ---
 @dataclass
-class YAMLProcessingError:
+class YAMLProcessingError(Exception):
     file_path: Path
     message: str
     card_index: Optional[int] = None
