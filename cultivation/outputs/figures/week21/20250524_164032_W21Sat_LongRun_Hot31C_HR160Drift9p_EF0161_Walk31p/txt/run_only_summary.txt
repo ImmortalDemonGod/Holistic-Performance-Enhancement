@@ -1,0 +1,16 @@
+Run Summary (Run-Only, Filtered):
+  start_time: 2025-05-24 16:41:18+00:00
+  end_time: 2025-05-24 19:07:43+00:00
+  duration: 0 days 02:26:25
+  total_distance_km: 17.705995301046805
+  avg_pace_min_per_km: 6.48
+  avg_hr: 159.6
+  max_hr: 193
+  avg_cadence: 158.2694397601649
+  elevation_gain_m: 101.69999999999999
+  distance_km: 13.73
+  duration_min: 89.0
+  efficiency_factor: 0.01611
+  decoupling_%: 8.69
+  hrTSS: 114.1
+  zones_applied: {"Z1 (Recovery)": {"bpm": [0, 145], "pace_min_per_km": [7.0, 999]}, "Z2 (Aerobic)": {"bpm": [145, 160], "pace_min_per_km": [6.85, 8.7]}, "Z3 (Tempo)": {"bpm": [161, 175], "pace_min_per_km": [5.2, 6.85]}, "Z4 (Threshold)": {"bpm": [176, 186], "pace_min_per_km": [4.8, 5.2]}, "Z5 (VO2max)": {"bpm": [187, 201], "pace_min_per_km": [0.0, 4.8]}}

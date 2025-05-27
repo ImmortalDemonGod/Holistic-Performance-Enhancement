@@ -238,7 +238,34 @@ cultivation/reader_app/static/pdfjs/locale/*
 cultivation/reader_app/static/pdfjs/standard_fonts/*
 cultivation/reader_app/node_modules/*
 
+# Task Master, agent/editor, and system cache/config files
+.cursor/
+.roo/
+.roomodes
+
 cultivation/reader_app/
 cultivation/data/processed/
 cultivation/outputs/software/dev_daily_reflect/raw/*.json
 cultivation/outputs/software/dev_daily_reflect/rollup/*.csv
+
+# Task Master
+.taskmaster/.env
+node_modules/
+
+# Added by Claude Task Master
+logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dev-debug.log
+# Dependency directories
+# Environment variables
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific

@@ -1,0 +1,1252 @@
+{
+  "tasks": [
+    {
+      "id": 13,
+      "title": "P1.W1.Day1 Passive: Intro to Nucleotides (Reading & Initial Notes)",
+      "description": "Focused reading on RNA nucleotide components (phosphate, ribose, bases) and creating initial notes/flashcards.",
+      "status": "pending",
+      "dependencies": [1],
+      "priority": "high",
+      "details": "Refer to CSM Day 1, Passive Block, Task 1.A. Read relevant sections from chosen resources on nucleotide structure. Summarize key concepts. Start creating flashcards for basic definitions.",
+      "testStrategy": "Key concepts of nucleotide structure noted. Initial flashcards for base definitions created.",
+      "subtasks": [],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Day1.Passive.NucleotideIntro",
+        "anchor_link": "#day-1-e-g-monday---focus-orientation--initial-biochemistry-dive"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Gain initial understanding of RNA nucleotide components through focused reading and note-taking.",
+        "estimated_effort_tshirt": "M",
+        "estimated_effort_hours_raw": "1.0-1.5 hours",
+        "estimated_effort_hours_min": 1.0,
+        "estimated_effort_hours_max": 1.5,
+        "mastery_criteria_summary": "Completed reading on nucleotide structure. Initial notes and basic flashcards created.",
+        "activity_type": "focused_reading_initial_notetaking_flashcard_creation",
+        "recommended_block": "passive_review",
+        "deliverables": ["Initial notes on nucleotide structure.", "First batch of basic definition flashcards."]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 1,
+        "curriculum_part_title": "Day 1 Passive: Nucleotide Introduction",
+        "csm_tags": ["rna_modeling", "biochemistry", "nucleotides", "initial_reading", "day1_passive"]
+      },
+      "labels": [
+        "passive",
+        "reading",
+        "notetaking",
+        "flashcard_creation",
+        "rna_modeling",
+        "biochemistry",
+        "nucleotides",
+        "week1",
+        "day1",
+        "curriculum-aligned"
+      ]
+    },
+
+    {
+      "id": 1,
+      "title": "Set up RNA Biophysics Knowledge Base Structure",
+      "description": "Create the initial knowledge base structure for organizing RNA biochemistry and thermodynamics concepts, including sections for notes, diagrams, and summaries.",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high",
+      "details": "Create a dedicated section in your personal knowledge management system (e.g., Obsidian, Notion, or local Markdown files) titled 'Pillar 1 Foundations: RNA Biochemistry & Thermodynamics'. Set up subsections for: 1) RNA Nucleotide Structure, 2) Phosphodiester Backbone, 3) RNA vs DNA Comparison, 4) Thermodynamic Principles, 5) Energetic Contributions to RNA Stability, and 6) Environmental Factors. Include placeholder files for diagrams, explanations, and quiz materials.",
+      "testStrategy": "Verify the knowledge base structure is complete with all required sections and placeholder files. Ensure the organization follows a logical progression that supports the learning objectives.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create Main Knowledge Base Structure and Root Section",
+          "description": "Set up the main knowledge base folder/section and create the root 'Pillar 1 Foundations: RNA Biochemistry & Thermodynamics' section with an index or overview document",
+          "dependencies": [],
+          "details": "1. Choose and prepare your knowledge management system (Obsidian, Notion, or local Markdown files)\n2. Create a main folder/section for the RNA Biophysics Knowledge Base\n3. Create a root document titled 'Pillar 1 Foundations: RNA Biochemistry & Thermodynamics'\n4. In the root document, write a brief overview describing the purpose and scope of this pillar\n5. Create a table of contents that will link to each subsection\n6. Add metadata tags for easy reference and searching (e.g., #RNA, #biophysics, #foundations)\n7. Test by ensuring the root document is properly saved and accessible",
+          "status": "pending",
+          "parentTaskId": 1
+        },
+        {
+          "id": 2,
+          "title": "Establish Six Core Subsections with Folder Structure",
+          "description": "Create the six required subsections as separate folders/sections with index documents for each topic area",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Within the main Pillar 1 folder, create six separate folders/sections titled:\n   - 1.1 RNA Nucleotide Structure\n   - 1.2 Phosphodiester Backbone\n   - 1.3 RNA vs DNA Comparison\n   - 1.4 Thermodynamic Principles\n   - 1.5 Energetic Contributions to RNA Stability\n   - 1.6 Environmental Factors\n2. For each subsection, create an index document that briefly describes the topic and its importance\n3. Update the root document's table of contents with links to each subsection\n4. Add consistent metadata tags to each subsection for organization\n5. Test by navigating between the main index and each subsection to verify links work correctly",
+          "status": "pending",
+          "parentTaskId": 1
+        },
+        {
+          "id": 3,
+          "title": "Create Content Template Files for Each Subsection",
+          "description": "Develop and implement standardized template files for notes, diagrams, and explanations within each subsection",
+          "dependencies": [
+            2
+          ],
+          "details": "1. Design a standardized template format for three types of content:\n   - Notes template (with headers for key concepts, definitions, and references)\n   - Diagram placeholder (with instructions for diagram types needed)\n   - Explanation template (with sections for detailed explanations and examples)\n2. For each of the six subsections, create these three template files\n3. Name files consistently (e.g., '1.1-Notes.md', '1.1-Diagrams.md', '1.1-Explanations.md')\n4. Add placeholder text in each file describing the expected content\n5. Include metadata and tagging consistent with the knowledge base structure\n6. Test by opening each file to verify template structure is consistent and properly formatted",
+          "status": "pending",
+          "parentTaskId": 1
+        },
+        {
+          "id": 4,
+          "title": "Develop Quiz and Assessment Materials Structure",
+          "description": "Create a dedicated quiz/assessment section with templates for self-testing materials for each topic",
+          "dependencies": [
+            2
+          ],
+          "details": "1. Create a 'Quizzes and Assessments' folder within the Pillar 1 section\n2. Design a standardized quiz template with sections for:\n   - Multiple choice questions\n   - Short answer questions\n   - Diagram interpretation exercises\n   - Problem-solving scenarios\n3. Create six quiz template files, one for each subsection (e.g., 'Quiz-1.1-RNA-Nucleotide-Structure.md')\n4. Add placeholder questions in each quiz file related to the corresponding topic\n5. Create an index file for the quiz section explaining how to use the materials\n6. Link the quiz section in the main Pillar 1 index document\n7. Test by reviewing each quiz template for consistency and proper formatting",
+          "status": "pending",
+          "parentTaskId": 1
+        },
+        {
+          "id": 5,
+          "title": "Implement Cross-References and Learning Progression Structure",
+          "description": "Organize sections in a logical learning sequence and add cross-references between related concepts across subsections",
+          "dependencies": [
+            2,
+            3,
+            4
+          ],
+          "details": "1. Review all created sections and reorder if necessary to ensure logical learning progression\n2. Update the main index document to include a suggested learning path through the materials\n3. Create a 'Cross-References' section in each subsection index document\n4. Identify and document relationships between topics (e.g., how RNA structure affects thermodynamic properties)\n5. Add bidirectional links between related concepts across different subsections\n6. Create a visual concept map document showing relationships between all topics\n7. Verify the entire knowledge base structure by:\n   - Checking all links work correctly\n   - Confirming all required sections and placeholders exist\n   - Testing navigation through the suggested learning path\n   - Ensuring consistent formatting and naming conventions throughout",
+          "status": "pending",
+          "parentTaskId": 1
+        }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Task0",
+        "anchor_link": "#task-0-setup-planning--hpe-integration-day-1---approx-1-15-hours"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Orient to Week 1 learning, prepare the learning environment, and set up Task Master & flashcard system for RNA foundations topics.",
+        "estimated_effort_tshirt": "S",
+        "estimated_effort_hours_raw": "1-1.5 hours",
+        "estimated_effort_hours_min": 1,
+        "estimated_effort_hours_max": 1.5,
+        "mastery_criteria_summary": "Task Master entries for Week 1 created. Knowledge base section for 'Pillar 1 Foundations' initialized. Flashcard authoring environment ready.",
+        "activity_type": "planning_setup",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Task Master entries created for the week.",
+          "Knowledge base section for 'Pillar 1 Foundations' initialized."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 1,
+        "curriculum_part_title": "Task 0: Setup, Planning & HPE Integration",
+        "csm_tags": [
+          "hpe_integration",
+          "planning",
+          "setup",
+          "rna_foundations",
+          "week1_orientation"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:1",
+        "activity:planning_setup",
+        "block:active_learning",
+        "effort_tshirt:S"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Develop RNA Nucleotide Structure Materials",
+      "description": "Create comprehensive materials on RNA nucleotide structure, including diagrams of nucleotide components and base structures.",
+      "status": "pending",
+      "dependencies": [
+        1
+      ],
+      "priority": "high",
+      "details": "Draw and label a generic RNA nucleotide showing the phosphate group, ribose sugar (with numbered carbons 1'-5'), and placeholder for the base. Highlight the critical 2'-hydroxyl group. Create detailed chemical structures of the four standard RNA bases (Adenine, Guanine, Cytosine, Uracil) and identify them as purines or pyrimidines. Include notes on nucleosides vs. nucleotides and the chemical properties of each component. Create flashcards for key terms, chemical structures, and important distinctions.",
+      "testStrategy": "Review drawings for accuracy and completeness. Verify all components are correctly labeled and the 2'-OH group is explicitly highlighted. Confirm that the base structures are chemically accurate and properly classified as purines or pyrimidines.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create detailed diagram of a generic RNA nucleotide structure",
+          "description": "Draw and label a comprehensive diagram of a generic RNA nucleotide showing all key components with proper labeling and highlighting of distinctive features.",
+          "dependencies": [],
+          "details": "Implementation steps:\n1. Create a clear, chemically accurate drawing of a generic RNA nucleotide with:\n   - Phosphate group (labeled with P)\n   - Ribose sugar ring (properly oriented)\n   - Numbered carbon atoms (1'-5') on the ribose\n   - A placeholder for the nitrogenous base attached at the 1' position\n   - Highlight the 2'-hydroxyl group that distinguishes RNA from DNA\n2. Use standard chemical notation for bonds, atoms, and functional groups\n3. Add clear labels with leader lines for each component\n4. Include a title and brief caption explaining the diagram\n5. Test by having someone with biochemistry knowledge verify accuracy and completeness of the structure",
+          "status": "pending",
+          "parentTaskId": 2
+        },
+        {
+          "id": 2,
+          "title": "Develop detailed structures of the four RNA bases",
+          "description": "Create chemically accurate diagrams of the four standard RNA bases (Adenine, Guanine, Cytosine, Uracil) with proper classification and labeling.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation steps:\n1. Draw detailed chemical structures for each of the four RNA bases:\n   - Adenine (A) - with proper purine ring structure\n   - Guanine (G) - with proper purine ring structure\n   - Cytosine (C) - with proper pyrimidine ring structure\n   - Uracil (U) - with proper pyrimidine ring structure\n2. Label each structure with its full name and single-letter abbreviation\n3. Group and label bases as purines (A, G) or pyrimidines (C, U)\n4. For each base, indicate the attachment point to the ribose (N9 for purines, N1 for pyrimidines)\n5. Include hydrogen bond donor and acceptor sites important for base pairing\n6. Test by comparing to standard biochemistry references and having an expert verify accuracy",
+          "status": "pending",
+          "parentTaskId": 2
+        },
+        {
+          "id": 3,
+          "title": "Write explanatory notes on nucleotide chemistry and properties",
+          "description": "Create comprehensive notes explaining the chemical properties of RNA nucleotide components and the distinction between nucleosides and nucleotides.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implementation steps:\n1. Write clear explanations of:\n   - The difference between nucleosides (base + sugar) and nucleotides (base + sugar + phosphate)\n   - Chemical properties of the phosphate group (negative charge, role in backbone formation)\n   - Properties of the ribose sugar (chirality, reactivity of the 2'-OH group)\n   - Chemical characteristics of purine vs. pyrimidine bases\n   - Hydrogen bonding capabilities of each base\n2. Include information on the nomenclature system used for RNA nucleotides\n3. Explain the significance of the 2'-hydroxyl group in RNA function and stability\n4. Add notes on tautomeric forms of bases and their biological significance\n5. Include a section on modified RNA bases found in nature\n6. Test by having a biochemistry student review for clarity and accuracy",
+          "status": "pending",
+          "parentTaskId": 2
+        },
+        {
+          "id": 4,
+          "title": "Create educational flashcards for RNA nucleotide structures",
+          "description": "Develop a comprehensive set of educational flashcards covering key terms, chemical structures, and important distinctions related to RNA nucleotides.",
+          "dependencies": [
+            1,
+            2,
+            3
+          ],
+          "details": "Implementation steps:\n1. Design a template for flashcards with clear front/back format\n2. Create flashcards for the following categories:\n   - Structure identification (image of structure on front, name and key features on back)\n   - Key terms (term on front, definition on back)\n   - Comparisons (e.g., 'Difference between nucleoside and nucleotide?' on front, explanation on back)\n   - Base classification (base structure on front, classification and properties on back)\n3. Include at least 20 flashcards covering all essential concepts\n4. Ensure each flashcard has a clear learning objective\n5. Format flashcards for both digital use and printing\n6. Test by having students use the flashcards and provide feedback on clarity and usefulness",
+          "status": "pending",
+          "parentTaskId": 2
+        },
+        {
+          "id": 5,
+          "title": "Review and finalize all RNA nucleotide structure materials",
+          "description": "Conduct a comprehensive review of all created materials for accuracy, clarity, consistency, and educational effectiveness.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "Implementation steps:\n1. Systematically review all diagrams for:\n   - Chemical accuracy (bond angles, atom positions, functional groups)\n   - Clarity of labeling and annotations\n   - Consistency across all materials\n   - Visual quality and readability\n2. Review all written explanations for:\n   - Scientific accuracy\n   - Clarity and appropriate level of detail\n   - Logical flow of information\n   - Absence of contradictions or ambiguities\n3. Have at least one subject matter expert review all materials\n4. Test materials with the target audience (e.g., students) and collect feedback\n5. Make necessary revisions based on all feedback\n6. Compile final materials into a cohesive package with table of contents and consistent formatting\n7. Test final materials by having someone learn RNA nucleotide structure using only these materials",
+          "status": "pending",
+          "parentTaskId": 2
+        }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part1.Biochem.NucleotideStructure",
+        "anchor_link": "#part-1-mastering-rna-biochemistry-fundamentals-days-1-3---approx-4-5-hours-total-study--activity-time"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Master the chemical composition of RNA nucleotides, accurately draw generic nucleotide and base structures, and create related explanatory notes and flashcards.",
+        "estimated_effort_tshirt": "M",
+        "estimated_effort_hours_raw": "1.5-2 hours",
+        "estimated_effort_hours_min": 1.5,
+        "estimated_effort_hours_max": 2,
+        "mastery_criteria_summary": "Accurate drawings of generic RNA nucleotide and the four standard RNA bases. Comprehensive notes covering components, properties, and nucleoside/nucleotide distinction. Initial flashcards for structures and terms created.",
+        "activity_type": "drawing_diagramming_notetaking_flashcard_creation",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Completed drawing of a generic RNA nucleotide (Task 1.1 from PRD).",
+          "Completed detailed chemical structures of Adenine, Guanine, Cytosine, and Uracil (Task 1.2 from PRD).",
+          "Notes on nucleosides vs. nucleotides and chemical properties of components.",
+          "Initial batch of flashcards for nucleotide structures and related terms."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 1,
+        "curriculum_part_title": "Part 1: RNA Biochemistry - Nucleotide & Base Structures",
+        "csm_tags": [
+          "rna_modeling",
+          "biochemistry",
+          "nucleotides",
+          "chemical_structure",
+          "purines",
+          "pyrimidines"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:1",
+        "activity:drawing",
+        "activity:notetaking",
+        "activity:flashcards",
+        "block:active_learning",
+        "effort_tshirt:M"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Document RNA Polymer Structure and Backbone",
+      "description": "Create materials explaining the phosphodiester backbone, RNA directionality, and polymer structure.",
+      "status": "pending",
+      "dependencies": [
+        2
+      ],
+      "priority": "high",
+      "details": "Draw a short RNA dinucleotide (e.g., A-U) showing and labeling the 5'-3' phosphodiester bond, the 5' end, and the 3' end. Document the formation of the phosphodiester backbone, including the directionality of an RNA strand and its implications. Include notes on the overall charge and properties of the backbone. Create a concise explanation of why RNA's 5'-to-3' directionality matters functionally and structurally. Develop flashcards for phosphodiester bond characteristics and RNA directionality concepts.",
+      "testStrategy": "Verify the dinucleotide drawing shows correct linkage between nucleotides with properly labeled 5' and 3' ends. Check that the explanation of directionality is clear and accurate. Ensure flashcards effectively capture key concepts about the phosphodiester backbone.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create Detailed Illustration of RNA Dinucleotide",
+          "description": "Produce a clear, labeled illustration of an A-U dinucleotide showing the phosphodiester bond and directional elements",
+          "dependencies": [],
+          "details": "1. Draw an adenine (A) and uracil (U) nucleotide connected by a phosphodiester bond\n2. Clearly label the following components:\n   - The 5' end (phosphate group)\n   - The 3' end (hydroxyl group)\n   - The phosphodiester bond connecting the nucleotides\n   - Ribose sugar components\n   - Nitrogenous bases (adenine and uracil)\n   - Phosphate groups\n3. Use color coding to distinguish different molecular components\n4. Include a small legend explaining the color scheme\n5. Ensure chemical accuracy in bond angles and molecular structures\n6. Create both a detailed technical version and a simplified schematic version\n7. Test by having a colleague with biochemistry knowledge verify accuracy",
+          "status": "pending",
+          "parentTaskId": 3
+        },
+        {
+          "id": 2,
+          "title": "Document Phosphodiester Backbone Formation and Properties",
+          "description": "Create comprehensive documentation on the formation, structure, and properties of the RNA phosphodiester backbone",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Explain the chemical reaction that forms phosphodiester bonds between nucleotides\n2. Document the step-by-step process of RNA polymerization\n3. Describe the overall negative charge of the backbone and explain its source\n4. Detail key physical properties of the backbone:\n   - Stability in various pH conditions\n   - Susceptibility to hydrolysis compared to DNA\n   - Structural flexibility\n5. Include diagrams showing how multiple phosphodiester bonds form the backbone\n6. Reference the illustration from subtask 1 to show how individual bonds contribute to the overall structure\n7. Create a table summarizing backbone properties\n8. Test by verifying against current biochemistry textbooks and having a subject matter expert review",
+          "status": "pending",
+          "parentTaskId": 3
+        },
+        {
+          "id": 3,
+          "title": "Explain RNA 5'-to-3' Directionality Significance",
+          "description": "Develop a clear explanation of why RNA's directional structure matters functionally and structurally",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "1. Define what 5'-to-3' directionality means in practical terms\n2. Explain the functional significance of directionality in:\n   - RNA synthesis (transcription)\n   - Translation processes\n   - Interaction with ribosomes and other cellular machinery\n   - RNA degradation mechanisms\n3. Describe structural implications of directionality:\n   - Impact on secondary structure formation\n   - Influence on tertiary structure\n   - Effects on RNA-protein interactions\n4. Include specific examples of how directionality affects RNA function in biological systems\n5. Create a diagram showing how directionality influences RNA folding\n6. Test by having biology students review for clarity and comprehension",
+          "status": "pending",
+          "parentTaskId": 3
+        },
+        {
+          "id": 4,
+          "title": "Develop Educational Flashcards on RNA Structure",
+          "description": "Create a comprehensive set of flashcards covering phosphodiester bonds and RNA directionality concepts",
+          "dependencies": [
+            1,
+            2,
+            3
+          ],
+          "details": "1. Design 15-20 flashcards covering key concepts:\n   - Phosphodiester bond formation and structure\n   - RNA backbone properties\n   - 5'-to-3' directionality\n   - Functional significance of RNA structure\n   - Common misconceptions about RNA structure\n2. Format each flashcard with:\n   - A clear question or prompt on front\n   - A concise answer with a small diagram where helpful on back\n   - Reference to more detailed materials\n3. Include cards with both recall questions and application problems\n4. Organize cards in a logical learning sequence\n5. Create digital versions (PDF and interactive format)\n6. Test flashcards with students or colleagues to verify effectiveness\n7. Revise based on feedback for clarity and educational value",
+          "status": "pending",
+          "parentTaskId": 3
+        },
+        {
+          "id": 5,
+          "title": "Compile and Review Complete RNA Structure Documentation",
+          "description": "Assemble all materials into a cohesive educational package and conduct comprehensive review",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "1. Compile all materials from previous subtasks into a unified document/package\n2. Create a table of contents and consistent formatting throughout\n3. Add cross-references between related sections\n4. Develop a glossary of key terms\n5. Conduct a thorough review process:\n   - Check for scientific accuracy against current literature\n   - Verify consistency in terminology throughout all materials\n   - Review for pedagogical effectiveness and clarity\n   - Have at least two subject matter experts review content\n   - Test materials with the intended audience (students/learners)\n6. Make revisions based on feedback\n7. Finalize materials in multiple formats (print-ready PDF, web-based interactive version, presentation slides)\n8. Create a brief instructor guide with suggestions for using the materials",
+          "status": "pending",
+          "parentTaskId": 3
+        }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part1.Biochem.BackboneDirectionality",
+        "anchor_link": "#part-1-mastering-rna-biochemistry-fundamentals-days-1-3---approx-4-5-hours-total-study--activity-time"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Explain phosphodiester backbone formation, RNA 5'-3' directionality, its implications, and illustrate with a dinucleotide drawing.",
+        "estimated_effort_tshirt": "S",
+        "estimated_effort_hours_raw": "1-1.5 hours",
+        "estimated_effort_hours_min": 1,
+        "estimated_effort_hours_max": 1.5,
+        "mastery_criteria_summary": "Accurate drawing of an A-U dinucleotide showing phosphodiester bond and 5'/3' ends (Task 1.3 PRD). Clear explanation of directionality and backbone properties. Flashcards created.",
+        "activity_type": "drawing_explanation_writing_flashcard_creation",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Drawing of A-U dinucleotide with labeled 5'-3' phosphodiester bond, 5' end, and 3' end (Task 1.3 PRD).",
+          "Documentation on phosphodiester backbone formation and its properties (charge, etc.).",
+          "Explanation of RNA 5'-to-3' directionality significance.",
+          "Flashcards for phosphodiester bond characteristics and RNA directionality."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 2,
+        "curriculum_part_title": "Part 1: RNA Biochemistry - Polymer Structure & Backbone",
+        "csm_tags": [
+          "rna_modeling",
+          "biochemistry",
+          "phosphodiester_backbone",
+          "directionality",
+          "polymer_structure"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:2",
+        "activity:drawing",
+        "activity:explanation_writing",
+        "activity:flashcards",
+        "block:active_learning",
+        "effort_tshirt:S"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Develop RNA vs. DNA Comparison Materials",
+      "description": "Create detailed comparison materials highlighting the structural and functional differences between RNA and DNA.",
+      "status": "pending",
+      "dependencies": [
+        3
+      ],
+      "priority": "high",
+      "details": "Write a comprehensive comparison between RNA and DNA covering: 1) Sugar differences (ribose vs. deoxyribose) with focus on the 2'-OH group's implications for structure, 2) Base differences (Uracil vs. Thymine), 3) Strandedness differences and their functional implications, and 4) Stability and reactivity differences. Create a 1-2 paragraph explanation detailing why the 2'-hydroxyl group on ribose is significant for RNA's structural properties, reactivity, and functional versatility compared to DNA. Optional: Research and sketch the preferred sugar pucker conformations for ribose (C3'-endo) in A-form RNA helices versus deoxyribose (C2'-endo) in B-form DNA.",
+      "testStrategy": "Review the RNA vs. DNA comparison for accuracy and comprehensiveness. Verify that the explanation of the 2'-OH significance addresses its role in RNA catalysis, forming A-form helices, and susceptibility to alkaline hydrolysis. Check that all key structural and functional differences are clearly articulated."
+    },
+    {
+      "id": 5,
+      "title": "Develop Thermodynamic Principles Materials",
+      "description": "Create comprehensive materials explaining fundamental thermodynamic principles relevant to RNA folding.",
+      "status": "pending",
+      "dependencies": [
+        4
+      ],
+      "priority": "medium",
+      "details": "Document the concept of Gibbs Free Energy (ΔG) and its relationship to enthalpy (ΔH), entropy (ΔS), and temperature (T) in the context of molecular stability (ΔG = ΔH - TΔS). Explain why a negative ΔG is favorable for spontaneous processes like RNA folding into stable structures. Define chemical equilibrium and relate it to the concept of a Minimum Free Energy (MFE) structure for RNA. Write a 2-3 paragraph explanation of what Gibbs Free Energy represents and why structures with more negative ΔG are considered more stable for RNA molecules. Create flashcards for ΔG, ΔH, ΔS definitions and their relationship, MFE, and thermodynamic concepts related to spontaneity.",
+      "testStrategy": "Review the thermodynamic principles documentation for accuracy and clarity. Verify that the explanation of Gibbs Free Energy correctly relates to RNA stability. Ensure the relationship between ΔG, ΔH, and TΔS is properly explained in the context of RNA folding.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create Explanatory Content for ΔG, ΔH, ΔS, and Their Relationship",
+          "description": "Develop clear explanations of Gibbs Free Energy (ΔG), enthalpy (ΔH), entropy (ΔS), and their mathematical relationship (ΔG = ΔH - TΔS) in the context of RNA folding.",
+          "dependencies": [],
+          "details": "Implementation steps:\n1. Research and compile precise definitions for ΔG, ΔH, and ΔS from authoritative sources in biochemistry and thermodynamics\n2. Write clear explanations of each term using language accessible to biology students\n3. Explain the mathematical relationship between these variables and the significance of temperature (T)\n4. Create 2-3 simple diagrams illustrating how these concepts relate to molecular interactions in RNA\n5. Include specific examples showing how these values change during RNA folding\n6. Review for scientific accuracy and clarity\n\nTesting approach: Have 2-3 subject matter experts review the explanations for accuracy and comprehensibility. Test with a small group of students to ensure the material is understandable to the target audience.",
+          "status": "pending",
+          "parentTaskId": 5
+        },
+        {
+          "id": 2,
+          "title": "Develop Content on Spontaneity and Negative ΔG in RNA Folding",
+          "description": "Create explanatory material on why negative ΔG values are favorable for spontaneous processes, with specific examples related to RNA folding and stability.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation steps:\n1. Explain the concept of spontaneity in thermodynamic processes\n2. Clarify why negative ΔG indicates a spontaneous process\n3. Develop 3-4 concrete examples showing how RNA folding relates to negative ΔG values\n4. Create a visual representation comparing stable vs. unstable RNA structures and their corresponding ΔG values\n5. Include real-world experimental data showing ΔG values for different RNA conformations\n6. Develop a simple interactive element where learners can manipulate factors affecting ΔG\n\nTesting approach: Test explanations with students who have limited prior knowledge of thermodynamics to ensure concepts are clearly conveyed. Verify examples with RNA folding simulation tools to confirm accuracy.",
+          "status": "pending",
+          "parentTaskId": 5
+        },
+        {
+          "id": 3,
+          "title": "Develop Materials on Chemical Equilibrium and MFE in RNA",
+          "description": "Create content explaining chemical equilibrium concepts and how they relate to Minimum Free Energy (MFE) structures in RNA folding.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implementation steps:\n1. Define chemical equilibrium in the context of molecular folding\n2. Explain how equilibrium relates to energy minimization in biological systems\n3. Introduce the concept of Minimum Free Energy (MFE) structure for RNA\n4. Develop examples showing how RNA molecules find their MFE configuration\n5. Create a step-by-step explanation of how computational tools determine MFE structures\n6. Include comparisons between MFE structures and alternative conformations\n\nTesting approach: Validate explanations by comparing with current RNA folding algorithms and their documentation. Test with students to ensure they can correctly predict relative stability of simple RNA structures after studying the material.",
+          "status": "pending",
+          "parentTaskId": 5
+        },
+        {
+          "id": 4,
+          "title": "Write Comprehensive Explanation of ΔG and RNA Stability",
+          "description": "Develop a 2-3 paragraph explanation that synthesizes the relationship between Gibbs Free Energy and RNA structural stability, suitable for inclusion in course materials.",
+          "dependencies": [
+            1,
+            2,
+            3
+          ],
+          "details": "Implementation steps:\n1. Draft an introductory paragraph establishing the fundamental relationship between ΔG and molecular stability\n2. Write a second paragraph explaining how specific molecular interactions in RNA contribute to overall ΔG\n3. Develop a third paragraph connecting ΔG calculations to practical applications in RNA research and prediction tools\n4. Ensure the explanation incorporates concepts from previous subtasks\n5. Edit for clarity, conciseness, and scientific accuracy\n6. Format the explanation for inclusion in various course materials\n\nTesting approach: Have colleagues review the paragraphs for scientific accuracy. Test comprehension by asking students to paraphrase the key points after reading the explanation.",
+          "status": "pending",
+          "parentTaskId": 5
+        },
+        {
+          "id": 5,
+          "title": "Create Thermodynamics Flashcards for RNA Folding Concepts",
+          "description": "Design a comprehensive set of flashcards covering key thermodynamic concepts related to RNA folding, including definitions, relationships, and applications.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "Implementation steps:\n1. Create definition flashcards for ΔG, ΔH, ΔS with concise explanations on one side and terms on the other\n2. Develop flashcards showing the mathematical relationship between ΔG, ΔH, ΔS, and T\n3. Create cards explaining MFE and its significance in RNA structure prediction\n4. Design flashcards illustrating the concept of spontaneity and its relationship to negative ΔG\n5. Include application-based flashcards that ask students to predict stability based on given thermodynamic values\n6. Format flashcards for both digital and print use\n7. Organize flashcards into logical learning sequences\n\nTesting approach: Test flashcards with students in spaced repetition sessions to measure retention of concepts. Revise cards with low retention rates for clarity and effectiveness.",
+          "status": "pending",
+          "parentTaskId": 5
+        }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part1.Biochem.Thermodynamics",
+        "anchor_link": "#part-1-mastering-rna-biochemistry-fundamentals-days-1-3---approx-4-5-hours-total-study--activity-time"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Explain thermodynamic principles relevant to RNA folding, including Gibbs Free Energy, spontaneity, and Minimum Free Energy structures.",
+        "estimated_effort_tshirt": "M",
+        "estimated_effort_hours_raw": "2-3 hours",
+        "estimated_effort_hours_min": 2,
+        "estimated_effort_hours_max": 3,
+        "mastery_criteria_summary": "Clear explanations of ΔG, ΔH, ΔS, and their relationship. Accurate examples illustrating spontaneity and MFE concepts in RNA folding.",
+        "activity_type": "explanatory_writing_flashcard_creation",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Comprehensive explanations of thermodynamic principles (ΔG, ΔH, ΔS, spontaneity, MFE).",
+          "Flashcards covering key thermodynamic concepts for RNA folding."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 4,
+        "curriculum_part_title": "Part 1: RNA Biochemistry - Thermodynamic Principles",
+        "csm_tags": [
+          "rna_modeling",
+          "biochemistry",
+          "thermodynamics",
+          "gibbs_free_energy",
+          "rna_folding"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:4",
+        "activity:explanatory_writing",
+        "activity:flashcard_creation",
+        "block:active_learning",
+        "effort_tshirt:M"
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Document Base Stacking and Hydrogen Bonding in RNA",
+      "description": "Create materials explaining base stacking and hydrogen bonding contributions to RNA stability.",
+      "status": "pending",
+      "dependencies": [
+        5
+      ],
+      "priority": "medium",
+      "details": "Document base stacking interactions, including their nature (van der Waals, hydrophobic, dipole-dipole/π-π electronic interactions), significance as a major stabilizing force, and sequence dependence. Explain hydrogen bonding in base pairs, including Watson-Crick A-U (2 H-bonds), G-C (3 H-bonds), and G-U wobble pairs (2 H-bonds, different geometry). Write a detailed explanation (2-3 paragraphs) contrasting the roles and relative energetic contributions of base stacking versus hydrogen bonding in stabilizing an RNA helix. Create a thought experiment comparing the stability of two hairpins: one with 5 G-C pairs versus one with 5 A-U pairs, justifying the prediction based on thermodynamic principles. Create flashcards for base stacking and hydrogen bonding concepts.",
+      "testStrategy": "Review the base stacking and hydrogen bonding documentation for accuracy. Verify that the explanation correctly identifies base stacking as the major contributor to helix stability while hydrogen bonding contributes more to specificity. Check that the thought experiment includes a well-reasoned prediction based on thermodynamic principles.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Document Base Stacking Mechanisms and Energetics in RNA",
+          "description": "Create comprehensive documentation explaining the mechanisms, energetic contributions, and sequence dependence of base stacking in RNA structures.",
+          "dependencies": [],
+          "details": "Implementation steps:\n1. Research and compile information on the physical forces involved in base stacking (van der Waals, hydrophobic effects, dipole-dipole/π-π electronic interactions)\n2. Explain how these forces collectively contribute to RNA stability\n3. Document the relative energetic contribution of base stacking compared to other stabilizing forces\n4. Create diagrams illustrating the stacking interactions between adjacent bases in an RNA helix\n5. Explain how base sequence affects stacking strength (e.g., purine-purine vs. pyrimidine-pyrimidine stacking)\n6. Include numerical data on stacking energies for different base combinations\n7. Test by having subject matter experts review for accuracy and completeness",
+          "status": "pending",
+          "parentTaskId": 6
+        },
+        {
+          "id": 2,
+          "title": "Document Hydrogen Bonding Patterns in RNA Base Pairs",
+          "description": "Create detailed documentation of hydrogen bonding patterns in canonical and non-canonical RNA base pairs, including bond numbers and geometric arrangements.",
+          "dependencies": [],
+          "details": "Implementation steps:\n1. Document Watson-Crick A-U base pairs with detailed description of the 2 hydrogen bonds formed\n2. Document Watson-Crick G-C base pairs with detailed description of the 3 hydrogen bonds formed\n3. Document G-U wobble pairs with detailed description of the 2 hydrogen bonds and their unique geometry\n4. Create molecular diagrams showing the hydrogen bond positions and lengths for each pair type\n5. Explain how hydrogen bonds contribute to specificity in base pairing\n6. Include information on bond energies for different types of hydrogen bonds in RNA\n7. Test by having subject matter experts review for accuracy and completeness",
+          "status": "pending",
+          "parentTaskId": 6
+        },
+        {
+          "id": 3,
+          "title": "Write Comparative Analysis of Base Stacking vs. Hydrogen Bonding",
+          "description": "Develop a detailed 2-3 paragraph analysis contrasting the roles and relative energetic contributions of base stacking versus hydrogen bonding in stabilizing RNA helices.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implementation steps:\n1. Synthesize information from subtasks 1 and 2 to compare the two stabilizing forces\n2. Write first paragraph introducing both forces and their basic mechanisms\n3. Write second paragraph comparing the energetic contributions (emphasizing that stacking typically contributes more to overall stability)\n4. Write third paragraph discussing how the two forces work together and their different roles in structure vs. specificity\n5. Include quantitative comparisons where possible (e.g., approximate energy values)\n6. Ensure the explanation is scientifically accurate but accessible\n7. Test by having both RNA experts and non-experts review for clarity and accuracy",
+          "status": "pending",
+          "parentTaskId": 6
+        },
+        {
+          "id": 4,
+          "title": "Develop Thought Experiment on Hairpin Stability",
+          "description": "Create a thought experiment comparing the stability of two RNA hairpins: one with 5 G-C pairs versus one with 5 A-U pairs, with thermodynamic justification for stability predictions.",
+          "dependencies": [
+            1,
+            2,
+            3
+          ],
+          "details": "Implementation steps:\n1. Design a specific sequence for each hairpin (one with 5 G-C pairs, one with 5 A-U pairs)\n2. Calculate or estimate the free energy contribution from hydrogen bonding in each hairpin\n3. Calculate or estimate the free energy contribution from base stacking in each hairpin\n4. Analyze how the loop regions would affect overall stability\n5. Predict which hairpin would be more stable and at what temperatures\n6. Justify the prediction using thermodynamic principles from previous subtasks\n7. Create diagrams illustrating both hairpins and their energy landscapes\n8. Test by comparing predictions with experimental data or computational models if available",
+          "status": "pending",
+          "parentTaskId": 6
+        },
+        {
+          "id": 5,
+          "title": "Create Educational Flashcards on RNA Stabilizing Forces",
+          "description": "Develop a set of educational flashcards covering key concepts related to base stacking and hydrogen bonding in RNA structures.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "Implementation steps:\n1. Create 5-7 flashcards on base stacking concepts:\n   - Definition and physical basis\n   - Types of interactions involved\n   - Sequence dependence\n   - Energetic contribution\n   - Structural significance\n2. Create 5-7 flashcards on hydrogen bonding concepts:\n   - Watson-Crick base pairing\n   - G-U wobble pairs\n   - Bond geometries and strengths\n   - Role in specificity\n   - Comparison to DNA hydrogen bonding\n3. Create 3-5 flashcards integrating both concepts:\n   - Relative contributions to stability\n   - How they work together\n   - Experimental methods to measure each\n4. Format each flashcard with a question on one side and a concise, accurate answer on the other\n5. Include simple diagrams where helpful\n6. Test flashcards with students or researchers to ensure clarity and educational value",
+          "status": "pending",
+          "parentTaskId": 6
+        }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part2.Biochem.BaseStacking",
+        "anchor_link": "#part-2-mastering-foundational-biochemical-principles-for-rna-folding-days-3-5---approx-4-5-hours-total-study--activity-time"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Explain the roles of base stacking and hydrogen bonding in RNA stability, including their relative energetic contributions and how they work together.",
+        "estimated_effort_tshirt": "M",
+        "estimated_effort_hours_raw": "2-3 hours",
+        "estimated_effort_hours_min": 2,
+        "estimated_effort_hours_max": 3,
+        "mastery_criteria_summary": "Clear written explanations of base stacking and hydrogen bonding in RNA stability. Flashcards for base stacking and hydrogen bonding concepts created.",
+        "activity_type": "explanatory_writing_flashcard_creation",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Written explanations of base stacking and hydrogen bonding in RNA stability.",
+          "Flashcards defining base stacking and hydrogen bonding concepts."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 5,
+        "curriculum_part_title": "Part 2: Biochemistry - Base Stacking and Hydrogen Bonding",
+        "csm_tags": [
+          "rna_modeling",
+          "biochemistry",
+          "base_stacking",
+          "hydrogen_bonding",
+          "rna_stability"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:5",
+        "activity:explanatory_writing",
+        "activity:flashcard_creation",
+        "block:active_learning",
+        "effort_tshirt:M"
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Document Loop Penalties and Electrostatic Effects in RNA",
+      "description": "Create materials explaining loop penalties, electrostatic repulsion, and their effects on RNA stability.",
+      "status": "pending",
+      "dependencies": [
+        6
+      ],
+      "priority": "medium",
+      "details": "Document loop penalties as an entropic cost associated with the conformational restriction of forming hairpin loops, internal loops, bulges, and multi-loops. Explain how loop penalties depend on loop type and size. Document electrostatic repulsion from the negatively charged phosphate backbone and the mitigating role of counterions (e.g., Mg²⁺). Write a detailed explanation of why forming a hairpin loop is entropically unfavorable and what factors influence this unfavorable contribution. Create flashcards for loop penalties, electrostatic repulsion, and the role of counterions in RNA stability.",
+      "testStrategy": "Review the loop penalties and electrostatic effects documentation for accuracy. Verify that the explanation of entropic costs for loop formation is clear and correct. Ensure the role of counterions in mitigating electrostatic repulsion is properly explained.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Document Loop Penalties in RNA Secondary Structures",
+          "description": "Create comprehensive documentation explaining loop penalties as entropic costs in RNA secondary structures, covering different loop types and their size-dependent effects.",
+          "dependencies": [],
+          "details": "1. Research and compile information on entropy costs in RNA folding\n2. Define and explain loop penalties in RNA structures\n3. Document the four main loop types: hairpin loops, internal loops, bulges, and multi-loops\n4. Create diagrams illustrating each loop type\n5. Explain how loop size affects penalty values with mathematical expressions\n6. Include a table showing typical entropy costs for different loop sizes\n7. Reference primary literature sources for loop penalty parameters\n8. Test by having colleagues review for technical accuracy",
+          "status": "pending",
+          "parentTaskId": 7
+        },
+        {
+          "id": 2,
+          "title": "Analyze Entropic Unfavorability of Hairpin Loops",
+          "description": "Develop a detailed explanation of why forming hairpin loops is entropically unfavorable, with examples and factors that influence this entropic cost.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Build on the general loop penalty documentation from subtask 1\n2. Explain conformational restriction in hairpin formation\n3. Discuss the reduction in degrees of freedom when nucleotides form a loop\n4. Calculate entropy changes using statistical mechanics principles\n5. Analyze how base stacking in the loop affects stability\n6. Document how loop sequence composition influences stability\n7. Provide specific examples with tetraloops and other common hairpin motifs\n8. Compare entropy costs between different hairpin sizes\n9. Test by creating a small simulation demonstrating entropy changes",
+          "status": "pending",
+          "parentTaskId": 7
+        },
+        {
+          "id": 3,
+          "title": "Document Electrostatic Repulsion and Counterion Effects",
+          "description": "Create documentation on electrostatic repulsion in RNA structures due to the negatively charged phosphate backbone and explain how counterions mitigate this effect.",
+          "dependencies": [],
+          "details": "1. Explain the chemical basis for negative charges in the RNA backbone\n2. Document how phosphate groups create electrostatic repulsion\n3. Calculate typical repulsion forces at various ionic strengths\n4. Explain the concept of Debye screening length in RNA\n5. Document the role of monovalent ions (Na+, K+) in screening charges\n6. Explain how divalent ions (especially Mg2+) interact with RNA\n7. Analyze ion-specific effects on RNA stability\n8. Create diagrams showing counterion condensation around RNA\n9. Test by reviewing with a biophysicist for accuracy",
+          "status": "pending",
+          "parentTaskId": 7
+        },
+        {
+          "id": 4,
+          "title": "Create Educational Flashcards on RNA Stability Factors",
+          "description": "Develop a set of educational flashcards covering loop penalties, electrostatic repulsion, and counterion effects on RNA stability for learning and teaching purposes.",
+          "dependencies": [
+            1,
+            2,
+            3
+          ],
+          "details": "1. Create 5-7 flashcards on loop penalties covering:\n   - Definition of loop penalties\n   - Different loop types\n   - Size dependencies\n   - Sequence effects\n2. Create 5-7 flashcards on hairpin loop entropy covering:\n   - Conformational restriction\n   - Factors affecting unfavorability\n   - Stable motifs like tetraloops\n3. Create 5-7 flashcards on electrostatic effects covering:\n   - Backbone repulsion\n   - Counterion condensation\n   - Mg2+ vs. monovalent ions\n4. Design cards with question on front, answer on back\n5. Include diagrams where helpful\n6. Test flashcards with students or colleagues for clarity\n7. Implement feedback and revise cards as needed",
+          "status": "pending",
+          "parentTaskId": 7
+        },
+        {
+          "id": 5,
+          "title": "Review and Integrate RNA Stability Documentation",
+          "description": "Review all materials for accuracy, consistency, and completeness, then integrate them into a cohesive educational resource on RNA stability factors.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "1. Review all documents for scientific accuracy\n2. Check for consistency in terminology across all materials\n3. Ensure all materials use the same notation and units\n4. Verify all diagrams are correctly labeled and referenced\n5. Cross-reference with recent literature to ensure up-to-date information\n6. Integrate the separate documents into a cohesive resource with:\n   - Table of contents\n   - Glossary of terms\n   - Cross-references between sections\n7. Create a summary document connecting loop penalties and electrostatic effects\n8. Test the integrated materials with both experts and students\n9. Make final revisions based on testing feedback",
+          "status": "pending",
+          "parentTaskId": 7
+        }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part2.Thermo.LoopsElectrostatics",
+        "anchor_link": "#part-2-mastering-foundational-thermodynamic-principles-for-rna-folding-days-3-5---approx-4-5-hours-total-study--activity-time"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Explain loop penalties as an entropic cost in RNA folding and the role of electrostatic repulsion from the phosphate backbone, including mitigation by counterions.",
+        "estimated_effort_tshirt": "S",
+        "estimated_effort_hours_raw": "1-1.5 hours",
+        "estimated_effort_hours_min": 1,
+        "estimated_effort_hours_max": 1.5,
+        "mastery_criteria_summary": "Clear explanation of why forming a hairpin loop is entropically unfavorable (Task 2.3 PRD). Notes on electrostatic repulsion and counterions. Flashcards created.",
+        "activity_type": "focused_reading_explanation_writing_flashcard_creation",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Written explanation of why forming a hairpin loop is entropically unfavorable and factors influencing this contribution (Task 2.3 PRD for Day 5).",
+          "Notes on electrostatic repulsion from the phosphate backbone and the mitigating role of counterions.",
+          "Flashcards for loop penalties, electrostatic repulsion, and counterions."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 5,
+        "curriculum_part_title": "Part 2: Thermodynamics - Loop Penalties & Electrostatics",
+        "csm_tags": [
+          "rna_modeling",
+          "thermodynamics",
+          "loop_entropy",
+          "electrostatics",
+          "counterions",
+          "rna_stability"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:5",
+        "activity:focused_reading",
+        "block:active_learning",
+        "effort_tshirt:S"
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Document Environmental Influences on RNA Stability",
+      "description": "Create materials explaining how environmental factors like temperature and salt concentration affect RNA folding and stability.",
+      "status": "pending",
+      "dependencies": [
+        7
+      ],
+      "priority": "low",
+      "details": "Document how temperature affects RNA stability through its impact on the TΔS term in the Gibbs Free Energy equation, explaining that higher temperatures favor unfolding. Explain how salt concentration, particularly the presence of cations like Mg²⁺, shields phosphate charges and stabilizes helices and compact folds. Briefly mention how extreme pH can alter protonation states of bases and disrupt hydrogen bonding. Create a short summary of how these environmental factors might be relevant to RNA structure prediction tools. Create flashcards for the effects of temperature, salt concentration, and pH on RNA stability.",
+      "testStrategy": "Review the environmental influences documentation for accuracy and completeness. Verify that the explanation of temperature effects correctly relates to the TΔS term. Ensure the role of salt concentration in stabilizing RNA structures is properly explained.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Explain Temperature Effects on RNA Stability Through Gibbs Free Energy",
+          "description": "Create a detailed explanation of how temperature affects RNA stability through the TΔS term in the Gibbs Free Energy equation, and why higher temperatures favor RNA unfolding.",
+          "dependencies": [],
+          "details": "1. Introduce the Gibbs Free Energy equation (ΔG = ΔH - TΔS) and its relevance to RNA folding.\n2. Explain the enthalpy (ΔH) and entropy (ΔS) components in RNA folding.\n3. Illustrate mathematically how increasing temperature (T) amplifies the -TΔS term.\n4. Provide specific examples of how higher temperatures disrupt base pairing and secondary structures.\n5. Include a graph showing the relationship between temperature and RNA stability.\n6. Create 1-2 diagrams showing RNA in folded vs. unfolded states at different temperatures.\n7. Test by having a colleague with biochemistry background review for accuracy.",
+          "status": "pending",
+          "parentTaskId": 8
+        },
+        {
+          "id": 2,
+          "title": "Document Salt Concentration Effects on RNA Stability",
+          "description": "Develop materials explaining how salt concentration, particularly cations like Mg²⁺, shields phosphate charges and stabilizes RNA helices and compact folds.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Explain the electrostatic repulsion between phosphate groups in RNA backbone.\n2. Detail how monovalent (Na⁺, K⁺) and divalent (Mg²⁺, Ca²⁺) cations interact with RNA.\n3. Compare the effectiveness of monovalent vs. divalent cations in stabilizing RNA structures.\n4. Describe specific structural motifs that are particularly dependent on cation stabilization.\n5. Include molecular diagrams showing cation-RNA interactions.\n6. Provide experimental examples of how changing salt concentration affects RNA folding.\n7. Test by creating a simple quiz to verify key concepts are clearly communicated.",
+          "status": "pending",
+          "parentTaskId": 8
+        },
+        {
+          "id": 3,
+          "title": "Explain pH Effects on RNA Base Protonation and Hydrogen Bonding",
+          "description": "Create a concise explanation of how extreme pH values alter protonation states of RNA bases and disrupt hydrogen bonding patterns.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Identify the typical pKa values of RNA nucleobases.\n2. Explain how protonation/deprotonation occurs at non-physiological pH.\n3. Describe how altered protonation states affect hydrogen bonding capabilities.\n4. Provide examples of specific base pairs that are particularly sensitive to pH changes.\n5. Include diagrams showing normal vs. disrupted hydrogen bonding at extreme pH.\n6. Briefly mention how pH changes can lead to alternative folding patterns or denaturation.\n7. Test by comparing against current literature to ensure accuracy.",
+          "status": "pending",
+          "parentTaskId": 8
+        },
+        {
+          "id": 4,
+          "title": "Create Comparative Summary Table of Environmental Factors",
+          "description": "Develop a comprehensive table comparing the effects of temperature, salt concentration, and pH on RNA stability with specific examples and mechanisms.",
+          "dependencies": [
+            1,
+            2,
+            3
+          ],
+          "details": "1. Design a table with columns for: Environmental Factor, Mechanism of Action, Effect on Stability, Typical Range, and Notable Examples.\n2. For temperature: include entropy effects, melting temperatures, and examples of thermostable RNAs.\n3. For salt concentration: include electrostatic shielding, specific ion effects, and concentration thresholds.\n4. For pH: include base protonation effects and pH-sensitive RNA structures.\n5. Add a column for practical considerations in experimental settings.\n6. Ensure the table is visually clear with appropriate formatting.\n7. Test by having researchers from different backgrounds review for clarity and completeness.",
+          "status": "pending",
+          "parentTaskId": 8
+        },
+        {
+          "id": 5,
+          "title": "Summarize Relevance to RNA Structure Prediction Tools",
+          "description": "Create a summary explaining how temperature, salt concentration, and pH considerations are incorporated into RNA structure prediction tools.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "1. Research how major RNA structure prediction algorithms (e.g., Mfold, RNAfold, RNAstructure) account for temperature.\n2. Investigate how these tools incorporate salt concentration parameters.\n3. Determine if and how pH effects are modeled in prediction software.\n4. Explain limitations of current prediction tools regarding environmental factors.\n5. Suggest best practices for users when applying these tools under varying conditions.\n6. Include specific examples of prediction outcomes at different parameter settings.\n7. Test by running example predictions with different environmental parameters and verifying the summary accurately reflects the differences.",
+          "status": "pending",
+          "parentTaskId": 8
+        },
+        {
+          "id": 6,
+          "title": "Develop Flashcards on Environmental Influences on RNA Stability",
+          "description": "Create a set of educational flashcards covering the effects of temperature, salt concentration, and pH on RNA stability.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "details": "1. Design 5-7 flashcards for temperature effects, including questions on Gibbs Free Energy, entropy, and practical examples.\n2. Create 5-7 flashcards for salt concentration effects, covering electrostatic shielding, ion-specific effects, and experimental considerations.\n3. Develop 3-5 flashcards for pH effects on RNA stability.\n4. Add 2-3 integrative flashcards that connect multiple environmental factors.\n5. Include both conceptual questions and numerical problems where appropriate.\n6. Format cards with clear questions on front and concise, accurate answers on back.\n7. Test flashcards with students or colleagues to ensure clarity and appropriate difficulty level.",
+          "status": "pending",
+          "parentTaskId": 8
+        },
+        {
+          "id": 7,
+          "title": "Review and Finalize All Educational Materials",
+          "description": "Conduct a comprehensive review of all created materials for accuracy, completeness, clarity, and educational effectiveness.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "details": "1. Develop a checklist for reviewing each component (explanations, diagrams, table, summary, flashcards).\n2. Verify all scientific content against recent literature and textbooks.\n3. Check for consistency in terminology and explanations across all materials.\n4. Ensure appropriate depth for the target audience.\n5. Have at least two subject matter experts review the complete set of materials.\n6. Make necessary revisions based on feedback.\n7. Test the materials with a small group from the target audience and collect feedback on clarity and usefulness.",
+          "status": "pending",
+          "parentTaskId": 8
+        }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part2.Thermo.EnvFactors",
+        "anchor_link": "#part-2-mastering-foundational-thermodynamic-principles-for-rna-folding-days-3-5---approx-4-5-hours-total-study--activity-time"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Explain how environmental factors like temperature, salt concentration, and pH affect RNA folding and stability, and their relevance to prediction tools.",
+        "estimated_effort_tshirt": "S",
+        "estimated_effort_hours_raw": "0.5-1 hour",
+        "estimated_effort_hours_min": 0.5,
+        "estimated_effort_hours_max": 1,
+        "mastery_criteria_summary": "Notes summarizing effects of temperature, salt, and pH. Short summary on relevance to RNA structure prediction tools. Flashcards created.",
+        "activity_type": "focused_reading_summary_writing_flashcard_creation",
+        "recommended_block": "passive_review",
+        "deliverables": [
+          "Notes on how temperature, salt concentration, and pH affect RNA stability.",
+          "Short summary of the relevance of these environmental factors to RNA structure prediction tools.",
+          "Flashcards for temperature, salt concentration, and pH effects on RNA."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 5,
+        "curriculum_part_title": "Part 2: Thermodynamics - Environmental Factors",
+        "csm_tags": [
+          "rna_modeling",
+          "thermodynamics",
+          "temperature_effects",
+          "salt_effects",
+          "ph_effects",
+          "rna_stability"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:5",
+        "activity:summary_writing",
+        "block:passive_review",
+        "effort_tshirt:S"
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Develop Comprehensive Self-Assessment Materials",
+      "description": "Create a comprehensive quiz and practical assessment tasks to evaluate mastery of RNA biochemistry and thermodynamics concepts.",
+      "status": "pending",
+      "dependencies": [
+        8
+      ],
+      "priority": "medium",
+      "details": "Create a comprehensive quiz of 15-20 questions covering all learning objectives, including multiple-choice, true/false, short answer, and fill-in-the-blank questions. Design a practical assessment task requiring drawing a detailed, labeled RNA nucleotide and writing a clear explanation of the key energetic contributions to RNA secondary structure stability. Create a grading rubric for both the quiz and practical assessment, with ≥85% accuracy as the target for demonstrating mastery. Include a template for identifying weak areas and planning targeted review.",
+      "testStrategy": "Review the self-assessment materials for comprehensive coverage of all learning objectives. Verify that the quiz includes a good mix of question types and difficulty levels. Ensure the practical assessment effectively tests the ability to apply knowledge of RNA structure and thermodynamics.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Develop a Comprehensive Quiz with Mixed Question Formats",
+          "description": "Create a 15-20 question quiz covering all RNA biochemistry and thermodynamics learning objectives with varied question formats and difficulty levels.",
+          "dependencies": [],
+          "details": "Implementation steps:\n1. Review all learning objectives to ensure comprehensive coverage\n2. Create 5-7 multiple-choice questions with 4 answer options each\n3. Develop 3-4 true/false questions with clear statements\n4. Design 4-5 short answer questions requiring 2-3 sentence responses\n5. Create 3-4 fill-in-the-blank questions focusing on key terms and concepts\n6. Ensure questions span all difficulty levels (basic recall, application, analysis)\n7. Include answer key with explanations for each question\n8. Organize questions by topic area for easier assessment\n\nTesting approach: Have subject matter experts review for accuracy, clarity, and alignment with learning objectives. Verify that questions accurately assess understanding rather than just memorization.",
+          "status": "pending",
+          "parentTaskId": 9
+        },
+        {
+          "id": 2,
+          "title": "Design Practical Assessment Task for RNA Structure",
+          "description": "Create a practical assessment requiring students to draw a detailed RNA nucleotide and explain energetic contributions to RNA secondary structure stability.",
+          "dependencies": [],
+          "details": "Implementation steps:\n1. Develop clear instructions for the nucleotide drawing portion, specifying required labels (e.g., 5' and 3' ends, phosphate groups, ribose sugar, nitrogenous base, hydrogen bonds)\n2. Create a template or workspace for the drawing portion\n3. Draft specific prompts for the written explanation component, requiring students to address:\n   - Base-pairing interactions and hydrogen bonding\n   - Base-stacking interactions\n   - Electrostatic interactions\n   - Solvent effects\n   - Entropic contributions\n4. Specify expected length (e.g., 250-300 words) and format for the explanation\n5. Create an exemplar answer for instructor reference\n\nTesting approach: Create a sample response to ensure the task can be completed within reasonable time constraints. Verify that instructions are unambiguous and that the task effectively tests conceptual understanding.",
+          "status": "pending",
+          "parentTaskId": 9
+        },
+        {
+          "id": 3,
+          "title": "Create Comprehensive Grading Rubrics",
+          "description": "Develop detailed grading rubrics for both the quiz and practical assessment, defining mastery as ≥85% accuracy.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implementation steps:\n1. For the quiz:\n   - Assign point values to each question type (e.g., 1 point for T/F, 2 points for multiple choice, 3-5 points for short answer)\n   - Create a total point scale (e.g., out of 50 points)\n   - Define mastery threshold at 85% (e.g., 43/50 points)\n   - Develop partial credit guidelines for short answer questions\n\n2. For the practical assessment:\n   - Create a detailed rubric for the RNA nucleotide drawing (10-15 points) covering accuracy, completeness, and proper labeling\n   - Develop a rubric for the written explanation (15-20 points) evaluating conceptual understanding, completeness, accuracy, and clarity\n   - Define specific criteria for each score level\n   - Set mastery threshold at 85% of total points\n\n3. Include guidelines for consistent grading across multiple evaluators\n\nTesting approach: Apply rubrics to sample student work to verify clarity and fairness. Ensure rubrics align with learning objectives and properly weight the most important concepts.",
+          "status": "pending",
+          "parentTaskId": 9
+        },
+        {
+          "id": 4,
+          "title": "Develop Personalized Review Template",
+          "description": "Create a template to help students identify weak areas and plan targeted review based on assessment results.",
+          "dependencies": [
+            1,
+            2,
+            3
+          ],
+          "details": "Implementation steps:\n1. Design a self-reflection section prompting students to analyze their performance\n2. Create a structured format for categorizing quiz and practical assessment results by topic area (e.g., RNA structure, thermodynamic principles, biochemical properties)\n3. Develop a scoring matrix that maps questions to specific learning objectives\n4. Create a template section for identifying knowledge gaps based on missed questions\n5. Design a targeted study plan template with:\n   - Space to list weak areas requiring review\n   - Recommended resources for each topic area\n   - Suggested practice exercises\n   - Timeline for review completion\n   - Self-check mechanisms to verify improvement\n6. Include examples of completed templates as models\n\nTesting approach: Have students test the template with sample assessment results to ensure it effectively guides them to identify knowledge gaps and create actionable review plans.",
+          "status": "pending",
+          "parentTaskId": 9
+        },
+        {
+          "id": 5,
+          "title": "Review and Validate Assessment Materials",
+          "description": "Conduct comprehensive review of all assessment materials for coverage, clarity, and alignment with learning objectives.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "Implementation steps:\n1. Create a mapping document linking each assessment item to specific learning objectives\n2. Verify all learning objectives are adequately covered across assessment materials\n3. Review language for clarity, precision, and appropriate scientific terminology\n4. Check for balanced coverage of topics based on their importance\n5. Verify progressive difficulty levels throughout the assessment materials\n6. Ensure practical assessment and quiz complement each other in coverage\n7. Review rubrics for fair evaluation criteria\n8. Validate that the review template effectively guides students to address knowledge gaps\n9. Make final revisions based on review findings\n10. Compile all materials into a cohesive assessment package with clear instructions\n\nTesting approach: Conduct pilot testing with a small group of students and instructors to gather feedback on clarity, difficulty level, and effectiveness. Make final adjustments based on this feedback before full implementation.",
+          "status": "pending",
+          "parentTaskId": 9
+        }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part3.Assessment.Creation",
+        "anchor_link": "#part-3-consolidation-self-assessment--reflection-days-6-7---approx-3-4-hours-total"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Create a comprehensive self-quiz (15-20 questions) and design a practical assessment task (drawing/explanation) covering Week 1's RNA biochemistry and thermodynamics. Develop associated grading rubrics.",
+        "estimated_effort_tshirt": "M",
+        "estimated_effort_hours_raw": "1.5-2 hours",
+        "estimated_effort_hours_min": 1.5,
+        "estimated_effort_hours_max": 2.0,
+        "mastery_criteria_summary": "Comprehensive 15-20 question quiz created with answer key. Practical assessment task designed with clear instructions. Detailed grading rubrics for both developed, targeting >=85% for mastery.",
+        "activity_type": "assessment_design_quiz_creation_rubric_development",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Self-created comprehensive quiz (15-20 questions) with answer key (maps to PRD Task 3.1).",
+          "Design for practical assessment task (drawing a nucleotide & explaining energetic contributions) (maps to PRD Task 3.3 design part).",
+          "Grading rubrics for both the quiz and the practical assessment."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 6,
+        "curriculum_part_title": "Part 3: Self-Assessment - Material Creation",
+        "csm_tags": [
+          "rna_modeling", "self_assessment", "quiz_design", "rubric_creation", "pedagogy", "week1_review_prep"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:6",
+        "activity:assessment_design",
+        "activity:quiz_creation",
+        "block:active_learning",
+        "effort_tshirt:M"
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Week 1 Learning Reflection, Flashcard Finalization & HPE Logging",
+      "description": "Reflect on Week 1 learning, finalize and organize all flashcards, and log all study time and deliverables in Task Master.",
+      "status": "pending",
+      "dependencies": [
+        11
+      ],
+      "priority": "medium",
+      "details": "Write a reflection on Week 1 learning. Finalize and organize all flashcards for the week. Log all study time and deliverables for Week 1 in Task Master.",
+      "testStrategy": "Written reflection completed. Flashcards finalized. All progress logged.",
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part3.ReflectFinalizeLog",
+        "anchor_link": "#part-3-consolidation-self-assessment--reflection-days-6-7---approx-3-4-hours-total"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Reflect on Week 1 learning process and outcomes, finalize and organize all flashcards for the week, and ensure all study time and deliverables are logged in HPE Task Master.",
+        "estimated_effort_tshirt": "S",
+        "estimated_effort_hours_raw": "0.5-1 hour",
+        "estimated_effort_hours_min": 0.5,
+        "estimated_effort_hours_max": 1.0,
+        "mastery_criteria_summary": "Written learning reflection completed. Week 1 flashcards finalized and organized for SRS. All study time and deliverables for Week 1 logged in Task Master.",
+        "activity_type": "reflection_flashcard_review_logging_consolidation",
+        "recommended_block": "passive_review",
+        "deliverables": [
+          "Written learning reflection for Week 1 (PRD Task 3.G).",
+          "Finalized and organized flashcard set for Week 1 material (ready for SRS).",
+          "All study time and deliverables for Week 1 logged and status updated in Task Master."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 7,
+        "curriculum_part_title": "Part 3: Reflection, Finalization & Logging",
+        "csm_tags": [
+          "rna_modeling", "reflection", "hpe_logging", "flashcard_review", "consolidation", "week1_wrapup"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:7",
+        "activity:reflection",
+        "activity:flashcard_review",
+        "activity:hpe_logging",
+        "block:passive_review",
+        "effort_tshirt:S"
+      ],
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Draft structured Week 1 learning reflection",
+          "description": "Create a comprehensive reflection document analyzing Week 1 learning experiences, key insights, and areas for improvement",
+          "dependencies": [],
+          "details": "1. Create a new document with clear sections for: a) Summary of topics covered, b) Key concepts learned, c) Challenges encountered, d) Successful learning strategies, e) Areas for improvement, f) Questions that arose, g) Goals for next week\n2. For each section, write 2-3 paragraphs with specific examples from Week 1\n3. Include references to specific resources, lectures, or assignments that were particularly valuable\n4. Conclude with actionable next steps for Week 2\n5. Test by reviewing for completeness, clarity, and actionable insights",
+          "status": "pending",
+          "parentTaskId": 12
+        },
+        {
+          "id": 2,
+          "title": "Review and organize Week 1 flashcards",
+          "description": "Systematically review all Week 1 flashcards, tag them by topic, and organize them into a spaced repetition system for ongoing study",
+          "dependencies": [],
+          "details": "1. Gather all flashcards created during Week 1\n2. Review each flashcard for accuracy, clarity, and completeness\n3. Tag each flashcard with appropriate topic categories (e.g., key concepts, definitions, formulas)\n4. Organize flashcards into digital format if not already done (using Anki, Quizlet, or similar tool)\n5. Set up spaced repetition schedule for ongoing review\n6. Create backup of all flashcards\n7. Test the system by doing a practice review session with the organized flashcards",
+          "status": "pending",
+          "parentTaskId": 12
+        },
+        {
+          "id": 3,
+          "title": "Log Week 1 study activities in Task Master",
+          "description": "Document all Week 1 study time, activities, and deliverables in Task Master according to tracking guidelines",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "1. Open Task Master logging system\n2. Create entries for each study session from Week 1, including: a) Date and duration, b) Topics covered, c) Resources used, d) Deliverables completed\n3. Upload or link to all Week 1 deliverables, including the learning reflection document from Subtask 1\n4. Tag all flashcards as completed from Subtask 2\n5. Calculate and record total study hours for Week 1\n6. Add notes on effectiveness of different study methods\n7. Verify all entries for accuracy and completeness\n8. Generate Week 1 summary report if Task Master has this feature\n9. Test by reviewing all entries to ensure nothing is missing",
+          "status": "pending",
+          "parentTaskId": 12
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Complete Week 1 Self-Assessments (Quiz & Practical)",
+      "description": "Complete the self-created quiz and practical assessment for Week 1 RNA foundations.",
+      "status": "pending",
+      "dependencies": [
+        9
+      ],
+      "priority": "high",
+      "details": "Take the quiz created in Task 9.1. Complete the practical drawing/explanation task from Task 9.2. Self-grade using rubrics from Task 9.3.",
+      "testStrategy": "Achieve >=85% on quiz. Achieve satisfactory self-grade on practical task based on rubric.",
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+        "csm_id": "RNA.P1.Foundations.W1.Part3.ExecuteAssessments",
+        "anchor_link": "#part-3-consolidation-self-assessment--reflection-days-6-7---approx-3-4-hours-total"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Complete the self-created quiz and the practical assessment task for Week 1 RNA foundations, aiming for >=85% mastery, and self-grade.",
+        "estimated_effort_tshirt": "M",
+        "estimated_effort_hours_raw": "1.0-1.5 hours",
+        "estimated_effort_hours_min": 1.0,
+        "estimated_effort_hours_max": 1.5,
+        "mastery_criteria_summary": "Self-quiz completed and scored (>=85% target). Practical task completed and self-graded against rubric (satisfactory).",
+        "activity_type": "self_assessment_active_execution",
+        "recommended_block": "active_learning",
+        "deliverables": [
+          "Completed self-quiz with score (maps to PRD Task 3.2).",
+          "Completed practical assessment (drawing/explanation) and self-graded result (maps to PRD Task 3.3 completion part)."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": 6,
+        "curriculum_part_title": "Part 3: Execute Self-Assessments",
+        "csm_tags": [
+          "rna_modeling", "self_assessment", "quiz_taking", "practical_execution", "week1_mastery_check"
+        ]
+      },
+      "labels": [
+        "domain:rna_modeling",
+        "pillar:1",
+        "curriculum_week:1",
+        "plan_day:6",
+        "activity:self_assessment_execution",
+        "block:active_learning",
+        "effort_tshirt:M"
+      ],
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Complete and Score Self-Created Week 1 RNA Quiz",
+          "description": "Take the previously created Week 1 RNA foundations quiz (from Task 9.1), record your answers, and calculate your initial score.",
+          "dependencies": [],
+          "details": "Implementation steps:\n1. Retrieve the quiz created in Task 9.1\n2. Set aside 30-45 minutes of uninterrupted time to complete the quiz\n3. Answer all questions without referring to notes or external resources\n4. Record your answers in a document\n5. Calculate your raw score based on the answer key\n6. Document any questions you found particularly challenging\n7. Save your completed quiz with answers and initial score for later review\n\nTesting approach: Verify all questions have been answered and initial scoring is complete before proceeding to the next subtask.",
+          "status": "pending",
+          "parentTaskId": 11
+        },
+        {
+          "id": 2,
+          "title": "Complete and Document Practical RNA Drawing/Explanation Task",
+          "description": "Perform the practical assessment created in Task 9.2 that involves drawing RNA structures and explaining key RNA concepts.",
+          "dependencies": [],
+          "details": "Implementation steps:\n1. Retrieve the practical assessment instructions from Task 9.2\n2. Gather necessary materials (paper, drawing tools, or digital drawing tools)\n3. Set aside 45-60 minutes of focused time for the practical task\n4. Complete all required drawings of RNA structures (may include secondary structures, base pairing, etc.)\n5. Write explanations for all required RNA concepts as specified in the assessment\n6. Take clear photos/scans of hand-drawn work or save digital files\n7. Compile all drawings and explanations into a single document\n8. Ensure all parts of the practical assessment are complete and properly documented\n\nTesting approach: Review the completed practical work against the original requirements to ensure all components have been addressed.",
+          "status": "pending",
+          "parentTaskId": 11
+        },
+        {
+          "id": 3,
+          "title": "Self-Grade Assessments and Create Improvement Plan",
+          "description": "Using the rubrics from Task 9.3, evaluate your quiz and practical assessment performance, record results, and develop a targeted improvement plan.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implementation steps:\n1. Retrieve the grading rubrics created in Task 9.3\n2. Re-review your quiz answers and apply the quiz rubric criteria\n3. Evaluate your practical assessment using the practical task rubric\n4. Calculate final scores for both assessments\n5. Compare your initial quiz score with the rubric-based evaluation\n6. Document specific strengths demonstrated in both assessments\n7. Identify knowledge gaps and areas for improvement\n8. Create a specific improvement plan with:\n   - List of RNA concepts needing further study\n   - Specific resources to review (textbook sections, videos, etc.)\n   - Timeline for addressing each improvement area\n   - Method to re-test understanding after review\n9. Compile all assessment results and improvement plan into a final report\n\nTesting approach: Ensure the improvement plan addresses all identified weaknesses and includes concrete, actionable steps with specific resources and timelines.",
+          "status": "pending",
+          "parentTaskId": 11
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Create Learning Reflection and Progress Tracking System",
+      "description": "Develop a system for reflecting on the learning process, tracking progress, and integrating with the Holistic Performance Enhancement (HPE) system.",
+      "status": "pending",
+      "dependencies": [
+        9
+      ],
+      "priority": "low",
+      "details": "Create a structured template for reflecting on the learning process, including sections for: 1) Concepts that were easy to understand, 2) Challenging concepts requiring further review, 3) Most effective learning strategies, 4) Areas for improvement in learning approach. Develop a progress tracking system that integrates with the Task Master component of the HPE system, including logging study time and completion of deliverables. Set up a flashcard organization system for the ~30-50 created flashcards that integrates with the Flash-Memory Layer of the HPE system for long-term retention through spaced repetition.",
+      "testStrategy": "Review the reflection template for comprehensiveness and usefulness in identifying strengths and areas for improvement. Verify that the progress tracking system effectively integrates with the HPE system components. Ensure the flashcard organization system supports effective spaced repetition learning.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Design and Implement Learning Reflection Template",
+          "description": "Create a structured template for reflecting on the learning process with sections for easy concepts, challenging concepts, effective learning strategies, and areas for improvement.",
+          "dependencies": [],
+          "details": "Implementation steps:\n1. Design a template structure with 4 main sections: 'Easy Concepts', 'Challenging Concepts', 'Effective Strategies', and 'Areas for Improvement'\n2. Implement the template as a digital form (e.g., markdown template, HTML form, or document template)\n3. Add guiding questions for each section to prompt thoughtful reflection\n4. Include a timestamp field and subject/topic identifier\n5. Create a storage system for completed reflections\n6. Add tagging functionality to categorize reflections by subject/topic\n\nTesting approach:\n- Create sample reflections using the template\n- Verify all sections prompt useful reflections\n- Test storage and retrieval of completed reflections",
+          "status": "pending",
+          "parentTaskId": 12
+        },
+        {
+          "id": 2,
+          "title": "Develop Study Time and Deliverable Tracking System",
+          "description": "Build a progress tracking system that logs study time and completion of deliverables, with integration points for the Task Master component of the HPE system.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation steps:\n1. Create a data structure to store study sessions with fields for date, start time, end time, duration, topic, and notes\n2. Implement a timer functionality for tracking active study time\n3. Develop a deliverable tracking component with fields for deliverable description, due date, completion status, and quality self-assessment\n4. Design API endpoints or integration hooks for the Task Master component of HPE\n5. Implement data export functionality for analysis\n6. Create a dashboard view showing study time trends and deliverable completion rates\n\nTesting approach:\n- Test timer functionality for accuracy\n- Verify data persistence across sessions\n- Test the integration points with mock HPE Task Master data\n- Validate dashboard visualizations with sample data",
+          "status": "pending",
+          "parentTaskId": 12
+        },
+        {
+          "id": 3,
+          "title": "Create Flashcard Organization and Spaced Repetition System",
+          "description": "Set up a system to organize 30-50 flashcards and integrate with the Flash-Memory Layer of HPE for spaced repetition and long-term retention.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation steps:\n1. Design a flashcard data structure with fields for question, answer, category, difficulty rating, and metadata (creation date, last reviewed date)\n2. Implement tagging and categorization features for flashcards\n3. Create an interface for adding, editing, and reviewing flashcards\n4. Develop a spaced repetition algorithm that schedules reviews based on difficulty ratings and review history\n5. Design integration points with the HPE Flash-Memory Layer\n6. Implement export/import functionality for flashcard decks\n7. Add analytics to track retention rates and identify difficult cards\n\nTesting approach:\n- Test the spaced repetition algorithm with sample flashcards\n- Verify proper scheduling of reviews\n- Test integration with HPE Flash-Memory Layer\n- Validate analytics calculations",
+          "status": "pending",
+          "parentTaskId": 12
+        },
+        {
+          "id": 4,
+          "title": "Integrate and Test Complete Learning Reflection and Progress Tracking System",
+          "description": "Integrate all components, ensure comprehensive HPE system integration, and test the effectiveness of the complete system in supporting reflection and learning.",
+          "dependencies": [
+            2,
+            3
+          ],
+          "details": "Implementation steps:\n1. Create a unified interface that connects the reflection template, progress tracking, and flashcard systems\n2. Implement cross-component functionality (e.g., automatically generating flashcards from challenging concepts in reflections)\n3. Ensure consistent data flow between all components\n4. Develop comprehensive HPE integration by connecting to both Task Master and Flash-Memory Layer\n5. Create holistic reporting that combines insights from all components\n6. Implement user settings for customizing the system\n7. Develop a notification system for scheduled reflections and reviews\n\nTesting approach:\n- Conduct end-to-end testing of the complete workflow\n- Test data consistency across all components\n- Verify all HPE integration points function correctly\n- Perform usability testing to ensure the system effectively supports learning\n- Test the system with a complete learning cycle on a real subject",
+          "status": "pending",
+          "parentTaskId": 12
+        }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/HPE_SYSTEM/HPE_Reflection_Progress_Tracking_PRD.md",
+        "csm_id": "HPE.ToolDev.ReflectionSystem.V1",
+        "anchor_link": "#reflection-progress-tracking-system-design"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "Design, implement, and validate a learning reflection and progress tracking system for the HPE platform, supporting integration with Task Master and flashcard tools.",
+        "estimated_effort_tshirt": "XL",
+        "estimated_effort_hours_raw": "8-16 hours",
+        "estimated_effort_hours_min": 8.0,
+        "estimated_effort_hours_max": 16.0,
+        "mastery_criteria_summary": "Fully functional reflection and tracking system deployed, passing all integration and usability tests.",
+        "activity_type": "software_development",
+        "recommended_block": "deep_work",
+        "deliverables": [
+          "User-facing reflection template and interface",
+          "Integrated progress tracking dashboard",
+          "Automated flashcard generation from reflections",
+          "Comprehensive system documentation",
+          "End-to-end integration with Task Master and flashcard tools"
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": null,
+        "curriculum_part_title": "HPE System Development",
+        "csm_tags": [
+          "hpe_system_dev",
+          "reflection_tool",
+          "progress_tracking",
+          "integration",
+          "software_development"
+        ]
+      },
+      "labels": [
+        "domain:hpe_system",
+        "pillar:platform",
+        "project:reflection_tracker",
+        "block:deep_work",
+        "activity:software_development",
+        "effort_tshirt:XL"
+      ]
+    }
+  ],
+  "metadata": {
+    "projectName": "RNA Modeling Foundations Learning Plan",
+    "totalTasks": 10,
+    "sourceFile": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
+    "generatedAt": "2023-11-14"
+  }
+}

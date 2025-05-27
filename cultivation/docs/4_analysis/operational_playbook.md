@@ -57,7 +57,7 @@ important hides in Notion or email.
 
 ---
 
-## 3 · The Daily Loop ⏰
+## 3 · The Daily Loop Example (adjust against scheduling) ⏰
 
 | Slot | Action | System Autonomy | Human Pay‑off |
 |------|--------|-----------------|---------------|

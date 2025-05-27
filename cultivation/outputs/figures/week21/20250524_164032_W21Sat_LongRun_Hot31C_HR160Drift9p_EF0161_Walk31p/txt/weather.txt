@@ -1,0 +1,2 @@
+Temperature: 31.5 °C, Apparent: None °C
+Description: Clear sky
