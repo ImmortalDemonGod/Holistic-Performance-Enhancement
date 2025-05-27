@@ -74,6 +74,12 @@ class _RawYAMLCardEntry(PydanticBaseModel):
     origin_task: Optional[str] = Field(default=None)
     media: Optional[List[str]] = Field(default_factory=list)
 
+    @validator("tags", pre=True, each_item=True)
+    def normalize_tag(cls, v):
+        if isinstance(v, str):
+            return v.strip().lower()
+        return v
+
     class Config:
         extra = "forbid"
 
@@ -146,13 +152,18 @@ def _transform_raw_card_to_model(
 
     # Secrets Detection
     if not skip_secrets_detection:
-        for content, field_name_str in [(front_sanitized, "q (question)"), (back_sanitized, "a (answer)")]:
-            for pattern in DEFAULT_SECRET_PATTERNS:
-                if pattern.search(content):
-                    return YAMLProcessingError(
-                        file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
-                        field_name=field_name_str, message=f"Potential secret detected in field '{field_name_str}'. Matched pattern: '{pattern.pattern[:50]}...'."
-                    )
+        for pattern in DEFAULT_SECRET_PATTERNS:
+            if pattern.search(back_sanitized):
+                return YAMLProcessingError(
+                    file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
+                    field_name="a", message=f"Potential secret detected in card answer. Matched pattern: '{pattern.pattern[:50]}...'."
+                )
+            if pattern.search(front_sanitized):
+                return YAMLProcessingError(
+                    file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
+                    field_name="q", message=f"Potential secret detected in card question. Matched pattern: '{pattern.pattern[:50]}...'."
+                )
+
     # Tags Processing
     final_tags = deck_tags.copy() # Start with deck-level tags (already validated for format by _RawYAMLDeckFile)
     if raw_card_model.tags: # raw_card_model.tags is List[str] validated for kebab-case
@@ -167,7 +178,7 @@ def _transform_raw_card_to_model(
             if media_path.is_absolute():
                 return YAMLProcessingError(
                     file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
-                    field_name="media", message=f"Media path '{media_path}' must be relative."
+                    field_name="media", message=f"Media path must be relative: '{media_path}'."
                 )
             
             if not skip_media_validation:
@@ -253,19 +264,38 @@ def _process_single_yaml_file(
     if not isinstance(raw_yaml_content, dict):
         raise YAMLProcessingError(file_path, "Top level of YAML must be a dictionary (deck object).")
 
-    # Validate Raw YAML Structure using _RawYAMLDeckFile Pydantic model
-    try:
-        validated_raw_deck = _RawYAMLDeckFile(**raw_yaml_content)
-    except ValidationError as e:
-        error_details = "; ".join([f"{'.'.join(map(str, err['loc']))}: {err['msg']}" for err in e.errors()])
-        raise YAMLProcessingError(file_path, f"File-level schema validation failed. Details: {error_details}")
+    # Manual top-level validation
+    if 'deck' not in raw_yaml_content or not isinstance(raw_yaml_content['deck'], str) or not raw_yaml_content['deck'].strip():
+        raise YAMLProcessingError(file_path, "Missing or invalid 'deck' field at top level.")
+    deck_name = raw_yaml_content['deck'].strip()
 
-    deck_name = validated_raw_deck.deck
-    deck_tags: Set[str] = set(t.strip().lower() for t in validated_raw_deck.tags if t) if validated_raw_deck.tags else set()
-    
+    tags = raw_yaml_content.get('tags', [])
+    if tags is not None and not isinstance(tags, list):
+        raise YAMLProcessingError(file_path, "'tags' field must be a list if present.")
+    deck_tags: Set[str] = set(t.strip().lower() for t in tags if isinstance(t, str)) if tags else set()
+
+    if 'cards' not in raw_yaml_content or not isinstance(raw_yaml_content['cards'], list):
+        raise YAMLProcessingError(file_path, "Missing or invalid 'cards' list at top level.")
+    cards_list = raw_yaml_content['cards']
+    if not cards_list:
+        raise YAMLProcessingError(file_path, "No cards found in 'cards' list.")
+
     encountered_fronts_this_file: Set[str] = set()
 
-    for idx, raw_card_entry_model in enumerate(validated_raw_deck.cards):
+    for idx, card_dict in enumerate(cards_list):
+        try:
+            raw_card_entry_model = _RawYAMLCardEntry(**card_dict)
+        except ValidationError as e:
+            error_details = "; ".join([f"{'.'.join(map(str, err['loc']))}: {err['msg']}" for err in e.errors()])
+            errors_in_file.append(
+                YAMLProcessingError(
+                    file_path=file_path,
+                    message=f"Card-level schema validation failed. Details: {error_details}",
+                    card_index=idx,
+                    card_question_snippet=str(card_dict.get('q', ''))[:50] if isinstance(card_dict, dict) else None
+                )
+            )
+            continue
         transformed_result = _transform_raw_card_to_model(
             raw_card_entry_model,
             deck_name,
@@ -276,7 +306,6 @@ def _process_single_yaml_file(
             skip_media_validation,
             skip_secrets_detection
         )
-
         if isinstance(transformed_result, Card):
             card = transformed_result
             normalized_front = " ".join(card.front.lower().split())
@@ -290,7 +319,7 @@ def _process_single_yaml_file(
                 cards_in_file.append(card)
         else:
             errors_in_file.append(transformed_result)
-            
+    
     print(f"[DEBUG] _process_single_yaml_file({file_path}): errors_in_file={errors_in_file}")
     return cards_in_file, errors_in_file
 
@@ -318,11 +347,11 @@ def load_and_process_flashcard_yamls(
         error = YAMLProcessingError(assets_root_directory, "Assets root directory does not exist or is not a directory.")
         if fail_fast:
             raise error
-        all_errors.append(error)
         if not skip_media_validation:
+            all_errors.append(error)
             return [], all_errors
 
-    yaml_files = list(source_directory.rglob("*.yaml")) + list(source_directory.rglob("*.yml"))
+    yaml_files = sorted(list(source_directory.rglob("*.yaml")) + list(source_directory.rglob("*.yml")))
 
     if not yaml_files:
         logger.info(f"No YAML files found in {source_directory}")
