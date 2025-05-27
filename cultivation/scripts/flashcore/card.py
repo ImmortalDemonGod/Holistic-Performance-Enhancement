@@ -5,7 +5,10 @@ Defines the core Pydantic data models for Cards and Reviews in the flashcore sys
 These models serve as the canonical internal representation of flashcard data and review events.
 """
 
+from __future__ import annotations
+
 import uuid
+from uuid import UUID
 from datetime import datetime, date, timezone
 from typing import List, Optional, Set
 from pathlib import Path
@@ -21,7 +24,7 @@ class Card(BaseModel):
     Represents a single flashcard after parsing and processing from YAML.
     This is the canonical internal representation of a card's content and metadata.
     """
-    uuid: uuid.UUID = Field(
+    uuid: UUID = Field(
         default_factory=uuid.uuid4,
         description="Unique UUIDv4 identifier for the card. Auto-generated if not provided in YAML 'id'."
     )
@@ -37,7 +40,7 @@ class Card(BaseModel):
         ..., max_length=1024,
         description="The answer text. Supports Markdown and KaTeX. Maps from YAML 'a'."
     )
-    tags: Set[constr(pattern=KEBAB_CASE_REGEX_PATTERN)] = Field(  # type: ignore
+    tags: Set[str] = Field(
         default_factory=set,
         description="Set of unique, kebab-case tags. Result of merging deck-level global tags and card-specific tags from YAML."
     )
@@ -62,6 +65,29 @@ class Card(BaseModel):
         description="A field for internal system notes or flags about the card, not typically exposed to the user (e.g., 'needs_review_for_xss_risk_if_sanitizer_fails', 'generated_by_task_hook')."
     )
 
+    @validator("tags", each_item=True, pre=True)
+    def validate_tags_kebab_case(cls, v):
+        """Ensure each tag is a string and matches kebab-case pattern."""
+        if not isinstance(v, str):
+            raise ValueError("Input should be a valid string")
+        if not re.match(KEBAB_CASE_REGEX_PATTERN, v):
+            raise ValueError(f"Tag '{v}' is not in kebab-case.")
+        return v
+
+    @validator("front")
+    def check_front_max_length(cls, v: str) -> str:
+        """Ensure front text does not exceed 1024 characters."""
+        if len(v) > 1024:
+            raise ValueError("String should have at most 1024 characters")
+        return v
+
+    @validator("back")
+    def check_back_max_length(cls, v: str) -> str:
+        """Ensure back text does not exceed 1024 characters."""
+        if len(v) > 1024:
+            raise ValueError("String should have at most 1024 characters")
+        return v
+
     class Config:
         validate_assignment = True  # Enforce validation when field values are changed post-instantiation
         extra = "forbid"            # Disallow any fields not defined in the model during instantiation
@@ -75,7 +101,7 @@ class Review(BaseModel):
         default=None,
         description="The auto-incrementing primary key from the 'reviews' database table. Will be None for new Review objects before they are persisted."
     )
-    card_uuid: uuid.UUID = Field(
+    card_uuid: UUID = Field(
         ...,
         description="The UUID of the card that was reviewed, linking to Card.uuid."
     )
@@ -123,6 +149,13 @@ class Review(BaseModel):
         default="review",
         description="Type of review, e.g., 'learn', 'review', 'relearn', 'manual'. Useful for advanced FSRS variants or analytics."
     )
+
+    @validator("rating")
+    def validate_rating_range(cls, v: int) -> int:
+        """Ensure rating is between 0 and 3 inclusive."""
+        if v < 0 or v > 3:
+            raise ValueError("Rating must be between 0 and 3")
+        return v
 
     @validator("review_type")
     def check_review_type_is_allowed(cls, v: Optional[str]) -> Optional[str]:
