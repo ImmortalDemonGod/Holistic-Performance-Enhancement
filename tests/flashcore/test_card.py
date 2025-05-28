@@ -22,7 +22,9 @@ except ImportError:
 
 class TestCardModel:
     def test_card_creation_minimal_required(self):
-        """Test Card creation with only absolutely required fields (others have defaults)."""
+        """
+        Verifies that a Card instance can be created with only required fields, and that all optional fields are set to their default values.
+        """
         card = Card(
             deck_name="Minimal Deck",
             front="Minimal Q?",
@@ -41,7 +43,11 @@ class TestCardModel:
         assert card.internal_note is None
 
     def test_card_creation_all_fields_valid(self):
-        """Test Card creation with all fields populated with valid data."""
+        """
+        Verifies that a Card instance can be created with all fields explicitly set to valid values.
+        
+        Asserts that each field is correctly assigned when provided, including UUID, deck name with subdeck, tags, timestamps, origin task, media paths, source YAML file path, and internal note.
+        """
         specific_uuid = uuid.uuid4()
         specific_added_at = datetime.now(timezone.utc) - timedelta(days=1)
         card = Card(
@@ -66,13 +72,17 @@ class TestCardModel:
         assert card.internal_note == "This card was programmatically generated."
 
     def test_card_uuid_default_generation(self):
-        """Ensure UUIDs are different for different instances if not provided."""
+        """
+        Tests that each Card instance receives a unique UUID when not explicitly provided.
+        """
         card1 = Card(deck_name="D1", front="Q1", back="A1")
         card2 = Card(deck_name="D2", front="Q2", back="A2")
         assert card1.uuid != card2.uuid
 
     def test_card_added_at_default_is_utc_and_recent(self):
-        """Ensure added_at default is a recent UTC timestamp."""
+        """
+        Tests that the Card model's added_at field defaults to a recent UTC timestamp.
+        """
         card = Card(deck_name="D", front="Q", back="A")
         now_utc = datetime.now(timezone.utc)
         assert card.added_at.tzinfo == timezone.utc
@@ -86,6 +96,9 @@ class TestCardModel:
         {"alphanum123", "123tag"}
     ])
     def test_card_tags_valid_kebab_case(self, valid_tag_set):
+        """
+        Tests that a Card instance accepts valid kebab-case tag sets without raising validation errors.
+        """
         card = Card(deck_name="D", front="Q", back="A", tags=valid_tag_set)
         assert card.tags == valid_tag_set
 
@@ -98,12 +111,24 @@ class TestCardModel:
         ({"valid-tag", "Tag With Space"}, "Tag 'Tag With Space' is not in kebab-case.")
     ])
     def test_card_tags_invalid_format(self, invalid_tag_set, expected_error_part):
+        """
+        Tests that invalid tag sets for the Card model raise a ValidationError with the expected error message.
+        
+        Args:
+            invalid_tag_set: A set of tags in an invalid format.
+            expected_error_part: Substring expected to appear in the validation error message.
+        """
         with pytest.raises(ValidationError) as excinfo:
             Card(deck_name="D", front="Q", back="A", tags=invalid_tag_set)
         assert expected_error_part in str(excinfo.value)
 
     @pytest.mark.parametrize("field, max_len", [("front", 1024), ("back", 1024)])
     def test_card_text_fields_max_length(self, field, max_len):
+        """
+        Tests that the specified text field (`front` or `back`) of the Card model enforces its maximum length constraint.
+        
+        Creates a Card with the field at maximum allowed length (should succeed), and with the field exceeding the limit (should raise ValidationError).
+        """
         long_text = "a" * (max_len + 1)
         valid_text = "a" * max_len
         
@@ -119,12 +144,17 @@ class TestCardModel:
         assert f"String should have at most {max_len} characters" in str(excinfo.value)
 
     def test_card_deck_name_min_length(self):
+        """
+        Tests that creating a Card with an empty deck_name raises a ValidationError due to minimum length constraint.
+        """
         with pytest.raises(ValidationError) as excinfo:
             Card(deck_name="", front="Q", back="A")
         assert "String should have at least 1 character" in str(excinfo.value)
 
     def test_card_extra_fields_forbidden(self):
-        """Test that extra fields raise an error due to Config.extra = 'forbid'."""
+        """
+        Verifies that providing unexpected extra fields to the Card model raises a ValidationError due to forbidden extra fields.
+        """
         with pytest.raises(ValidationError) as excinfo:
             Card(
                 deck_name="Deck",
@@ -136,7 +166,9 @@ class TestCardModel:
                "unexpected_field" in str(excinfo.value) # Pydantic v1 vs v2 error msg
 
     def test_card_validate_assignment(self):
-        """Test that validation occurs on attribute assignment if Config.validate_assignment = True."""
+        """
+        Tests that attribute assignment on a Card instance triggers validation errors when invalid values are assigned, ensuring Pydantic's validate_assignment configuration is enforced.
+        """
         card = Card(deck_name="D", front="Q", back="A")
         with pytest.raises(ValidationError):
             card.front = "a" * 2000 # Exceeds max_length
@@ -148,7 +180,11 @@ class TestCardModel:
 
 class TestReviewModel:
     def test_review_creation_minimal_required(self, valid_card_uuid):
-        """Test Review creation with only absolutely required fields."""
+        """
+        Verifies that a Review instance can be created with only the required fields.
+        
+        Asserts that required fields are set correctly and optional fields take their default values, including automatic UTC timestamp and default review type.
+        """
         review = Review(
             card_uuid=valid_card_uuid,
             rating=1, # Hard
@@ -168,6 +204,9 @@ class TestReviewModel:
         assert review.review_type == "review" # Default
 
     def test_review_creation_all_fields_valid(self, valid_card_uuid):
+        """
+        Tests that a Review instance can be created with all fields explicitly set and verifies correct assignment of each field.
+        """
         specific_ts = datetime.now(timezone.utc) - timedelta(hours=1)
         review = Review(
             review_id=123,
@@ -193,6 +232,9 @@ class TestReviewModel:
         assert review.review_type == "relearn"
 
     def test_review_ts_default_is_utc_and_recent(self, valid_card_uuid):
+        """
+        Tests that the default timestamp (`ts`) of a Review is set to the current UTC time and is recent.
+        """
         review = Review(card_uuid=valid_card_uuid, rating=0, stab_after=1.0, diff=7.0,
                         next_due=date.today() + timedelta(days=1), elapsed_days_at_review=0,
                         scheduled_days_interval=1)
@@ -202,12 +244,22 @@ class TestReviewModel:
 
     @pytest.mark.parametrize("valid_rating", [0, 1, 2, 3])
     def test_review_rating_valid(self, valid_card_uuid, valid_rating):
+        """
+        Verifies that the Review model accepts valid rating values without raising a ValidationError.
+        
+        This test ensures that the Review instance can be created with allowed rating values.
+        """
         Review(card_uuid=valid_card_uuid, rating=valid_rating, stab_after=1.0, diff=7.0,
                next_due=date.today() + timedelta(days=1), elapsed_days_at_review=0,
                scheduled_days_interval=1) # Should not raise
 
     @pytest.mark.parametrize("invalid_rating", [-1, 4, 3.5])
     def test_review_rating_invalid(self, valid_card_uuid, invalid_rating):
+        """
+        Tests that providing an invalid rating to the Review model raises a ValidationError.
+        
+        Accepts ratings that are out of the allowed integer range or of the wrong type, and asserts that the resulting error message matches expected validation errors.
+        """
         with pytest.raises(ValidationError) as excinfo:
             Review(card_uuid=valid_card_uuid, rating=invalid_rating, stab_after=1.0, diff=7.0, # type: ignore
                    next_due=date.today() + timedelta(days=1), elapsed_days_at_review=0,
@@ -221,6 +273,11 @@ class TestReviewModel:
         )  # Accept Pydantic v2 error messages
 
     def test_review_resp_ms_validation(self, valid_card_uuid):
+        """
+        Tests that the Review model accepts non-negative resp_ms values and rejects negative values.
+        
+        Ensures that a Review instance with resp_ms set to zero is valid, while a negative resp_ms raises a ValidationError.
+        """
         Review(card_uuid=valid_card_uuid, rating=0, resp_ms=0, stab_after=1.0, diff=7.0,
                next_due=date.today() + timedelta(days=1), elapsed_days_at_review=0,
                scheduled_days_interval=1) # Valid: 0
@@ -230,6 +287,11 @@ class TestReviewModel:
                    scheduled_days_interval=1)
 
     def test_review_stab_after_validation(self, valid_card_uuid):
+        """
+        Tests that the Review model enforces a minimum value of 0.1 for the stab_after field.
+        
+        Creates a Review with the minimum valid stab_after value and asserts that values below 0.1 raise a ValidationError.
+        """
         Review(card_uuid=valid_card_uuid, rating=0, stab_after=0.1, diff=7.0,
                next_due=date.today() + timedelta(days=1), elapsed_days_at_review=0,
                scheduled_days_interval=1) # Valid: 0.1
@@ -239,6 +301,11 @@ class TestReviewModel:
                    scheduled_days_interval=1)
 
     def test_review_elapsed_days_validation(self, valid_card_uuid):
+        """
+        Tests that the Review model enforces non-negative values for elapsed_days_at_review.
+        
+        Verifies that a value of zero is accepted, while negative values raise a ValidationError.
+        """
         Review(card_uuid=valid_card_uuid, rating=0, stab_after=1.0, diff=7.0,
                next_due=date.today() + timedelta(days=1), elapsed_days_at_review=0,
                scheduled_days_interval=1) # Valid: 0
@@ -248,6 +315,12 @@ class TestReviewModel:
                    scheduled_days_interval=1)
 
     def test_review_scheduled_interval_validation(self, valid_card_uuid):
+        """
+        Tests that the Review model enforces a minimum value of 1 for scheduled_days_interval.
+        
+        Verifies that a Review instance with scheduled_days_interval set to 1 is valid,
+        while a value of 0 raises a ValidationError.
+        """
         Review(card_uuid=valid_card_uuid, rating=0, stab_after=1.0, diff=7.0,
                next_due=date.today() + timedelta(days=1), elapsed_days_at_review=0,
                scheduled_days_interval=1) # Valid: 1
@@ -264,6 +337,9 @@ class TestReviewModel:
         assert review.review_type == valid_review_type
 
     def test_review_type_invalid(self, valid_card_uuid):
+        """
+        Tests that providing an invalid `review_type` to the Review model raises a ValidationError with the expected error message.
+        """
         with pytest.raises(ValidationError) as excinfo:
             Review(card_uuid=valid_card_uuid, rating=0, stab_after=1.0, diff=7.0,
                    next_due=date.today() + timedelta(days=1), elapsed_days_at_review=0,
@@ -271,6 +347,9 @@ class TestReviewModel:
         assert "Invalid review_type" in str(excinfo.value)
 
     def test_review_extra_fields_forbidden(self, valid_card_uuid):
+        """
+        Tests that providing extra, unexpected fields to the Review model raises a ValidationError.
+        """
         with pytest.raises(ValidationError) as excinfo:
             Review(
                 card_uuid=valid_card_uuid,
@@ -290,5 +369,7 @@ class TestReviewModel:
 
 @pytest.fixture
 def valid_card_uuid() -> uuid.UUID:
-    """Provides a valid UUID for review tests."""
+    """
+    Returns a newly generated valid UUID for use in Review model tests.
+    """
     return uuid.uuid4()

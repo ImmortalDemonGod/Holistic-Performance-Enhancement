@@ -77,6 +77,15 @@ class _RawYAMLCardEntry(PydanticBaseModel):
 
     @validator("tags", pre=True, each_item=True)
     def normalize_tag(cls, v):
+        """
+        Normalizes a tag string by stripping whitespace and converting it to lowercase.
+        
+        Args:
+            v: The tag value to normalize.
+        
+        Returns:
+            The normalized tag string if input is a string; otherwise, returns the input unchanged.
+        """
         if isinstance(v, str):
             return v.strip().lower()
         return v
@@ -103,6 +112,11 @@ class YAMLProcessingError(Exception):
     yaml_path_segment: Optional[str] = None # e.g., "cards[2].q"
 
     def __str__(self) -> str:
+        """
+        Returns a formatted string representation of the error with contextual information.
+        
+        The output includes the file name, card index, question snippet, field name, YAML path segment, and the error message if available.
+        """
         context_parts = [f"File: {self.file_path.name}"]
         if self.card_index is not None:
             context_parts.append(f"Card Index: {self.card_index}")
@@ -130,8 +144,9 @@ def _transform_raw_card_to_model(
     # internal_note is now authorable from YAML and should be passed through
 
     """
-    Transforms a validated raw card entry into a canonical Card model.
-    Performs sanitization, media validation, secrets detection, and final Card instantiation.
+    Converts a validated raw YAML card entry into a canonical Card model instance.
+    
+    Performs HTML sanitization on question and answer fields, merges deck and card tags, validates and resolves media paths relative to the assets root directory, and detects potential secrets in card content unless detection is skipped. Returns either a fully constructed Card instance or a YAMLProcessingError detailing the failure context.
     """
     card_q_preview = raw_card_model.q[:50]
 
@@ -253,7 +268,20 @@ def _process_single_yaml_file(
     skip_media_validation: bool,
     skip_secrets_detection: bool
 ) -> Tuple[List[Card], List[YAMLProcessingError]]:
-    """Processes a single YAML file, returning successfully created Cards and any card-level errors."""
+    """
+    Parses and validates a single flashcard YAML file, returning valid Card instances and any card-level errors encountered.
+    
+    The function loads the YAML file, checks the top-level structure for required fields, and validates each card entry. It enforces forbidden fields, validates schema compliance, transforms raw entries into canonical Card models, and detects duplicate question fronts within the file. Errors are collected for schema violations, forbidden fields, transformation failures, and duplicate questions.
+    
+    Args:
+        file_path: Path to the YAML file to process.
+        assets_root_directory: Root directory for resolving and validating media file paths.
+        skip_media_validation: If True, skips validation of media file existence and paths.
+        skip_secrets_detection: If True, skips detection of secrets in card content.
+    
+    Returns:
+        A tuple containing a list of successfully created Card instances and a list of YAMLProcessingError instances for any errors encountered.
+    """
     cards_in_file: List[Card] = []
     errors_in_file: List[YAMLProcessingError] = []
 
@@ -348,8 +376,21 @@ def load_and_process_flashcard_yamls(
     skip_secrets_detection: bool = False
 ) -> Tuple[List[Card], List[YAMLProcessingError]]:
     """
-    Scans a directory for flashcard YAML files, processes them, and returns
-    a list of Card objects and a list of any processing errors.
+    Recursively loads and processes flashcard YAML files from a directory, returning validated Card instances and any processing errors.
+    
+    Scans the specified source directory for `.yaml` and `.yml` files, parses and validates each file, and transforms valid entries into canonical Card objects. Performs HTML sanitization, tag normalization, media path validation, and secret detection as configured. Detects and reports duplicate card questions both within and across files. Supports fail-fast mode to abort on the first error, and options to skip media validation or secret detection.
+    
+    Args:
+        source_directory: Path to the directory containing flashcard YAML files.
+        assets_root_directory: Path to the root directory for media asset validation.
+        fail_fast: If True, aborts and raises on the first encountered error.
+        skip_media_validation: If True, skips validation of media file existence and paths.
+        skip_secrets_detection: If True, skips detection of potential secrets in card content.
+    
+    Returns:
+        A tuple containing:
+            - A list of successfully processed Card instances.
+            - A list of YAMLProcessingError instances describing any errors encountered.
     """
     all_processed_cards: List[Card] = []
     all_errors: List[YAMLProcessingError] = []

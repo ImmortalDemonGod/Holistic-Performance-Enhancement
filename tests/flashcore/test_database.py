@@ -39,14 +39,33 @@ except ImportError:
 # --- Fixtures ---
 @pytest.fixture
 def db_path_memory() -> str:
+    """
+    Returns the DuckDB in-memory database path string.
+    
+    Use this as the database path to create a transient, non-persistent database for testing or temporary operations.
+    """
     return ":memory:"
 
 @pytest.fixture
 def db_path_file(tmp_path: Path) -> Path:
+    """
+    Provides a temporary file path for the test database within the pytest `tmp_path` directory.
+    
+    Args:
+        tmp_path: The pytest-provided temporary directory path.
+    
+    Returns:
+        Path to a temporary database file named "test_flash.db".
+    """
     return tmp_path / "test_flash.db"
 
 @pytest.fixture(params=["memory", "file"])
 def db_manager(request, db_path_memory: str, db_path_file: Path) -> FlashcardDatabase:
+    """
+    Yields a FlashcardDatabase instance connected to either an in-memory or file-based database.
+    
+    Selects the database type based on the test parameter, and ensures the connection is closed after use.
+    """
     if request.param == "memory":
         db_man = FlashcardDatabase(db_path_memory)
     else:
@@ -57,11 +76,20 @@ def db_manager(request, db_path_memory: str, db_path_file: Path) -> FlashcardDat
 
 @pytest.fixture
 def initialized_db_manager(db_manager: FlashcardDatabase) -> FlashcardDatabase:
+    """
+    Provides a FlashcardDatabase instance with its schema initialized for use in tests.
+    """
     db_manager.initialize_schema()
     return db_manager
 
 @pytest.fixture
 def sample_card1() -> Card:
+    """
+    Creates a sample Card instance representing a card in 'Deck A::Sub1' with predefined attributes.
+    
+    Returns:
+        Card: A Card object with fixed UUID, deck, front, back, tags, timestamp, and source file.
+    """
     return Card(
         uuid=uuid.UUID("11111111-1111-1111-1111-111111111111"),
         deck_name="Deck A::Sub1",
@@ -74,6 +102,12 @@ def sample_card1() -> Card:
 
 @pytest.fixture
 def sample_card2() -> Card:
+    """
+    Provides a sample Card instance representing a card in 'Deck A::Sub2' for testing purposes.
+    
+    Returns:
+        Card: A Card object with predefined UUID, deck, front, back, tags, timestamp, and source file.
+    """
     return Card(
         uuid=uuid.UUID("22222222-2222-2222-2222-222222222222"),
         deck_name="Deck A::Sub2",
@@ -86,6 +120,12 @@ def sample_card2() -> Card:
 
 @pytest.fixture
 def sample_card3_deck_b() -> Card:
+    """
+    Provides a sample Card instance belonging to 'Deck B' for use in tests.
+    
+    Returns:
+        Card: A Card object with preset UUID, deck name, front, back, tags, timestamp, and source YAML file path.
+    """
     return Card(
         uuid=uuid.UUID("33333333-3333-3333-3333-333333333333"),
         deck_name="Deck B",
@@ -98,6 +138,15 @@ def sample_card3_deck_b() -> Card:
 
 @pytest.fixture
 def sample_review1(sample_card1: Card) -> Review:
+    """
+    Creates a sample Review instance associated with sample_card1 for testing purposes.
+    
+    Args:
+    	sample_card1: The Card instance to associate with the review.
+    
+    Returns:
+    	A Review object with preset timestamp, rating, stability values, next due date, and intervals.
+    """
     return Review(
         card_uuid=sample_card1.uuid,
         ts=datetime(2023, 1, 5, 12, 0, 0, tzinfo=timezone.utc),
@@ -109,6 +158,15 @@ def sample_review1(sample_card1: Card) -> Review:
 
 @pytest.fixture
 def sample_review2_for_card1(sample_card1: Card) -> Review:
+    """
+    Creates a sample Review instance for the provided card with preset values.
+    
+    Args:
+        sample_card1: The Card instance to associate with the review.
+    
+    Returns:
+        A Review object linked to sample_card1 with fixed timestamp, rating, stability, and scheduling fields.
+    """
     return Review(
         card_uuid=sample_card1.uuid,
         ts=datetime(2023, 1, 8, 13, 0, 0, tzinfo=timezone.utc),
@@ -121,6 +179,15 @@ def sample_review2_for_card1(sample_card1: Card) -> Review:
 # --- Sample Data Generators ---
 
 def create_sample_card(**overrides) -> Card:
+    """
+    Creates a sample Card instance with default values, allowing field overrides.
+    
+    Args:
+        **overrides: Optional keyword arguments to override default Card fields.
+    
+    Returns:
+        A Card object populated with sample data and any specified overrides.
+    """
     data = dict(
         uuid=uuid.uuid4(),
         deck_name="Deck A::Sub1",
@@ -137,6 +204,16 @@ def create_sample_card(**overrides) -> Card:
     return Card(**data)
 
 def create_sample_review(card_uuid, **overrides) -> Review:
+    """
+    Creates a sample Review instance with default values, allowing overrides for specific fields.
+    
+    Args:
+        card_uuid: The UUID of the card associated with the review.
+        **overrides: Optional keyword arguments to override default review fields.
+    
+    Returns:
+        A Review object populated with default or overridden values.
+    """
     data = dict(
         card_uuid=card_uuid,
         ts=datetime(2023, 1, 2, 11, 0, 0, tzinfo=timezone.utc),
@@ -157,6 +234,9 @@ def create_sample_review(card_uuid, **overrides) -> Review:
 
 class TestFlashcardDatabaseConnection:
     def test_instantiation_default_path(self):
+        """
+        Tests that instantiating FlashcardDatabase with no path uses the default data directory and filename, and that the directory is created as needed.
+        """
         db_man_default = FlashcardDatabase() # No path provided
         expected_path = DEFAULT_FLASHCORE_DATA_DIR / DEFAULT_DATABASE_FILENAME
         assert db_man_default.db_path_resolved == expected_path
@@ -171,6 +251,11 @@ class TestFlashcardDatabaseConnection:
                 expected_path.parent.rmdir()
 
     def test_instantiation_custom_file_path(self, tmp_path: Path):
+        """
+        Tests that FlashcardDatabase can be instantiated with a custom file path and resolves the path correctly.
+        
+        Verifies that the database directory is created if it does not exist and that a connection can be established.
+        """
         custom_path = tmp_path / "custom_dir" / "my_flash.db"
         db_man = FlashcardDatabase(custom_path)
         assert db_man.db_path_resolved == custom_path.resolve()
@@ -182,6 +267,9 @@ class TestFlashcardDatabaseConnection:
             if conn: conn.close()
 
     def test_instantiation_in_memory(self, db_path_memory: str):
+        """
+        Tests that the FlashcardDatabase can be instantiated with an in-memory database path and manages its connection lifecycle correctly.
+        """
         db_man = FlashcardDatabase(db_path_memory)
         assert str(db_man.db_path_resolved) == ":memory:"
         with db_man as db:
@@ -190,10 +278,16 @@ class TestFlashcardDatabaseConnection:
         assert db._connection is None or db._connection.closed
 
     def test_get_connection_success(self, db_manager: FlashcardDatabase):
+        """
+        Tests that a database connection can be successfully acquired and is open.
+        """
         conn = db_manager.get_connection()
         assert conn is not None and not conn.closed
 
     def test_get_connection_idempotent(self, db_manager: FlashcardDatabase):
+        """
+        Tests that repeated calls to get_connection return the same open connection, and that closing the connection resets the internal state, allowing a new connection to be established.
+        """
         conn1 = db_manager.get_connection()
         conn2 = db_manager.get_connection()
         assert conn1 is conn2
@@ -205,6 +299,9 @@ class TestFlashcardDatabaseConnection:
         assert conn1 is not conn3
 
     def test_close_connection(self, db_manager: FlashcardDatabase):
+        """
+        Tests that closing the database connection marks it as closed, clears the internal reference, and allows reconnection.
+        """
         conn = db_manager.get_connection()
         db_manager.close_connection()
         assert conn.closed
@@ -214,11 +311,21 @@ class TestFlashcardDatabaseConnection:
         assert conn2 is not None and not conn2.closed
 
     def test_context_manager_usage(self, db_path_file: Path):
+        """
+        Tests that FlashcardDatabase properly manages its connection when used as a context manager.
+        
+        Ensures the database connection is open within the context and closed upon exiting the context block.
+        """
         with FlashcardDatabase(db_path_file) as db:
             assert db._connection is not None and not db._connection.closed
         assert db._connection is None or db._connection.closed
 
     def test_read_only_mode_connection(self, db_path_file: Path):
+        """
+        Tests that a FlashcardDatabase opened in read-only mode allows connections but disallows write operations.
+        
+        Verifies that a connection can be established in read-only mode and that attempts to perform write operations raise appropriate exceptions.
+        """
         db_man = FlashcardDatabase(db_path_file)
         db_man.initialize_schema()
         db_man.close_connection()
@@ -231,6 +338,9 @@ class TestFlashcardDatabaseConnection:
 
 class TestSchemaInitialization:
     def test_initialize_schema_creates_tables_and_sequence(self, db_manager: FlashcardDatabase):
+        """
+        Tests that schema initialization creates the required 'cards' and 'reviews' tables and the 'review_seq' sequence in the database.
+        """
         with db_manager:
             db_manager.initialize_schema()
             tables = db_manager._connection.execute("SELECT table_name FROM information_schema.tables WHERE table_name IN ('cards', 'reviews');").fetchall()
@@ -241,6 +351,11 @@ class TestSchemaInitialization:
             assert seq is not None
 
     def test_initialize_schema_idempotent(self, db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that initializing the database schema multiple times does not affect existing data.
+        
+        Ensures that schema initialization is idempotent by verifying that a card inserted before a repeated initialization remains accessible and unchanged.
+        """
         with db_manager:
             db_manager.initialize_schema()
             db_manager.upsert_cards_batch([sample_card1])
@@ -250,6 +365,11 @@ class TestSchemaInitialization:
             assert retrieved_card.uuid == sample_card1.uuid
 
     def test_initialize_schema_force_recreate(self, db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that forcing schema recreation drops existing tables and data.
+        
+        Verifies that after inserting a card and reinitializing the schema with `force_recreate_tables=True`, all previously inserted data is removed.
+        """
         with db_manager:
             db_manager.initialize_schema()
             db_manager.upsert_cards_batch([sample_card1])
@@ -258,6 +378,11 @@ class TestSchemaInitialization:
             assert db_manager.get_card_by_uuid(sample_card1.uuid) is None
 
     def test_initialize_schema_on_readonly_db_fails_for_force_recreate(self, db_path_file: Path):
+        """
+        Tests that forcing schema recreation on a read-only database raises DatabaseConnectionError.
+        
+        Ensures that attempting to drop and recreate tables on a database opened in read-only mode fails with the expected exception.
+        """
         db_man = FlashcardDatabase(db_path_file)
         db_man.initialize_schema()
         db_man.close_connection()
@@ -266,6 +391,11 @@ class TestSchemaInitialization:
             db_readonly.initialize_schema(force_recreate_tables=True)
 
     def test_schema_constraints_rating(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that adding a review with an invalid rating value raises a ReviewOperationError.
+        
+        Ensures the database enforces the rating check constraint by rejecting reviews with out-of-bounds ratings.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         invalid_review = create_sample_review(card_uuid=sample_card1.uuid, rating=5)
@@ -273,6 +403,9 @@ class TestSchemaInitialization:
             db.add_review(invalid_review)
 
     def test_schema_constraints_fk_cascade_delete(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that deleting a card cascades and deletes its associated reviews due to foreign key constraints.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         review = create_sample_review(card_uuid=sample_card1.uuid)
@@ -284,6 +417,9 @@ class TestSchemaInitialization:
 
 class TestCardOperations:
     def test_upsert_cards_batch_insert_new(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card, sample_card2: Card):
+        """
+        Tests that batch upserting new cards inserts them into the database and preserves their original 'added_at' timestamps.
+        """
         db = initialized_db_manager
         cards_to_insert = [sample_card1, sample_card2]
         affected_rows = db.upsert_cards_batch(cards_to_insert)
@@ -293,6 +429,9 @@ class TestCardOperations:
         assert retrieved_c1.added_at == sample_card1.added_at
 
     def test_upsert_cards_batch_update_existing(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that batch upserting an existing card updates its fields except for the original 'added_at' timestamp.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         original_added_at = db.get_card_by_uuid(sample_card1.uuid).added_at
@@ -306,6 +445,11 @@ class TestCardOperations:
         assert retrieved_updated_card.added_at == original_added_at
 
     def test_upsert_cards_batch_mixed_insert_update(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card, sample_card2: Card):
+        """
+        Tests that batch upsert correctly updates existing cards and inserts new cards in a single operation.
+        
+        Verifies that updated fields are applied to existing cards, new cards are inserted, and all affected cards are retrievable after the operation.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         updated_card1 = sample_card1.model_copy(update={"front": "Mixed Updated", "tags": {"mixed"}})
@@ -316,10 +460,18 @@ class TestCardOperations:
         assert db.get_card_by_uuid(sample_card2.uuid) is not None
 
     def test_upsert_cards_batch_empty_list(self, initialized_db_manager: FlashcardDatabase):
+        """
+        Verifies that batch upserting an empty list of cards returns zero affected rows.
+        """
         affected = initialized_db_manager.upsert_cards_batch([])
         assert affected == 0
 
     def test_upsert_cards_batch_data_marshalling(self, initialized_db_manager: FlashcardDatabase):
+        """
+        Tests that card batch upsert correctly marshals tags, media paths, and source YAML file fields.
+        
+        Verifies that after inserting a card with specific tags, media paths, and a source YAML file, the retrieved card preserves the correct types and values for these fields.
+        """
         db = initialized_db_manager
         card = create_sample_card(tags={"tagX"}, media_paths=[Path("foo.png")], source_yaml_file=Path("foo.yaml"))
         db.upsert_cards_batch([card])
@@ -329,6 +481,12 @@ class TestCardOperations:
         assert isinstance(retrieved.source_yaml_file, Path) and retrieved.source_yaml_file.name == "foo.yaml"
 
     def test_upsert_cards_batch_transaction_rollback(self, db_manager: FlashcardDatabase):
+        """
+        Tests that batch upsert of cards rolls back the transaction if any card is invalid.
+        
+        Verifies that when attempting to upsert a batch containing both valid and invalid cards,
+        no cards are inserted if a constraint violation occurs, ensuring atomicity of the operation.
+        """
         db = db_manager
         db.initialize_schema()
         valid_card = create_sample_card()
@@ -340,6 +498,9 @@ class TestCardOperations:
         assert db.get_card_by_uuid(valid_card.uuid) is None
 
     def test_get_card_by_uuid_exists(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that retrieving a card by its UUID returns the correct card when it exists in the database.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         card = db.get_card_by_uuid(sample_card1.uuid)
@@ -347,9 +508,15 @@ class TestCardOperations:
         assert card.uuid == sample_card1.uuid
 
     def test_get_card_by_uuid_not_exists(self, initialized_db_manager: FlashcardDatabase):
+        """
+        Verifies that retrieving a card by a nonexistent UUID returns None.
+        """
         assert initialized_db_manager.get_card_by_uuid(uuid.uuid4()) is None
 
     def test_get_all_cards_empty_db(self, initialized_db_manager: FlashcardDatabase):
+        """
+        Verifies that retrieving all cards from an empty database returns an empty list.
+        """
         assert initialized_db_manager.get_all_cards() == []
 
     def test_get_all_cards_multiple_cards(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card, sample_card2: Card):
@@ -362,6 +529,11 @@ class TestCardOperations:
         assert sample_card2.uuid in uuids
 
     def test_get_all_cards_with_deck_filter(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card, sample_card2: Card, sample_card3_deck_b: Card):
+        """
+        Tests retrieval of all cards filtered by deck name using SQL LIKE patterns.
+        
+        Verifies that cards are correctly returned when filtering by deck name prefix or exact match.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1, sample_card2, sample_card3_deck_b])
         deck_a_cards = db.get_all_cards(deck_name_filter="Deck A::%")
@@ -371,6 +543,11 @@ class TestCardOperations:
         assert sample_card3_deck_b.uuid == deck_b_cards[0].uuid
 
     def test_get_due_cards_logic(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card, sample_card2: Card):
+        """
+        Tests that `get_due_cards` correctly identifies cards due for review based on their next due dates.
+        
+        Verifies that cards with no reviews are initially due, that adding a review with a future due date removes a card from the due list, and that cards become due again if their next due date is in the past.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1, sample_card2])
         today = date.today()
@@ -392,6 +569,11 @@ class TestCardOperations:
         assert due_cards_final[0].uuid == sample_card2.uuid
 
     def test_delete_cards_by_uuids_batch(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that deleting a card by UUID removes the card and its associated reviews.
+        
+        Verifies that the batch delete operation returns the correct count, the card is no longer retrievable, and all related reviews are deleted.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         review = create_sample_review(card_uuid=sample_card1.uuid)
@@ -402,10 +584,18 @@ class TestCardOperations:
         assert db.get_reviews_for_card(sample_card1.uuid) == []
 
     def test_delete_cards_by_uuids_batch_non_existent(self, initialized_db_manager: FlashcardDatabase):
+        """
+        Tests that deleting non-existent cards by UUID returns zero affected rows.
+        """
         count = initialized_db_manager.delete_cards_by_uuids_batch([uuid.uuid4()])
         assert count == 0
 
     def test_get_all_card_fronts_and_uuids(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that all card fronts are retrieved in normalized form and mapped to their UUIDs.
+        
+        Verifies that cards with variant casing or whitespace in their fronts are normalized to a single key, and that the mapping includes the correct UUIDs.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         card_variant_front = sample_card1.model_copy(update={"uuid": uuid.uuid4(), "front": sample_card1.front.lower()})
@@ -418,6 +608,11 @@ class TestCardOperations:
 
 class TestReviewOperations:
     def test_add_review_success(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that a review can be successfully added to the database and retrieved.
+        
+        Verifies that the review receives a valid ID, is stored correctly, and can be fetched for the associated card with matching attributes.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         review = create_sample_review(card_uuid=sample_card1.uuid)
@@ -429,12 +624,18 @@ class TestReviewOperations:
         assert retrieved_reviews[0].rating == review.rating
 
     def test_add_review_fk_violation(self, initialized_db_manager: FlashcardDatabase):
+        """
+        Tests that adding a review for a non-existent card UUID raises a ReviewOperationError.
+        """
         db = initialized_db_manager
         bad_review = create_sample_review(card_uuid=uuid.uuid4())
         with pytest.raises(ReviewOperationError):
             db.add_review(bad_review)
 
     def test_add_review_check_constraint_violation(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that adding a review with an invalid rating value raises a ReviewOperationError due to a check constraint violation.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         bad_review = create_sample_review(card_uuid=sample_card1.uuid, rating=99)
@@ -442,6 +643,9 @@ class TestReviewOperations:
             db.add_review(bad_review)
 
     def test_add_reviews_batch_success(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card, sample_card2: Card):
+        """
+        Tests that adding a batch of reviews for multiple cards succeeds and each card receives its corresponding review.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1, sample_card2])
         r1 = create_sample_review(card_uuid=sample_card1.uuid)
@@ -453,6 +657,11 @@ class TestReviewOperations:
         assert len(reviews2) == 1
 
     def test_add_reviews_batch_partial_failure_transaction(self, db_manager: FlashcardDatabase):
+        """
+        Tests that a batch review insert with an invalid review causes a transaction rollback.
+        
+        Ensures that if any review in a batch fails validation, no reviews are added to the database.
+        """
         db = db_manager
         db.initialize_schema()
         card = create_sample_card()
@@ -464,6 +673,9 @@ class TestReviewOperations:
         assert db.get_reviews_for_card(card.uuid) == []
 
     def test_get_reviews_for_card(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that reviews for a card are retrieved in the correct ascending and descending timestamp order.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         r1 = create_sample_review(card_uuid=sample_card1.uuid, ts=datetime(2023, 1, 2, 11, 0, 0, tzinfo=timezone.utc))
@@ -475,11 +687,19 @@ class TestReviewOperations:
         assert reviews_desc[0].ts > reviews_desc[1].ts
 
     def test_get_reviews_for_card_no_reviews(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Verifies that retrieving reviews for a card with no associated reviews returns an empty list.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         assert db.get_reviews_for_card(sample_card1.uuid) == []
 
     def test_get_latest_review_for_card(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that retrieving the latest review for a card returns the review with the most recent timestamp.
+        
+        Ensures that after adding multiple reviews for a card, the database returns the review with the latest timestamp when queried.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         r1 = create_sample_review(card_uuid=sample_card1.uuid, ts=datetime(2023, 1, 2, 11, 0, 0, tzinfo=timezone.utc))
@@ -489,14 +709,25 @@ class TestReviewOperations:
         assert latest.ts == r2.ts
 
     def test_get_latest_review_for_card_no_reviews(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that retrieving the latest review for a card with no reviews returns None.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         assert db.get_latest_review_for_card(sample_card1.uuid) is None
 
     def test_get_all_reviews_empty(self, initialized_db_manager: FlashcardDatabase):
+        """
+        Verifies that retrieving all reviews from an initialized database with no reviews returns an empty list.
+        """
         assert initialized_db_manager.get_all_reviews() == []
 
     def test_get_all_reviews_with_data_and_filtering(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests retrieval of all reviews and filtering by start timestamp.
+        
+        Verifies that all reviews can be retrieved after insertion and that filtering by a specific start timestamp returns only reviews on or after that timestamp.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         r1 = create_sample_review(card_uuid=sample_card1.uuid, ts=datetime(2023, 1, 2, 11, 0, 0, tzinfo=timezone.utc))
@@ -510,10 +741,16 @@ class TestReviewOperations:
 class TestGeneralErrorHandling:
     def test_operations_on_uninitialized_db(self, db_manager: FlashcardDatabase):
         # No initialize_schema called
+        """
+        Verifies that performing card operations on an uninitialized database raises a CardOperationError.
+        """
         with pytest.raises(CardOperationError):
             db_manager.upsert_cards_batch([create_sample_card()])
 
     def test_operations_on_closed_connection(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that operations on a closed database connection either reconnect automatically or raise an exception.
+        """
         db = initialized_db_manager
         db.close_connection()
         # Should reconnect or raise
@@ -523,6 +760,11 @@ class TestGeneralErrorHandling:
             pass
 
     def test_read_only_db_write_attempt(self, db_path_file: Path):
+        """
+        Tests that write operations on a read-only database raise the appropriate exceptions.
+        
+        Ensures that attempting to upsert cards on a database opened in read-only mode results in an error, confirming enforcement of write restrictions.
+        """
         db_man = FlashcardDatabase(db_path_file)
         db_man.initialize_schema()
         db_man.close_connection()
