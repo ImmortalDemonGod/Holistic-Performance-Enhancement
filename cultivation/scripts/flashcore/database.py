@@ -176,10 +176,8 @@ class FlashcardDatabase:
         return params_list
 
     def _db_row_to_card(self, row_dict: Dict[str, Any]) -> 'Card':
-        if row_dict.get("media_paths"):
-            row_dict["media"] = [Path(p) for p in row_dict.pop("media_paths")]
-        else:
-            row_dict["media"] = None
+        media_paths = row_dict.pop("media_paths", None)
+        row_dict["media"] = [Path(p) for p in media_paths] if media_paths else None
         if row_dict.get("source_yaml_file"):
             row_dict["source_yaml_file"] = Path(row_dict["source_yaml_file"])
         row_dict["tags"] = set(row_dict["tags"]) if row_dict.get("tags") else set()
@@ -395,7 +393,10 @@ class FlashcardDatabase:
         try:
             with conn.cursor() as cursor:
                 cursor.begin()
-                result = cursor.executemany(sql, review_params_list).fetchall()
+                result_ids = []
+                for params in review_params_list:
+                    result = cursor.execute(sql, params).fetchone()
+                    result_ids.append(int(result[0]))
                 cursor.commit()
             review_ids = [int(r[0]) for r in result]
             logger.info(f"Successfully batch-added {len(review_ids)} reviews.")

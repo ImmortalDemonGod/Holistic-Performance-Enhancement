@@ -1,0 +1,609 @@
+[
+  {
+    "task_id_candidate": "DW_001",
+    "tentative_title": "Formalize Mathematical Model of Human Potential",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/outline.md", "section": "2.1.3 Mathematical Formalization in Probability Spaces"}
+    ],
+    "description_objective": "Develop a rigorous mathematical model to quantify 'potential' using probability spaces, incorporating philosophical, physical, and Bayesian perspectives.",
+    "primary_type": "Algorithm Development, Theoretical Modeling",
+    "initial_scale_estimate": "Epic (multi-week/month, needs breakdown)",
+    "potential_deliverables_outcomes": [
+      "Formal mathematical definitions and equations.",
+      "Technical report or whitepaper.",
+      "Prototype code for simulation or calculation."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from outline)",
+    "notes_questions_dependencies": "Requires interdisciplinary literature review. Coordination with philosophy and mathematics experts may be needed."
+  },
+  {
+    "task_id_candidate": "DW_002",
+    "tentative_title": "Design and Implement Synergy Equation Framework",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/outline.md", "section": "6.1 Formal Synergy Equations"}
+    ],
+    "description_objective": "Create a computational framework to model, calculate, and visualize synergy effects across multiple domains using the formal equations outlined.",
+    "primary_type": "System Development (Algorithm Implementation)",
+    "initial_scale_estimate": "Large (1-5 days)",
+    "potential_deliverables_outcomes": [
+      "Python module for synergy calculation.",
+      "Visualization tools for domain interactions.",
+      "Documentation and usage examples."
+    ],
+    "implicit_reasoning_confidence": "N/A",
+    "notes_questions_dependencies": "Depends on finalized synergy equations. May require integration with data sources from running, biology, and software domains."
+  },
+  {
+    "task_id_candidate": "DW_003",
+    "tentative_title": "Develop Automated Pipeline for Cross-Domain Data Integration",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/outline.md", "section": "6.2.1 GitHub-Driven Data Integration; 6.2.2 Python Scripts & ML"}
+    ],
+    "description_objective": "Build an automated pipeline that ingests, processes, and correlates data from GitHub activity, biological sensors, and running metrics to enable real-time synergy analysis.",
+    "primary_type": "Process Automation, System Integration",
+    "initial_scale_estimate": "Epic (multi-week/month, needs breakdown)",
+    "potential_deliverables_outcomes": [
+      "End-to-end data ingestion and processing pipeline.",
+      "Real-time dashboards or reports.",
+      "Integration with synergy modeling tools."
+    ],
+    "implicit_reasoning_confidence": "N/A",
+    "notes_questions_dependencies": "Requires access to data sources and APIs. Security and privacy considerations for biological data."
+  },
+  {
+    "task_id_candidate": "DW_004",
+    "tentative_title": "Case Study: Integrate Running, Biology, and Software for Synergy Gains",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/outline.md", "section": "10.3 Case Study C: Tri-Domain Triangulation"}
+    ],
+    "description_objective": "Design and execute a case study that combines running routines, biological data collection, and software development in a single integrated schedule to empirically measure synergy effects.",
+    "primary_type": "Experimentation, Integration, Analysis",
+    "initial_scale_estimate": "Large (1-5 days)",
+    "potential_deliverables_outcomes": [
+      "Experimental protocol and schedule.",
+      "Collected and analyzed data.",
+      "Written case study report."
+    ],
+    "implicit_reasoning_confidence": "High (directly suggested by outline)",
+    "notes_questions_dependencies": "Coordination across multiple domains. Requires access to sensors, software tools, and scheduling flexibility."
+  }
+,
+  {
+    "task_id_candidate": "DW_005",
+    "tentative_title": "Develop a Systematic Constraint Cataloging Framework for Key Domains",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/domains_scope.md", "section": "3. Limits & Constraints"}
+    ],
+    "description_objective": "Design and implement a structured process (and supporting tool) to identify, tabulate, and periodically reassess hard and soft constraints on potential in running, biology, and software engineering.",
+    "primary_type": "System Design, Tool Development",
+    "initial_scale_estimate": "Large (1-5 days)",
+    "potential_deliverables_outcomes": [
+      "Constraint cataloging template or software tool.",
+      "Documentation and usage guidelines.",
+      "Example constraint tables for each domain."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from document)",
+    "notes_questions_dependencies": "May require domain expert input; should support updates as new knowledge/resources arise."
+  },
+  {
+    "task_id_candidate": "DW_006",
+    "tentative_title": "Build Multi-Domain Progress Tracking and Benchmarking Tool",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/domains_scope.md", "section": "2. Measurement & Metrics"}
+    ],
+    "description_objective": "Create a tool to track progress metrics, percentage improvements, and benchmark achievements for running, biological knowledge, and software engineering, with recalibration logic for new baselines.",
+    "primary_type": "Feature Implementation, Data Engineering",
+    "initial_scale_estimate": "Large (1-5 days)",
+    "potential_deliverables_outcomes": [
+      "Progress tracking dashboard or CLI tool.",
+      "Automated recalibration of baselines.",
+      "Visualizations and reports for each domain."
+    ],
+    "implicit_reasoning_confidence": "High (directly suggested by document)",
+    "notes_questions_dependencies": "Requires integration with data sources for each domain; may need user input for subjective metrics."
+  },
+  {
+    "task_id_candidate": "DW_007",
+    "tentative_title": "Design Dynamic Potential Modeling System",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/domains_scope.md", "section": "3. Limits & Constraints, Dynamic Potential"}
+    ],
+    "description_objective": "Develop a model and supporting software that treats potential as dynamic, updating local estimates as new knowledge, methods, or resources are acquired in any domain.",
+    "primary_type": "Algorithm Development, System Design",
+    "initial_scale_estimate": "Epic (multi-week/month, needs breakdown)",
+    "potential_deliverables_outcomes": [
+      "Dynamic potential modeling algorithm.",
+      "Implementation in code.",
+      "Case studies demonstrating model updates."
+    ],
+    "implicit_reasoning_confidence": "Medium (implied by multiple sections)",
+    "notes_questions_dependencies": "Requires robust data on knowledge/resource changes; may need machine learning for adaptive updates."
+  }
+,
+  {
+    "task_id_candidate": "DW_008",
+    "tentative_title": "Develop Automated Multi-Domain Synergy Discovery Pipeline",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/ultimate_goals.md", "section": "2. Automated Physical & Cognitive Experiments"}
+    ],
+    "description_objective": "Design and implement a continuous integration pipeline that collects, integrates, and analyzes data from running, biological experiments, and coding activity to discover and quantify cross-domain synergies.",
+    "primary_type": "Process Automation, Data Engineering, Experimentation",
+    "initial_scale_estimate": "Epic (multi-week/month, needs breakdown)",
+    "potential_deliverables_outcomes": [
+      "Automated data ingestion and integration scripts.",
+      "Machine learning models for pattern discovery.",
+      "Dashboards or reports highlighting discovered synergies."
+    ],
+    "implicit_reasoning_confidence": "High (explicitly suggested by document)",
+    "notes_questions_dependencies": "Requires access to data sources and APIs; may need to develop new data schemas and storage solutions."
+  },
+  {
+    "task_id_candidate": "DW_009",
+    "tentative_title": "Build AI-Driven Human Performance Optimization Agent",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/ultimate_goals.md", "section": "2. AI-Driven Human Performance"}
+    ],
+    "description_objective": "Develop a reinforcement learning agent that suggests and adapts daily schedules to optimize running, research, and coding productivity, maximizing overall performance and long-term potential.",
+    "primary_type": "AI/ML Development, System Integration",
+    "initial_scale_estimate": "Epic (multi-week/month, needs breakdown)",
+    "potential_deliverables_outcomes": [
+      "Reinforcement learning agent implementation.",
+      "Integration with user data and scheduling systems.",
+      "Performance analytics and adaptation reports."
+    ],
+    "implicit_reasoning_confidence": "High (explicitly suggested by document)",
+    "notes_questions_dependencies": "Requires historical and real-time data; may need user feedback loop for continuous improvement."
+  },
+  {
+    "task_id_candidate": "DW_010",
+    "tentative_title": "Design Architecture for Cross-Domain Research Platform",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/ultimate_goals.md", "section": "1. High-Level Integration; 3. Connecting to Transhumanist & Galactic Ambitions"}
+    ],
+    "description_objective": "Architect a scalable research platform that unites running, biological, and software data, supporting advanced analytics, hypothesis testing, and long-term goals such as life extension and space exploration.",
+    "primary_type": "System Architecture, Platform Design",
+    "initial_scale_estimate": "Epic (multi-week/month, needs breakdown)",
+    "potential_deliverables_outcomes": [
+      "System architecture diagrams and documentation.",
+      "Prototype implementation of data unification components.",
+      "Roadmap for platform evolution toward transhumanist and galactic goals."
+    ],
+    "implicit_reasoning_confidence": "Medium (inferred from multiple sections)",
+    "notes_questions_dependencies": "Requires synthesis of requirements across all domains; must be extensible to future research needs."
+  }
+,
+  {
+    "task_id_candidate": "DW_011",
+    "tentative_title": "Develop Generalizable Potential Modeling and Refinement Framework",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/potential_overview.md", "section": "Overall Framework"}
+    ],
+    "description_objective": "Design and implement a flexible framework for defining, measuring, and refining potential in various domains, supporting dynamic updates as new data and insights become available.",
+    "primary_type": "System Design, Algorithm Development",
+    "initial_scale_estimate": "Epic (multi-week/month, needs breakdown)",
+    "potential_deliverables_outcomes": [
+      "Framework specification and documentation.",
+      "Prototype implementation for at least one domain.",
+      "Case studies demonstrating framework adaptability."
+    ],
+    "implicit_reasoning_confidence": "High (explicitly suggested by document)",
+    "notes_questions_dependencies": "Should be extensible to multiple domains; may require domain-specific modules."
+  },
+  {
+    "task_id_candidate": "DW_012",
+    "tentative_title": "Build Data Collection and Iterative Refinement Tool for Potential Estimation",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/potential_overview.md", "section": "Measurement Approaches; Practical Recommendations"}
+    ],
+    "description_objective": "Create a tool to systematically collect relevant performance data, test interventions, and iteratively refine potential estimates using Bayesian or probabilistic methods.",
+    "primary_type": "Feature Implementation, Data Engineering, Experimentation",
+    "initial_scale_estimate": "Large (1-5 days)",
+    "potential_deliverables_outcomes": [
+      "Data collection and logging system.",
+      "Bayesian/probabilistic refinement module.",
+      "Reports and visualizations of updated potential estimates."
+    ],
+    "implicit_reasoning_confidence": "High (explicitly suggested by document)",
+    "notes_questions_dependencies": "Requires integration with performance data sources; may need user interface for logging interventions."
+  },
+  {
+    "task_id_candidate": "DW_013",
+    "tentative_title": "Design Constraint Identification and Manipulation Module",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/potential_overview.md", "section": "Limits & Their Manipulation"}
+    ],
+    "description_objective": "Develop a module for identifying, cataloging, and systematically manipulating constraints in pursuit of raising potential, with support for tracking the impact of interventions.",
+    "primary_type": "System Design, Tool Development",
+    "initial_scale_estimate": "Large (1-5 days)",
+    "potential_deliverables_outcomes": [
+      "Constraint identification and cataloging tool.",
+      "Intervention tracking and outcome analysis features.",
+      "Documentation and usage examples."
+    ],
+    "implicit_reasoning_confidence": "Medium (implied by discussion)",
+    "notes_questions_dependencies": "Should interface with data collection and modeling tools; may require domain-specific constraint templates."
+  }
+,
+  {
+    "task_id_candidate": "DW_014",
+    "tentative_title": "Develop Holistic Potential and Synergy Tracking Framework",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/synergy_concept.md", "section": "1. Defining Holistic Potential; 2. Key Variables & Metrics"}
+    ],
+    "description_objective": "Design and implement a framework to quantify, track, and visualize both local (domain-specific) and systemic (cross-domain) potential and synergy, supporting dynamic recalibration as new data and insights emerge.",
+    "primary_type": "System Design, Data Engineering, Visualization",
+    "initial_scale_estimate": "Epic (multi-week/month, needs breakdown)",
+    "potential_deliverables_outcomes": [
+      "Unified metric definitions and documentation.",
+      "Tracking and visualization dashboard.",
+      "Case studies demonstrating framework use."
+    ],
+    "implicit_reasoning_confidence": "High (explicitly suggested by document)",
+    "notes_questions_dependencies": "Should integrate with existing data sources and tools (e.g., GitHub, wearable devices); must support extensibility for new domains."
+  },
+  {
+    "task_id_candidate": "DW_015",
+    "tentative_title": "Build Data Integration and Trade-Off Analysis Tool",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/synergy_concept.md", "section": "4. Tracking & Data Integration; 5. Local vs. Systemic Potential"}
+    ],
+    "description_objective": "Create a tool to integrate data from running, biology, and software engineering activities, analyze trade-offs, and identify positive or negative synergy effects across domains.",
+    "primary_type": "Feature Implementation, Data Engineering, Analysis",
+    "initial_scale_estimate": "Large (1-5 days)",
+    "potential_deliverables_outcomes": [
+      "Data integration scripts and pipelines.",
+      "Trade-off and synergy analysis reports.",
+      "Visualizations of cross-domain impacts."
+    ],
+    "implicit_reasoning_confidence": "High (explicitly suggested by document)",
+    "notes_questions_dependencies": "Requires access to multi-domain data sources; may need to develop new data schemas and analysis methods."
+  },
+  {
+    "task_id_candidate": "DW_016",
+    "tentative_title": "Design Time Allocation Optimization Module",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/synergy_concept.md", "section": "2. Key Variables & Metrics; 3. Limits & Constraints"}
+    ],
+    "description_objective": "Develop a module to optimize time allocation across running, research, and coding activities, balancing constraints and maximizing overall holistic potential.",
+    "primary_type": "Algorithm Development, Tool Development",
+    "initial_scale_estimate": "Large (1-5 days)",
+    "potential_deliverables_outcomes": [
+      "Optimization algorithm and implementation.",
+      "User interface for time allocation planning.",
+      "Reports on optimized schedules and outcomes."
+    ],
+    "implicit_reasoning_confidence": "Medium (implied by discussion)",
+    "notes_questions_dependencies": "Should interface with tracking and data integration tools; may require user feedback for constraint calibration."
+  }
+,
+  {
+    "task_id_candidate": "DW_017",
+    "tentative_title": "Develop Quantitative Synergy Measurement Framework",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/critique_and_refinement.md", "section": "1. Revisiting the Concept of Synergy; 2. Integrating Synergy Into a Systematic Potential Approach"}
+    ],
+    "description_objective": "Design and implement a framework to operationally define, hypothesize, measure, and quantify synergy between domains, including baseline modeling, intervention tracking, and outcome analysis.",
+    "primary_type": "System Design, Algorithm Development, Experimentation",
+    "initial_scale_estimate": "Epic (multi-week/month, needs breakdown)",
+    "potential_deliverables_outcomes": [
+      "Formal synergy measurement protocol and documentation.",
+      "Automated scripts for data collection and analysis.",
+      "Case studies demonstrating framework use."
+    ],
+    "implicit_reasoning_confidence": "High (explicitly suggested by document)",
+    "notes_questions_dependencies": "Requires robust baseline/control data; must integrate with domain-specific tracking tools."
+  },
+  {
+    "task_id_candidate": "DW_018",
+    "tentative_title": "Build Automated Synergy Calculation and Visualization Tool",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/critique_and_refinement.md", "section": "2. Integrating Synergy Into a Systematic Potential Approach; 4. Tools & Tech"}
+    ],
+    "description_objective": "Create an automated tool (e.g., using Python and GitHub) that calculates synergy scores from multi-domain data, generates reports, and visualizes synergy effects over time.",
+    "primary_type": "Feature Implementation, Data Engineering, Visualization",
+    "initial_scale_estimate": "Large (1-5 days)",
+    "potential_deliverables_outcomes": [
+      "Automated synergy calculation scripts.",
+      "Visualization dashboards or plots.",
+      "Integration with CI pipelines and data sources."
+    ],
+    "implicit_reasoning_confidence": "High (explicitly suggested by document)",
+    "notes_questions_dependencies": "Requires access to multi-domain data; may need to develop new data schemas and visualization templates."
+  },
+  {
+    "task_id_candidate": "DW_019",
+    "tentative_title": "Design Feedback and Model Refinement Loop for Potential Estimation",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/critique_and_refinement.md", "section": "3. Addressing the Deeper Concept: 'Everything Changes When You Measure It'"}
+    ],
+    "description_objective": "Develop a feedback system that updates potential and synergy models dynamically as new data is collected and analyzed, supporting continuous improvement and hypothesis refinement.",
+    "primary_type": "Algorithm Development, System Integration",
+    "initial_scale_estimate": "Large (1-5 days)",
+    "potential_deliverables_outcomes": [
+      "Feedback loop implementation for model updates.",
+      "Automated triggers for recalculating potential and synergy.",
+      "Documentation and usage guidelines."
+    ],
+    "implicit_reasoning_confidence": "Medium (implied by discussion)",
+    "notes_questions_dependencies": "Should interface with measurement and visualization tools; may require user input for hypothesis adjustment."
+  }
+,
+  {
+    "task_id_candidate": "DW_020",
+    "tentative_title": "Implement Data Collection and Continuous Refinement Workflow",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/potential_overview.md", "section": "6. Practical Recommendations"}
+    ],
+    "description_objective": "Develop a workflow and supporting tools/scripts to systematically collect, track, and analyze key variables (frequency, intensity, duration, etc.) across all domains. Enable continuous model refinement as new data and insights appear.",
+    "primary_type": "Workflow Automation, Data Engineering",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "Automated data collection scripts.",
+      "Documentation for data tracking procedures.",
+      "Continuous update mechanism for models."
+    ],
+    "implicit_reasoning_confidence": "High (explicitly suggested by document)",
+    "notes_questions_dependencies": "Should integrate with existing and future domain pipelines."
+  },
+  {
+    "task_id_candidate": "DW_021",
+    "tentative_title": "Develop Milestone, Limit, and Iteration Framework",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/potential_overview.md", "section": "7. Overall Framework"}
+    ],
+    "description_objective": "Create a framework for defining potential in context, establishing quantifiable milestones, accounting for true limits, and iteratively updating estimates with real-world data.",
+    "primary_type": "System Design, Tool Development",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "Milestone and limit definition tool.",
+      "Iterative update and tracking scripts.",
+      "Documentation and usage guidelines."
+    ],
+    "implicit_reasoning_confidence": "High (explicitly suggested by document)",
+    "notes_questions_dependencies": "Should be extensible to all tracked domains; must support integration with data pipelines."
+  },
+  {
+    "task_id_candidate": "DW_022",
+    "tentative_title": "Document and Maintain Comprehensive Project Analysis and Deep Work Task Elicitation",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/potential_overview.md", "section": "Project Analysis & Deep Work Task Elicitation (user summary, 2025-05-28)"}
+    ],
+    "description_objective": "Maintain a living document that summarizes the project's objectives, current status, subcomponent analysis, and a running list of deep work tasks derived from documentation and evolving needs. Use this as a foundation for ongoing planning, prioritization, and onboarding.",
+    "primary_type": "Documentation, Project Management",
+    "initial_scale_estimate": "Large (multi-session, ongoing)",
+    "potential_deliverables_outcomes": [
+      "Up-to-date project summary document.",
+      "Curated and prioritized deep work task list.",
+      "Versioned history of analysis and task evolution."
+    ],
+    "implicit_reasoning_confidence": "High (explicitly requested by user)",
+    "notes_questions_dependencies": "Should be updated regularly as project evolves; serves as a reference for all contributors."
+  }
+,
+  {
+    "task_id_candidate": "DW_HPE_001",
+    "tentative_title": "Implement Core Synergy Engine (S_A->B Calculation - P1 Baseline)",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/design_overview.md", "section": "3.1 Synergy Score"},
+      {"file": "cultivation/docs/1_background/synergy_concept.md", "section": "Operational Definition of Synergy"},
+      {"file": "cultivation/scripts/synergy/calculate_synergy.py", "section": "Placeholder status noted in Progress.md"}
+    ],
+    "description_objective": "Implement the Python script `calculate_synergy.py` to compute the synergy score S_A->B(w) = ΔB_obs(w) - ΔB_pred_baseline(w) for defined domain pairs (e.g., Running -> Software). For P1, the baseline model ΔB_pred_baseline(w) will be a 4-week rolling mean of ΔB. The script should read processed Parquet data from relevant domains and output `synergy_score.parquet`.",
+    "primary_type": "Algorithm Development & Implementation",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `calculate_synergy.py` script.",
+      "`synergy_score.parquet` generated from sample domain data.",
+      "Unit tests for synergy calculation logic.",
+      "Documentation for script usage and data schema."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from design docs and roadmap)",
+    "notes_questions_dependencies": "Depends on processed Parquet files from at least two domains (e.g., `running_weekly.parquet`, `commit_metrics.parquet`). Schema for `synergy_score.parquet` needs to be strictly adhered to (as per `design_overview.md`)."
+  },
+  {
+    "task_id_candidate": "DW_HPE_002",
+    "tentative_title": "Implement Global Potential Engine (Π Calculation - P2 Initial)",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/design_overview.md", "section": "3.2 Global Potential Π"},
+      {"file": "cultivation/scripts/synergy/potential_engine.py", "section": "Placeholder status noted in Progress.md"}
+    ],
+    "description_objective": "Implement the Python script `potential_engine.py` to calculate the Global Potential score Π based on the formula Π(P,C,S,A) = w_P P^α + w_C C^β + λ ΣS_i->j + ε. Initially (P2), this will use Physical (P) and Cognitive (C, proxied from commit/literature metrics) domain KPIs and the `synergy_score.parquet`. S and A will be zero-padded. Script should output `potential_snapshot.parquet`.",
+    "primary_type": "Algorithm Development & Implementation",
+    "initial_scale_estimate": "Medium (1-2 full deep work sessions, ~4-8 hours)",
+    "potential_deliverables_outcomes": [
+      "Functional `potential_engine.py` script.",
+      "`potential_snapshot.parquet` generated.",
+      "Unit tests for Π calculation.",
+      "Script to handle initial weight setting (w, α, β, λ)."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from design docs and roadmap)",
+    "notes_questions_dependencies": "Depends on `synergy_score.parquet` and domain-specific KPI CSVs/Parquets. The `update_potential_weights.py` script (for monthly weight recalibration) is a separate, subsequent task."
+  },
+  {
+    "task_id_candidate": "DW_HPE_003",
+    "tentative_title": "Develop `flashcore` Python Package for Flashcard System (MVP)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "Folder layout, Build pipeline"},
+      {"file": "cultivation/scripts/biology/flashcards_playground.ipynb", "section": "Prototyped logic"}
+    ],
+    "description_objective": "Develop the `flashcore` Python package as specified in `flashcards_1.md`. This includes: YAML parsing, `Card` object model, DuckDB schema creation (`cards`, `reviews` tables), `build_cards.py` (YAML to DuckDB ingest/upsert), `export_anki.py` (DuckDB to .apkg), `export_markdown.py` (DuckDB to Markdown). Implement basic FSRS logic from `flashcards_playground.ipynb` for scheduling.",
+    "primary_type": "System Development (Python Package)",
+    "initial_scale_estimate": "Epic (multi-week/month, needs breakdown)",
+    "potential_deliverables_outcomes": [
+      "Installable `flashcore` Python package.",
+      "CLI tools (`tm-fc vet`, `tm-fc add` - stubs initially).",
+      "Functional `build_cards.py`, `export_anki.py`, `export_markdown.py` scripts.",
+      "DuckDB database `flash.db` created and populated from sample YAML.",
+      "Sample Anki deck and Markdown file generated."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from design docs)",
+    "notes_questions_dependencies": "Requires `genanki`, `pyyaml`, `duckdb`, `pandas`, `markdown`. Decision needed on full FSRS implementation scope for MVP vs. simplified version from notebook."
+  },
+  {
+    "task_id_candidate": "DW_HPE_004",
+    "tentative_title": "Implement Full DocInsight Integration for Literature Pipeline (P0-P1)",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/literature_system_overview.md", "section": "§ 4 Component Catalogue, § 5 Interfaces & API Contracts"},
+      {"file": "cultivation/scripts/literature/docinsight_client.py", "section": "Placeholder status"}
+    ],
+    "description_objective": "Fully implement `docinsight_client.py` to interact with the DocInsight service (HTTP API: /start_research, /get_results). Modify `fetch_paper.py` to call this client to get summaries and novelty scores, and store these in the paper's metadata JSON and note skeleton. Ensure graceful fallback if DocInsight is unavailable.",
+    "primary_type": "System Development (API Integration)",
+    "initial_scale_estimate": "Large (2-3 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `docinsight_client.py`.",
+      "`fetch_paper.py` correctly calls DocInsight and stores results.",
+      "Error handling for DocInsight unavailability.",
+      "Integration tests mocking DocInsight API responses."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from design docs)",
+    "notes_questions_dependencies": "Requires a running instance of the DocInsight service (local Docker or remote) for testing. API contract from `literature_system_overview.md` must be strictly followed."
+  },
+  {
+    "task_id_candidate": "DW_HPE_005",
+    "tentative_title": "Develop `fetch_arxiv_batch.py` for Nightly Literature Ingestion (P1)",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/literature_system_overview.md", "section": "§ 4 Component Catalogue, § 7.2 P1 — Nightly Batch"},
+      {"file": ".github/workflows/ci-literature.yml", "section": "Note: current CI is for testing code, not running this batch job."}
+    ],
+    "description_objective": "Implement `fetch_arxiv_batch.py` to query arXiv API for new pre-prints based on specified tags (e.g., 'ml', 'rna', 'arc') since the last run. For each new paper, it should invoke the `fetch_paper.py` logic (or its core functions) to download, extract metadata, and process via DocInsight. Manage state (last run date/last fetched ID per tag) to avoid re-fetching.",
+    "primary_type": "System Development (Automation Script)",
+    "initial_scale_estimate": "Large (2-3 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `fetch_arxiv_batch.py` script.",
+      "State management mechanism (e.g., JSON file).",
+      "Integration with `fetch_paper.py`'s ingestion logic.",
+      "Logging of fetched papers and any errors."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from design docs)",
+    "notes_questions_dependencies": "Requires `fetch_paper.py` and `docinsight_client.py` to be functional. Needs robust error handling for API rate limits or network issues. A separate GitHub Action will be needed to run this nightly."
+  },
+  {
+    "task_id_candidate": "DW_HPE_006",
+    "tentative_title": "Implement `metrics_literature.py` for Cognitive Potential (C(t)) Input (P2)",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/literature_system_overview.md", "section": "§ 4 Component Catalogue, § 6.2 Reading Stats, § 8 Synergy & Potential Integration"},
+      {"file": "cultivation/docs/3_design/design_overview.md", "section": "ETL_B and C(t) calculation"}
+    ],
+    "description_objective": "Implement `metrics_literature.py` to parse reading notes (`cultivation/literature/notes/*.md`) and Task Master logs (if they contain reading time) to produce the `reading_stats.parquet` file. This file should include `iso_week`, `papers_read` (TL;DR completed), `minutes_spent`, and `avg_novelty` (from paper metadata). This directly feeds the Cognitive (C) channel of the Potential Engine.",
+    "primary_type": "System Development (Data Processing Script)",
+    "initial_scale_estimate": "Medium (1-2 full deep work sessions, ~4-8 hours)",
+    "potential_deliverables_outcomes": [
+      "Functional `metrics_literature.py` script.",
+      "`reading_stats.parquet` generated from sample notes and metadata.",
+      "Documentation on how `papers_read` and `minutes_spent` are determined."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from design docs)",
+    "notes_questions_dependencies": "Depends on format of notes files (for TL;DR check) and metadata files (for novelty scores). Integration with Task Master logs for `minutes_spent` needs clarification on TM log format/access."
+  },
+  {
+    "task_id_candidate": "DW_HPE_007",
+    "tentative_title": "Develop Formal Methods Setup and Core Utilities Proofs (Lean 4 - P0)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/lean_guide.md", "section": "Folder & Namespace Layout, Setup Steps"},
+      {"file": "cultivation/docs/3_design/roadmap_vSigma.md", "section": "P0 Milestones"}
+    ],
+    "description_objective": "Set up the Lean 4 project structure under `cultivation/lean/` with `lakefile.lean`. Implement `Cultivation/Core/Arithmetic.lean` (or similar, e.g., `Common.lean` as per `Progress.md`) with basic arithmetic properties or list utilities and prove them. Ensure this compiles successfully in a GitHub Actions workflow (`lean.yml`).",
+    "primary_type": "Formal Methods Development & Setup",
+    "initial_scale_estimate": "Large (2-4 days, assuming initial Lean learning curve)",
+    "potential_deliverables_outcomes": [
+      "Functional Lean 4 project in `cultivation/lean/`.",
+      "At least one `.lean` file with simple theorems and proofs.",
+      "GitHub Action (`lean.yml`) that successfully builds the Lean project.",
+      "Documentation on how to build and test the Lean code locally."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from design docs and roadmap)",
+    "notes_questions_dependencies": "Requires Lean 4 toolchain and `elan` to be installed. Familiarity with Lean 4 syntax and basic proof tactics."
+  },
+  {
+    "task_id_candidate": "DW_HPE_008",
+    "tentative_title": "Design and Implement Real-Time Focus Predictor Hardware (EEG-B ADS1292R DIY Rig - MVP)",
+    "source_reference": [
+      {"file": "cultivation/docs/6_scheduling/FocusPredictor_TechSpec_v1.1.md", "section": "3.2. EEG-B: ADS1292R DIY Rig"}
+    ],
+    "description_objective": "Assemble and test the DIY EEG rig based on the ADS1292R and ESP32, as specified in the FocusPredictor tech spec. This includes hardware assembly, firmware development for data acquisition and LSL streaming, and performing initial signal validation tests (noise floor, alpha modulation, artifacts).",
+    "primary_type": "Hardware Development & Embedded Programming",
+    "initial_scale_estimate": "Epic (multi-week, heavy on debugging)",
+    "potential_deliverables_outcomes": [
+      "Assembled and functional EEG-B sensor module.",
+      "ESP32 firmware streaming 2-channel EEG data via LSL.",
+      "Validation report confirming signal quality (noise < 5µV, clear alpha modulation, artifact signatures).",
+      "Detailed assembly log and schematics (if deviating from Appendix A)."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from tech spec)",
+    "notes_questions_dependencies": "Requires all components from BOM (ADS1292R breakout, ESP32, electrodes, etc.). Access to soldering equipment, 3D printer (optional for enclosure). Strong C++/Arduino skills for ESP32 firmware."
+  },
+  {
+    "task_id_candidate": "DW_HPE_009",
+    "tentative_title": "Implement Software Stack for Focus Predictor (Data Acquisition, Preprocessing, Feature Extraction - MVP)",
+    "source_reference": [
+      {"file": "cultivation/docs/6_scheduling/FocusPredictor_TechSpec_v1.1.md", "section": "4. Software Stack (4.1, 4.2)"}
+    ],
+    "description_objective": "Develop the Python software components on the central processing unit to: 1. Create LSL inlets for all sensor streams (EEG-A, EEG-B, HRV, EDA). 2. Implement robust time synchronization and data windowing. 3. Implement preprocessing pipelines (filtering, artifact handling) for each modality. 4. Implement feature extraction algorithms for EEG, HRV, and EDA as detailed in the tech spec.",
+    "primary_type": "System Development (Signal Processing & Data Pipeline)",
+    "initial_scale_estimate": "Epic (multi-week/month, needs breakdown)",
+    "potential_deliverables_outcomes": [
+      "Python scripts/modules for LSL data ingestion and synchronization.",
+      "Signal preprocessing functions for EEG, HRV, EDA.",
+      "Feature extraction functions outputting a consistent feature vector per window.",
+      "Ability to log synchronized raw and processed features to disk.",
+      "Unit tests for preprocessing and feature extraction logic."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from tech spec)",
+    "notes_questions_dependencies": "Depends on functional sensor modules streaming data via LSL. Requires libraries like `pylsl`, `numpy`, `scipy`, `mne-python`, `neurokit2`."
+  },
+  {
+    "task_id_candidate": "DW_HPE_010",
+    "tentative_title": "Train and Validate Initial Sensor Fusion Model for Focus Predictor (XGBoost + Kalman - MVP)",
+    "source_reference": [
+      {"file": "cultivation/docs/6_scheduling/FocusPredictor_TechSpec_v1.1.md", "section": "4.3. Sensor Fusion Engine, 5. Validation Protocol"}
+    ],
+    "description_objective": "Collect labeled multi-sensor data during varied cognitive tasks (min 3-5 hours per user for personalization). Train the XGBoost static focus probability estimator. Implement and tune the Kalman filter for temporal smoothing, incorporating adaptive observation noise based on sensor quality. Validate the fused focus score against cognitive paradigms (N-Back, Stroop) and subjective ratings (KSS).",
+    "primary_type": "Machine Learning Model Development & Validation",
+    "initial_scale_estimate": "Epic (multi-week/month, includes data collection)",
+    "potential_deliverables_outcomes": [
+      "Labeled multi-sensor dataset.",
+      "Trained XGBoost model file.",
+      "Implemented Kalman filter module.",
+      "Validation report showing correlation with KSS, performance on cognitive tasks, and AUC for focused/distracted classification.",
+      "Initial Focus Score API implementation (Section 4.4 of tech spec)."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from tech spec)",
+    "notes_questions_dependencies": "Depends on DW_HPE_009 (Software Stack for Focus Predictor). Requires a robust data labeling strategy and experimental protocol for data collection."
+  },
+  {
+    "task_id_candidate": "DW_HPE_011",
+    "tentative_title": "Implement `curriculum_parser.py` and `task_generator.py` for RNA Modeling CSM",
+    "source_reference": [
+      {"file": "cultivation/docs/5_biology/RNA_MODELING/rna_tasks_hpe_metadata_v1.0.md", "section": "Entire document, especially 'Important Considerations for Your Parser/Generator'"},
+      {"file": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md", "section": "Source curriculum document"}
+    ],
+    "description_objective": "Develop Python scripts (`curriculum_parser.py` and `task_generator.py`) to parse the RNA modeling curriculum Markdown files (e.g., `rna-modeling_p1-foundations_week1-7day.md`), extract learning tasks, and populate/update `tasks.json` with the detailed HPE metadata (`hpe_csm_reference`, `hpe_learning_meta`, `hpe_scheduling_meta`) and derived `labels` as specified in `rna_tasks_hpe_metadata_v1.0.md`. Ensure idempotency using `csm_id`.",
+    "primary_type": "System Development (Automation Script & Data Processing)",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `curriculum_parser.py` and `task_generator.py` scripts.",
+      "`tasks.json` correctly populated with HPE metadata for the RNA Week 1 curriculum.",
+      "Documentation for running the parser and its assumptions about Markdown structure."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from design docs)",
+    "notes_questions_dependencies": "Requires a well-defined and consistent structure in the source Markdown curriculum files for reliable parsing. Needs robust error handling for parsing variations."
+  },
+  {
+    "task_id_candidate": "DW_HPE_012",
+    "tentative_title": "Develop `active_learning_block_scheduler.py` with Subtask Promotion for Oversized Tasks",
+    "source_reference": [
+      {"file": "cultivation/docs/6_scheduling/scheduling_oversized_tasks_strategy_v1.0.md", "section": "4. Proposed Integrated Strategy - Layer 1"},
+      {"file": "cultivation/scripts/task_management/active_learning_block_scheduler.py", "section": "Existing script to be enhanced"}
+    ],
+    "description_objective": "Enhance the `active_learning_block_scheduler.py` to implement the 'Subtask Promotion' strategy for handling oversized learning tasks. If a parent task's `estimated_effort_hours_min` exceeds the block duration, the scheduler should check its pending subtasks. If a subtask fits (using explicit subtask effort or an inferred heuristic if missing), it should be considered for scheduling. Update prioritization logic to handle mixed parent/subtask candidates.",
+    "primary_type": "Algorithm Development & Refinement",
+    "initial_scale_estimate": "Medium (1-2 full deep work sessions, ~4-8 hours)",
+    "potential_deliverables_outcomes": [
+      "Updated `active_learning_block_scheduler.py` with subtask promotion logic.",
+      "Unit tests covering scenarios with oversized parent tasks and fittable/non-fittable subtasks.",
+      "Documentation of the subtask effort heuristic and fallback logic."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from design docs)",
+    "notes_questions_dependencies": "Depends on the structure of tasks and subtasks in Task Master. May require updates to the task schema or additional metadata for subtasks."
+  }
+]
