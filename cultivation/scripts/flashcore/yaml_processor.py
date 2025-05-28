@@ -183,21 +183,27 @@ def _transform_raw_card_to_model(
             
             if not skip_media_validation:
                 try:
-                    # Construct absolute path and resolve symlinks for robust check
-                    full_media_path = (assets_root_directory / media_path).resolve(strict=True)
+                    # Construct absolute path (may not exist yet)
+                    full_media_path = (assets_root_directory / media_path).resolve(strict=False)
                     abs_assets_root = assets_root_directory.resolve(strict=True)
-                    
+
                     # Ensure the resolved media path is truly within the assets_root_directory
                     if not str(full_media_path).startswith(str(abs_assets_root)):
-                         return YAMLProcessingError(
+                        return YAMLProcessingError(
                             file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
                             field_name="media", message=f"Media path '{media_path}' resolves outside the assets root directory '{assets_root_directory}'."
                         )
-                    # is_file() check already done by resolve(strict=True) if it points to a file
-                except FileNotFoundError:
-                     return YAMLProcessingError(
+
+                    # Now check if file exists
+                    if not full_media_path.exists():
+                        return YAMLProcessingError(
+                            file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
+                            field_name="media", message=f"Media file not found at expected path: '{(assets_root_directory / media_path)}'."
+                        )
+                except Exception as e:
+                    return YAMLProcessingError(
                         file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
-                        field_name="media", message=f"Media file not found at expected path: '{(assets_root_directory / media_path)}'."
+                        field_name="media", message=f"Error validating media path '{media_path}': {e}."
                     )
                 except Exception as e: # Catch other potential Path errors
                      return YAMLProcessingError(
