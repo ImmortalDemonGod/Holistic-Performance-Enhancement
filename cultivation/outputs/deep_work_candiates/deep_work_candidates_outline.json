@@ -420,26 +420,6 @@
     "notes_questions_dependencies": "Depends on `synergy_score.parquet` and domain-specific KPI CSVs/Parquets. The `update_potential_weights.py` script (for monthly weight recalibration) is a separate, subsequent task."
   },
   {
-    "task_id_candidate": "DW_HPE_003",
-    "tentative_title": "Develop `flashcore` Python Package for Flashcard System (MVP)",
-    "source_reference": [
-      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "Folder layout, Build pipeline"},
-      {"file": "cultivation/scripts/biology/flashcards_playground.ipynb", "section": "Prototyped logic"}
-    ],
-    "description_objective": "Develop the `flashcore` Python package as specified in `flashcards_1.md`. This includes: YAML parsing, `Card` object model, DuckDB schema creation (`cards`, `reviews` tables), `build_cards.py` (YAML to DuckDB ingest/upsert), `export_anki.py` (DuckDB to .apkg), `export_markdown.py` (DuckDB to Markdown). Implement basic FSRS logic from `flashcards_playground.ipynb` for scheduling.",
-    "primary_type": "System Development (Python Package)",
-    "initial_scale_estimate": "Epic (multi-week/month, needs breakdown)",
-    "potential_deliverables_outcomes": [
-      "Installable `flashcore` Python package.",
-      "CLI tools (`tm-fc vet`, `tm-fc add` - stubs initially).",
-      "Functional `build_cards.py`, `export_anki.py`, `export_markdown.py` scripts.",
-      "DuckDB database `flash.db` created and populated from sample YAML.",
-      "Sample Anki deck and Markdown file generated."
-    ],
-    "implicit_reasoning_confidence": "N/A (Explicitly derived from design docs)",
-    "notes_questions_dependencies": "Requires `genanki`, `pyyaml`, `duckdb`, `pandas`, `markdown`. Decision needed on full FSRS implementation scope for MVP vs. simplified version from notebook."
-  },
-  {
     "task_id_candidate": "DW_HPE_004",
     "tentative_title": "Implement Full DocInsight Integration for Literature Pipeline (P0-P1)",
     "source_reference": [
