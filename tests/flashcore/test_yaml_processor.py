@@ -214,20 +214,20 @@ class TestTransformRawCardToModel:
         # Path traversal
         raw_trav_media = _RawYAMLCardEntry(q="Q", a="A", media=["../image.png"])
         err_trav_media = _transform_raw_card_to_model(
-            raw_trav_media, "D", set(), assets_dir, 0, False, False # assets_dir is also source_file_path.parent here
+            raw_trav_media, "D", set(), assets_dir / "f.yaml", assets_dir, 0, False, False
         )
         assert isinstance(err_trav_media, YAMLProcessingError)
         assert "resolves outside the assets root" in err_trav_media.message
 
 
     def test_secrets_detection(self, tmp_path: Path, assets_dir: Path):
-        raw_secret_q = _RawYAMLCardEntry(q="My password is: supersecretpassword1234567890", a="A")
+        raw_secret_q = _RawYAMLCardEntry(q="api_key: sk_live_verylongtestkey1234567890", a="A")
         err_secret_q = _transform_raw_card_to_model(
             raw_secret_q, "D", set(), tmp_path / "f.yaml", assets_dir, 0, False, False
         )
         assert isinstance(err_secret_q, YAMLProcessingError)
         assert "Potential secret detected" in err_secret_q.message
-        assert "q (question)" in err_secret_q.message
+        assert "card question" in err_secret_q.message
 
         # Skipped detection
         card_skipped_secret = _transform_raw_card_to_model(
