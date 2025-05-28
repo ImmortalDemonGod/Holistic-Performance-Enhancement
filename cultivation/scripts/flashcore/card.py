@@ -54,7 +54,7 @@ class Card(BaseModel):
     )
     media: Optional[List[Path]] = Field(
         default=None,
-        description="Optional list of paths to media files (images, audio, etc.) associated with the card. Paths should be relative to a defined assets root directory (e.g., 'docs/5_flashcards/assets/')."
+        description="Optional list of paths to media files (images, audio, etc.) associated with the card. Paths should be relative to a defined assets root directory (e.g., 'outputs/flashcards/assets/')."
     )
     source_yaml_file: Optional[Path] = Field(
         default=None,
