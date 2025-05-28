@@ -18,3 +18,4 @@ GitPython
 PyYAML
 pytest==7.4.0
 bleach
+duckdb
