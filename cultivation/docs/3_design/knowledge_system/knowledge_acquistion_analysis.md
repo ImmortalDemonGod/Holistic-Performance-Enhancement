@@ -1,6 +1,4 @@
-Okay, let's take a deep dive into the "Biological Knowledge Acquisition" pillar of the Cultivation project. This area is multifaceted, aiming to systematically enhance understanding and retention of biological information through a combination of formal study, advanced literature processing, instrumented learning, and robust knowledge retention techniques.
 
-Here's a breakdown of its key sub-components:
 
 ## A. Mathematical Biology (Formal Study & Self-Assessment)
 
@@ -167,7 +165,7 @@ Here's a breakdown of its key sub-components:
 2.  **Key Artifacts/Files:**
     *   `cultivation/docs/2_requirements/flashcards_1.md`: A detailed "Flash-Memory Layer — Authoring, Build & CI Spec v 1.0". This covers:
         *   Design principles (author-first, YAML source, CI-friendly, scalable, Python toolchain).
-        *   Folder layout (`docs/5_flashcards/` for authoring, `flashcore/` for Python package, `dist/flashcards/` for exports).
+        *   Folder layout (`outputs/flashcards/yaml/` for authoring, `flashcore/` for Python package, `dist/flashcards/` for exports).
         *   YAML schema for cards (deck, tags, id, q, a, media, origin_task).
         *   Author workflow (VS Code snippet, pre-commit hook for UUID injection/sorting).
         *   Build pipeline (`make flash-sync` → YAML to DuckDB → export to Anki .apkg and Markdown).
