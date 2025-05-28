@@ -1,0 +1,68 @@
+# outputs/flashcards/yaml/feature_showcase.yaml
+
+deck: Full Deck::SubDeck
+tags:
+  - comprehensive
+  - test-deck
+  - yaml-schema
+
+cards:
+  # Card 1: All features (UUID, tags, origin_task, media, internal_note, added_at)
+  - id: "123e4567-e89b-12d3-a456-426614174000"
+    q: |
+      Comprehensive question with details?
+      - Includes code: `print("Hello, World!")`
+      - Supports **markdown** formatting
+      - Can reference media
+    a: |
+      Comprehensive answer with `code` and **markdown**.
+      ![Sample Image](assets/image.png)
+      - Supports KaTeX: $E=mc^2$
+      - Multi-line answers are allowed.
+    tags:
+      - valid-tag
+      - another-valid-one
+    origin_task: TASK-001
+    media:
+      - image.png
+      - audio.mp3
+    internal_note: This card was programmatically generated.
+    added_at: "2025-05-27T21:44:00-05:00"
+
+  # Card 2: Minimal (auto-generates UUID, inherits global tags)
+  - q: What is the minimum required to define a card?
+    a: A question and an answer.
+
+  # Card 3: Card-level tags, media, and origin_task
+  - q: Which fields are optional in a flashcard YAML entry?
+    a: |
+      Optional fields include:
+      - id (UUID)
+      - tags
+      - origin_task
+      - media
+      - internal_note
+      - added_at
+    tags:
+      - optional-fields
+      - reference
+    origin_task: DOC-REF-123
+    media:
+      - diagram.png
+
+  # Card 4: Card with only global tags, no card-level tags
+  - q: How are global tags applied to cards?
+    a: Global tags from the YAML file are merged with any card-specific tags. If a card has no tags, it inherits only the global tags.
+
+  # Card 5: Card with multi-line answer and markdown
+  - q: What is the purpose of the `internal_note` field?
+    a: |
+      The `internal_note` field can be used for implementation notes, debugging, or provenance. It is not shown to end users.
+      - Useful for tracking card generation source.
+      - Can help with audits or automated QA.
+    internal_note: For maintainers only.
+
+  # Card 6: Card with added_at timestamp
+  - q: When was this card added?
+    a: This card was added on 2025-05-27.
+    added_at: "2025-05-27T21:44:55-05:00"
