@@ -224,6 +224,8 @@ def _transform_raw_card_to_model(
             "tags": final_tags,
             "source_yaml_file": source_file_path.resolve() # Store absolute, resolved path
         }
+        if raw_card_model.internal_note is not None:
+            card_data["internal_note"] = raw_card_model.internal_note
         if card_uuid_obj: # Only include if explicitly provided in YAML
             card_data["uuid"] = card_uuid_obj
         if raw_card_model.origin_task is not None:
