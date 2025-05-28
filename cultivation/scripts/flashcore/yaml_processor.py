@@ -73,6 +73,7 @@ class _RawYAMLCardEntry(PydanticBaseModel):
     tags: Optional[List[constr(pattern=RAW_KEBAB_CASE_PATTERN)]] = Field(default_factory=list) # type: ignore
     origin_task: Optional[str] = Field(default=None)
     media: Optional[List[str]] = Field(default_factory=list)
+    internal_note: Optional[str] = Field(default=None)  # Authorable from YAML
 
     @validator("tags", pre=True, each_item=True)
     def normalize_tag(cls, v):
@@ -126,6 +127,8 @@ def _transform_raw_card_to_model(
     skip_media_validation: bool,
     skip_secrets_detection: bool
 ) -> Union[Card, YAMLProcessingError]:
+    # internal_note is now authorable from YAML and should be passed through
+
     """
     Transforms a validated raw card entry into a canonical Card model.
     Performs sanitization, media validation, secrets detection, and final Card instantiation.
