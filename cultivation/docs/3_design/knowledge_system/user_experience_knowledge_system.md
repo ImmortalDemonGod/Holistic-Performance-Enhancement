@@ -45,14 +45,14 @@ Okay, let's envision what the fully built "Biological/General Knowledge System" 
         *   Prompts for self-rated comprehension and novelty (0-5 or 0-1).
         *   Prompts for a TL;DR summary if not already filled in the notes.
         *   Presents a quick, auto-generated recall quiz (3-5 questions based on the paper's content via DocInsight or a simpler NLP model).
-        *   Any staged flashcards (`[[fc]]` items) are presented for quick review/editing and then automatically added to `docs/5_flashcards/inbox.yaml` (or directly to a relevant deck YAML) via `tm-fc add` equivalent.
+        *   Any staged flashcards (`[[fc]]` items) are presented for quick review/editing and then automatically added to `outputs/flashcards/yaml/inbox.yaml` (or directly to a relevant deck YAML) via `tm-fc add` equivalent.
         *   The `reading_stats.parquet` file (or an intermediate SQLite table) is updated with metrics from this session (duration, pages, notes, quiz score, novelty score, etc.). This data immediately becomes available for the Potential Engine.
 
 **Phase 3: Knowledge Consolidation & Retention (Flashcards)**
 
 1.  **Authoring Flashcards:**
     *   **User Action (During Reading/Study):** User identifies key concepts, facts, or questions. They might use the `[[fc]]` syntax in their notes or a dedicated "Add Flashcard" button in the reading UI.
-    *   **User Action (Dedicated Session):** User opens a `*.yaml` file in `docs/5_flashcards/` (e.g., `biology_cellular_respiration.yaml`) and adds new cards directly using the defined schema. VS Code snippets make this fast.
+    *   **User Action (Dedicated Session):** User opens a `*.yaml` file in `outputs/flashcards/yaml/` (e.g., `biology_cellular_respiration.yaml`) and adds new cards directly using the defined schema. VS Code snippets make this fast.
     *   **System Action:**
         *   `pre-commit` hooks automatically validate YAML, assign UUIDs if missing, sort decks, and flag duplicates.
         *   The `flashcore` system processes these YAML files.
