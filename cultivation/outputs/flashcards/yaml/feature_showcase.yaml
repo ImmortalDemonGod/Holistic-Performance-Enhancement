@@ -5,9 +5,10 @@ tags:
   - comprehensive
   - test-deck
   - yaml-schema
+  - multi-word-global-tag # Demonstrates multi-word kebab-case tag
 
 cards:
-  # Card 1: All features (UUID, tags, origin_task, media, internal_note, added_at)
+  # Card 1: Most features (UUID, tags, origin_task, media, internal_note, multi-word tag)
   - id: "123e4567-e89b-12d3-a456-426614174000"
     q: |
       Comprehensive question with details?
@@ -16,17 +17,58 @@ cards:
       - Can reference media
     a: |
       Comprehensive answer with `code` and **markdown**.
-      ![Sample Image](assets/image.png)
-      - Supports KaTeX: $E=mc^2$
-      - Multi-line answers are allowed.
+      Supports KaTeX: $E=mc^2$
+      And display mode:
+      $$
+      \int_a^b f(x) dx
+      $$
     tags:
       - valid-tag
       - another-valid-one
+      - specific-feature-test
+      - multi-word-card-tag # Demonstrates multi-word kebab-case tag at card level
     origin_task: TASK-001
     media:
-      - image.png
-      - audio.mp3
-    internal_note: This card was programmatically generated.
+      - image.png           # Resides in assets/image.png
+      - audio/narration.mp3 # Resides in assets/audio/narration.mp3
+    internal_note: "Card 1: Programmatically generated. For detailed testing. (Authorable from YAML)"
+
+  # Card 2: Minimal (auto-generates UUID, inherits global tags)
+  - q: What is the minimum required to define a card?
+    a: A question (`q`) and an answer (`a`).
+
+  # Card 3: Card-level tags, media (with subdirectory), and origin_task
+  - q: Which fields are optional for a card in YAML?
+    a: |
+      Optional fields per card entry:
+      - `id` (UUID string)
+      - `tags` (list of kebab-case strings)
+      - `origin_task` (string)
+      - `media` (list of relative path strings)
+      - `internal_note` (string, if supported from YAML)
+    tags:
+      - optional-fields
+      - reference-schema
+    origin_task: DOC-REF-123
+    media:
+      - "diagrams/card_schema.png" # Resides in assets/diagrams/card_schema.png
+
+  # Card 4: Card with explicitly empty card-level tags
+  - q: What happens if a card has 'tags: []'?
+    a: It inherits only the global tags from the deck file. The empty list overrides nothing.
+    tags: []
+
+  # Card 5: Card with only global tags, no card-level tags field (implicitly empty)
+  - q: How are global tags applied if a card has no 'tags' field?
+    a: Global tags from the YAML file are applied. It's equivalent to `tags: []`.
+
+  # Card 6: Multi-line answer and markdown, showcasing 'internal_note'
+  - q: What is the purpose of the `internal_note` field in the Card model?
+    a: |
+      The `internal_note` field (if supported from YAML) is for system or author notes not shown to the user during review.
+      - Useful for tracking generation source or special handling instructions.
+      - Example: "This card's answer needs KaTeX rendering."
+    internal_note: "Card 6: Focus on internal_note's purpose if it's authorable."
     added_at: "2025-05-27T21:44:00-05:00"
 
   # Card 2: Minimal (auto-generates UUID, inherits global tags)
