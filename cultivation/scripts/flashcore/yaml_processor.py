@@ -207,12 +207,7 @@ def _transform_raw_card_to_model(
                     return YAMLProcessingError(
                         file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
                         field_name="media", message=f"Error validating media path '{media_path}': {e}."
-                    )
-                except Exception as e: # Catch other potential Path errors
-                     return YAMLProcessingError(
-                        file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
-                        field_name="media", message=f"Error validating media path '{media_path}': {e}."
-                    )
+                    ) from e
             processed_media_paths.append(media_path) # Store the original relative path
 
     # Instantiate canonical Card model

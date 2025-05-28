@@ -389,19 +389,25 @@ class FlashcardDatabase:
         sql = """
         INSERT INTO reviews (card_uuid, ts, rating, resp_ms, stab_before, stab_after, diff, next_due,
                              elapsed_days_at_review, scheduled_days_interval, review_type)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11); 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING review_id;
         """
         try:
             with conn.cursor() as cursor:
                 cursor.begin()
-                cursor.executemany(sql, review_params_list)
+                result = cursor.executemany(sql, review_params_list).fetchall()
                 cursor.commit()
-            logger.info(f"Successfully batch-added {len(reviews)} reviews.")
-            return []
+            review_ids = [int(r[0]) for r in result]
+            logger.info(f"Successfully batch-added {len(review_ids)} reviews.")
+            return review_ids
         except duckdb.Error as e:
             logger.error(f"Error during batch review add: {e}")
-            if 'cursor' in locals() and cursor.connection.is_open: cursor.rollback()
-            raise ReviewOperationError(f"Batch review add failed: {e}", original_exception=e)
+            if 'cursor' in locals() and cursor.connection.is_open:
+                try:
+                    cursor.rollback()
+                except duckdb.Error as rb_err:
+                    logger.error(f"Error during rollback for add_reviews_batch: {rb_err}")
+            raise ReviewOperationError(f"Batch review add failed: {e}") from e
 
     def get_reviews_for_card(self, card_uuid: uuid.UUID, order_by_ts_desc: bool = True) -> List['Review']:
         conn = self.get_connection()

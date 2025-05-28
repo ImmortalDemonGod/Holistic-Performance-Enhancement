@@ -13,7 +13,8 @@ try:
 except ImportError:
     # Fallback for local execution if path not set up
     import sys
-    sys.path.append(str(Path(__file__).parent.parent.parent / 'scripts'))
+    # Add cultivation/scripts to PYTHONPATH for local test execution
+    sys.path.append(str(Path(__file__).parent.parent.parent / 'cultivation' / 'scripts'))
     from flashcore.card import Card, Review
 
 

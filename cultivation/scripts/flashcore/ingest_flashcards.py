@@ -52,7 +52,8 @@ def main():
 
     cards, errors = load_and_process_flashcard_yamls(
         source_directory=source_dir,
-        assets_root_directory=assets_dir
+        assets_root_directory=assets_dir,
+        fail_fast=args.strict  # propagate --strict
     )
 
     if errors:
@@ -69,10 +70,15 @@ def main():
         print("[WARN] No valid cards to ingest. Exiting.")
         sys.exit(0)
 
-    db = FlashcardDatabase(db_path)
-    db.initialize_schema()
-    db.upsert_cards_batch(cards)
-    print(f"[SUCCESS] Ingested {len(cards)} cards into {db_path.resolve()}.")
+    try:
+        db = FlashcardDatabase(db_path)
+        db.initialize_schema()
+        inserted = db.upsert_cards_batch(cards)
+        print(f"[SUCCESS] Ingested {inserted} cards into {db_path.resolve()}.")
+    except Exception as e:
+        print(f"[FATAL] Database ingestion failed: {type(e).__name__} – {e}", file=sys.stderr)
+        sys.exit(2)
+
 
 if __name__ == "__main__":
     main()

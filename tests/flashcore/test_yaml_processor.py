@@ -19,7 +19,7 @@ try:
     from cultivation.scripts.flashcore.card import Card
 except ImportError:
     import sys
-    sys.path.append(str(Path(__file__).parent.parent.parent / 'scripts'))
+    sys.path.append(str(Path(__file__).parent.parent.parent / 'cultivation' / 'scripts'))
     from flashcore.yaml_processor import (
         load_and_process_flashcard_yamls,
         _process_single_yaml_file,
@@ -89,7 +89,7 @@ YAML_WITH_SECRET_CONTENT = """
 deck: SecretsDeck
 cards:
   - q: What is the api_key?
-    a: The api_key is sk_live_verylongtestkey1234567890
+    a: The api_key is sk_live_verylongtestkey1234567890 # gitleaks:allow
   - q: Another question
     a: Some normal answer.
 """

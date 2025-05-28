@@ -334,7 +334,7 @@ class TestCardOperations:
         valid_card = create_sample_card()
         # Intentionally break a card (deck_name=None violates NOT NULL)
         broken_card = create_sample_card(deck_name=None)
-        with pytest.raises(Exception):
+        with pytest.raises(CardOperationError):
             db.upsert_cards_batch([valid_card, broken_card])
         # Neither should be present
         assert db.get_card_by_uuid(valid_card.uuid) is None
@@ -459,7 +459,7 @@ class TestReviewOperations:
         db.upsert_cards_batch([card])
         valid_review = create_sample_review(card_uuid=card.uuid)
         bad_review = create_sample_review(card_uuid=card.uuid, rating=999)
-        with pytest.raises(Exception):
+        with pytest.raises(CardOperationError):
             db.add_reviews_batch([valid_review, bad_review])
         assert db.get_reviews_for_card(card.uuid) == []
 
@@ -510,7 +510,7 @@ class TestReviewOperations:
 class TestGeneralErrorHandling:
     def test_operations_on_uninitialized_db(self, db_manager: FlashcardDatabase):
         # No initialize_schema called
-        with pytest.raises(Exception):
+        with pytest.raises(CardOperationError):
             db_manager.upsert_cards_batch([create_sample_card()])
 
     def test_operations_on_closed_connection(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
