@@ -52,7 +52,7 @@ class TestCardModel:
             added_at=specific_added_at,
             origin_task="TASK-001",
             media=[Path("assets/image.png"), Path("assets/audio.mp3")],
-            source_yaml_file=Path("docs/5_flashcards/full_deck.yaml"),
+            source_yaml_file=Path("outputs/flashcards/yaml/feature_showcase.yaml"),
             internal_note="This card was programmatically generated."
         )
         assert card.uuid == specific_uuid
@@ -61,7 +61,7 @@ class TestCardModel:
         assert card.added_at == specific_added_at
         assert card.origin_task == "TASK-001"
         assert card.media == [Path("assets/image.png"), Path("assets/audio.mp3")]
-        assert card.source_yaml_file == Path("docs/5_flashcards/full_deck.yaml")
+        assert card.source_yaml_file == Path("outputs/flashcards/yaml/feature_showcase.yaml")
         assert card.internal_note == "This card was programmatically generated."
 
     def test_card_uuid_default_generation(self):
