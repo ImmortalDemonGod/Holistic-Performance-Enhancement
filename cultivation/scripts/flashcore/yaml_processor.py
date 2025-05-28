@@ -293,7 +293,18 @@ def _process_single_yaml_file(
 
     encountered_fronts_this_file: Set[str] = set()
 
+    forbidden_fields = {"added_at"}
     for idx, card_dict in enumerate(cards_list):
+        forbidden_present = forbidden_fields.intersection(card_dict.keys())
+        if forbidden_present:
+            errors_in_file.append(
+                YAMLProcessingError(
+                    file_path=file_path,
+                    message=f"Forbidden field(s) present in card YAML: {', '.join(forbidden_present)}. These will be ignored and replaced by system-assigned values.",
+                    card_index=idx,
+                    card_question_snippet=str(card_dict.get('q', ''))[:50] if isinstance(card_dict, dict) else None
+                )
+            )
         try:
             raw_card_entry_model = _RawYAMLCardEntry(**card_dict)
         except ValidationError as e:

@@ -23,8 +23,8 @@ def main():
     parser.add_argument(
         "--assets-dir",
         type=str,
-        default=os.environ.get("FLASHCARD_ASSETS_DIR", "cultivation/outputs/flashcards/assets"),
-        help="Directory containing media assets (default: cultivation/outputs/flashcards/assets or $FLASHCARD_ASSETS_DIR)"
+        default=os.environ.get("FLASHCARD_ASSETS_DIR", "cultivation/outputs/flashcards/yaml/assets"),
+        help="Directory containing flashcard media assets (default: cultivation/outputs/flashcards/yaml/assets or $FLASHCARD_ASSETS_DIR)"
     )
     parser.add_argument(
         "--db-path",

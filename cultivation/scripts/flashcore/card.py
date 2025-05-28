@@ -23,6 +23,8 @@ class Card(BaseModel):
     """
     Represents a single flashcard after parsing and processing from YAML.
     This is the canonical internal representation of a card's content and metadata.
+
+    Media asset paths are always relative to 'cultivation/outputs/flashcards/yaml/assets/'.
     """
     uuid: UUID = Field(
         default_factory=uuid.uuid4,
