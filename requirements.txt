@@ -17,3 +17,5 @@ ruff
 GitPython
 PyYAML
 pytest==7.4.0
+bleach>=6.2.0
+duckdb>=1.0.0

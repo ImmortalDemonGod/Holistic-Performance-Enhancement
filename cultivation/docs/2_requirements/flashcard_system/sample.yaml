@@ -1,0 +1,7 @@
+# Sample flashcard YAML file for flashcore system
+- uuid: sample-uuid-1
+  front: What is spaced repetition?
+  back: A learning technique that incorporates increasing intervals of time between subsequent review of previously learned material.
+  tags: [memory, learning]
+  internal_note: This card was manually created.  # Authorable in YAML
+  # added_at: "2025-05-27T21:44:00-05:00"  # NOT allowed in YAML, system-assigned only
