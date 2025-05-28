@@ -54,7 +54,7 @@ cards:
       - "diagrams/card_schema.png" # Resides in assets/diagrams/card_schema.png
 
   # Card 4: Card with explicitly empty card-level tags
-  - q: What happens if a card has 'tags: []'?
+  - q: "What happens if a card has 'tags: []'?"
     a: It inherits only the global tags from the deck file. The empty list overrides nothing.
     tags: []
 

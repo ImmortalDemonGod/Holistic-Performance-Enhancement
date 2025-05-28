@@ -1,4 +1,3 @@
-<!--  File: docs/6_scheduling/FocusPredictor_TechSpec_v1.1.md  -->
 
 ---
 

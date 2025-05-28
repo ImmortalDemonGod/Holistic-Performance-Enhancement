@@ -1,8 +1,4 @@
-<!--  
-File: **docs/4_analysis/operational_playbook.md**  
-Status: **✅ APPROVED — v Σ 1.0 (Full‑stack experience guide)**  
-This supersedes every previous “playbook” draft and is now the canonical day‑to‑day / year‑to‑year usage manual for the fully‑integrated **Cultivation** platform.  
--->
+
 
 # 🚀 Operational Playbook — *Life inside Cultivation*  
 *A practitioner‑oriented walkthrough of what it feels like to **live** with the entire stack once P0 → P2 (and beyond) are in production.*

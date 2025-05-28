@@ -142,7 +142,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
       - run: pip install "flashcore[dev]"
-      - run: python -m flashcore.exporters.build_cards --lint docs/5_flashcards
+      - run: python -m flashcore.exporters.build_cards --lint outputs/flashcards/yaml
 ```
 
 ### 6.2 Build job (heavy; nightly)

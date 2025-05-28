@@ -1,8 +1,3 @@
-<!--  
-File: **docs/3_design/literature_system_overview.md**  
-Status: **✅ APPROVED — v Σ 0.2 (P0 baseline)**  
-Supersedes: v Σ 0.1 (Draft) after review in ADR‑05 Literature‑Pipeline  
--->
 
 # 📚 Literature Pipeline & DocInsight Integration  
 *Turning scattered pre‑prints into structured insight, metrics, and action for the **Cultivation** programme.*
