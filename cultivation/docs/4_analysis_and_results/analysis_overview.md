@@ -108,6 +108,20 @@ CI can assert these files exist and include a `## Next Action` section → green
 
 ---
 
+## Key Analyses and Reports
+
+Below are the most important analysis documents and templates available in this section:
+
+- [Running Analysis Template](running_analysis_template.md): Use this template to generate new run or experiment reports.
+- [Week 21 RPE10 Benchmark Analysis](week21_rpe10_benchmark_analysis.md): In-depth analysis of the week 21 benchmark run, including methodology, results, and actionable insights.
+- [2025-04-27 Run Report](2025_04_27_run_report.md): Example of a detailed run report for April 27, 2025.
+- [2025-05-01 Run Report](2025_05_01_run_report.md): Example of a detailed run report for May 1, 2025.
+- [2025-05-11 Run Report](2025_05_11_run_report.md): Example of a detailed run report for May 11, 2025.
+- [2025-05-17 Run Report](2025_05_17_run_report.md): Example of a detailed run report for May 17, 2025.
+- [2025-05-24 Run Report](2025_05_24_run_report.md): Example of a detailed run report for May 24, 2025.
+
+---
+
 ### TL;DR
 
 Put *every* finalized result, figure, and conclusion into `docs/4_analysis/`, organized by domain ⇒ date/version. Each file becomes a bite‑sized lab report that tells (a) what you did, (b) what you saw, (c) what you’ll do next. When CI or humans rerun things, they create a fresh file or update the existing one, keeping the project’s scientific memory intact.
