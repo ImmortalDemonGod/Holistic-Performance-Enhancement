@@ -258,6 +258,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 dev-debug.log
+# MkDocs build output
+site/
+# Mac system files
+**/.DS_Store
+# Auto-generated docs file map
+docs_file_map.txt
 # Dependency directories
 # Environment variables
 # Editor directories and files
