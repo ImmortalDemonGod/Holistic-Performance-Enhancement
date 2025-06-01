@@ -1,0 +1,2 @@
+# 6_personal_schedules_and_protocols
+Overview of the 6_personal_schedules_and_protocols section.
