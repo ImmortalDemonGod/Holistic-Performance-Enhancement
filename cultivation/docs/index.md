@@ -9,9 +9,9 @@ Below is a hierarchical overview of all documentation sections, subfolders, and 
 ## 0. Introduction & Strategy
 *Vision, philosophy, and strategic framing for the Cultivation project. Start here for the "why" and big-picture context.*
 - [README](0_introduction_and_strategy/README.md)
-- [conceptual_framework.md](0_introduction_and_strategy/conceptual_framework.md)
-- [system_readiness_audit_2025-04-18.md](0_introduction_and_strategy/system_readiness_audit_2025-04-18.md)
-- [systems_map_and_market_cheatsheet.md](0_introduction_and_strategy/systems_map_and_market_cheatsheet.md)
+
+- [system_readiness_audit_2025-04-18.md](4_analysis_and_results/repository_audits/system_readiness_audit_2025-04-18.md)
+- [systems_map_and_market_cheatsheet.md](0_introduction_and_strategy/archive/systems_map_and_market_cheatsheet.md)
 - **archive/**
 - **to_be_consolidated/**
 
