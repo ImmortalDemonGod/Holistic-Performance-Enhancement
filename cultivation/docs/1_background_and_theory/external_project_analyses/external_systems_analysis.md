@@ -7,7 +7,7 @@ This document presents a systematic and critical analysis of four external softw
 ---
 
 ### 1. Repository: `DocInsight`
-   *(Based on the analysis document `cultivation/outputs/deep_work_candiates/DocInsight.md`, which analyzed `ImmortalDemonGod/DocInsight` commit `8e7b0be...` and focused on its client-side components)*
+   *(Based on the analysis document `cultivation/outputs/deep_work_candidates/DocInsight.md`, which analyzed `ImmortalDemonGod/DocInsight` commit `8e7b0be...` and focused on its client-side components)*
 
 *   **1.1. Summary of `DocInsight` Repository (Client Components):**
     *   **1.1.1. Core Purpose & Key Functionalities:**
@@ -47,7 +47,7 @@ This document presents a systematic and critical analysis of four external softw
 ---
 
 ### 2. Repository: `simplest_arc_agi` (Neural Circuit Extraction Framework)
-   *(Based on the analysis document `cultivation/outputs/deep_work_candiates/Simplest_ARC_AGI.md`)*
+   *(Based on the analysis document `cultivation/outputs/deep_work_candidates/Simplest_ARC_AGI.md`)*
 
 *   **2.1. Summary of `simplest_arc_agi` Repository:**
     *   **2.1.1. Core Purpose & Key Functionalities:**
@@ -89,7 +89,7 @@ This document presents a systematic and critical analysis of four external softw
 ---
 
 ### 3. Repository: `RNA_PREDICT` (RNA 3D Structure Prediction Pipeline)
-   *(Based on the analysis document `cultivation/outputs/deep_work_candiates/RNA_PREDICT.md`, analyzing v2.0.3)*
+   *(Based on the analysis document `cultivation/outputs/deep_work_candidates/RNA_PREDICT.md`, analyzing v2.0.3)*
 
 *   **3.1. Summary of `RNA_PREDICT` Repository:**
     *   **3.1.1. Core Purpose & Key Functionalities:**
@@ -136,7 +136,7 @@ This document presents a systematic and critical analysis of four external softw
 ---
 
 ### 4. Repository: `Pytest-Error-Fixing-Framework` (pytest-fixer)
-   *(Based on the analysis document `cultivation/outputs/deep_work_candiates/Pytest-Error-Fixing-Framework.md`, analyzing commit `bf40966...`)*
+   *(Based on the analysis document `cultivation/outputs/deep_work_candidates/Pytest-Error-Fixing-Framework.md`, analyzing commit `bf40966...`)*
 
 *   **4.1. Summary of `Pytest-Error-Fixing-Framework` Repository:**
     *   **4.1.1. Core Purpose & Key Functionalities:**
