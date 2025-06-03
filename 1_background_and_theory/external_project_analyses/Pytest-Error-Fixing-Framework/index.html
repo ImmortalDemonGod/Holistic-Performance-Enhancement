@@ -1,0 +1,4416 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../PrimordialEncounters/">
+      
+      
+        <link rel="next" href="../RNA_PREDICT/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.9">
+    
+    
+      
+        <title>Pytest-Error-Fixing-Framework - Cultivation Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.4af4bdda.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#pytest-error-fixing-framework-technical-analysis-documentation-2025-05-29" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Cultivation Documentation" class="md-header__button md-logo" aria-label="Cultivation Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Cultivation Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Pytest-Error-Fixing-Framework
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Cultivation Documentation" class="md-nav__button md-logo" aria-label="Cultivation Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Cultivation Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    0 Vision And Strategy
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            0 Vision And Strategy
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../0_vision_and_strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../0_vision_and_strategy/The_Dao_of_Cultivation_A_Founding_Vision/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    The Dao Of Cultivation A Founding Vision
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../0_vision_and_strategy/project_philosophy_and_core_concepts/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Project Philosophy And Core Concepts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Archive
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            Archive
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../0_vision_and_strategy/archive/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../0_vision_and_strategy/archive/critique_and_refinement/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Critique And Refinement
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../0_vision_and_strategy/archive/final_thoughts/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Final Thoughts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../0_vision_and_strategy/archive/potential_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Potential Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../0_vision_and_strategy/archive/systems_map_and_market_cheatsheet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Systems Map And Market Cheatsheet
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../0_vision_and_strategy/archive/ultimate_goals/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Ultimate Goals
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../0_vision_and_strategy/archive/synergy_concept/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Synergy Concept
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Strategic Initiatives
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            Strategic Initiatives
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../0_vision_and_strategy/strategic_initiatives/CULTIVATION_SVEP_MASTER_V1_0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cultivation Svep Master V1 0
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    1 Background And Theory
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            1 Background And Theory
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../domains_scope/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Domains Scope
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../hyper_detailed_theoretical_outline/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hyper Detailed Theoretical Outline
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    External Project Analyses
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            External Project Analyses
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DocInsight/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Docinsight
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PrimordialEncounters/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Primordialencounters
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Pytest-Error-Fixing-Framework
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Pytest-Error-Fixing-Framework
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#i-analysis-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      I. Analysis Metadata
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ii-executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      II. Executive Summary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iii-repository-overview-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      III. Repository Overview &amp; Purpose
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iv-technical-architecture-implementation-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      IV. Technical Architecture &amp; Implementation Details
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v-core-functionality-key-modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      V. Core Functionality &amp; Key Modules
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-data-schemas-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      VI. Data Schemas &amp; Formats
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vii-operational-aspects" class="md-nav__link">
+    <span class="md-ellipsis">
+      VII. Operational Aspects
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#viii-documentation-quality-availability" class="md-nav__link">
+    <span class="md-ellipsis">
+      VIII. Documentation Quality &amp; Availability
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ix-observable-data-assets-pre-trained-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      IX. Observable Data Assets &amp; Pre-trained Models
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#x-areas-requiring-further-investigation-observed-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      X. Areas Requiring Further Investigation / Observed Limitations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#xi-analysts-concluding-remarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      XI. Analyst’s Concluding Remarks
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RNA_PREDICT/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rna Predict
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Simplest_ARC_AGI/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Simplest Arc Agi
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../external_systems_analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    External Systems Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    2 Requirements And Specifications
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            2 Requirements And Specifications
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../2_requirements_and_specifications/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../2_requirements_and_specifications/flashcard_system_spec/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Flashcard System Spec
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../2_requirements_and_specifications/functional_requirements/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Functional Requirements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../2_requirements_and_specifications/non_functional_requirements/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Non Functional Requirements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../2_requirements_and_specifications/task_master_integration_spec/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Task Master Integration Spec
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_6" id="__nav_5_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Data Schemas
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_6">
+            <span class="md-nav__icon md-icon"></span>
+            Data Schemas
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../2_requirements_and_specifications/data_schemas/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../2_requirements_and_specifications/data_schemas/strength_data_schemas/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Strength Data Schemas
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_7" id="__nav_5_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Formal System
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_7">
+            <span class="md-nav__icon md-icon"></span>
+            Formal System
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../2_requirements_and_specifications/formal_system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../2_requirements_and_specifications/formal_system/lean_guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Lean Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../2_requirements_and_specifications/formal_system/lean_tools/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Lean Tools
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../2_requirements_and_specifications/formal_system/math_stack/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Math Stack
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    3 Design And Architecture
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            3 Design And Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/architecture_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Architecture Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/roadmap_vSigma/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Roadmap Vsigma
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Integrations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_4">
+            <span class="md-nav__icon md-icon"></span>
+            Integrations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/integrations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_5" id="__nav_6_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Knowledge System
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_5">
+            <span class="md-nav__icon md-icon"></span>
+            Knowledge System
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/knowledge_system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/knowledge_system/flashcard_anki_addon_design/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Flashcard Anki Addon Design
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/knowledge_system/flashcard_self_assessment_design/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Flashcard Self Assessment Design
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/knowledge_system/knowledge_acquistion_analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Knowledge Acquistion Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/knowledge_system/knowledge_creation_and_validation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Knowledge Creation And Validation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/knowledge_system/knowledge_measurement_theory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Knowledge Measurement Theory
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/knowledge_system/literature_system_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Literature System Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/knowledge_system/user_experience_knowledge_system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Experience Knowledge System
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_5_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_5_9" id="__nav_6_5_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    References
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_5_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_5_9">
+            <span class="md-nav__icon md-icon"></span>
+            References
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/knowledge_system/references/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/knowledge_system/references/knowledge_creation_and_validation_supporting_report/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Knowledge Creation And Validation Supporting Report
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_6" id="__nav_6_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Scheduling System
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_6">
+            <span class="md-nav__icon md-icon"></span>
+            Scheduling System
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/scheduling_system/FocusPredictor_TechSpec_v1.1/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Focuspredictor Techspec V1.1
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/scheduling_system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../3_design_and_architecture/scheduling_system/scheduling_oversized_tasks_strategy_v1.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scheduling Oversized Tasks Strategy V1.0
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    4 Analysis Results And Audits
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            4 Analysis Results And Audits
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../4_analysis_results_and_audits/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../4_analysis_results_and_audits/analysis_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Analysis Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../4_analysis_results_and_audits/running_analysis_template/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Running Analysis Template
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../4_analysis_results_and_audits/week21_rpe10_benchmark_analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Week21 Rpe10 Benchmark Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_5" id="__nav_7_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Repository Audits
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_5">
+            <span class="md-nav__icon md-icon"></span>
+            Repository Audits
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../4_analysis_results_and_audits/repository_audits/architectural_review_and_task_consolidation_2025-05-29/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Architectural Review And Task Consolidation 2025-05-29
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../4_analysis_results_and_audits/repository_audits/system_readiness_audit_2025-04-18/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    System Readiness Audit 2025-04-18
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_6" id="__nav_7_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Run Reports
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_6">
+            <span class="md-nav__icon md-icon"></span>
+            Run Reports
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../4_analysis_results_and_audits/run_reports/2025_04_27_run_report/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2025 04 27 Run Report
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../4_analysis_results_and_audits/run_reports/2025_05_01_run_report/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2025 05 01 Run Report
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../4_analysis_results_and_audits/run_reports/2025_05_11_run_report/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2025 05 11 Run Report
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../4_analysis_results_and_audits/run_reports/2025_05_17_run_report/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2025 05 17 Run Report
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../4_analysis_results_and_audits/run_reports/2025_05_24_run_report/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2025 05 24 Run Report
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    5 Domain Knowledge And Curricula
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            5 Domain Knowledge And Curricula
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_2" id="__nav_8_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Biology
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_2">
+            <span class="md-nav__icon md-icon"></span>
+            Biology
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/biology/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_2_2" id="__nav_8_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Mathematical Bio
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Mathematical Bio
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/chapter_1_single_species/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Chapter 1 Single Species
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/section_1_test/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Section 1 Test
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_2_3" id="__nav_8_2_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Rna Modeling
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Rna Modeling
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/REPORTS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reports
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar1/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Skill Map Csm Pillar1
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar2/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Skill Map Csm Pillar2
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Skill Map Csm Pillar3
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar4/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Skill Map Csm Pillar4
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rna-Modeling P1-Foundations Week1-7Day
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/rna_tasks_hpe_metadata_v1.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rna Tasks Hpe Metadata V1.0
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_3" id="__nav_8_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Running Methodology
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_3">
+            <span class="md-nav__icon md-icon"></span>
+            Running Methodology
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/running_methodology/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_3_2" id="__nav_8_3_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    References
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            References
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/running_methodology/references/long_distance_running_principles/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Long Distance Running Principles
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/running_methodology/references/pace_and_hr_zones/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pace And Hr Zones
+    
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--v1 · 2025-05-01"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/running_methodology/references/running_performance_prediction_concepts/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Running Performance Prediction Concepts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_3_3" id="__nav_8_3_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Training Blocks
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Training Blocks
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/running_methodology/training_blocks/base_ox_block/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Base Ox Block
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/running_methodology/training_blocks/synergistic_performance_amplification_block_w22_w25_v1/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Synergistic Performance Amplification Block W22 W25 V1
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Software Engineering Practices
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_4">
+            <span class="md-nav__icon md-icon"></span>
+            Software Engineering Practices
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/software_engineering_practices/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Strength Training Methodology
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_5">
+            <span class="md-nav__icon md-icon"></span>
+            Strength Training Methodology
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_5_1" id="__nav_8_5_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Training Blocks
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_5_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            Training Blocks
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../5_domain_knowledge_and_curricula/strength_training_methodology/training_blocks/strength_block_prototype_v2025-Q2/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Strength Block Prototype V2025-Q2
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    6 Personal Schedules And Protocols
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            6 Personal Schedules And Protocols
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../6_personal_schedules_and_protocols/My_Optimized_Flex_Learning_System_v2.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    My Optimized Flex Learning System V2.0
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../6_personal_schedules_and_protocols/My_Optimized_Performance_Schedule_v1.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    My Optimized Performance Schedule V1.0
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../6_personal_schedules_and_protocols/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    7 User Guides And Sops
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            7 User Guides And Sops
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../7_user_guides_and_sops/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../7_user_guides_and_sops/comprehensive_debugging_workflow/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Comprehensive Debugging Workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../7_user_guides_and_sops/habitdash_integration_guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Habitdash Integration Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../7_user_guides_and_sops/literature_system_howto/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Literature System Howto
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../7_user_guides_and_sops/operational_playbook/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Operational Playbook
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Meta
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            Meta
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../meta/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../meta/repository_progress_audit_2025-05-31/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Repository Progress Audit 2025-05-31
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#i-analysis-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      I. Analysis Metadata
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ii-executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      II. Executive Summary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iii-repository-overview-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      III. Repository Overview &amp; Purpose
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iv-technical-architecture-implementation-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      IV. Technical Architecture &amp; Implementation Details
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v-core-functionality-key-modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      V. Core Functionality &amp; Key Modules
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-data-schemas-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      VI. Data Schemas &amp; Formats
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vii-operational-aspects" class="md-nav__link">
+    <span class="md-ellipsis">
+      VII. Operational Aspects
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#viii-documentation-quality-availability" class="md-nav__link">
+    <span class="md-ellipsis">
+      VIII. Documentation Quality &amp; Availability
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ix-observable-data-assets-pre-trained-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      IX. Observable Data Assets &amp; Pre-trained Models
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#x-areas-requiring-further-investigation-observed-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      X. Areas Requiring Further Investigation / Observed Limitations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#xi-analysts-concluding-remarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      XI. Analyst’s Concluding Remarks
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<p>Great. I’ll begin a detailed technical analysis of the <code>ImmortalDemonGod/Pytest-Error-Fixing-Framework</code> repository. This will include evaluating its structure, purpose, technologies used, code architecture, assets, and documentation quality.</p>
+<p>I’ll return with a comprehensive Markdown document that strictly follows the structure and guidelines you've specified.</p>
+<h1 id="pytest-error-fixing-framework-technical-analysis-documentation-2025-05-29">Pytest-Error-Fixing-Framework: Technical Analysis &amp; Documentation (2025-05-29)</h1>
+<h2 id="i-analysis-metadata">I. Analysis Metadata</h2>
+<p><strong>A. Repository Name:</strong> Pytest-Error-Fixing-Framework
+<strong>B. Repository URL/Path:</strong> <a href="https://github.com/ImmortalDemonGod/Pytest-Error-Fixing-Framework">https://github.com/ImmortalDemonGod/Pytest-Error-Fixing-Framework</a>
+<strong>C. Analyst:</strong> ChatGPT
+<strong>D. Date of Analysis:</strong> 2025-05-29
+<strong>E. Primary Branch Analyzed:</strong> <code>main</code>
+<strong>F. Last Commit SHA Analyzed:</strong> bf40966d3c4330fe1bc3f06a6ce4e1d4f534794c
+<strong>G. Estimated Time Spent on Analysis:</strong> \~4 hours</p>
+<h2 id="ii-executive-summary">II. Executive Summary</h2>
+<p>Pytest-Error-Fixing-Framework is an AI-driven developer tool designed to automatically identify and fix failing <strong>Pytest</strong> tests in Python projects. It integrates <strong>OpenAI GPT</strong> model suggestions with intelligent test failure analysis and Git version control to iteratively correct code until tests pass. The system orchestrates test execution, error parsing, code modifications, and re-testing in a loop, and can operate in a fully automated mode or interactively with user confirmation on each change. Implemented in Python (packaged as <code>pytest_fixer</code> version 0.1.0), the project is in an early development stage but already features continuous integration, documentation site generation, and a structured design emphasizing maintainability.</p>
+<h2 id="iii-repository-overview-purpose">III. Repository Overview &amp; Purpose</h2>
+<p><strong>Purpose &amp; Audience:</strong> The repository’s stated goal is to provide an <strong>AI-powered framework</strong> that helps developers automatically resolve failing tests. According to its documentation, <em>“pytest-fixer is an AI-powered tool designed to automatically identify and fix failing <code>pytest</code> tests in Python projects”</em>. It is intended for Python developers (particularly those using Pytest) who want to automate the debugging and fixing of test failures, possibly in the context of advanced software engineering challenges where automated bug-fixing can save time. The tool leverages GPT-based code generation to suggest fixes for failing tests, applies those changes to the codebase, and then reruns tests to verify the fixes. This is especially relevant in scenarios like continuous integration pipelines or competitive benchmarks for automated code repair.</p>
+<p><strong>Development Activity:</strong> The project appears to be under active development in 2023–2025. It includes GitHub Actions workflows for CI and documentation deployment, indicating regular updates to the main branch. The package version is 0.1.0 (pre-release), suggesting it’s an initial iteration. Commits and internal planning documents (e.g. TDD blueprints, design drafts) show that the sole contributor (the repository owner) is iteratively building out features and refining the design. There is an emphasis on testing and documentation in the workflow (e.g. a docstring coverage check badge is present) but as of the latest commit, there isn’t evidence of multiple external contributors or a broad community yet. The issue tracker also appears relatively quiet, implying most development is driven by the author’s roadmap rather than external bug reports or PRs (no open issues were found during analysis).</p>
+<p><strong>Project Status &amp; Licensing:</strong> This framework is currently <strong>experimental/alpha</strong> in status – many components are present with detailed plans, but some are not fully implemented or tested (for example, certain Git operations are stubbed as placeholders). The documentation and commit history suggest the author is aligning the implementation with a clean architecture approach and test-driven development principles, but a full stable release is not yet reached. Notably, <strong>no explicit license file</strong> was found in the repository, which means the default is “all rights reserved” – this could limit adoption or contribution until a license is added. There were also no dedicated contribution guidelines or code of conduct files in the repo, which is common for a personal project at this stage.</p>
+<h2 id="iv-technical-architecture-implementation-details">IV. Technical Architecture &amp; Implementation Details</h2>
+<p><strong>Technology Stack:</strong> Pytest-Error-Fixing-Framework is implemented entirely in <strong>Python</strong>. It targets modern Python versions (the docs list Python 3.8+ as required, and development seems to use Python 3.11+, per environment files). The project depends on several key libraries and services:</p>
+<ul>
+<li><strong>Pytest</strong> for driving test discovery and execution, and capturing test results.</li>
+<li><strong>OpenAI API</strong> (via the <code>openai</code> Python package) for generating code fixes using GPT models.</li>
+<li><strong>Git</strong> integration through <a href="https://pypi.org/project/GitPython/">GitPython</a> (imported as <code>git</code> in the code) for repository status and branch operations.</li>
+<li><strong>TinyDB</strong> for lightweight JSON database storage of session data.</li>
+<li><strong>Click</strong> (a CLI framework) for implementing the command-line interface. (The <code>prompt-toolkit</code> and <code>rich</code> libraries are also present in the lockfile, likely to support interactive console UI and formatting.)</li>
+<li><strong>Snoop</strong> for debugging (providing trace logs), and standard libraries like <code>logging</code>, <code>subprocess</code>, <code>threading</code> for various utilities.</li>
+</ul>
+<p><strong>Code Organization:</strong> The repository follows a structured, domain-driven layout. The Python package is under <code>src/branch_fixer</code> (the name “branch_fixer” is used internally, while distribution is as <code>pytest_fixer</code>). Major sub-packages/modules include:</p>
+<ul>
+<li><strong>Core Domain Models (<code>branch_fixer/core</code>)</strong> – Defines fundamental data structures. For example, the <code>models.py</code> here declares <code>ErrorDetails</code>, <code>FixAttempt</code>, and <code>TestError</code> data classes capturing a test failure and attempts to fix it. These are the “domain” layer representing the problem (failing tests and fixes).</li>
+<li>
+<p><strong>Services Layer (<code>branch_fixer/services</code>)</strong> – Contains components for specific functional areas:</p>
+</li>
+<li>
+<p><em>Pytest Service (<code>services/pytest</code>)</em> – Manages test running and result collection. It includes a <code>PytestRunner</code> class that can programmatically run tests and aggregate results into structured objects, as well as helper classes for parsing errors (an <code>ErrorProcessor</code>) and custom exceptions.</p>
+</li>
+<li><em>AI Service (<code>services/ai</code>)</em> – Manages AI interactions. The <code>AIManager</code> class encapsulates calls to OpenAI’s API, including constructing prompts and handling the temperature-based retry logic (e.g. starting at temp 0.4 and increasing in 0.1 increments for up to 3 tries). This allows the system to attempt multiple fix suggestions if the first attempt doesn’t pass the tests.</li>
+<li><em>Code Change Service (<code>services/code</code>)</em> – Applies and reverts code changes. A <code>ChangeApplier</code> (also referred to as <strong>ChangeHandler</strong> in docs) is responsible for taking the AI’s proposed code edits and patching the target source files, then verifying if tests now pass. It also handles rollback of changes if a fix attempt fails, ensuring the codebase is restored before the next attempt.</li>
+<li><em>Git Service (<code>services/git</code>)</em> – Handles version control operations. The <code>GitRepository</code> class wraps GitPython’s <code>Repo</code> to check repository status (current branch, clean/dirty state) and provides methods for branch and commit operations. On top of this, <code>BranchManager</code> and <code>PRManager</code> classes implement higher-level workflows like creating a new fix branch, cleaning it up, and (in the future) creating pull requests for fixes. (Some of these Git/PR features are scaffolding; e.g., methods for actual pushing to remote or PR creation are not fully implemented yet.)</li>
+<li><strong>Orchestration Layer (<code>branch_fixer/orchestration</code>)</strong> – Coordinates the overall fix process. A <code>FixService</code> class is the central orchestrator that brings together all the above components. When invoked, it will: initialize an AIManager, TestRunner, ChangeApplier, and GitRepository (plus optional StateManager and SessionStore for state tracking); use a <strong>workspace validator</strong> to ensure the environment is correct (e.g., confirm we’re in a Git repo and dependencies are installed); run tests to collect failures; for each failing test, generate and apply fixes in a loop up to a max retry count; and log the outcomes. There is also a <code>FixOrchestrator</code>/<code>FixSession</code> construct that represents a higher-level session possibly involving multiple errors – this manages session state (with states like INITIALIZING, RUNNING, PAUSED, COMPLETED, etc.) and keeps track of which errors have been fixed or are in progress. This layering allows separation of concerns: <code>FixService</code> handles one error’s fix logic, while <code>FixOrchestrator</code> could manage sequences of multiple errors and maintain an overall session context.</li>
+<li><strong>Storage &amp; State (<code>branch_fixer/storage</code>)</strong> – Provides persistence and state validation. A <code>SessionStore</code> class (backed by TinyDB) saves and loads session data (like the list of errors, attempts, and results) to a JSON file so that a long fix session can be resumed or analyzed later. The <code>StateManager</code> class defines allowed state transitions for a fix session and enforces that the orchestrator moves through states (running, paused, completed, etc.) in a valid way. It can record transitions and prevent invalid state changes, raising errors if, say, something tries to move from COMPLETED back to RUNNING without a proper reset.</li>
+<li><strong>Utilities &amp; Config (<code>branch_fixer/utils</code> &amp; <code>branch_fixer/config</code>)</strong> – Miscellaneous support code. For example, <code>utils/cli.py</code> sets up the command-line interface and ties together the components based on user inputs. There’s also a <code>workspace.py</code> with the <code>WorkspaceValidator</code> used to check that the working directory is a valid Git repo and that required dependencies (pytest, click, git, etc.) are installed before running. The <code>config/logging_config.py</code> configures application logging (sending logs to console and a <code>logs/app.log</code> file), and <code>config/settings.py</code> (if present) might handle global settings or environment loading (the docs suggest environment variable usage for settings).</li>
+</ul>
+<p><strong>Dependency Management &amp; Build:</strong> The repository uses a standard Python packaging approach with a <code>setup.py</code> (naming the package <code>pytest_fixer</code> version 0.1.0). The source is under <code>src/</code> which is a modern Python packaging convention. There is mention of a <code>requirements.txt</code> in documentation for installation, and a <code>uv.lock</code> file is present, which appears to be a lockfile possibly from <strong>Pipenv</strong> or a similar tool, enumerating exact dependency versions (including development tools). Continuous integration is set up to simply install the package (<code>pip install .</code>) and run <code>pytest</code>. As of the latest commit, the package’s <code>install_requires</code> in setup.py only lists <code>mkdocs</code> (likely to support documentation), so the environment for running the tool is managed outside of setup.py (through the lockfile or requirements). This means to use the tool, a developer should ensure dependencies like openai, pytest, gitpython, tinydb, etc., are installed (the WorkspaceValidator will check for some of these at runtime). The project does not currently produce distribution artifacts on PyPI; one would install it by cloning the repo and using pip.</p>
+<p><strong>Testing &amp; QA:</strong> Ironically for a tool that fixes tests, the repository’s own test suite is minimal or absent. The initial project outline emphasizes writing tests first (TDD approach), and we see some planning for tests in the docs, but no substantial <code>tests/</code> directory in the actual codebase. The CI pipeline runs <code>pytest</code> against the repository, which currently likely just runs zero or trivial tests (passing by default). It seems development effort so far has focused on building functionality rather than writing self-tests for the framework. However, a separate “SWE Benchmark” is referenced in docs (suggesting the author plans to use this tool in a benchmark context), and a <code>scripts/runner_debug.py</code> exists for manual testing/debugging. In future, we expect more comprehensive unit tests of the framework’s components will be added, but as of now, quality assurance relies on manual testing and the layered design to isolate issues.</p>
+<h2 id="v-core-functionality-key-modules">V. Core Functionality &amp; Key Modules</h2>
+<p>The Pytest-Error-Fixing-Framework provides several <strong>major capabilities</strong> through well-defined modules, each handling a part of the automated fix workflow:</p>
+<ul>
+<li>
+<p><strong>Pytest Runner:</strong> Discovers and executes tests, capturing results. The <code>PytestRunner</code> class programmatically runs tests (all tests or a specific test file/function) and collects the outcomes in a structured way. It captures standard output, error output, and each test’s pass/fail status into <code>TestResult</code> objects, and aggregates them into a <code>SessionResult</code> for the entire run. This component essentially automates running <code>pytest</code> without human intervention, and provides hooks (via a custom Pytest plugin) to listen for test report events and populate the results data structure.</p>
+</li>
+<li>
+<p><strong>Error Processor:</strong> After or during test execution, the ErrorProcessor parses the Pytest output and test reports to identify failing tests and extract relevant information about each failure. This includes the exception type, message, stack trace, and any other context needed to reason about the failure. The output of this module is used to construct <code>TestError</code> objects (the domain model for a failing test). Essentially, it translates Pytest’s raw output into a structured error description that the rest of the system can work with. (In the current implementation, some of this parsing might be handled directly in the <code>PytestRunner</code> and domain model creation, rather than a distinct class, but the concept is defined in docs.)</p>
+</li>
+<li>
+<p><strong>Dependency Mapper:</strong> This component (planned as <code>DependencyMapper</code>) analyzes the project code to understand relationships between tests and source files. For example, if a test fails, it determines which modules or functions the test touches (via import analysis or static code inspection). This information can be very useful for prompt generation – by knowing which files or functions are relevant to a failing test, the AI can be given focused context to suggest fixes. The DependencyMapper is intended to handle both relative and absolute imports to build a map of dependencies. (In the repository, we didn’t find a fully implemented class for this yet, suggesting it may be a near-future addition. It’s conceptually mentioned in docs as an important part of providing context to the AI.)</p>
+</li>
+<li>
+<p><strong>AI Manager:</strong> The <code>AIManager</code> module manages interactions with the OpenAI API and the logic for proposing fixes using GPT models. Its responsibilities include constructing the prompt with all necessary context (the failing test details, relevant code snippets from the project, perhaps the content of the failing function, error message, etc.), sending the prompt to the OpenAI model, and receiving the code suggestion. Importantly, it implements a <strong>retry strategy with temperature adjustments</strong>: for each failing test, the AIManager can attempt multiple solutions – starting with a lower “temperature” (more deterministic output) and increasing it for subsequent tries to get more creative fixes if the first attempt didn’t work. The defaults (initial_temperature=0.4, increment=0.1, max_retries=3) mean it will try up to three different suggestions per failure. The AIManager also parses the AI’s response into a concrete set of changes (e.g., a diff or a code snippet to be applied). It likely uses utilities (like the <code>partialjson</code> or custom parsing) to extract structured info if the AI response is formatted in JSON. This component encapsulates all OpenAI-specific logic so that the rest of the system can remain decoupled from the API details.</p>
+</li>
+<li>
+<p><strong>Change Handler (ChangeApplier):</strong> This module is responsible for applying the code changes suggested by the AI to the actual codebase, and for undoing them if necessary. When the AI suggests a fix, the ChangeApplier will take that suggestion (which could be a patch, or instructions like “modify function X in file Y”) and perform the edits on the code (likely by editing files on disk or using an in-memory patch and writing out). After applying a change, it triggers the test run again (via PytestRunner) to see if the fix resolved the issue. If the tests still fail (or if the change caused new problems, like syntax errors), the ChangeApplier will revert the code to the previous state (it keeps a backup of the original files before applying changes). This ensures each attempt starts from a clean baseline if it fails. The ChangeApplier also logs the changes made, and in interactive mode, it can present a diff of the changes to the user (the CLI has a <code>diff</code> command to show Git differences of the fix). Internally, this likely uses Git operations or simple file copy to manage rollbacks.</p>
+</li>
+<li>
+<p><strong>State &amp; Session Management:</strong> To manage complex fix sessions, the framework uses a <code>StateManager</code> and session tracking. The <strong>StateManager</strong> ensures that the fix process follows a valid sequence (preventing invalid transitions). For example, a session starts at INITIALIZING, moves to RUNNING when fixes are in progress, could go to PAUSED if user intervention stops it, and eventually to COMPLETED or FAILED. It defines which state changes are allowed (e.g., RUNNING -&gt; COMPLETED is fine, but COMPLETED -&gt; RUNNING would be invalid without restarting). If an invalid transition is attempted, it throws a <code>StateTransitionError</code>. This helps maintain consistency, especially if using checkpoint/restoration features. The <strong>SessionStore</strong> aspect persists the session data – it saves the list of errors, which ones have been fixed, how many attempts were made, etc., to a JSON file (using TinyDB) so that if the tool or system crashes, the session can potentially be resumed. It’s essentially a lightweight database of runs. Each fix session (which may involve multiple failing tests and multiple attempts each) gets a unique ID and record. This persistence also aids in providing a history or generating reports of what fixes were applied.</p>
+</li>
+<li>
+<p><strong>CLI Interface:</strong> The user-facing entry point is the <strong>command-line interface</strong> implemented in <code>branch_fixer.utils.cli</code> and <code>run_cli.py</code>. When you install the package, you can run the tool via <code>pytest-fixer</code> command (or <code>python -m branch_fixer.main</code>). The CLI provides a <code>fix</code> command with various options. Running this command orchestrates everything: it will set up logging, initialize all the components via <code>CLI.setup_components</code> (AI manager, test runner, etc.), and then either execute the full auto-fix sequence or drop into an interactive loop depending on flags. In <strong>fully automated mode</strong>, the tool will attempt fixes for all failures and exit when done (or when max retries are exhausted). In <strong>interactive modes</strong>, the tool pauses to ask the user for input at key decision points. The documentation describes modes like <code>ON_FAILURE</code> (only prompt the user when an attempt fails) or <code>ALWAYS</code> (step-by-step confirmation) or <code>MANUAL</code> (where the user can manually apply a fix). In practice, the CLI implemented a simpler flag <code>--non-interactive</code> to run without prompts (i.e., automated), otherwise by default it might prompt on each failure. While a fix session is running interactively, the user can issue commands in the CLI: for example, <code>show</code> to display the error details and the diff of the proposed change, <code>edit</code> to open the proposed fix in an editor, <code>apply</code> to accept the change and run tests, <code>retry</code> to ask the AI for a new suggestion with higher temperature, <code>prompt</code> to manually adjust the AI prompt, <code>diff</code> to show the current difference between original and modified code, <code>history</code> to see past attempts, or <code>quit</code> to abort the session. These commands give the developer fine-grained control over the process, which is important because AI-proposed fixes might need oversight. The CLI also handles cleanup on exit (restoring the main branch, deleting any temporary fix branches) to leave the repository in a clean state.</p>
+</li>
+</ul>
+<p>Overall, the core functionality enables a cycle of: <strong>detect failing test -&gt; formulate fix (AI) -&gt; apply fix -&gt; re-run tests -&gt; repeat if needed</strong>. If a fix succeeds (tests pass), the tool can mark that test as fixed and move on to the next failing test. If all tests pass, it concludes the session (optionally leaving the code changes on a separate Git branch for review). If it cannot fix a particular test within the allowed attempts, it will either stop (in automated mode) or ask for user intervention.</p>
+<h2 id="vi-data-schemas-formats">VI. Data Schemas &amp; Formats</h2>
+<p><strong>Internal Data Models:</strong> The framework defines clear schemas for the data it handles, primarily through Python data classes in the core model:</p>
+<ul>
+<li>
+<p>A <strong>TestError</strong> object represents a failing test case. It includes the path to the test file and the test function name, an <code>ErrorDetails</code> object capturing the failure information (type of error/exception, error message, and an optional stack trace), a unique identifier (UUID) for tracking, a status field (e.g. “unfixed” or “fixed”), and a list of associated fix attempts. For example, when a test fails, the system creates a TestError with status “unfixed” and no attempts; each time an AI fix is tried, a <strong>FixAttempt</strong> entry is added to that list. The <strong>FixAttempt</strong> data class records the attempt ID (UUID), the AI <strong>temperature</strong> used for that try, and the outcome status (e.g. “success” or “failed”). This structure allows the tool to keep a history of attempts for each error, which could be saved or reported.</p>
+</li>
+<li>
+<p><strong>TestResult</strong> and <strong>SessionResult</strong> represent the testing outcomes. Each TestResult (one per test case execution) contains fields like nodeid (Pytest’s full test identifier), the test file and function, timestamps and duration, the outcome of each phase (setup/call/teardown), captured stdout/stderr output, and flags for whether it passed, failed, was skipped, etc.. The <strong>SessionResult</strong> aggregates overall run info: start and end time, total duration, Pytest exit code, counts of tests passed/failed/skipped, number of errors (like collection errors), and it holds a dictionary of all TestResult objects by test nodeid. It also can include any warnings and the raw output of the test session. This standardized representation of test outcomes is crucial for the ErrorProcessor to decide what’s broken and for reporting progress (e.g., how many tests fixed so far).</p>
+</li>
+<li>
+<p>A <strong>FixSession</strong> object (defined in orchestration) tracks a whole fixing session across potentially multiple tests. It contains lists of TestError objects (errors to fix, and which have been fixed), a pointer to the current error being worked on, counters like how many errors and retries so far, the git branch name used for fixes, and metadata like total tests/passed/failed at session start. This is essentially a snapshot of the state of the overall operation, which can be serialized. The FixSession’s state field (enum of INITIALIZING/RUNNING/etc.) is the piece managed by StateManager for validity.</p>
+</li>
+</ul>
+<p><strong>Persistence Format:</strong> When the session data is saved via <code>SessionStore</code>, it is stored in a TinyDB database (which is a JSON file on disk, named <code>sessions.json</code> in a designated folder). Each session is saved as a document in the “sessions” table. The stored schema is slightly condensed for practicality: for example, instead of storing full TestError objects, the session record might just store their IDs and statuses. Looking at the code, the session data includes fields like session <code>id</code>, <code>state</code>, <code>start_time</code> (ISO timestamp), counts of errors, retry count, the fix branch name, list of modified file paths, IDs of completed errors, the current error’s ID if any, and some environment info. On saving, it checks if an entry with that session ID exists – if yes, updates it; if not, inserts a new one. This JSON format makes it easy to inspect or restore sessions, though currently there isn’t an exposed user command to resume a session (one could imagine a future feature to continue a session by ID).</p>
+<p><strong>Configuration Input:</strong> Configuration for the tool (outside of code) is minimal and primarily through environment variables and CLI arguments. The documentation suggests creating a <strong><code>.env</code> file</strong> with settings like: <code>OPENAI_API_KEY</code> (required for the AI to work), <code>MODEL_NAME</code> (which model to use, e.g. a placeholder "gpt-4o-mini" is shown), <code>INITIAL_TEMPERATURE</code>, <code>TEMPERATURE_INCREMENT</code>, and <code>MAX_RETRIES</code>. These correspond to the same parameters that can be passed via command-line options. The CLI’s <code>--api-key</code> option can load from the env var, and there are flags for <code>--max-retries</code>, <code>--initial-temp</code>, <code>--temp-increment</code> etc.. No other config files (like YAML/JSON configs) are used; the preferences are either in <code>.env</code> or just default-coded. Logging configuration is hardcoded to log to <code>logs/app.log</code> in the current working directory, and there isn’t an obvious way to configure this path short of editing the code.</p>
+<p><strong>Output &amp; Formats:</strong> The primary output of the tool is the modified source code when a fix is successful. Those changes are applied directly to the user’s Python files. If the <code>--fast-run</code> option is used (fix only first failing test) or after finishing all fixes, the changes will be on a Git branch separate from <code>main</code>. The user is expected to review and merge these changes manually (which aligns with best practices noted in docs: use dedicated fix branches and review before merging). For the user’s clarity, the tool provides textual output: it prints failing tests, shows diffs of changes when asked, and reports success/failure for each attempt. The interactive commands like <code>show</code> and <code>diff</code> format the code differences in unified diff format (via Git diff). There is no custom binary or proprietary format in any part of the workflow; everything is text-based (Python source code, console logs, JSON for internal storage).</p>
+<p>One more data aspect: the <strong>Git branch naming</strong> for fixes. The branch manager typically will generate a name for each fix branch (possibly using the test name or an increment). The code imposes a pattern and forbids certain names (“master”, “main”, “develop” can’t be used for new branch names). While the exact naming scheme isn’t explicitly documented, it likely uses a prefix like “fix/” plus an error ID or test name. This is an implementation detail, but important in that each fix attempt operates on its own branch which encapsulates its changes.</p>
+<p>In summary, data flows through the system in well-defined Python structures, with JSON used for persistence. There aren’t external data files like datasets or models included – the “data” this framework concerns itself with is the code under test, the test results, and the textual changes suggested by the AI. All of these are handled as plain text or Python objects and logged for transparency.</p>
+<h2 id="vii-operational-aspects">VII. Operational Aspects</h2>
+<p><strong>Setup &amp; Installation:</strong> To use the Pytest-Error-Fixing-Framework, a developer needs a compatible environment and the project code. The documentation specifies a few prerequisites: <strong>Python 3.8+</strong>, <strong>Git</strong>, <strong>Pytest</strong>, and an <strong>OpenAI API key</strong> are required. The project itself is not on PyPI, so installation is from source. The typical steps (as per README/docs) are: clone the repository from GitHub, then install the Python dependencies (e.g. <code>pip install -r requirements.txt</code> or <code>pip install .</code> after cloning). The repository likely includes a <code>requirements.txt</code> file generated with all needed libs (though we mostly relied on the lockfile to identify them during analysis). After installation, one should ensure the <code>OPENAI_API_KEY</code> is set (usually by creating a <code>.env</code> file in the project directory or exporting the env var). No other build steps are needed – it’s a pure Python project.</p>
+<p><strong>Invocation &amp; Usage:</strong> The framework is used via its <strong>command-line interface</strong>. After installation, a command <code>pytest-fixer</code> (or equivalently running <code>python -m pytest_fixer.main</code>) becomes available. The primary command is: <code>pytest-fixer fix [options]</code>. Typically, you navigate to the root of the project you want to fix (the project containing failing tests), and run this command. By default, it will attempt to run all tests in the current directory (it automatically discovers tests matching the Pytest conventions). Key command-line options include:</p>
+<ul>
+<li><code>--api-key</code> (or environment variable) to specify your OpenAI API key, if not already set.</li>
+<li><code>--max-retries</code>, <code>--initial-temp</code>, <code>--temp-increment</code> to configure the AI retry behavior (e.g., try up to 5 attempts instead of 3, or use a different starting temperature).</li>
+<li><code>--non-interactive</code> to run fully automatic (no user prompts). Without this, the tool runs in a semi-automatic mode where it might pause on each failed attempt and ask if the user wants to continue or inspect.</li>
+<li><code>--fast-run</code> to only fix the first failing test and then exit (useful for quick checks or debugging the fixer on one problem).</li>
+<li><code>--test-path</code> and <code>--test-function</code> to target a specific test file or even a single test function for fixing, rather than the whole suite.</li>
+<li><code>--cleanup-only</code> to perform cleanup of any leftover branches from past runs without attempting new fixes.</li>
+<li><code>--dev-force-success</code> (a development flag that forces the system to treat an attempt as successful without actually invoking AI, used for testing the framework logic itself).</li>
+</ul>
+<p>For example, running:</p>
+<pre><code class="language-bash">pytest-fixer fix --api-key $OPENAI_API_KEY --max-retries 3 --initial-temp 0.4 --temp-increment 0.1
+</code></pre>
+<p>in a project directory will start the tool on that project with default settings. It will create a Git branch (if not already on one) for the fixes.</p>
+<p><strong>Runtime Workflow:</strong> Once invoked, the tool prints an introduction and then proceeds to run the tests. If no tests fail, it will simply exit saying all tests passed. If there are failing tests, it will list them and begin the fix loop. During operation, if running in interactive mode, it may stop and prompt the user after each unsuccessful fix attempt with choices (for instance, “[r]etry with higher temperature, [s]kip this test, [q]uit, [m]anual fix, etc.” – the actual interface is implemented via the CLI’s interactive commands as described earlier). If running non-interactively, it will automatically loop through retries for each failing test up to the max, then move on.</p>
+<p>The <strong>Git integration</strong> is a crucial operational detail: The WorkspaceValidator will refuse to run if the current directory is not a Git repository or if the repo isn’t in a clean state. This is by design – the tool assumes it can use Git to manage changes. On start, a new branch is typically created for the fix session (e.g., <code>fix-session-&lt;ID&gt;</code>). All changes the AI makes are committed to this branch. This way, the <code>main</code> (or primary) branch of the project is left untouched until the user explicitly merges. The tool’s BranchManager checks out the base branch (defaulting to “main”) and then creates a new branch for the fix. It ensures the branch name is valid and not already taken. Throughout the fixing process, it might commit each applied fix (or maybe stash and commit later). In case of abort or completion, the CLI’s cleanup routine will attempt to delete the fix branch and check out main to restore the original state (unless the user wants to keep the branch for manual merging). The documentation notes Git-based <strong>reversion and recovery</strong> capabilities – essentially, any changes are version-controlled so you can always undo them if something goes wrong. If a fix attempt fails (makes tests worse or causes errors), the framework uses <code>git reset</code> or similar to revert to the last good state before trying the next attempt.</p>
+<p><strong>Environment &amp; Execution Context:</strong> The user must ensure the OpenAI API key is available (either via environment or as a CLI arg). Internet connectivity is required during the fix process, since it actively calls the OpenAI service to get suggestions. In terms of performance, each AI call can take a few seconds (or more, depending on the complexity of the prompt and the model used), so fixing multiple errors can be time-consuming. The tool runs all of this synchronously in the current terminal. It’s not optimized for concurrent execution (docs explicitly mention no parallel test execution is implemented). This means if you have, say, 10 failing tests, it will address them one by one in sequence.</p>
+<p><strong>Deployment/Integration:</strong> This framework is intended to be used locally by a developer rather than deployed on a server. One could integrate it into a CI pipeline in theory (for example, have it run when tests fail to auto-attempt fixes and push a branch), but given the need for an OpenAI API and caution required, it’s more likely a tool a developer runs on their machine. The presence of GitHub Actions in the repo for CI and documentation suggests that the author ensures it works in automated environments, but those Actions do not actually run the fixer on projects (they are for the framework’s own tests/docs). There is also a workflow for deploying docs to GitHub Pages, but not for publishing the package (no PyPI deployment yet).</p>
+<p><strong>Example Workflow:</strong> A typical user scenario might be: A developer writes new code and some tests fail. They run <code>pytest-fixer fix</code> in their repo. The tool finds 2 failing tests. It creates branch <code>fix-session-123</code>. For the first failing test, it calls GPT and applies a fix; the test still fails. It retries with a higher temperature, gets a new suggestion, applies it, and now the test passes. It commits that change. Then it moves to the second failing test, repeats the process. Suppose it can’t fix the second test after 3 tries; it will either prompt the user for input (interactive mode) or stop with that test unresolved (automated mode). In interactive mode, the user could choose to skip that test or attempt a manual fix. At the end, the user has branch <code>fix-session-123</code> with changes that fixed test 1 and possibly some attempts for test 2. The tool then outputs a summary (maybe “1 test fixed, 1 test still failing”) and performs cleanup: it might leave the branch in place for the user to inspect. The user can then merge the changes for test 1 into main via a pull request or merge commit. The second test remains an open issue for manual attention. The key point is that the tool accelerates the easy fixes and highlights the hard ones.</p>
+<p><strong>Error Handling &amp; Recovery:</strong> If something goes wrong during the run (for instance, the OpenAI API fails, or the process is interrupted with Ctrl+C), the system is built to handle it gracefully. The CLI sets up signal handlers to catch interrupts so it can do cleanup (delete any partially created branches, etc.). The StateManager ensures the session state doesn’t get stuck in an incorrect status. And because all changes are in Git, even if the program crashes, the user can manually reset or continue from the Git history. The documentation also describes <strong>checkpointing</strong> ideas (though it’s not clear if implemented) to recover from where it left off. The default behavior is to be cautious: never apply changes to the main branch automatically, always use a throwaway branch and require user merge, so the original code is safe.</p>
+<p>In summary, operationally the framework acts as a smart assistant that integrates with your development workflow. You run it in your repo when needed, it attempts to fix things, and uses familiar tools (git branches, commits, diffs) under the hood. After running, you still review and integrate the changes. It’s not a fire-and-forget autonomous agent in production; it’s a developer-side tool to save time during the coding/testing cycle.</p>
+<h2 id="viii-documentation-quality-availability">VIII. Documentation Quality &amp; Availability</h2>
+<p><strong>Documentation Content:</strong> The project maintains an extensive set of documentation for both users and developers. The README in the repository is brief, mainly serving as an entry point with status badges and a link to the documentation site. The bulk of the information resides in the <code>docs/</code> directory and is published via <strong>MkDocs</strong> to a GitHub Pages site (the “Documentation” badge points to ImmortalDemonGod.github.io/Pytest-Error-Fixing-Framework/). This documentation is well-organized and covers: an Overview (purpose and context of the tool), Core Architecture (explaining each component in the system in a succinct list with sub-points), Key Features (highlighting things like test discovery, AI integration with adjustable parameters, interactive modes and commands, state management, and Git integration), Setup instructions (requirements, installation, configuration), Usage examples (CLI usage and options), Error handling mechanisms, Known limitations, Best practices, and Support/troubleshooting tips.</p>
+<p>The documentation is written in a <strong>tutorial/guide style</strong> – it doesn’t just list API functions, but actually explains how and why to use the tool. For instance, the <em>User &amp; Developer Guide</em> reads like a polished document with sections for Overview, Architecture, Setup, etc., and even includes a component interaction diagram (Mermaid graph) showing data flow between TestRunner -&gt; ErrorProcessor -&gt; AIManager -&gt; ChangeHandler -&gt; StateManager. This indicates a strong emphasis on clarity and helps new users or contributors understand the system design at a high level. Additionally, the repository contains <em>design discussion docs</em>: we found markdown files like <strong>Pytest-Fixer TDD Blueprint</strong>, <strong>DDD (Domain-Driven Design) Concepts guide</strong>, <strong>Refactoring notes</strong>, and even strategy reflections for an SWE benchmark. These suggest the author documents not only the “what” of the code, but also the “why” – capturing design decisions and future plans. This level of internal documentation is quite beneficial for future maintainers or if the project grows to involve more contributors.</p>
+<p><strong>Code Documentation:</strong> The source code itself is moderately documented. There are docstrings for most classes and functions – for example, each data class has a brief description, the FixService and orchestrator methods have multi-line docstrings explaining their purpose and listing parameters/exceptions. The presence of a <strong>Docstring Coverage</strong> badge in the README (with a GitHub Actions workflow for it) confirms that the project tracks how much of the code is covered by docstrings. This is a good indicator that the author values in-code documentation and likely maintains a high docstring coverage percentage. The code also has inline comments where necessary (some marked with “# NEW:” to indicate recent changes or explain non-obvious sections). For instance, complex logic in the CLI and orchestrator might be broken down with comments for readability.</p>
+<p><strong>Documentation Quality:</strong> Overall, the documentation quality is <strong>high for a project at this stage</strong>. The language in the guides is clear and the structure is logical. The user guide is written in a polished manner (it even looks like it’s been proofread or formatted for readability, possibly with the help of tools). The guides explain concepts before diving into steps, which is helpful. There are also examples given for configuration (like showing exactly how to format the .env file and how to run the CLI). The Known Limitations section in the docs demonstrates transparency about what the tool cannot do yet.</p>
+<p>One minor gap is that the documentation might not yet include a real example of the tool in action (e.g., a sample failing test and how pytest-fixer fixes it). It’s mostly descriptive. Including a walkthrough with actual code diffs could further strengthen the docs, but that can be added in future revisions. Additionally, since the project is evolving, some parts of the docs might be slightly out of sync with the code – for example, the CLI options in the docs mention a <code>--model</code> option and <code>--manual-fix</code> which did not exactly match the implemented options at the commit we analyzed (these might be planned or renamed options). Keeping documentation updated with the code changes will be an ongoing task.</p>
+<p><strong>Doc Availability:</strong> The documentation is readily accessible via the GitHub Pages link. Users can also build it locally using MkDocs (the CI deploy workflow confirms a standard MkDocs setup, though the actual <code>mkdocs.yml</code> wasn’t seen, it’s likely present or generated). The decision to use MkDocs and provide a GitHub Pages site is a strong positive, as it lowers the barrier for developers to read the docs (no need to read raw markdown on GitHub).</p>
+<p>In summary, the project’s documentation is quite robust and professionally presented for an open-source tool in early development. It covers conceptual and practical aspects, which should instill confidence in users trying it out and help any new contributors get up to speed on the architecture. The only improvements could be more real examples and ensuring every documented feature aligns with the current implementation.</p>
+<h2 id="ix-observable-data-assets-pre-trained-models">IX. Observable Data Assets &amp; Pre-trained Models</h2>
+<p>This repository does <strong>not include any proprietary data sets or pre-trained machine learning models</strong> – it relies on external AI services. All “intelligence” comes from calls to OpenAI’s GPT models via the API. There are no model files (e.g., no <code>.pt</code> or <code>.bin</code> files for machine learning) stored in the repo. The absence is expected since the approach is to use OpenAI’s hosted models (like GPT-4 or GPT-3.5) to generate fixes on the fly.</p>
+<p>The only data-like assets in the project are:</p>
+<ul>
+<li><strong>Configuration examples</strong>: e.g., the <code>.env</code> example in the docs which shows a model name <code>gpt-4o-mini</code>. This appears to be a placeholder or shorthand for a model (possibly an alias the author uses; not an actual OpenAI model name unless it refers to a fine-tuned variant). Regardless, no actual model weights are present – this is just a string in config.</li>
+<li><strong>TinyDB JSON data</strong>: The <code>SessionStore</code> writes a <code>sessions.json</code> file during usage to record session info. This is a runtime artifact, not part of the repository source. It’s small (likely only a few KB per session at most, text data).</li>
+<li><strong>Test/Example files</strong>: The repository itself does not include a large set of test code or target code examples. It’s a framework to be used on other code. So, aside from some minimal example functions in docs (like maybe snippets in the blueprint), there’s no bundle of code or test cases included as a dataset.</li>
+</ul>
+<p>The <strong>uv.lock</strong> file lists versions of dependencies but that’s for environment reproducibility, not a data asset.</p>
+<p><strong>External API usage</strong>: The OpenAI API usage means that indirectly, a large language model (GPT) is involved, but it’s not shipped with this project. Users must have access to OpenAI’s service. The prompts and responses are generated at runtime and not stored long-term (except possibly in logs if debug is on). The developer did mention possibly logging prompts or using them for analysis, but there’s no evidence of a collected prompt-response dataset in the repo.</p>
+<p>In conclusion, there are no notable data assets in the repository itself. The focus is on code. The heavy lifting on AI is delegated to OpenAI’s models (which are external). This means users don’t have to download any huge files to use the tool, but they do need an internet connection and API access. It also means the quality of fixes depends on OpenAI’s model performance rather than something the repository provides. If OpenAI’s API changes or requires certain constraints (like rate limits), those are external factors not controlled by the repository.</p>
+<h2 id="x-areas-requiring-further-investigation-observed-limitations">X. Areas Requiring Further Investigation / Observed Limitations</h2>
+<p>Despite its promising design, the Pytest-Error-Fixing-Framework has several <strong>limitations and open questions</strong> at this stage:</p>
+<ul>
+<li>
+<p><strong>Scope Limited to Pytest/Git/GPT:</strong> The tool assumes a very specific context – the project must be using Git (with a <code>main</code> branch) and Pytest, and the fix generation works only via OpenAI’s GPT models. If any of these assumptions don’t hold (e.g., tests are run by another framework, or one is offline without API access, or the repo uses Mercurial instead of Git), the framework won’t work. In particular, the code explicitly looks for a Git repo and will error out if not found. It also uses Git for branch management and reverts, which means it doesn’t currently support non-git version control. The reliance on OpenAI is a limitation for users who cannot use that service (due to cost or policy); no alternative LLM integration is provided at this time.</p>
+</li>
+<li>
+<p><strong>Handling of Complex Failures:</strong> The ability of the framework to actually fix failures is unproven on a broad scale. The internal docs note that generic GPT-4 had only a \~1–10% success rate on similar software engineering fix challenges. This indicates that many non-trivial bugs will be too complex for an out-of-the-box GPT model to handle fully automatically. The system might end up in retry loops or give up on such cases. The “limited error pattern recognition” mentioned in docs means the AI might not generalize well if an error doesn’t match patterns it was trained on. Essentially, for hard bugs, this framework might identify the failure but still need the developer’s insight to resolve – it’s not magic. Further investigation could involve running the tool on real open-source projects to evaluate its success rate and failure modes.</p>
+</li>
+<li>
+<p><strong>No Learning from Past Attempts:</strong> Each run of the tool doesn’t make the AI smarter for next time – there’s no mechanism to incorporate feedback or past fixes into future suggestions (beyond the immediate retry attempts which escalate temperature). For example, if the AI tries something that fails, it doesn’t “learn” a new rule; it just tries a higher temperature random alternative. There is no repository of known fixes or common patterns it refers to. Over time, it could be valuable to integrate a knowledge base or allow fine-tuning on the project’s code, but that’s not present now.</p>
+</li>
+<li>
+<p><strong>Parallelism &amp; Performance:</strong> The current design fixes one failing test at a time, sequentially. There’s no parallel execution of fixes, and it doesn’t prioritize which test to fix first (it probably goes in the order Pytest reports them). On a project with many failing tests, this could be slow. Additionally, if multiple tests fail due to the same root cause, the tool might redundantly attempt separate fixes for each, rather than fixing the underlying issue once – it doesn’t have a concept of grouping failures by cause. Investigating ways to optimize this (like clustering failures, or running tests in parallel after each change to get faster feedback) would be a future improvement area.</p>
+</li>
+<li>
+<p><strong>Partial/Incomplete Feature Implementation:</strong> Some features are mentioned but not fully realized yet:</p>
+</li>
+<li>
+<p>The <strong>Git PR integration</strong>: The docs and some code refer to automating PR creation (using GitHub CLI), but the current <code>PRManager</code> is essentially a stub that just stores PR details in memory without actually interfacing with GitHub. This means that while the plan is to eventually be able to auto-create a pull request with the fixes, right now that likely doesn’t happen – a user must manually create the PR or merge.</p>
+</li>
+<li><strong>Test generation</strong>: There is a hint of a <code>test_generator</code> module in the initial project scaffold (files for Hypothesis strategies, Pynguin, etc.). This suggests the author considered adding functionality to generate new tests (possibly to increase coverage or help with TDD). However, in the current state, those files are either not implemented or not integrated (they might even have been removed or moved, as we didn’t see them in the final package structure). This part of the project is a <em>future area</em> – generating tests is a whole other complex challenge, and combining it with the fixer would be ambitious. It’s an area to watch, but for now not active.</li>
+<li>
+<p><strong>Checkpoint/Recovery</strong>: The code has a <code>RecoveryManager</code> and checkpoint classes defined (perhaps to snapshot the state of the workspace at certain points), but how to trigger recovery isn’t clearly exposed to the user. This again might be partially done (the SessionStore saves some data, but an automatic resume feature isn’t documented). Testing these recovery paths (simulate a crash mid-run and see if the tool can pick up) is something that hasn’t been shown.</p>
+</li>
+<li>
+<p><strong>Robustness and Edge Cases:</strong> Being a developer tool, it will encounter a variety of projects and failure types. Some potential edge cases to examine:</p>
+</li>
+<li>
+<p>How does it handle <strong>non-deterministic tests</strong> or flaky tests? It might think a fix succeeded if a test passes on retry by fluke.</p>
+</li>
+<li>How does it handle <strong>tests with side effects or required context</strong> (like database or network)? The AI might suggest a change that fixes the symptom but breaks something else not caught by tests.</li>
+<li>The system currently <strong>does not run tests in parallel</strong> or isolate them (no mention of using <code>pytest-xdist</code> or similar), so test interactions could cause cascades of failures that are tricky for the AI to reason about.</li>
+<li>
+<p>If the project’s tests require certain environment or dependencies, the CLI’s current implementation might not account for that (though one can pass <code>--test-path</code> to focus on a subset).</p>
+</li>
+<li>
+<p><strong>User Experience Limitations:</strong> While interactive mode is powerful, it presumes the user is comfortable making decisions in a textual interface. There is no GUI or visualization beyond console text and diffs. For complex patches, reviewing in a terminal might be cumbersome (though the <code>edit</code> command can open an editor, which is a good touch). Additionally, without a dry-run mode (aside from not applying changes to main), some users might be cautious to run a tool that modifies code. In practice, the tool will need to build trust. Its logging of all actions to <code>logs/app.log</code> is helpful for audit, but one must verify that log to ensure no unintended changes were made. As an improvement, one might want an option to output a patch file or commit diff without applying, just to see what the AI <em>would</em> do, for manual consideration. Currently it applies to a branch directly (though not your main).</p>
+</li>
+<li>
+<p><strong>Lack of Licensing for Wider Use:</strong> From an open-source project perspective, the absence of a license file is a limitation because it discourages outside contribution or use. If someone wanted to use this tool in their company or integrate it into their CI, legally they are in a gray area due to no license. This is easily addressed by the author adding a license (MIT, Apache, etc.), but until then, it remains a barrier for wider community adoption. This might not be a technical limitation, but it’s a non-code issue worth noting.</p>
+</li>
+<li>
+<p><strong>Testing &amp; Validation:</strong> As mentioned, the framework itself doesn’t have a robust test suite verifying its components. This means there could be bugs within the fixer. For example, the logic to parse pytest output or to apply a patch might have edge cases that aren’t ironed out yet. Before using on critical projects, one might want to thoroughly test the tool on a safe sample repository. It’s essentially beta software. Increasing test coverage of the framework (perhaps using simulation of failing tests) is an area for further work.</p>
+</li>
+</ul>
+<p><strong>Further Investigation:</strong> To fully evaluate and improve this framework, one should try it on real repositories with known failing tests. Observing where it succeeds or fails will be invaluable. It would also be useful to track metrics like how many attempts it usually needs, what categories of issues it can fix (e.g., simple syntax errors or small logic bugs) versus those it cannot (design flaws, larger refactor needs). The integration with AI means that as OpenAI’s models improve or if specialized models are used, the effectiveness might change. So, there is an ongoing need to keep the “AIManager” updated with best practices (like prompt engineering, handling model output quirks, etc.).</p>
+<p>In summary, while the design is solid, the current limitations revolve around <strong>scope (Pytest+OpenAI only)</strong>, <strong>feature completeness (some parts not fully implemented)</strong>, and the fundamental challenge of <strong>AI reliability</strong>. These are not trivial issues, but they are expected for a novel tool. Most can be addressed with further development and community feedback. The documentation acknowledges many of these limitations explicitly (which is good), showing that the author is aware of what needs to be done next.</p>
+<h2 id="xi-analysts-concluding-remarks">XI. Analyst’s Concluding Remarks</h2>
+<p>Pytest-Error-Fixing-Framework is an <strong>innovative fusion</strong> of automated testing and AI-driven code modification. Its architecture reflects strong software engineering principles – separating concerns into modular services and maintaining state and history for reproducibility. The thorough documentation and planning artifacts suggest a level of rigor and ambition: the author envisions a tool that not only fixes bugs but potentially writes tests, integrates with CI/CD, and adapts to complex developer workflows. In its current state, the framework’s <strong>strengths</strong> lie in its clear design and developer-focused approach (e.g., using Git branches and diffs to ensure transparency of changes, and providing interactive control to the user). It’s also riding the cutting edge of what’s possible with GPT-4 in software engineering, which is commendable.</p>
+<p>However, the project is still <strong>early-stage and experimental</strong>. Some components are skeletal, and actual success in fixing tests will depend heavily on the intelligence of the AI suggestions, which can be hit-or-miss. There is a risk of over-reliance on an AI that might not fully grasp the developer’s intent or the code’s context, meaning the tool could sometimes introduce fixes that are superficially correct but semantically wrong. The human-in-the-loop design (interactive mode) is a wise mitigation of that risk. Practically, this framework might excel at fixing simple issues (like adjusting an assertion, adding an import, small off-by-one errors) and serve as a time-saving assistant, but for more complex problems, it will likely defer to the developer.</p>
+<p>One notable characteristic is the emphasis on <strong>Domain-Driven Design</strong> and maintainability, which is somewhat unusual for a project combining AI scripts – it’s a sign the author intends this to be a long-lived, extensible system rather than a one-off script. This could make it easier for others to contribute (once licensed) or integrate new features (like plugging in a different AI model, or extending to another test framework) because the core concepts are cleanly abstracted.</p>
+<p>In conclusion, Pytest-Error-Fixing-Framework stands out as a forward-looking developer tool that leverages AI to reduce drudgery in debugging. Its comprehensive documentation and thoughtful architecture are strengths that bode well for future development. Key limitations around AI reliability and scope mean it should currently be used with caution and human oversight. If those limitations are addressed over time – through improved AI models, expanded support, and thorough testing – this framework could significantly improve developer productivity in dealing with test failures. It’s an exciting project that sits at the intersection of software engineering automation and artificial intelligence, embodying both the potential and the challenges of that intersection in 2025.</p>
+<p><strong>Sources:</strong></p>
+<ul>
+<li>Repository README and Badges</li>
+<li>Pytest-Fixer User/Dev Guide and Architecture Docs</li>
+<li>Core Data Models (<code>branch_fixer/core/models.py</code>)</li>
+<li>Pytest Runner and Result Structures</li>
+<li>FixService Orchestration (<code>fix_service.py</code>)</li>
+<li>Workspace Validator (Git enforcement)</li>
+<li>Documentation Known Limitations</li>
+<li>Developer planning notes (SWE Bench reflection)</li>
+<li>
+<h1 id="setup-and-usage-instructions">Setup and Usage Instructions</h1>
+</li>
+</ul>
+<h1 id="pytest-fixer-technical-analysis-documentation-2024-07-26">pytest-fixer: Technical Analysis &amp; Documentation (2024-07-26)</h1>
+<p><strong>I. Analysis Metadata:</strong></p>
+<ul>
+<li><strong>A. Repository Name:</strong> <code>pytest-fixer</code> (also referred to as Pytest-Error-Fixing-Framework)</li>
+<li><strong>B. Repository URL/Path:</strong> <code>/Users/tomriddle1/RNA_PREDICT</code> (local path provided for analysis)</li>
+<li><strong>C. Analyst:</strong> HypothesisGPT</li>
+<li><strong>D. Date of Analysis:</strong> 2024-07-26</li>
+<li><strong>E. Primary Branch Analyzed:</strong> <code>main</code> (assumed, not determinable from static analysis)</li>
+<li><strong>F. Last Commit SHA Analyzed:</strong> Not determinable from static analysis of local files.</li>
+<li><strong>G. Estimated Time Spent on Analysis:</strong> 5 hours</li>
+</ul>
+<p><strong>II. Executive Summary (Concise Overview):</strong></p>
+<p>The <code>pytest-fixer</code> repository contains a Python-based framework designed to automatically identify, analyze, and fix failing <code>pytest</code> tests, and also to generate new pytest test cases. Its prominent functional capabilities include parsing pytest error output, leveraging Large Language Models (LLMs) via LiteLLM for code fix generation, managing Git branches for fixes, and applying/verifying these changes. The primary programming language is Python, utilizing key libraries such as Click for the CLI, Pytest for test interaction, GitPython for version control, LiteLLM for AI model abstraction, and TinyDB for data persistence. The repository appears to be under active development, with a comprehensive documentation suite and a modular architecture, though some components (particularly in the <code>dev/</code> directory and advanced AI manager designs) might be experimental or under development.</p>
+<p><strong>III. Repository Overview &amp; Purpose:</strong></p>
+<ul>
+<li><strong>A. Stated Purpose/Goals:</strong><ul>
+<li>As per <code>README.md</code> and <code>docs/pytest-fixer-User-&amp;-Developer-Guide.md</code>, "pytest-fixer is an AI-powered tool designed to automatically identify and fix failing <code>pytest</code> tests in Python projects."</li>
+<li>The <code>docs/DDD-for-pytest-fixer-Concepts-and-Implementation-Guide.md</code> further clarifies: "<code>pytest-fixer</code>, which combines test generation and test fixing capabilities."</li>
+<li>The <code>docs/Test Generation System.md</code> details a system to "automate the generation of pytest test cases using multiple approaches...to achieve high test coverage."</li>
+</ul>
+</li>
+<li><strong>B. Intended Audience/Use Cases (if specified or clearly inferable):</strong><ul>
+<li>The primary audience appears to be Python developers using <code>pytest</code> for their testing.</li>
+<li>Use cases include:<ul>
+<li>Automated fixing of common pytest errors.</li>
+<li>Assisting developers in debugging and resolving test failures.</li>
+<li>Generating pytest test suites for existing Python code to improve coverage.</li>
+<li>Integration into CI/CD pipelines for automated test maintenance (implied by GitHub Actions workflows).</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>C. Development Status &amp; Activity Level (Objective Indicators):</strong><ul>
+<li><strong>C.1. Last Commit Date:</strong> Not determinable from static file analysis.</li>
+<li><strong>C.2. Commit Frequency/Recency:</strong> Not determinable from static file analysis. The presence of extensive documentation and a detailed architecture suggests ongoing or recent significant development.</li>
+<li><strong>C.3. Versioning:</strong> <code>setup.py</code> specifies <code>version="0.1.0"</code>. No explicit <code>CHANGELOG.md</code> is visible in the root directory. Git tags would provide more versioning history.</li>
+<li><strong>C.4. Stability Statements:</strong> No explicit statements like "alpha," "beta," or "production-ready" were found in the main <code>README.md</code> or core documentation. The <code>0.1.0</code> version suggests it's likely in an early stage of development.</li>
+<li><strong>C.5. Issue Tracker Activity (if public and accessible):</strong> Not determinable from static file analysis.</li>
+<li><strong>C.6. Number of Contributors (if easily visible from platform):</strong> Not determinable from static file analysis.</li>
+</ul>
+</li>
+<li><strong>D. Licensing &amp; Contribution:</strong><ul>
+<li><strong>D.1. License:</strong> No <code>LICENSE</code> or <code>LICENSE.md</code> file is present in the provided file map at the root level. The licensing status is therefore "Unlicensed" or "Not Specified" based on the provided files.</li>
+<li><strong>D.2. Contribution Guidelines:</strong> No <code>CONTRIBUTING.md</code> file is visible in the root directory of the provided file map.</li>
+</ul>
+</li>
+</ul>
+<p><strong>IV. Technical Architecture &amp; Implementation Details:</strong></p>
+<ul>
+<li><strong>A. Primary Programming Language(s):</strong><ul>
+<li>Python (Version 3.8+ is stated in <code>docs/pytest-fixer-User-&amp;-Developer-Guide.md</code>).</li>
+</ul>
+</li>
+<li><strong>B. Key Frameworks &amp; Libraries:</strong><ul>
+<li><strong>Pytest:</strong> Used for running tests, and its output is parsed to identify failures. The <code>PytestRunner</code> class (<code>src/branch_fixer/services/pytest/runner.py</code>) directly interacts with pytest.</li>
+<li><strong>Click:</strong> Used for creating the command-line interface (<code>src/branch_fixer/utils/run_cli.py</code>).</li>
+<li><strong>LiteLLM:</strong> Employed by the <code>AIManager</code> (<code>src/branch_fixer/services/ai/manager.py</code>) to interact with various LLMs (e.g., OpenAI models, Ollama models) for generating code fixes. This provides an abstraction layer over different AI providers.</li>
+<li><strong>GitPython:</strong> Utilized by <code>GitRepository</code> (<code>src/branch_fixer/services/git/repository.py</code>) for programmatic Git operations like branch creation, status checks, and potentially committing/pushing changes.</li>
+<li><strong>TinyDB:</strong> Used for persistent storage of <code>FixSession</code> data (<code>src/branch_fixer/storage/session_store.py</code> managing <code>sessions.json</code>) and <code>RecoveryPoint</code> data (<code>src/branch_fixer/storage/recovery.py</code> managing <code>recovery_points.json</code>).</li>
+<li><strong>snoop:</strong> Used for debugging, as seen in <code>src/branch_fixer/main.py</code> and various scripts.</li>
+<li><strong>Hypothesis:</strong> Referenced for property-based test generation in documentation (<code>docs/hypothesis.md</code>, <code>docs/Test Generation System.md</code>) and a script (<code>scripts/hypot_test_gen.py</code>).</li>
+<li><strong>Marvin:</strong> Mentioned in <code>src/branch_fixer/services/ai/manager_design_draft.py</code> as a potential tool for more structured AI interactions, though its usage in the primary <code>AIManager</code> is not apparent.</li>
+<li><strong>Pydantic:</strong> Used in <code>src/branch_fixer/services/ai/manager_design_draft.py</code> for data validation and settings management.</li>
+</ul>
+</li>
+<li><strong>C. Build System &amp; Dependency Management:</strong><ul>
+<li><code>setup.py</code>: Indicates a standard Python package setup. It lists <code>mkdocs</code> as an install requirement, likely for documentation.</li>
+<li><code>requirements.txt</code>: Mentioned in <code>docs/pytest-fixer-User-&amp;-Developer-Guide.md</code> for installation, though not provided in the file map. This would typically list runtime dependencies.</li>
+<li>Build/installation involves <code>pip install -r requirements.txt</code> (as per docs).</li>
+</ul>
+</li>
+<li><strong>D. Code Structure &amp; Directory Organization:</strong><ul>
+<li><strong><code>src/branch_fixer/</code></strong>: Main application code.<ul>
+<li><code>config/</code>: Configuration files (defaults, logging, settings).</li>
+<li><code>core/</code>: Core domain models (<code>TestError</code>, <code>FixAttempt</code>, <code>ErrorDetails</code>) and custom exceptions.</li>
+<li><code>orchestration/</code>: Components for managing the fix workflow (<code>FixService</code>, <code>FixOrchestrator</code>, placeholders like <code>Dispatcher</code>, <code>Coordinator</code>).</li>
+<li><code>services/</code>: External service integrations and business logic.<ul>
+<li><code>ai/</code>: AI model interaction (<code>AIManager</code>). Includes a <code>manager_design_draft.py</code>.</li>
+<li><code>code/</code>: Applying code changes (<code>ChangeApplier</code>).</li>
+<li><code>git/</code>: Git operations (<code>GitRepository</code>, <code>BranchManager</code>, <code>PRManager</code>).</li>
+<li><code>pytest/</code>: Pytest interaction (<code>PytestRunner</code>, error parsers).</li>
+</ul>
+</li>
+<li><code>storage/</code>: Data persistence (<code>SessionStore</code>, <code>RecoveryManager</code>, <code>StateManager</code>).</li>
+<li><code>utils/</code>: CLI utilities (<code>run_cli.py</code>, <code>cli.py</code>) and workspace validation.</li>
+<li><code>main.py</code>: Main entry point for the application.</li>
+</ul>
+</li>
+<li><strong><code>src/dev/</code></strong>: Appears to be a separate or experimental module, primarily for test generation.<ul>
+<li><code>cli/</code>: CLI components for the dev tools.</li>
+<li><code>shared/</code>: Shared utilities for dev tools.</li>
+<li><code>test_generator/</code>: A system for generating tests, with subdirectories for <code>analyze</code>, <code>generate</code> (including strategies like fabric, hypothesis, pynguin), and <code>output</code>.</li>
+</ul>
+</li>
+<li><strong><code>docs/</code></strong>: Extensive documentation, including user guides, design documents (DDD, architecture), and specific feature explanations.</li>
+<li><strong><code>scripts/</code></strong>: Utility scripts for tasks like adding headers, refactoring (instructions), test generation (<code>hypot_test_gen.py</code>), and updating imports.</li>
+<li><strong><code>tests/</code></strong>: Unit and integration tests.<ul>
+<li><code>fixtures/</code>: Pytest fixtures.</li>
+<li><code>integration/</code>: Integration tests for workflow and pytest runner.</li>
+<li><code>unit/</code>: Unit tests for core, git, pytest parsers, utils.</li>
+</ul>
+</li>
+<li><code>.github/workflows/</code>: GitHub Actions CI configuration (e.g., <code>ci.yml</code> mentioned in <code>README.md</code>, though file content not provided).</li>
+<li><code>README.md</code>: Project overview.</li>
+<li><code>setup.py</code>: Package setup script.</li>
+<li><strong>Architectural Patterns:</strong> The documentation (<code>docs/DDD-for-pytest-fixer-Concepts-and-Implementation-Guide.md</code>, <code>docs/Repository-Structure-and-Architecture-Design-Proposal.md</code>) explicitly mentions aiming for Domain-Driven Design (DDD) and a layered architecture (Domain, Application, Infrastructure). The structure largely reflects this with separation of concerns into <code>core</code> (domain), <code>orchestration</code> (application), and <code>services</code>/<code>storage</code> (infrastructure/services).</li>
+</ul>
+</li>
+<li><strong>E. Testing Framework &amp; Practices:</strong><ul>
+<li><strong>E.1. Evidence of Testing:</strong> A dedicated <code>tests/</code> directory is present with <code>unit/</code> and <code>integration/</code> subdirectories. Pytest is the chosen framework.</li>
+<li><strong>E.2. Types of Tests (if discernible):</strong> Unit tests (e.g., <code>tests/unit/core/test_models.py</code>) and integration tests (e.g., <code>tests/integration/pytest/test_pytest_runner.py</code>) are evident.</li>
+<li><strong>E.3. Test Execution:</strong> Tests are likely run using the <code>pytest</code> command. No specific scripts for running tests are highlighted apart from standard pytest invocation.</li>
+<li><strong>E.4. CI Integration for Tests:</strong> The <code>README.md</code> and <code>setup.py</code> (mentioning <code>.github/workflows/ci.yml</code>) suggest CI is used, presumably for running tests automatically.</li>
+</ul>
+</li>
+<li><strong>F. Data Storage Mechanisms (if applicable):</strong><ul>
+<li><strong>F.1. Databases:</strong> TinyDB is used as a lightweight document database.<ul>
+<li><code>src/branch_fixer/storage/session_store.py</code> uses TinyDB to store <code>FixSession</code> data in a <code>sessions.json</code> file.</li>
+<li><code>src/branch_fixer/storage/recovery.py</code> uses TinyDB (implicitly, by managing JSON files, likely <code>recovery_points.json</code>) to store <code>RecoveryPoint</code> data.</li>
+</ul>
+</li>
+<li><strong>F.2. File-Based Storage:</strong> Yes, for storing session and recovery data in JSON format via TinyDB. Also, for temporary backups of code files during changes.</li>
+<li><strong>F.3. Cloud Storage:</strong> No direct evidence of interaction with cloud storage services for primary data, though LLM interactions are cloud-based.</li>
+</ul>
+</li>
+<li><strong>G. APIs &amp; External Service Interactions (if applicable):</strong><ul>
+<li><strong>G.1. Exposed APIs:</strong> The repository primarily provides a CLI tool. It does not appear to expose any network APIs for external systems.</li>
+<li><strong>G.2. Consumed APIs/Services:</strong><ul>
+<li><strong>LLM APIs:</strong> Interacts with Large Language Models (e.g., OpenAI's GPT series, Ollama models) through the LiteLLM library for code fix generation (<code>src/branch_fixer/services/ai/manager.py</code>).</li>
+<li><strong>GitHub API:</strong> Potentially uses GitHub CLI for PR creation, as suggested in <code>docs/git-commits/git.md</code>. The <code>PRManager</code> might also interact with a Git hosting provider's API, though this is not explicitly detailed in the code.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>H. Configuration Management:</strong><ul>
+<li><strong>Environment Variables:</strong> <code>.env</code> files are mentioned in <code>docs/pytest-fixer-User-&amp;-Developer-Guide.md</code> for storing <code>OPENAI_API_KEY</code>.</li>
+<li><strong>Configuration Files:</strong><ul>
+<li><code>src/branch_fixer/config/settings.py</code>: Contains settings like <code>BASE_DIR</code>, <code>DEBUG</code>, <code>SECRET_KEY</code>.</li>
+<li><code>src/branch_fixer/config/defaults.py</code>: Contains default values like <code>DEFAULT_RETRIES</code>, <code>DEFAULT_TIMEOUT</code>.</li>
+<li><code>src/branch_fixer/config/logging_config.py</code>: Centralized logging setup.</li>
+</ul>
+</li>
+<li><strong>Command-Line Arguments:</strong> The CLI (<code>src/branch_fixer/utils/run_cli.py</code>) accepts various configuration parameters (e.g., <code>--api-key</code>, <code>--max-retries</code>, <code>--initial-temp</code>).</li>
+<li><strong>Critical Configuration Parameters:</strong><ol>
+<li><code>OPENAI_API_KEY</code> (or other LLM provider keys): For AI service access.</li>
+<li><code>MODEL_NAME</code>: Specifies which LLM to use (e.g., <code>openai/gpt-4o-mini</code>, <code>ollama/codellama</code>).</li>
+<li><code>INITIAL_TEMPERATURE</code>: Controls randomness of AI output.</li>
+<li><code>MAX_RETRIES</code>: Number of attempts to fix an error.</li>
+<li><code>DEBUG</code>: Enables debug mode (from <code>settings.py</code>).</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>V. Core Functionality &amp; Key Modules (Functional Breakdown):</strong></p>
+<ul>
+<li><strong>A. Primary Functionalities/Capabilities:</strong><ol>
+<li><strong>Automated Pytest Error Fixing:</strong> The system identifies failing pytest tests, uses an LLM to generate potential code fixes, applies these fixes, and verifies them by re-running the tests.</li>
+<li><strong>Git Integration for Fixes:</strong> Manages fix attempts within separate Git branches, allowing for isolated changes and potential PR creation.</li>
+<li><strong>Session and State Management:</strong> Tracks the progress of fixing multiple errors within a session, including retries and state transitions (e.g., running, completed, failed). Supports persistence of session state.</li>
+<li><strong>Test Generation:</strong> Includes capabilities for generating pytest test cases using various strategies (Hypothesis, AI-based like Fabric/GPT-4, Pynguin), with an AI-powered engine to combine and optimize generated tests (primarily detailed in <code>docs/</code> and <code>src/dev/test_generator/</code>).</li>
+<li><strong>Command-Line Interface:</strong> Provides user interaction for initiating fixes, configuring AI parameters, and managing the workflow.</li>
+</ol>
+</li>
+<li><strong>B. Breakdown of Key Modules/Components:</strong><ol>
+<li><strong><code>src/branch_fixer/main.py</code> &amp; <code>src/branch_fixer/utils/run_cli.py</code></strong><ul>
+<li><strong>Specific Purpose:</strong> Main entry point and CLI command definitions using Click. Handles argument parsing and initializes core components.</li>
+<li><strong>Key Inputs:</strong> Command-line arguments (API key, paths, flags).</li>
+<li><strong>Key Outputs/Effects:</strong> Orchestrates the test fixing process, prints output to console, logs activities.</li>
+</ul>
+</li>
+<li><strong><code>src/branch_fixer/orchestration/fix_service.py</code> (<code>FixService</code>)</strong><ul>
+<li><strong>Specific Purpose:</strong> Orchestrates the process of attempting to fix a single <code>TestError</code>. Integrates AI, code application, and test verification for one error.</li>
+<li><strong>Key Inputs:</strong> A <code>TestError</code> object, AI temperature.</li>
+<li><strong>Key Outputs/Effects:</strong> Boolean indicating fix success, modifies code files, updates <code>TestError</code> status.</li>
+</ul>
+</li>
+<li><strong><code>src/branch_fixer/orchestration/orchestrator.py</code> (<code>FixOrchestrator</code>, <code>FixSession</code>)</strong><ul>
+<li><strong>Specific Purpose:</strong> Manages a <code>FixSession</code> involving multiple <code>TestError</code>s. Handles the lifecycle of a fixing session, including retries across errors and overall state.</li>
+<li><strong>Key Inputs:</strong> List of <code>TestError</code>s to fix.</li>
+<li><strong>Key Outputs/Effects:</strong> Updates <code>FixSession</code> state, logs progress, potentially triggers recovery actions.</li>
+</ul>
+</li>
+<li><strong><code>src/branch_fixer/services/ai/manager.py</code> (<code>AIManager</code>)</strong><ul>
+<li><strong>Specific Purpose:</strong> Interacts with LLMs (via LiteLLM) to generate code fixes. Constructs prompts based on error details and parses LLM responses.</li>
+<li><strong>Key Inputs:</strong> <code>TestError</code> object, temperature setting.</li>
+<li><strong>Key Outputs/Effects:</strong> <code>CodeChanges</code> object containing original and modified code.</li>
+</ul>
+</li>
+<li><strong><code>src/branch_fixer/services/pytest/runner.py</code> (<code>PytestRunner</code>)</strong><ul>
+<li><strong>Specific Purpose:</strong> Executes pytest tests programmatically. Captures detailed results including stdout, stderr, outcomes, and timing for each test and the overall session.</li>
+<li><strong>Key Inputs:</strong> Test path, specific test function (optional).</li>
+<li><strong>Key Outputs/Effects:</strong> <code>SessionResult</code> object containing comprehensive test run information.</li>
+</ul>
+</li>
+<li><strong><code>src/branch_fixer/services/pytest/parsers/unified_error_parser.py</code> (<code>UnifiedErrorParser</code>)</strong><ul>
+<li><strong>Specific Purpose:</strong> Parses raw pytest output string into a list of structured <code>ErrorInfo</code> objects, distinguishing between collection errors and test failures.</li>
+<li><strong>Key Inputs:</strong> Raw pytest output string.</li>
+<li><strong>Key Outputs/Effects:</strong> List of <code>ErrorInfo</code> objects.</li>
+</ul>
+</li>
+<li><strong><code>src/branch_fixer/services/git/repository.py</code> (<code>GitRepository</code>)</strong><ul>
+<li><strong>Specific Purpose:</strong> Provides an interface for Git operations using GitPython. Manages branch creation, status checks, and potentially commits/PRs.</li>
+<li><strong>Key Inputs:</strong> Branch names, commit messages.</li>
+<li><strong>Key Outputs/Effects:</strong> Modifies the Git repository state (new branches, commits).</li>
+</ul>
+</li>
+<li><strong><code>src/branch_fixer/storage/session_store.py</code> (<code>SessionStore</code>)</strong><ul>
+<li><strong>Specific Purpose:</strong> Persists and retrieves <code>FixSession</code> state using TinyDB, storing data in <code>sessions.json</code>.</li>
+<li><strong>Key Inputs:</strong> <code>FixSession</code> object for saving, session ID for loading/deleting.</li>
+<li><strong>Key Outputs/Effects:</strong> Reads from and writes to <code>sessions.json</code>.</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<p><strong>VI. Data Schemas &amp; Formats (Input &amp; Output Focus):</strong></p>
+<ul>
+<li><strong>A. Primary System Input Data:</strong><ul>
+<li><strong>Source Code:</strong> Python files (<code>.py</code>) of the project whose tests are to be fixed or for which tests are to be generated.</li>
+<li><strong>Pytest Output:</strong> Textual output from <code>pytest</code> execution, which is then parsed to identify errors. The format includes standard pytest failure reports, collection error messages, and stack traces.</li>
+<li><strong>User Configuration:</strong> API keys, model preferences, temperature settings, paths, etc., provided via CLI arguments or <code>.env</code> files.</li>
+</ul>
+</li>
+<li><strong>B. Primary System Output Data/Artifacts:</strong><ul>
+<li><strong>Modified Source Code:</strong> Python files with applied fixes.</li>
+<li><strong>Generated Test Files:</strong> New Python files containing pytest tests (if using the test generation functionality).</li>
+<li><strong>Git Branches/Pull Requests:</strong> New branches created for fixes, and potentially PRs on a Git hosting platform.</li>
+<li><strong>Log Files:</strong> Application logs (<code>logs/app.log</code>, <code>snoop_debug.log</code>).</li>
+<li><strong>Session Data:</strong> <code>sessions.json</code> and <code>recovery_points.json</code> storing structured information about fix sessions and recovery checkpoints.</li>
+<li><strong>Console Output:</strong> Progress messages, summaries, and prompts for interactive mode.</li>
+</ul>
+</li>
+<li><strong>C. Key Configuration File Schemas (if applicable):</strong><ul>
+<li><strong><code>.env</code> file (as per <code>docs/pytest-fixer-User-&amp;-Developer-Guide.md</code>):</strong><ul>
+<li><code>OPENAI_API_KEY=your-api-key</code></li>
+<li><code>MODEL_NAME=gpt-4o-mini</code> (or other LiteLLM compatible model string)</li>
+<li><code>INITIAL_TEMPERATURE=0.4</code></li>
+<li><code>TEMPERATURE_INCREMENT=0.1</code></li>
+<li><code>MAX_RETRIES=3</code></li>
+</ul>
+</li>
+<li><strong><code>src/branch_fixer/config/settings.py</code>:</strong> Defines Python constants like <code>DEBUG = True</code>.</li>
+<li><strong><code>src/branch_fixer/config/defaults.py</code>:</strong> Defines default retry and timeout values.</li>
+</ul>
+</li>
+</ul>
+<p><strong>VII. Operational Aspects (Setup, Execution, Deployment):</strong></p>
+<ul>
+<li><strong>A. Setup &amp; Installation:</strong><ol>
+<li>Clone the repository: <code>git clone https://github.com/your-repo/pytest-fixer.git</code> (URL from user guide).</li>
+<li>Navigate into the directory: <code>cd pytest-fixer</code>.</li>
+<li>Install dependencies: <code>pip install -r requirements.txt</code> (as per user guide; <code>requirements.txt</code> not provided in file map but <code>setup.py</code> lists <code>mkdocs</code>). Key runtime dependencies identified from code are <code>click</code>, <code>pytest</code>, <code>litellm</code>, <code>gitpython</code>, <code>tinydb</code>, <code>snoop</code>.</li>
+<li>Configure API keys: Create a <code>.env</code> file in the project root with <code>OPENAI_API_KEY</code> and other settings as needed.</li>
+</ol>
+</li>
+<li><strong>B. Typical Execution/Invocation:</strong><ul>
+<li>The application is run as a command-line tool.</li>
+<li>Primary entry point: <code>python -m branch_fixer.main</code> (as per <code>src/branch_fixer/main.py</code>).</li>
+<li>The CLI is defined in <code>src/branch_fixer/utils/run_cli.py</code> with a main command <code>fix</code>.</li>
+<li>Example: <code>pytest-fixer fix --api-key="sk-..." --test-path="/path/to/project/tests"</code></li>
+<li>It can be run in interactive or non-interactive mode.</li>
+<li>The test generation functionality (e.g., <code>scripts/hypot_test_gen.py</code> or the <code>src/dev/test_generator</code> system) would have its own invocation method, likely also a CLI.</li>
+</ul>
+</li>
+<li><strong>C. Deployment (if applicable and documented):</strong><ul>
+<li>No specific deployment instructions (e.g., for server or cloud environments) are evident. The tool is designed for local execution by developers or in CI environments that can run Python scripts.</li>
+<li>Docker: <code>manager_design_draft.py</code> mentions Docker for test execution in an isolated environment, but no Dockerfile is present in the root of the provided file map.</li>
+</ul>
+</li>
+</ul>
+<p><strong>VIII. Documentation Quality &amp; Availability:</strong></p>
+<ul>
+<li><strong>A. README.md:</strong><ul>
+<li>Present at the root.</li>
+<li>Provides a brief overview, a link to hosted documentation, and badges for CI and docstring coverage. Appears informative for a starting point.</li>
+</ul>
+</li>
+<li><strong>B. Dedicated Documentation:</strong><ul>
+<li>An extensive <code>docs/</code> folder exists, containing numerous Markdown files.</li>
+<li>Key documents include:<ul>
+<li><code>pytest-fixer-User-&amp;-Developer-Guide.md</code>: Comprehensive guide on architecture, features, setup, usage, and limitations.</li>
+<li><code>DDD-for-pytest-fixer-Concepts-and-Implementation-Guide.md</code>: Explains DDD concepts applied to the project.</li>
+<li><code>Repository-Structure-and-Architecture-Design-Proposal.md</code>: Outlines the intended layered architecture.</li>
+<li><code>Test Generation System.md</code>, <code>generate_pytest.md</code>, <code>hypothesis.md</code>: Detail the test generation capabilities.</li>
+<li><code>execution-flow-doc.md</code>: Describes the program's execution flow.</li>
+</ul>
+</li>
+<li>The documentation appears relatively comprehensive and detailed, covering both user and developer aspects. The documentation is also hosted (link in <code>README.md</code>).</li>
+</ul>
+</li>
+<li><strong>C. API Documentation (if applicable):</strong><ul>
+<li>No externally exposed APIs are provided by the repository itself.</li>
+<li>Internal components like <code>AIManager</code> consume external LLM APIs, but there's no generated API documentation (e.g., Sphinx-style) for the repository's own codebase visible in the file map.</li>
+</ul>
+</li>
+<li><strong>D. Code Comments &amp; Docstrings:</strong><ul>
+<li>Based on the provided file snippets (e.g., <code>GitRepository</code>, <code>FixService</code>, <code>AIManager</code>, CLI files), docstrings are present for most classes and methods, explaining their purpose, arguments, and behavior.</li>
+<li>Inline comments are used where necessary to clarify logic.</li>
+<li>The general level appears to be adequate to good. The <code>README.md</code> also has a badge for "Docstring Coverage".</li>
+</ul>
+</li>
+<li><strong>E. Examples &amp; Tutorials:</strong><ul>
+<li><code>docs/pytest-fixer-User-&amp;-Developer-Guide.md</code> serves as a primary tutorial and usage guide.</li>
+<li><code>docs/hypothesis.md</code> provides a guide to using Hypothesis for test generation.</li>
+<li>The <code>scripts/</code> directory contains example scripts that demonstrate usage or specific functionalities (e.g., <code>runner_debug.py</code>).</li>
+</ul>
+</li>
+</ul>
+<p><strong>IX. Observable Data Assets &amp; Pre-trained Models (if any):</strong></p>
+<ul>
+<li><strong>A. Datasets Contained/Referenced:</strong><ul>
+<li>The repository does not appear to contain any large, notable datasets.</li>
+<li><code>tests/unit/pytest/comprehensive_test_inputs.py</code> contains example Python classes (<code>DataPoint</code>, <code>MathOperations</code>, etc.) used as input for test generation or for testing the fixer itself, but these are small and illustrative.</li>
+<li>No scripts to download specific external datasets are evident.</li>
+</ul>
+</li>
+<li><strong>B. Models Contained/Referenced:</strong><ul>
+<li>The repository does not contain any pre-trained machine learning models or model weights directly.</li>
+<li>It <strong>references and consumes</strong> external Large Language Models (LLMs) such as OpenAI's GPT series or Ollama's CodeLlama through the LiteLLM library. These models are accessed via APIs.</li>
+</ul>
+</li>
+</ul>
+<p><strong>X. Areas Requiring Further Investigation / Observed Limitations:</strong></p>
+<ul>
+<li><strong>Current Operational Status of <code>dev/</code> Components:</strong> The <code>src/dev/test_generator/</code> module and its integration with the main <code>pytest-fixer</code> application (<code>src/branch_fixer/</code>) is not fully clear. It seems to be a sophisticated test generation system, but its current readiness and usage flow need clarification.</li>
+<li><strong><code>manager_design_draft.py</code>:</strong> The relationship between <code>src/branch_fixer/services/ai/manager_design_draft.py</code> (which proposes a Marvin-based AIManager) and the active <code>src/branch_fixer/services/ai/manager.py</code> (LiteLLM-based) is unclear. The draft suggests a more complex, tool-using AI agent.</li>
+<li><strong>Placeholder Components:</strong> <code>src/branch_fixer/orchestration/dispatcher.py</code> and <code>coordinator.py</code> are documented as placeholders (<code>docs/future-expansion.md</code>) and are not currently used.</li>
+<li><strong>Commit History and Activity:</strong> Actual Git commit history, frequency, last commit date, and number of contributors cannot be determined from the static file analysis, which are crucial for assessing current activity and maintenance status.</li>
+<li><strong>Issue Tracker Details:</strong> The activity level and nature of issues in any associated issue tracker are unknown.</li>
+<li><strong>CI/CD Effectiveness:</strong> While CI workflow files are mentioned (<code>.github/workflows/ci.yml</code>), their actual content, execution success rates, and coverage reports are not available.</li>
+<li><strong>Python Version Specifics:</strong> <code>docs/</code> state Python 3.8+, but <code>setup.py</code> does not enforce this or list a specific minimum version.</li>
+<li><strong>Completeness of Error Parsing:</strong> The robustness of <code>UnifiedErrorParser</code> across a wide variety of complex pytest error outputs would require empirical testing.</li>
+<li><strong>SWE-Bench Integration:</strong> Documentation (<code>swe-bench.md</code>) discusses strategies for the SWE-Bench benchmark, but the current level of integration or tooling for it is not detailed in the codebase.</li>
+<li><strong>Explicit License:</strong> The absence of a <code>LICENSE</code> file makes the software's usage terms unclear.</li>
+</ul>
+<p><strong>XI. Analyst's Concluding Remarks (Objective Summary):</strong></p>
+<ul>
+<li><strong>Significant Characteristics:</strong><ul>
+<li>The <code>pytest-fixer</code> repository represents a sophisticated attempt to automate both the fixing of failing pytest tests and the generation of new tests using LLMs.</li>
+<li>It features a modular, layered architecture guided by DDD principles, with clear separation of concerns for AI interaction, Git operations, test execution, and data persistence.</li>
+<li>Extensive documentation covers user guides, design principles, and architectural overviews.</li>
+<li>The system is designed to be flexible, supporting multiple LLM backends via LiteLLM and offering interactive and non-interactive modes of operation.</li>
+</ul>
+</li>
+<li><strong>Apparent Strengths:</strong><ul>
+<li><strong>Comprehensive Design:</strong> The architecture is well-thought-out, addressing various aspects of automated test fixing and generation.</li>
+<li><strong>Modularity:</strong> Clear separation of services (AI, Git, Pytest, Code) and layers (Core, Orchestration, Storage) promotes maintainability and extensibility.</li>
+<li><strong>Detailed Documentation:</strong> A significant amount of documentation aids understanding for both users and developers.</li>
+<li><strong>LLM Abstraction:</strong> Use of LiteLLM allows for easy switching between different AI models and providers.</li>
+<li><strong>Stateful Operation:</strong> Incorporates session management, state tracking, and recovery mechanisms, which is crucial for a multi-step, potentially fallible process.</li>
+</ul>
+</li>
+<li><strong>Notable Limitations or Areas of Unclearness (from static analysis):</strong><ul>
+<li><strong>Development Stage:</strong> The <code>0.1.0</code> version and presence of draft/placeholder components (<code>manager_design_draft.py</code>, <code>dispatcher.py</code>, <code>coordinator.py</code>) suggest the project is in an early to mid-stage of development, with some features potentially experimental or incomplete (e.g., the <code>src/dev/test_generator</code> system's full integration).</li>
+<li><strong>Missing Operational Data:</strong> Lack of commit history, issue tracker activity, and live CI/CD status makes it difficult to assess the current development velocity, stability, and real-world effectiveness.</li>
+<li><strong>Licensing:</strong> The absence of a <code>LICENSE</code> file creates ambiguity regarding usage rights.</li>
+<li><strong>Test Generation Integration:</strong> The exact relationship and operational flow between the main test fixing application and the test generation components (in <code>src/dev/</code> and <code>scripts/</code>) could be further clarified.</li>
+</ul>
+</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>
