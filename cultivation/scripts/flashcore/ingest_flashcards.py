@@ -13,6 +13,15 @@ from cultivation.scripts.flashcore.yaml_processor import load_and_process_flashc
 from cultivation.scripts.flashcore.database import FlashcardDatabase, DEFAULT_FLASHCORE_DATA_DIR, DEFAULT_DATABASE_FILENAME
 
 def main():
+    """
+    Parses command-line arguments and ingests flashcard YAML decks into a DuckDB database.
+    
+    This function loads flashcard decks from YAML files in the specified source directory,
+    validates and processes them, and inserts valid cards into the target DuckDB database.
+    It supports strict error handling, configurable asset and database paths, and provides
+    informative status and error messages throughout the ingestion process. Exits with
+    distinct status codes for YAML errors, empty card sets, or database failures.
+    """
     parser = argparse.ArgumentParser(description="Ingest flashcard YAML decks into DuckDB database.")
     parser.add_argument(
         "--source-dir",

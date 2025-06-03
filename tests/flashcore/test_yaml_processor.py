@@ -35,7 +35,15 @@ except ImportError:
 
 @pytest.fixture
 def assets_dir(tmp_path: Path) -> Path:
-    """Creates a temporary 'assets' directory and returns its path."""
+    """
+    Creates a temporary 'assets' directory with sample media files for testing.
+    
+    Args:
+        tmp_path: The base temporary directory path.
+    
+    Returns:
+        The path to the created 'assets' directory containing dummy media files.
+    """
     assets = tmp_path / "assets"
     assets.mkdir(parents=True, exist_ok=True)
     # Create some dummy media files
@@ -45,7 +53,17 @@ def assets_dir(tmp_path: Path) -> Path:
     return assets
 
 def create_yaml_file(base_path: Path, filename: str, content: str) -> Path:
-    """Helper to create a YAML file in a given base_path."""
+    """
+    Creates a YAML file with the specified content in the given directory.
+    
+    Args:
+        base_path: Directory where the YAML file will be created.
+        filename: Name of the YAML file to create.
+        content: String content to write into the YAML file.
+    
+    Returns:
+        The path to the created YAML file.
+    """
     file_path = base_path / filename
     file_path.write_text(content, encoding="utf-8")
     return file_path
@@ -131,6 +149,11 @@ cards:
 
 class TestTransformRawCardToModel:
     def test_basic_transform_success(self, tmp_path: Path, assets_dir: Path):
+        """
+        Verifies that a raw YAML card entry is correctly transformed into a Card model.
+        
+        Ensures that question and answer fields are stripped of whitespace and that deck tags are merged into the card's tags.
+        """
         raw_entry = _RawYAMLCardEntry(q=" Test Q? ", a=" Test A. ")
         result = _transform_raw_card_to_model(
             raw_card_model=raw_entry, deck_name="TestDeck", deck_tags={"global"},
@@ -144,6 +167,11 @@ class TestTransformRawCardToModel:
 
     def test_uuid_usage_and_generation(self, tmp_path: Path, assets_dir: Path):
         # With provided valid ID
+        """
+        Tests that card UUIDs are correctly handled during transformation.
+        
+        Verifies that a valid UUID string is accepted, a UUID is generated if missing, and an invalid UUID string results in a YAMLProcessingError.
+        """
         valid_uuid_str = "123e4567-e89b-12d3-a456-426614174000"
         raw_entry_with_id = _RawYAMLCardEntry(id=valid_uuid_str, q="Q", a="A")
         card_with_id = _transform_raw_card_to_model(
@@ -169,6 +197,9 @@ class TestTransformRawCardToModel:
         assert "Invalid UUID format" in error_invalid_id.message
 
     def test_tag_merging_and_formatting(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that card and deck tags are merged, normalized to kebab-case, lowercased, stripped, and deduplicated when transforming a raw YAML card entry to a Card model.
+        """
         raw_entry = _RawYAMLCardEntry(q="Q", a="A", tags=[" Card-Tag1 ", "card-tag2"])
         deck_tags = {"deck-tag", "card-tag2"} # card-tag2 is duplicate, Set will handle
         result = _transform_raw_card_to_model(
@@ -181,6 +212,11 @@ class TestTransformRawCardToModel:
 
     def test_media_validation(self, tmp_path: Path, assets_dir: Path):
         # Valid media
+        """
+        Tests media file validation logic in card transformation, including existence, relativity, and path traversal.
+        
+        Verifies that valid media files are accepted, non-existent files trigger errors unless validation is skipped, absolute paths are rejected, and path traversal outside the assets directory is detected and reported.
+        """
         raw_valid_media = _RawYAMLCardEntry(q="Q", a="A", media=["image.png", "subfolder/audio.mp3"])
         card_valid_media = _transform_raw_card_to_model(
             raw_valid_media, "D", set(), tmp_path / "f.yaml", assets_dir, 0, False, False
@@ -221,6 +257,13 @@ class TestTransformRawCardToModel:
 
 
     def test_secrets_detection(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that secret detection in card content triggers an error unless detection is skipped.
+        
+        Verifies that a card containing a potential secret in the question field results in a
+        `YAMLProcessingError` when secret detection is enabled, and is accepted as a valid `Card`
+        when secret detection is skipped.
+        """
         raw_secret_q = _RawYAMLCardEntry(q="api_key: sk_live_verylongtestkey1234567890", a="A")
         err_secret_q = _transform_raw_card_to_model(
             raw_secret_q, "D", set(), tmp_path / "f.yaml", assets_dir, 0, False, False
@@ -248,6 +291,11 @@ class TestProcessSingleYAMLFile:
         assert cards[0].front == "Question 1?"
 
     def test_success_comprehensive(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests processing of a comprehensive YAML file with multiple cards, tags, media, and UUIDs.
+        
+        Verifies that all cards are correctly parsed with expected fields, tags are merged, media paths are set, and no errors are returned.
+        """
         file = create_yaml_file(tmp_path, "comp.yaml", VALID_YAML_COMPREHENSIVE_CONTENT)
         cards, errors = _process_single_yaml_file(file, assets_dir, False, False)
         assert len(cards) == 2
@@ -259,20 +307,34 @@ class TestProcessSingleYAMLFile:
         assert "another-deck-tag" in cards[1].tags and "card-tag2" in cards[1].tags
 
     def test_file_not_found(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that processing a non-existent YAML file raises a YAMLProcessingError with an appropriate message.
+        """
         with pytest.raises(YAMLProcessingError, match="File not found"):
             _process_single_yaml_file(tmp_path / "nonexistent.yaml", assets_dir, False, False)
 
     def test_invalid_yaml_syntax(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that processing a YAML file with invalid syntax raises a YAMLProcessingError.
+        """
         file = create_yaml_file(tmp_path, "badsyntax.yaml", INVALID_YAML_SYNTAX_CONTENT)
         with pytest.raises(YAMLProcessingError, match="Invalid YAML syntax"):
             _process_single_yaml_file(file, assets_dir, False, False)
             
     def test_invalid_top_level_schema_no_deck(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that a YAML file missing the required top-level 'deck' key raises a YAMLProcessingError.
+        """
         file = create_yaml_file(tmp_path, "no_deck.yaml", INVALID_YAML_SCHEMA_NO_DECK_CONTENT)
         with pytest.raises(YAMLProcessingError, match="File-level schema validation failed. Details: deck: Field required"):
              _process_single_yaml_file(file, assets_dir, False, False)
 
     def test_card_level_error_collection(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that invalid cards within a YAML file are skipped and corresponding errors are collected.
+        
+        Creates a YAML file with both valid and invalid card entries, processes it, and asserts that only valid cards are returned while errors for invalid cards are reported with correct indexing and messages.
+        """
         content = """
 deck: MixedBag
 cards:
@@ -290,6 +352,11 @@ cards:
         assert "Field required" in errors[0].message # Pydantic error for missing 'q'
 
     def test_intra_file_duplicate_question(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that duplicate question fronts within a single YAML file are detected.
+        
+        Verifies that only the first occurrence of a duplicate question is processed as a card, while subsequent duplicates result in an error referencing the correct card index.
+        """
         file = create_yaml_file(tmp_path, "intradup.yaml", YAML_WITH_INTRA_FILE_DUPLICATE_Q_CONTENT)
         cards, errors = _process_single_yaml_file(file, assets_dir, False, False)
         assert len(cards) == 2 # First "Duplicate Question?" and "Unique Question?"
@@ -301,6 +368,9 @@ cards:
 
 class TestLoadAndProcessFlashcardYamls:
     def test_empty_source_directory(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that processing an empty source directory returns no cards and no errors.
+        """
         source_dir = tmp_path / "empty_src"
         source_dir.mkdir()
         cards, errors = load_and_process_flashcard_yamls(source_dir, assets_dir)
@@ -308,6 +378,11 @@ class TestLoadAndProcessFlashcardYamls:
         assert not errors
 
     def test_single_valid_file(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests processing a single valid YAML file and verifies that one card is loaded without errors.
+        
+        Creates a minimal valid YAML file in a temporary source directory, processes it, and asserts that exactly one card is returned with the expected deck name and no errors.
+        """
         source_dir = tmp_path / "src"
         source_dir.mkdir()
         create_yaml_file(source_dir, "deck1.yaml", VALID_YAML_MINIMAL_CONTENT)
@@ -317,6 +392,11 @@ class TestLoadAndProcessFlashcardYamls:
         assert cards[0].deck_name == "Minimal"
 
     def test_multiple_valid_files_and_recursion(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests processing of multiple valid YAML files, including recursive subdirectory traversal.
+        
+        Creates a source directory with YAML files in both the root and a subdirectory, then verifies that all cards are loaded and no errors are returned.
+        """
         source_dir = tmp_path / "src_multi"
         source_dir.mkdir()
         sub_dir = source_dir / "subdir"
@@ -329,6 +409,11 @@ class TestLoadAndProcessFlashcardYamls:
         assert not errors
 
     def test_error_aggregation_fail_fast_false(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that errors from multiple invalid YAML files are aggregated when fail_fast is False.
+        
+        Creates a source directory with one valid and two invalid YAML files, then verifies that only the valid file produces a card and both errors are collected without raising immediately.
+        """
         source_dir = tmp_path / "src_errors"
         source_dir.mkdir()
         create_yaml_file(source_dir, "valid.yaml", VALID_YAML_MINIMAL_CONTENT)
@@ -342,6 +427,12 @@ class TestLoadAndProcessFlashcardYamls:
         assert any("File-level schema validation failed" in str(e) for e in errors if e.file_path.name == "card_no_q.yaml") # _RawYAMLDeckFile catches missing q in cards list items
 
     def test_fail_fast_true_on_file_error(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that processing stops and raises an error immediately on a file-level error when fail_fast is True.
+        
+        Creates a source directory with one invalid YAML file and one valid file, then verifies that
+        `load_and_process_flashcard_yamls` raises `YAMLProcessingError` due to the invalid file, without processing further files.
+        """
         source_dir = tmp_path / "src_fail_fast"
         source_dir.mkdir()
         create_yaml_file(source_dir, "badsyntax.yaml", INVALID_YAML_SYNTAX_CONTENT) # This should cause immediate failure
@@ -351,6 +442,11 @@ class TestLoadAndProcessFlashcardYamls:
             load_and_process_flashcard_yamls(source_dir, assets_dir, fail_fast=True)
 
     def test_fail_fast_true_on_card_error(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that load_and_process_flashcard_yamls raises immediately on card-level error when fail_fast is True.
+        
+        Creates a source directory with one valid YAML file and one file containing a card with a secret. Verifies that processing raises YAMLProcessingError after encountering the card-level error in the second file when fail_fast is enabled.
+        """
         source_dir = tmp_path / "src_fail_fast_card"
         source_dir.mkdir()
         create_yaml_file(source_dir, "valid_first.yaml", VALID_YAML_MINIMAL_CONTENT)
@@ -373,6 +469,11 @@ cards:
 
 
     def test_cross_file_duplicate_question(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that cross-file duplicate question fronts are detected and only the first occurrence is kept.
+        
+        Creates two YAML files with a shared question front and verifies that only the first instance is included in the processed cards, while the duplicate in the second file results in an error. Also checks that unique questions are processed correctly.
+        """
         source_dir = tmp_path / "src_cross_dup"
         source_dir.mkdir()
         yaml_a_content = """
@@ -404,6 +505,10 @@ cards:
         assert errors[0].file_path.name == "deckB.yaml" # The duplicate is in the second file
 
     def test_skip_media_validation_flag(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that skipping media validation allows processing cards with missing media files,
+        while enabling validation returns an error for nonexistent media.
+        """
         source_dir = tmp_path / "src_skip_media"
         source_dir.mkdir()
         yaml_nonexistent_media = """
@@ -432,6 +537,11 @@ cards:
         assert "Media file not found" in errors_not_skipped[0].message
 
     def test_skip_secrets_detection_flag(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that the skip_secrets_detection flag controls whether cards containing potential secrets are processed or rejected.
+        
+        Creates a YAML file with one card containing secret-like content and one without. Verifies that when skip_secrets_detection is True, both cards are accepted with no errors; when False, only the non-secret card is processed and an error is reported for the secret-containing card.
+        """
         source_dir = tmp_path / "src_skip_secret"
         source_dir.mkdir()
         create_yaml_file(source_dir, "secret_test.yaml", YAML_WITH_SECRET_CONTENT)
@@ -453,6 +563,9 @@ cards:
         assert errors_not_skipped[0].card_index == 0 # First card had the secret
 
     def test_non_existent_source_dir(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that processing a non-existent source directory returns no cards and a single error indicating the missing directory.
+        """
         source_dir = tmp_path / "non_existent_src"
         # Do not create source_dir
         cards, errors = load_and_process_flashcard_yamls(source_dir, assets_dir)
@@ -461,6 +574,9 @@ cards:
         assert "Source directory does not exist" in errors[0].message
     
     def test_non_existent_assets_dir_no_skip(self, tmp_path: Path):
+        """
+        Tests that processing fails with an appropriate error when the assets directory does not exist and media validation is not skipped.
+        """
         source_dir = tmp_path / "src_for_no_assets"
         source_dir.mkdir()
         create_yaml_file(source_dir, "deck.yaml", VALID_YAML_MINIMAL_CONTENT) # No media needed for this test
@@ -476,6 +592,13 @@ cards:
         assert "Assets root directory does not exist" in errors[0].message
 
     def test_non_existent_assets_dir_with_skip(self, tmp_path: Path):
+        """
+        Tests that cards referencing media files are processed without error when the assets
+        directory does not exist and media validation is skipped.
+        
+        Verifies that the card is accepted and no errors are returned, even though the media
+        file is missing, when `skip_media_validation` is set to True.
+        """
         source_dir = tmp_path / "src_for_no_assets_skip"
         source_dir.mkdir()
         yaml_with_media = """

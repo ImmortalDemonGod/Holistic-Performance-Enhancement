@@ -69,7 +69,12 @@ class Card(BaseModel):
 
     @validator("tags", each_item=True, pre=True)
     def validate_tags_kebab_case(cls, v):
-        """Ensure each tag is a string and matches kebab-case pattern."""
+        """
+        Validates that a tag is a string in kebab-case format.
+        
+        Raises:
+            ValueError: If the input is not a string or does not match the kebab-case pattern.
+        """
         if not isinstance(v, str):
             raise ValueError("Input should be a valid string")
         if not re.match(KEBAB_CASE_REGEX_PATTERN, v):
@@ -78,14 +83,27 @@ class Card(BaseModel):
 
     @validator("front", pre=True)
     def check_front_max_length(cls, v: str) -> str:
-        """Ensure front text does not exceed 1024 characters."""
+        """
+        Validates that the front text does not exceed 1024 characters.
+        
+        Raises:
+            ValueError: If the input is not a string or exceeds 1024 characters.
+        """
         if not isinstance(v, str) or len(v) > 1024:
             raise ValueError("String should have at most 1024 characters")
         return v
 
     @validator("back", pre=True)
     def check_back_max_length(cls, v: str) -> str:
-        """Ensure back text does not exceed 1024 characters."""
+        """
+        Validates that the back text does not exceed 1024 characters.
+        
+        Raises:
+            ValueError: If the input is not a string or exceeds 1024 characters.
+        
+        Returns:
+            The validated back text string.
+        """
         if not isinstance(v, str) or len(v) > 1024:
             raise ValueError("String should have at most 1024 characters")
         return v
@@ -154,14 +172,24 @@ class Review(BaseModel):
 
     @validator("rating", pre=True)
     def validate_rating_type(cls, v):
-        """Ensure rating is an integer between 0 and 3., type check only."""
+        """
+        Validates that the rating is an integer.
+        
+        Raises:
+            ValueError: If the input is not an integer.
+        """
         if not isinstance(v, int):
             raise ValueError("Input should be a valid integer")
         return v
 
     @validator("review_type")
     def check_review_type_is_allowed(cls, v: Optional[str]) -> Optional[str]:
-        """Ensures review_type is one of the predefined allowed values or None."""
+        """
+        Validates that the review_type is one of the allowed values or None.
+        
+        Raises:
+            ValueError: If the provided review_type is not "learn", "review", "relearn", "manual", or None.
+        """
         ALLOWED_REVIEW_TYPES = {"learn", "review", "relearn", "manual"}
         if v is not None and v not in ALLOWED_REVIEW_TYPES:
             raise ValueError(
