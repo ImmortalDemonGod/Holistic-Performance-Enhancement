@@ -43,6 +43,18 @@ def nav_to_yaml_structure(nav_items):
             nav_struct.append({label: nav_to_yaml_structure(value)})
     return nav_struct
 
+def nav_to_markdown(items, indent=0):
+    md = []
+    for label, value in items:
+        if isinstance(value, str):
+            # Always use a single dash, no extra indentation to avoid code blocks
+            md.append(f"- [{label}]({value})")
+        elif isinstance(value, list) and value:
+            # Section header for folders, no extra blank line
+            md.append(f"\n### {label}\n")
+            md.extend(nav_to_markdown(value, indent + 1))
+    return md
+
 if __name__ == '__main__':
     docs_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path('cultivation/docs')
     rel_base = docs_dir
@@ -81,6 +93,37 @@ if __name__ == '__main__':
     with mkdocs_path.open('w') as f:
         yaml.dump(data, f)
     print('[INFO] mkdocs.yml nav section replaced (ruamel.yaml, no duplicates).')
+
+    # --- Markdown ToC generation ---
+    toc_md = ['<!-- AUTO-TOC-START -->',
+              '# Cultivation Documentation',
+              '',
+              '> **Comprehensive Table of Contents (Auto-generated)**',
+              '',
+              'Below is a hierarchical overview of all documentation sections, subfolders, and key files. Click any link to jump directly to that document.',
+              '',
+              '---',
+              '']
+    toc_md += nav_to_markdown(filtered_nav_items, indent=0)
+    toc_md.append('<!-- AUTO-TOC-END -->')
+    toc_md_str = '\n'.join(toc_md) + '\n'
+
+    index_path = docs_dir / 'index.md'
+    import re
+    if index_path.exists():
+        index_text = index_path.read_text()
+        # Always remove everything except the auto-TOC block
+        if '<!-- AUTO-TOC-START -->' in index_text and '<!-- AUTO-TOC-END -->' in index_text:
+            # Replace everything between and including the markers
+            new_index = re.sub(r'(?s)^.*?<!-- AUTO-TOC-START -->(.|\n)*?<!-- AUTO-TOC-END -->.*$', toc_md_str, index_text)
+        else:
+            # Overwrite entire file with ToC
+            new_index = toc_md_str
+        index_path.write_text(new_index)
+        print('[INFO] index.md auto-ToC replaced (idempotent).')
+    else:
+        index_path.write_text(toc_md_str)
+        print('[INFO] index.md created with auto-ToC.')
 
     # Run mkdocs build --strict
     print('[INFO] Running mkdocs build --strict...')
