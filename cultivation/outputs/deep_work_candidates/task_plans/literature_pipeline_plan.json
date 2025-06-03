@@ -1,0 +1,240 @@
+[
+  {
+    "task_id_candidate": "DW_LIT_CLIENT_001_FINALIZE",
+    "tentative_title": "Finalize and Robustly Test `docinsight_client.py` for DocInsight Service Interaction",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/literature_system_overview.md", "section": "§ 5.1 DocInsight HTTP API Contract"},
+      {"file": "cultivation/scripts/literature/docinsight_client.py"},
+      {"file": "tests/literature/test_docinsight_client.py"},
+      {"file": "tests/mocks/docinsight_mock.py"}
+    ],
+    "description_objective": "Perform a final audit and hardening of `docinsight_client.py`. Ensure robust error handling (API errors, network timeouts, malformed responses), correct implementation of `start_research`, `get_results`, and the `wait_for_result` polling logic for all documented DocInsight job statuses (pending, completed, error). Confirm and document environment variable handling for base URL (`DOCINSIGHT_API_URL`, `BASE_SERVER_URL`) and poll settings (`DOCINSIGHT_POLL_INTERVAL_SECONDS`, `DOCINSIGHT_POLL_TIMEOUT_SECONDS`). Enhance `test_docinsight_client.py` for comprehensive coverage of all scenarios, including various server responses and network conditions (e.g., using `requests_mock` or a live mock server like the existing `docinsight_mock.py`).",
+    "primary_type": "System Refinement & Testing",
+    "initial_scale_estimate": "Medium (1-2 days, ~4-8 deep work hours)",
+    "potential_deliverables_outcomes": [
+      "Audited, hardened, and well-documented `docinsight_client.py`.",
+      "Comprehensive `pytest` suite in `tests/literature/test_docinsight_client.py` achieving high test coverage.",
+      "Updated docstrings and internal documentation clarifying configuration and error handling."
+    ],
+    "notes_questions_dependencies": "The script `docinsight_client.py` appears relatively mature. Primary focus should be on rigorous edge-case testing for polling logic (timeouts, various error states from DocInsight) and ensuring consistent behavior with environment variable configurations. Confirm compatibility with the existing `tests/mocks/docinsight_mock.py`."
+  },
+  {
+    "task_id_candidate": "DW_LIT_INGEST_001_FETCH_PAPER",
+    "tentative_title": "Finalize and Robustly Test `fetch_paper.py` for Single Paper Ingestion & DocInsight Job Submission",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/literature_system_overview.md", "section": "§ 4 Component Catalogue (fetch_paper.py), § 7.1 P0 Process Flow"},
+      {"file": "cultivation/scripts/literature/fetch_paper.py"},
+      {"file": "cultivation/schemas/paper.schema.json"},
+      {"file": "tests/literature/test_fetch_paper.py"},
+      {"file": "tests/literature/test_fetch_paper_integration.py"}
+    ],
+    "description_objective": "Conduct a final audit and refinement of `fetch_paper.py`. Ensure robust functionality for: PDF download from arXiv; comprehensive metadata extraction from arXiv API and validation against `paper.schema.json` (log schema validation errors, but allow script to proceed if core fields are present); creation of well-structured note skeletons in `literature/notes/`; and correct submission of indexing/summary jobs to DocInsight (via `docinsight_client.py`), storing the returned `docinsight_job_id` in the metadata JSON. This script should *only submit* the job to DocInsight and not block/poll for results. Refine logic for `force_redownload` option and for merging new API data with existing metadata fields (e.g., preserving user-added tags if metadata file already exists). Improve error handling (e.g., for failed downloads, API errors, invalid arXiv IDs) and logging. Enhance existing tests for full coverage.",
+    "primary_type": "System Refinement & Testing",
+    "initial_scale_estimate": "Large (2-3 days, ~8-12 deep work hours)",
+    "potential_deliverables_outcomes": [
+      "Audited, hardened, and well-documented `fetch_paper.py` script that submits DocInsight jobs without polling for completion.",
+      "Comprehensive `pytest` suite, including integration tests with a mock DocInsight client.",
+      "Clear logic for metadata merging and update strategy documented.",
+      "Robust error handling for various ingestion failure scenarios."
+    ],
+    "notes_questions_dependencies": "Depends on `DW_LIT_CLIENT_001_FINALIZE`. Critical Change: The current `fetch_paper.py` includes logic to poll DocInsight. This polling responsibility should be definitively moved to `process_docinsight_results.py`. `fetch_paper.py` should be modified to only submit the job and record the `docinsight_job_id`. This makes `fetch_paper.py` faster and more suitable for batch operations. Ensure the `LIT_DIR_OVERRIDE` environment variable is respected for output directories."
+  },
+  {
+    "task_id_candidate": "DW_LIT_INGEST_002_DOCINSIGHT_POLLER",
+    "tentative_title": "Finalize and Test `process_docinsight_results.py` Asynchronous Worker for DocInsight Results",
+    "source_reference": [
+      {"file": "cultivation/scripts/literature/process_docinsight_results.py"},
+      {"file": "cultivation/docs/3_design/knowledge_system/literature_system_overview.md", "section": "Implied by asynchronous DocInsight job processing needs for batch operations and system resilience"}
+    ],
+    "description_objective": "Perform a final audit and hardening of `process_docinsight_results.py`. Ensure it correctly scans all metadata JSON files in `literature/metadata/` for pending DocInsight jobs (identified by the presence of `docinsight_job_id` but absence of `docinsight_summary`), uses `docinsight_client.py` to poll for and fetch results, and robustly updates the corresponding metadata JSON files (adding `docinsight_summary`, `docinsight_novelty`) and appends summaries/novelty scores to the Markdown note files. Implement clear logging and error handling (e.g., for jobs that fail in DocInsight or persistently timeout). Plan and document how this script will be scheduled for regular execution (e.g., as part of a GitHub Action after batch fetching).",
+    "primary_type": "System Refinement & Testing, Automation",
+    "initial_scale_estimate": "Medium (1-2 days, ~4-8 deep work hours)",
+    "potential_deliverables_outcomes": [
+      "Audited, hardened, and well-documented `process_docinsight_results.py` script.",
+      "A documented strategy and (if applicable) a script/CI configuration for its regular, automated execution.",
+      "Comprehensive `pytest` unit tests covering various states of metadata files and DocInsight responses."
+    ],
+    "notes_questions_dependencies": "Depends on `DW_LIT_CLIENT_001_FINALIZE` and `DW_LIT_INGEST_001_FETCH_PAPER` (which now only submits jobs). This script is the primary mechanism for completing the DocInsight processing loop."
+  },
+  {
+    "task_id_candidate": "DW_LIT_SEARCH_002_CLI",
+    "tentative_title": "Implement `lit-search` CLI for Semantic Search and Summarization via DocInsight",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/literature_system_overview.md", "section": "1 · Vision & Measurable Goals (LIT-02), 4 · Component Catalogue (lit-search CLI)"}
+    ],
+    "description_objective": "Implement a user-facing command-line interface (CLI) tool, `lit-search` (e.g., as `cultivation/scripts/literature/lit_search_cli.py` or integrated into a main project CLI such as the planned `flashcards_cli.py`). This tool must: 1. Accept a natural language query string as input. 2. Utilize `docinsight_client.py` to interact with the DocInsight service's search/RAG endpoint. 3. Present results (e.g., a direct answer or summary, relevant text chunks, source paper IDs, novelty scores if applicable) in a user-friendly Markdown format in the terminal. 4. Include options for controlling search parameters (e.g., number of results, specific corpus/tags to search if DocInsight supports). Ensure proper error handling and provide informative user feedback.",
+    "primary_type": "System Development (CLI)",
+    "initial_scale_estimate": "Medium (1-2 days, ~6-10 deep work hours)",
+    "potential_deliverables_outcomes": [
+      "Functional `lit-search` CLI tool integrated into the project's script structure.",
+      "Clear, well-formatted Markdown output of search results to the console.",
+      "Unit tests for CLI argument parsing, core logic, and DocInsight client invocation (using a mocked client).",
+      "User documentation for the `lit-search` CLI, including examples."
+    ],
+    "notes_questions_dependencies": "Depends on `DW_LIT_CLIENT_001_FINALIZE` and requires a running DocInsight instance (mock or real) with an indexed corpus for end-to-end testing."
+  },
+  {
+    "task_id_candidate": "DW_LIT_AUTOMATION_001_BATCH_FETCH",
+    "tentative_title": "Finalize `fetch_arxiv_batch.py` and Deploy Nightly Automated Literature Ingestion Workflow",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/literature_system_overview.md", "section": "§ 4 (fetch_arxiv_batch.py), § 7.2 (Nightly Batch), § 10.2 (GH Action for `ci-literature.yml`)"},
+      {"file": "cultivation/scripts/literature/fetch_arxiv_batch.py"},
+      {"file": ".github/workflows/ci-literature.yml"},
+      {"file": "tests/literature/test_fetch_arxiv_batch.py"}
+    ],
+    "description_objective": "Finalize the `fetch_arxiv_batch.py` script. Ensure it robustly queries the arXiv API for new papers based on configured tags/queries (e.g., 'ml', 'rna', 'arc'), correctly manages state (e.g., in `.fetch_batch_state.json`) to avoid re-fetching previously processed papers, and properly invokes the single-paper ingestion logic (`DW_LIT_INGEST_001_FETCH_PAPER`'s functionality for job submission to DocInsight). Develop and deploy a new GitHub Action workflow (e.g., `nightly-literature-ingest.yml`) to: 1. Run `fetch_arxiv_batch.py` on a nightly schedule. 2. Subsequently, run `process_docinsight_results.py` (`DW_LIT_INGEST_002_DOCINSIGHT_POLLER`) to gather summaries for newly submitted jobs. 3. Commit any new literature artifacts (PDFs, metadata JSONs with job IDs and eventually summaries) to the repository. Ensure comprehensive logging and error notifications for this batch job.",
+    "primary_type": "System Refinement & Process Automation (CI/CD)",
+    "initial_scale_estimate": "Large (2-3 days, ~8-12 deep work hours)",
+    "potential_deliverables_outcomes": [
+      "Audited, hardened, and well-documented `fetch_arxiv_batch.py` script.",
+      "A fully functional GitHub Action workflow in `.github/workflows/` for nightly automated literature ingestion and processing.",
+      "Demonstrated successful automated commits of new literature artifacts to the repository.",
+      "Comprehensive `pytest` tests for `fetch_arxiv_batch.py`, covering state management and error conditions."
+    ],
+    "notes_questions_dependencies": "Depends on `DW_LIT_INGEST_001_FETCH_PAPER` (for single paper job submission) and `DW_LIT_INGEST_002_DOCINSIGHT_POLLER` (for result fetching). The GitHub Action will require appropriate secrets/permissions for committing to the repository. The existing `ci-literature.yml` is for code testing; this will be a new, scheduled workflow. The re-indexing part mentioned in the original design doc's CI for `ci-literature.yml` should be handled by `DW_LIT_AUTOMATION_002_CORPUS_MGMT`."
+  },
+  {
+    "task_id_candidate": "DW_LIT_READERAPP_001_BACKEND",
+    "tentative_title": "Implement Instrumented Reading Backend (FastAPI, WebSocket, SQLite Logging)",
+    "source_reference": [
+      {"file": "cultivation/reader_app/main.py"},
+      {"file": "cultivation/docs/3_design/knowledge_system/user_experience_knowledge_system.md", "section": "Phase 2: Instrumented & Assisted Reading/Study"},
+      {"file": "cultivation/docs/literature_system_howto.md"}
+    ],
+    "description_objective": "Develop the FastAPI backend (`reader_app/main.py`) for the instrumented PDF reader. This includes: 1. Serving static frontend files and PDFs from `literature/pdf/`. 2. Implementing a WebSocket endpoint (`/ws`) to receive telemetry events from the frontend. 3. On WebSocket connection, create a new session entry in `literature/db.sqlite` (linking to `paper_id`, `started_at`). 4. Logging all received telemetry events (page changes, view area updates, highlights, text selections) to the `events` table in `db.sqlite`, associated with the session. 5. Implementing an API endpoint (`/finish_session`) to receive subjective metrics from the user (comprehension, relevance, novelty, time spent), mark the session as `finished_at` in `db.sqlite`, and log these metrics as a `session_summary_user` event. 6. Implement supporting API endpoints: `/papers/list`, `/papers/progress`, `/metadata/{arxiv_id}`. Ensure robust database interactions and error handling.",
+    "primary_type": "System Development (Web Backend & API)",
+    "initial_scale_estimate": "Large (3-4 days, ~12-16 deep work hours)",
+    "potential_deliverables_outcomes": [
+      "Functional FastAPI application in `reader_app/main.py` with all specified endpoints.",
+      "Reliable WebSocket communication and telemetry event logging to `literature/db.sqlite`.",
+      "Correct session lifecycle management (start, event logging, finish with subjective metrics).",
+      "Comprehensive `pytest` test suite for all API endpoints and WebSocket interactions using `fastapi.testclient.TestClient`."
+    ],
+    "notes_questions_dependencies": "Database schema in `main.py` (or an external `events_schema.sql`) must be stable. The `paperSelect` and `/papers/progress` logic in current `main.py` seems good; ensure it's robust. Metadata validation via `jsonschema` should be maintained if schema files are up-to-date."
+  },
+  {
+    "task_id_candidate": "DW_LIT_READERAPP_002_FRONTEND",
+    "tentative_title": "Implement Instrumented Reading Frontend (JavaScript, PDF.js Bridge, Telemetry)",
+    "source_reference": [
+      {"file": "cultivation/reader_app/static/main.js"},
+      {"file": "cultivation/reader_app/static/index.html"},
+      {"file": "cultivation/reader_app/tests/test_plan.md"}
+    ],
+    "description_objective": "Develop the JavaScript frontend (`static/main.js` and `static/pdfjs/viewer.html` event bridge) for the instrumented PDF reader. This includes: 1. Dynamically populating the paper selection dropdown using `/papers/list` and `/papers/progress` APIs. 2. Handling PDF loading into the PDF.js viewer iframe, supporting resume functionality. 3. Establishing and managing the WebSocket connection to the backend for sending telemetry. 4. Implementing the event bridge within `viewer.html` to accurately capture events from PDF.js (page changes, scroll/view area updates, highlight creation, text selections) and use `postMessage` to send them to `main.js`. 5. `main.js` relaying these events via WebSocket. 6. Providing UI elements for adding new arXiv IDs and triggering the 'Finish Session' workflow (prompting for subjective metrics and calling the backend API). Ensure robust error handling and clear user feedback.",
+    "primary_type": "System Development (Web Frontend)",
+    "initial_scale_estimate": "Large (3-5 days, ~12-20 deep work hours)",
+    "potential_deliverables_outcomes": [
+      "Functional JavaScript frontend (`main.js`) interacting seamlessly with the FastAPI backend.",
+      "Reliable PDF.js event capture and telemetry transmission via WebSocket.",
+      "User-friendly interface for paper selection, loading, and session management, including subjective metric input.",
+      "Comprehensive Jest unit/integration tests and Playwright E2E tests as outlined in `reader_app/tests/test_plan.md`."
+    ],
+    "notes_questions_dependencies": "Depends on `DW_LIT_READERAPP_001_BACKEND`. Requires careful implementation of the `postMessage` bridge from the PDF.js iframe to the parent `main.js`. WebSocket management (reconnection logic) needs to be robust. Highlight capture logic in `main.js` (patching `handleAnnotationEditorStatesChanged`) needs thorough testing."
+  },
+  {
+    "task_id_candidate": "DW_LIT_READERAPP_003_CLI_SESSION",
+    "tentative_title": "Refine Instrumented Reading CLI (`reading_session.py`) for Subjective Metrics Logging",
+    "source_reference": [
+      {"file": "cultivation/scripts/literature/reading_session.py"}
+    ],
+    "description_objective": "Refine the `reading_session.py` CLI tool. Its primary role will be to allow users to log subjective end-of-session metrics (comprehension, relevance, novelty, actual time spent) for a given active session. This script should now call the `/finish_session` API endpoint provided by the `reader_app` backend rather than writing directly to the SQLite database. The `start-reading` command can be deprecated or simplified as session start is primarily handled by the web app. `list-open` remains useful. Ensure robust argument parsing and error handling.",
+    "primary_type": "Tool Refinement (CLI)",
+    "initial_scale_estimate": "Small (0.5-1 day, ~2-4 deep work hours)",
+    "potential_deliverables_outcomes": [
+      "Refined `reading_session.py` CLI focused on `end-reading` (via API call) and `list-open`.",
+      "Updated user documentation if CLI usage changes significantly.",
+      "Unit tests for CLI commands."
+    ],
+    "notes_questions_dependencies": "Depends on `DW_LIT_READERAPP_001_BACKEND` (specifically the `/finish_session` API). This simplifies `reading_session.py`'s responsibilities."
+  },
+  {
+    "task_id_candidate": "DW_LIT_TELEMETRYVIZ_001_CLI",
+    "tentative_title": "Develop `plot_reading_metrics.py` CLI for Visualizing Reading Session Telemetry & Extracting Flashcard Candidates",
+    "source_reference": [
+      {"file": "cultivation/scripts/literature/plot_reading_metrics.py"},
+      {"file": "cultivation/literature/db.sqlite"}
+    ],
+    "description_objective": "Finalize and productionize `plot_reading_metrics.py` as a CLI tool. It must: 1. Accept `arxiv_id` and optional `session_id` as input. 2. Fetch and parse event data from `literature/db.sqlite`. 3. Generate and save visualizations for reading path (page vs. time) and estimated time spent per page. 4. Implement robust analysis of text selections, including frequency counts, fuzzy clustering of similar selections (using `rapidfuzz`), and export of deduped, clustered selections (with page numbers) to a text file suitable as input for flashcard creation (e.g., to be processed by a `flashcore` utility). Add comprehensive error handling and user documentation for the CLI.",
+    "primary_type": "Tool Development (Data Visualization & Analysis)",
+    "initial_scale_estimate": "Medium (1-2 days, ~6-8 deep work hours)",
+    "potential_deliverables_outcomes": [
+      "Functional `plot_reading_metrics.py` CLI tool.",
+      "Saved plots for reading path and time-on-page metrics, stored in a structured output directory.",
+      "Text file output of clustered text selections with page numbers, ready for flashcard generation.",
+      "Unit tests for core analysis functions (e.g., clustering, page assignment for selections)."
+    ],
+    "notes_questions_dependencies": "Depends on `DW_LIT_READERAPP_001_BACKEND` producing valid telemetry data in `db.sqlite`. The flashcard candidate export format and subsequent processing by `flashcore` need to be coordinated."
+  },
+  {
+    "task_id_candidate": "DW_LIT_METRICS_001_WEEKLY_AGGREGATE",
+    "tentative_title": "Refactor `metrics_literature.py` to Produce Weekly Aggregated `reading_stats.parquet` for Potential Engine",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/literature_system_overview.md", "section": "§ 6.2 Reading Stats Schema (focus on weekly aggregation for `C(t)`), § 8 Synergy & Potential Integration"},
+      {"file": "cultivation/scripts/literature/metrics_literature.py"},
+      {"file": "tests/literature/test_metrics_literature.py"},
+      {"file": "tests/literature/test_reading_stats_schema.py"}
+    ],
+    "description_objective": "Refactor `metrics_literature.py` to generate the `literature/reading_stats.parquet` file with metrics aggregated on a **weekly basis** (`iso_week` as the primary key for aggregation). This involves: 1. Reading per-session data from `literature/db.sqlite` (specifically `sessions` table for `paper_id`, `finished_at`; and `events` table for `session_summary_user` payloads containing self-rated metrics and actual time). 2. Reading per-paper metadata from `literature/metadata/*.json` (for `docinsight_novelty_corpus`). 3. Calculating weekly aggregates: `papers_read_count` (count of unique arXiv IDs with at least one session finished in that ISO week), `total_minutes_spent_actual` (sum from `session_summary_user` for that week), `avg_docinsight_novelty_corpus` (mean of `docinsight_novelty` for papers whose sessions finished that week), and other relevant weekly aggregated self-rated metrics or flashcard counts (from `session_summary_user`). 4. Ensure the output parquet file strictly adheres to the Pandera schema (defined in `metrics_literature.py` and tested by `test_reading_stats_schema.py`). Update tests to reflect weekly aggregation logic.",
+    "primary_type": "System Refinement & Data Processing",
+    "initial_scale_estimate": "Medium (2 days, ~8-10 deep work hours)",
+    "potential_deliverables_outcomes": [
+      "Refactored `metrics_literature.py` script that produces a weekly aggregated `reading_stats.parquet`.",
+      "Pandera schema validation for the output is maintained or enhanced.",
+      "Updated unit tests in `test_metrics_literature.py` to verify correct weekly aggregation logic.",
+      "Clear documentation within the script on how weekly metrics are derived from per-session and per-paper data."
+    ],
+    "notes_questions_dependencies": "This is a critical alignment task for the Potential Engine (`C(t)` input). The definition of `papers_read_count` (based on finished sessions) and sourcing of `total_minutes_spent_actual` (from `session_summary_user` event) needs to be precise. The current `metrics_literature.py`'s `aggregate` function outputs detailed per-session data; this might be retained for a `reading_sessions_detailed.parquet`, while a new aggregation function is added for the weekly `reading_stats.parquet`."
+  },
+  {
+    "task_id_candidate": "DW_LIT_AUTOMATION_002_CORPUS_MGMT",
+    "tentative_title": "Define and Implement DocInsight Corpus Management and Re-indexing Strategy (ADR)",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/literature_system_overview.md", "section": "§ 10.2 CI/CD (mentions `reindex` command), § 11 Roadmap & Open Decisions (Q-LIT-03)"}
+    ],
+    "description_objective": "Formally define and document (as an ADR) the strategy for managing the DocInsight vector index/corpus (LanceDB). This includes: 1. Procedures for initial corpus creation from all PDFs in `literature/pdf/`. 2. Strategy for incremental updates (indexing only new PDFs) versus full re-indexing (e.g., scheduled monthly, or when DocInsight's underlying embedding model changes). 3. Backup and recovery procedures for the LanceDB index. Implement any necessary scripts or CI steps to support this strategy (e.g., a robust `reindex` command that can be triggered manually or by CI, and potentially an incremental update script).",
+    "primary_type": "System Design & Process Automation",
+    "initial_scale_estimate": "Medium (1-2 days, ~6-8 deep work hours)",
+    "potential_deliverables_outcomes": [
+      "An Architecture Decision Record (ADR) detailing the chosen DocInsight corpus management and re-indexing strategy.",
+      "Implemented scripts (e.g., enhancements to `docinsight_client.py` or a new script) for full and potentially incremental re-indexing.",
+      "Documented backup and recovery procedures for the LanceDB index.",
+      "Updated CI workflows if re-indexing is to be automated."
+    ],
+    "notes_questions_dependencies": "Depends on understanding DocInsight's capabilities for incremental indexing and how it handles model updates. The decision on whether to store the LanceDB index in Git LFS (Q-LIT-03) is related but separate; this task focuses on the *process* of building/maintaining the index."
+  },
+  {
+    "task_id_candidate": "DW_LIT_TESTING_001_INTEGRATION",
+    "tentative_title": "Develop Comprehensive Integration Test Suite for the Full Literature Processing Pipeline",
+    "source_reference": [
+      {"file": "cultivation/tests/literature/"}
+    ],
+    "description_objective": "Design and implement a comprehensive integration test suite that validates the end-to-end functionality of the Literature Processing Pipeline. This suite should cover key workflows: 1. Batch fetching of several papers (`fetch_arxiv_batch.py`) -> single paper ingestion (`fetch_paper.py` submitting jobs) -> asynchronous DocInsight result processing (`process_docinsight_results.py`) -> verification of updated metadata and notes. 2. Simulating an instrumented reading session (via API calls to `reader_app` or direct DB manipulation for test purposes) -> verification of events logged to `db.sqlite`. 3. Running `metrics_literature.py` on the test data -> validation of the generated weekly `reading_stats.parquet` against expected aggregates. 4. Successful query execution via `lit-search` CLI against a small, specifically indexed test corpus. Focus on data integrity, correct interaction between all LPP components, and handling of error conditions using mocked external services (arXiv, DocInsight) where necessary.",
+    "primary_type": "Testing & Quality Assurance",
+    "initial_scale_estimate": "Large (2-4 days, ~10-16 deep work hours)",
+    "potential_deliverables_outcomes": [
+      "A suite of `pytest` integration tests covering the specified LPP workflows.",
+      "Documentation for setting up and running the integration test environment (including mock DocInsight setup, test SQLite DB schema and data).",
+      "Integration of these tests into a CI job that runs regularly (e.g., nightly or on major PRs)."
+    ],
+    "notes_questions_dependencies": "This is a significant QA undertaking, requiring all core LPP components to be in a reasonably stable and testable state. Will involve sophisticated mocking strategies and careful test data management."
+  },
+  {
+    "task_id_candidate": "DW_LIT_DOCS_001_SYSTEM_GUIDE",
+    "tentative_title": "Create Comprehensive User and Developer Guide for the Literature Processing Pipeline",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/literature_system_overview.md"},
+      {"file": "cultivation/docs/literature_system_howto.md"},
+      {"file": "cultivation/docs/3_design/knowledge_system/user_experience_knowledge_system.md"}
+    ],
+    "description_objective": "Consolidate, refine, and expand all documentation related to the Literature Processing Pipeline into a unified and comprehensive guide. This guide should cover: 1. System Architecture (high-level, component interactions). 2. User Guide: Setup instructions (dependencies, environment variables, DocInsight setup), step-by-step instructions for all CLI tools (`fetch_paper.py`, `fetch_arxiv_batch.py`, `lit-search`, `reading_session.py`, `plot_reading_metrics.py`), and usage of the Instrumented Reader web application. 3. Developer Guide: Overview of key scripts, data schemas (`paper.schema.json`, `db.sqlite` structure, `reading_stats.parquet` schema), API contracts, testing strategy, and contribution guidelines. 4. Troubleshooting common issues. Ensure consistency with the canonical design in `literature_system_overview.md`.",
+    "primary_type": "Documentation",
+    "initial_scale_estimate": "Large (2-3 days, ~8-12 deep work hours)",
+    "potential_deliverables_outcomes": [
+      "A single, comprehensive Markdown document (or a set of interlinked documents under `docs/literature_pipeline/`) serving as the primary guide for the LPP.",
+      "Clear instructions for both users and developers.",
+      "Updated diagrams and examples.",
+      "Integration into the project's main documentation site (e.g., MkDocs)."
+    ],
+    "notes_questions_dependencies": "Best undertaken once the majority of the LPP components (`DW_LIT_...` tasks) are finalized. This task involves consolidation and expansion of existing docs like `literature_system_howto.md` and parts of `literature_system_overview.md`."
+  }
+]

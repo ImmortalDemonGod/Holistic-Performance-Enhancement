@@ -1,0 +1,410 @@
+[
+  {
+    "task_id_candidate": "DW_HIL_CORE_001",
+    "tentative_title": "Implement Core Synergy Engine (S_A->B Calculation - P1 Baseline)",
+    "source_reference": [
+      {"file": "project_onboarding.md", "section": "Synergy Calculation Layer"},
+      {"file": "cultivation/docs/3_design/design_overview.md", "section": "3.1 Synergy Score S_A->B"},
+      {"file": "cultivation/docs/1_background/synergy_concept.md", "section": "Operational Definition of Synergy"},
+      {"file": "cultivation/scripts/synergy/calculate_synergy.py", "comment": "Status: Placeholder, core formula missing (per Progress.md)"},
+      {"file": "cultivation/docs/3_design/roadmap_vSigma.md", "section": "P1 Milestone"}
+    ],
+    "description_objective": "Implement the Python script `calculate_synergy.py` to compute the synergy score S_A->B(w) = ΔB_obs(w) - ΔB_pred_baseline(w) for defined domain pairings (e.g., Running -> Software). For Phase P1, the baseline model ΔB_pred_baseline(w) will be a 4-week rolling mean of ΔB. This script is fundamental to the HIL's ability to quantify cross-domain interactions, providing critical data for understanding how different activities influence overall improvement and forming the basis for optimized planning. It must read processed Parquet data from relevant domain stores and output `synergy_score.parquet` conforming to the schema in `design_overview.md` §4.3.",
+    "primary_type": "Algorithm Development & Implementation",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `calculate_synergy.py` script capable of P1 baseline calculations.",
+      "`synergy_score.parquet` generated from sample domain data, adhering to defined schema.",
+      "Unit tests verifying synergy calculation logic, especially the rolling mean baseline.",
+      "Comprehensive documentation for script usage, input data expectations (schemas of domain Parquets), and output schema."
+    ],
+    "notes_questions_dependencies": "Depends on availability of versioned, schema-compliant Parquet files from at least two domains (e.g., ETL_R, ETL_S). Initial focus on rolling mean baseline as per P1 roadmap; future enhancements (SARIMA/Prophet for P3) will build upon this. Error handling for insufficient historical data for rolling means is crucial."
+  },
+  {
+    "task_id_candidate": "DW_HIL_CORE_002",
+    "tentative_title": "Implement Global Potential Engine (Π Calculation - P2 Initial)",
+    "source_reference": [
+      {"file": "project_onboarding.md", "section": "Global Potential Engine"},
+      {"file": "cultivation/docs/3_design/design_overview.md", "section": "3.2 Global Potential Π"},
+      {"file": "cultivation/scripts/synergy/potential_engine.py", "section": "Status: Placeholder (per Progress.md)"},
+      {"file": "cultivation/docs/3_design/roadmap_vSigma.md", "section": "P2 Milestone"}
+    ],
+    "description_objective": "Implement the Python script `potential_engine.py` to calculate the Global Potential score Π using the formula Π(P,C,S,A) = w_P P^α + w_C C^β + λ ΣS_i->j + ε. This score is the HIL's primary metric for overall capability. Initially (P2), this will use Physical (P from running ETL) and Cognitive (C, proxied from software commit metrics, literature reading stats, and flashcard system analytics) domain KPIs, along with `synergy_score.parquet`. Social (S) and Aptitude/Artistic (A) domains will be zero-padded until their ETLs are developed. The script should output `potential_snapshot.parquet`. Implement initial weight setting (w, α, β, λ) via a configuration file.",
+    "primary_type": "Algorithm Development & Implementation",
+    "initial_scale_estimate": "Large (2-4 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `potential_engine.py` script for Π calculation.",
+      "`potential_snapshot.parquet` generated based on available inputs, adhering to a defined schema.",
+      "Unit tests for Π calculation logic, including handling of zero-padded domains and various KPI inputs.",
+      "Configuration file management for initial weights and parameters (w, α, β, λ)."
+    ],
+    "notes_questions_dependencies": "Depends on DW_HIL_CORE_001 (Synergy Engine) for `synergy_score.parquet` and standardized Parquet outputs from ETL_R, ETL_S (DevDailyReflect), ETL_B (Literature Pipeline), and Flashcore analytics. The schema for `potential_snapshot.parquet` needs to be defined. Weight learning (`update_potential_weights.py`) is a separate task (DW_HIL_CORE_003)."
+  },
+  {
+    "task_id_candidate": "DW_HIL_CORE_003",
+    "tentative_title": "Implement `update_potential_weights.py` for Monthly Π Recalibration (P2/P3)",
+    "source_reference": [
+      {"file": "project_onboarding.md", "section": "Global Potential Engine (mentions regression for weight updates)"},
+      {"file": "cultivation/docs/3_design/design_overview.md", "section": "3.2 Global Potential Π (mentions monthly weight update via `update_potential_weights.py`)"}
+    ],
+    "description_objective": "Develop the `update_potential_weights.py` script to perform periodic (e.g., monthly) recalibration of the Global Potential (Π) weights (w_P, w_C, etc.) and exponents (α, β, etc.) using historical domain KPI data, synergy scores, and a user-defined overall performance outcome/KPI (e.g., aggregated milestone achievements, subjective well-being trends). This script will employ regression techniques (e.g., Ridge Regression) to optimize weights for improving the correlation of Π with these 'ground truth' performance gains, thus making Π a more effective measure for the improvement system. Persist updated weights for `potential_engine.py`.",
+    "primary_type": "Algorithm Development (Machine Learning)",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `update_potential_weights.py` script.",
+      "Mechanism for storing, versioning, and loading updated weights.",
+      "Jupyter notebook demonstrating the regression process, feature selection, and validation of weight updates against historical data.",
+      "Clear documentation on the definition and sourcing of the 'target outcome KPI' and the recalibration workflow."
+    ],
+    "notes_questions_dependencies": "Requires historical data from all relevant domains and synergy scores, and a robustly defined 'target outcome KPI'. Depends on DW_HIL_CORE_002 outputting historical data. Needs libraries like `scikit-learn`."
+  },
+  {
+    "task_id_candidate": "DW_HIL_SCHED_001",
+    "tentative_title": "Implement Multi-Domain PID Scheduler (`pid_scheduler.py`) for Daily Planning (P2)",
+    "source_reference": [
+      {"file": "project_onboarding.md", "section": "Scheduler and Planning (PID Scheduler, daily_plan.json, phase management)"},
+      {"file": "cultivation/docs/3_design/design_overview.md", "section": "SCHED Component"},
+      {"file": "cultivation/scripts/running/pid_scheduler.py", "comment": "Existing template focused on running. Needs generalization and core PID logic for HIL."},
+      {"file": "cultivation/docs/3_design/roadmap_vSigma.md", "section": "P2 Milestone"}
+    ],
+    "description_objective": "Develop the core PID control logic within `pid_scheduler.py` to make it a general-purpose scheduler for the HIL. It should consume the `potential_snapshot.parquet` (or live Π value), compare current Π against a target Π (or desired rate of change), and use the error to adjust parameters in `daily_plan.json` (e.g., time allocations for domains, intensity levels for workouts/study). It must also integrate with `status.json` for training phase management, advancing phases based on KPI gates (e.g., from the `run-metrics` GitHub Action) using the `kpi_gate_passed` logic.",
+    "primary_type": "Algorithm Development & System Integration",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "Refactored and functional `pid_scheduler.py` with core PID logic for multi-domain plan adjustments.",
+      "`daily_plan.json` generated based on Π input and PID outputs, with a clearly defined schema.",
+      "Robust integration with `status.json` for training phase management, verified with test cases for phase advancement.",
+      "Unit tests for PID controller logic, plan generation, and phase gate interactions.",
+      "Documentation on PID tuning parameters (Kp, Ki, Kd, setpoints) and how PID outputs translate to plan modifications."
+    ],
+    "notes_questions_dependencies": "Depends on DW_HIL_CORE_002 (for Π input). Requires defining 'target potential' and the mapping from PID outputs to concrete plan changes. The `kpi_gate_passed` function requires reliable access to GitHub Actions workflow status (e.g., via GITHUB_TOKEN)."
+  },
+  {
+    "task_id_candidate": "DW_HIL_SCHED_002",
+    "tentative_title": "Develop `daily_hpe_planner.py` Orchestrator Script for All Schedulers",
+    "source_reference": [
+      {"file": "cultivation/scripts/task_management/hpe_taskmaster_csm_week1_scheduling_analysis_v1.0.md", "section": "IV. Implementation of Needed Features - Point 5"},
+      {"file": "project_onboarding.md", "section": "Scheduler and Planning (Implies need for overall daily plan generation)"}
+    ],
+    "description_objective": "Create the `daily_hpe_planner.py` script to orchestrate the entire daily scheduling process. This script will: 1. Accept a target date. 2. Invoke block-specific schedulers (`active_learning_block_scheduler.py`, `passive_learning_block_scheduler.py`). 3. Invoke the main `pid_scheduler.py` to get high-level directives or specific tasks for other blocks (e.g., Deep Work, Running). 4. Consolidate all outputs into a single, time-ordered daily plan (e.g., Markdown, or updates to `tasks.json` with a 'scheduled_for_today' status/tag). 5. Implement logic to prevent task over-commitment and ensure dependencies are respected across blocks.",
+    "primary_type": "System Development & Process Automation",
+    "initial_scale_estimate": "Medium (2-3 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `daily_hpe_planner.py` script.",
+      "A defined, consolidated daily plan output format (e.g., Markdown, or conventions for updating Task Master).",
+      "Logic for passing task state updates (e.g., if a task is scheduled by one sub-scheduler) to subsequent sub-schedulers to avoid conflicts.",
+      "Comprehensive logging of the daily planning process.",
+      "Unit tests for orchestration logic and conflict resolution."
+    ],
+    "notes_questions_dependencies": "Critical for operationalizing the daily schedule. Depends on functional and consistent APIs/outputs from `active_learning_block_scheduler.py`, `passive_learning_block_scheduler.py`, and `pid_scheduler.py` (DW_HIL_SCHED_001). Strategy for updating `tasks.json` (if any) needs to be robust."
+  },
+  {
+    "task_id_candidate": "DW_HIL_FOCUS_001",
+    "tentative_title": "Implement Hardware and Firmware for Focus Predictor: EEG-B (ADS1292R DIY Rig - MVP)",
+    "source_reference": [
+      {"file": "cultivation/docs/6_scheduling/FocusPredictor_TechSpec_v1.1.md", "section": "3.2. EEG-B: ADS1292R DIY Rig"}
+    ],
+    "description_objective": "Assemble, test, and validate the DIY EEG-B sensor module based on the ADS1292R and ESP32, as detailed in the FocusPredictor tech specification. This includes complete hardware assembly, development and debugging of ESP32 firmware for reliable data acquisition and LSL streaming, and rigorous signal validation (noise floor < 5µV, clear alpha modulation during eyes-open/closed tests, identifiable blink/clench artifacts). This task is foundational for acquiring direct neural correlates of focus for the HIL.",
+    "primary_type": "Hardware Development & Embedded Programming",
+    "initial_scale_estimate": "Epic (multi-week, intensive debugging expected)",
+    "potential_deliverables_outcomes": [
+      "Fully assembled and operational EEG-B sensor module.",
+      "Stable ESP32 firmware streaming 2-channel EEG data via LSL.",
+      "Detailed validation report with signal quality metrics (RMS noise, PSD plots for alpha modulation, artifact examples).",
+      "Finalized schematics, assembly guide, and troubleshooting notes for the EEG-B rig."
+    ],
+    "notes_questions_dependencies": "Requires all specified BOM components. Strong C++/Arduino (ESP32) skills, soldering, and basic electronics debugging. LSL_ESP32 library understanding is key. Adherence to safety protocols for battery-powered device is paramount."
+  },
+  {
+    "task_id_candidate": "DW_HIL_FOCUS_002",
+    "tentative_title": "Implement Hardware and Firmware for Focus Predictor: EDA (Grove GSR DIY Rig - MVP)",
+    "source_reference": [
+      {"file": "cultivation/docs/6_scheduling/FocusPredictor_TechSpec_v1.1.md", "section": "3.4. EDA: Grove GSR DIY Rig"}
+    ],
+    "description_objective": "Assemble, modify (shunt resistor, Low-Pass Filter), and validate the DIY EDA sensor module using the Grove GSR sensor, ESP32, and MPU-6050, as per the FocusPredictor tech spec. Develop ESP32 firmware for GSR ADC reading, MPU-6050 accelerometer data acquisition, and LSL streaming for both EDA and ACC data. Perform detailed calibration with known resistors and validate physiological responsiveness (e.g., startle response). This provides a measure of sympathetic arousal for the HIL.",
+    "primary_type": "Hardware Development & Embedded Programming",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "Assembled, modified, and validated EDA sensor module with integrated accelerometer.",
+      "Stable ESP32 firmware streaming calibrated EDA (µS) and ACC data via LSL.",
+      "Calibration report (resistance vs. conductance) and validation of physiological responses.",
+      "Finalized schematics for modifications, assembly guide, and troubleshooting notes."
+    ],
+    "notes_questions_dependencies": "Requires all BOM components. Involves circuit modification of Grove GSR module. Firmware must handle ADC, I2C, and LSL concurrently. Accurate conductance calculation from ADC values is critical."
+  },
+  {
+    "task_id_candidate": "DW_HIL_FOCUS_003",
+    "tentative_title": "Implement Software Stack for Focus Predictor (LSL Ingestion, Preprocessing, Feature Extraction - MVP)",
+    "source_reference": [
+      {"file": "cultivation/docs/6_scheduling/FocusPredictor_TechSpec_v1.1.md", "section": "4. Software Stack (4.1, 4.2)"}
+    ],
+    "description_objective": "Develop the Python software components for the Focus Predictor. This includes: 1. LSL inlets for all sensor streams (EEG-A MindWave, EEG-B ADS1292R, HRV Polar H10, EDA Grove GSR/ACC). 2. Robust time synchronization and data windowing across streams. 3. Signal preprocessing pipelines (filtering, artifact handling such as ICA for EEG-B if feasible for MVP, RR-interval cleaning for HRV, motion artifact rejection for EDA). 4. Implementation of core feature extraction algorithms for EEG (bands, ratios), HRV (time, frequency, non-linear), and EDA (tonic, phasic) as detailed in the tech spec (or Appendix D if available). Output features ready for the fusion model.",
+    "primary_type": "System Development (Signal Processing & Data Pipeline)",
+    "initial_scale_estimate": "Epic (multi-week, intensive algorithm implementation)",
+    "potential_deliverables_outcomes": [
+      "Python modules for LSL data ingestion, synchronization, and windowing from all four sensor types.",
+      "Well-tested signal preprocessing functions for EEG, HRV, and EDA.",
+      "Feature extraction functions generating a consistent feature vector per time window.",
+      "Mechanism for logging synchronized raw and processed features for model training and validation.",
+      "Comprehensive unit tests for all preprocessing and feature extraction algorithms."
+    ],
+    "notes_questions_dependencies": "Depends on functional sensor modules streaming data via LSL (DW_HIL_FOCUS_001, DW_HIL_FOCUS_002, and commercial sensors setup). Requires libraries like `pylsl`, `numpy`, `scipy`, `mne-python`, `neurokit2`, `hrv-analysis`. Artifact handling for EEG, especially muscle artifacts from frontal placement, will be challenging."
+  },
+  {
+    "task_id_candidate": "DW_HIL_FOCUS_004",
+    "tentative_title": "Train and Validate Sensor Fusion Model & API for Focus Predictor (XGBoost + Kalman - MVP)",
+    "source_reference": [
+      {"file": "cultivation/docs/6_scheduling/FocusPredictor_TechSpec_v1.1.md", "section": "4.3. Sensor Fusion Engine, 4.4. Focus Score API, 5. Validation Protocol"}
+    ],
+    "description_objective": "Develop and validate the sensor fusion model for the Focus Predictor. This includes: 1. Designing and executing a data collection protocol (min 3-5 hours per user) with varied cognitive tasks (N-Back, Stroop, SART, realistic work with self-annotations/KSS) to acquire labeled multi-sensor data. 2. Training the XGBoost static focus probability estimator. 3. Implementing and tuning the Kalman filter for temporal smoothing, including adaptive observation noise based on sensor quality flags. 4. Rigorously validating the fused focus score against task performance, KSS, and self-annotations (target AUC ≥ 0.85-0.90). 5. Implementing the Focus Score API (WebSocket & REST) as specified.",
+    "primary_type": "Machine Learning Model Development & Validation",
+    "initial_scale_estimate": "Epic (multi-week/month, includes significant data collection & labeling)",
+    "potential_deliverables_outcomes": [
+      "Curated and labeled multi-sensor dataset for focus modeling.",
+      "Trained XGBoost model file and optimized Kalman filter parameters.",
+      "Python module implementing the complete sensor fusion pipeline (XGBoost + Kalman).",
+      "Comprehensive validation report detailing performance metrics (AUC, correlation with KSS, etc.) across different cognitive states and tasks.",
+      "Functional Focus Score API (WebSocket & REST) providing real-time focus scores and confidence levels."
+    ],
+    "notes_questions_dependencies": "Critically depends on `DW_HIL_FOCUS_003` (Software Stack). Data labeling strategy is vital. Requires ML expertise (`xgboost`, `filterpy` or similar Kalman library, `scikit-learn`) and careful experimental design for validation."
+  },
+  {
+    "task_id_candidate": "DW_HIL_FM_001",
+    "tentative_title": "Formalize and Prove Stability & Boundedness of PID Scheduler Logic (Lean 4 - P2)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/lean_guide.md", "section": "5. Road-map ↔ Lean (Synergy.lean - PID boundedness)"},
+      {"file": "cultivation/docs/3_design/roadmap_vSigma.md", "section": "P2 Milestones (Lean control lemmas)"},
+      {"file": "project_onboarding.md", "section": "Formal Verification Hooks (mentions PID stability proof)"}
+    ],
+    "description_objective": "Develop formal Lean 4 proofs for the stability and boundedness properties of the PID control logic intended for `pid_scheduler.py`. This involves creating a precise mathematical model of the PID controller within Lean, defining relevant system state variables (e.g., based on Π), and proving that the controller's output (e.g., recommended plan adjustments) remains stable and within safe bounds under specified operating conditions. Store proofs in `lean/Cultivation/Synergy.lean` or `lean/Cultivation/Control.lean`.",
+    "primary_type": "Formal Proof Development",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "`.lean` file(s) with the formalized PID controller model and its stability/boundedness proofs.",
+      "Detailed documentation explaining the formal model, assumptions, and the interpretation of the proved theorems in the context of the HIL scheduler.",
+      "Successful compilation and checking of these proofs in the Lean CI workflow."
+    ],
+    "notes_questions_dependencies": "Requires a clear mathematical specification of the PID controller's inputs, outputs, and update rules as it will be implemented in `pid_scheduler.py`. Depends on `mathlib4`'s libraries for control theory or difference/differential equations."
+  },
+  {
+    "task_id_candidate": "DW_HIL_INTEGRATION_001",
+    "tentative_title": "Integrate Cognitive Metrics (C(t)) from Knowledge System into Potential Engine",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/user_experience_knowledge_system.md", "section": "Phase 4: Integration & Synergy (Cognitive Potential C(t) Update)"},
+      {"file": "cultivation/docs/3_design/knowledge_system/literature_system_overview.md", "section": "§ 8 Synergy & Potential Integration (Equation 1 for C(t))"},
+      {"file": "DW_HIL_CORE_002 (this plan, Π calculation)"}
+    ],
+    "description_objective": "Modify `potential_engine.py` (DW_HIL_CORE_002) to robustly ingest and incorporate diverse Cognitive Potential (C(t)) metrics into the Global Potential (Π) calculation. C(t) is derived from `reading_stats.parquet` (papers read, minutes spent, avg novelty from Literature Pipeline), flashcard maturity scores (from Flashcore via `flashcore.analytics.py`), and potentially mathematical biology self-assessment scores. Implement the C(t) aggregation formula (e.g., weighted sum like C(t) = α1*metric1 + α2*metric2...) and ensure its components are correctly weighted and integrated within the overall Π formula.",
+    "primary_type": "System Integration & Algorithm Refinement",
+    "initial_scale_estimate": "Medium (2-3 days)",
+    "potential_deliverables_outcomes": [
+      "Updated `potential_engine.py` script that correctly sources, calculates, and uses C(t) inputs.",
+      "Demonstrated calculation of Π with a non-zero, multi-component C(t) value.",
+      "Unit tests for the C(t) calculation and its integration into Π, covering various input scenarios from Literature, Flashcore, and self-assessments.",
+      "Documentation of the C(t) components, their data sources, and their weighting schema within Π."
+    ],
+    "notes_questions_dependencies": "Depends on DW_HIL_CORE_002, and stable Parquet/API outputs from Literature Pipeline (`reading_stats.parquet`) and Flashcore (`flashcore.analytics.py`). The specific formula and weights for C(t) components (α1, α2, α3, etc.) need to be finalized and configurable."
+  },
+  {
+    "task_id_candidate": "DW_HIL_TASKMGMT_001",
+    "tentative_title": "Develop Framework for Automated Curriculum Ingestion into HPE-Enriched Task Master Format (MVP: RNA Modeling CSM)",
+    "source_reference": [
+      {"file": "cultivation/docs/5_biology/RNA_MODELING/rna_tasks_hpe_metadata_v1.0.md", "section": "Entire document, esp. 'Important Considerations for Parser/Generator'"},
+      {"file": "cultivation/scripts/task_management/curriculum_parser&task_generator.md", "comment": "Design doc for these scripts"},
+      {"file": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md", "comment": "Source curriculum document"}
+    ],
+    "description_objective": "Design and implement generalizable Python scripts (`curriculum_parser.py`, `task_generator.py`) to parse structured curriculum documents (e.g., Markdown for RNA Modeling CSM) and (re)populate `tasks.json` with detailed HPE metadata (`hpe_csm_reference`, `hpe_learning_meta`, `hpe_scheduling_meta`) and derived `labels`. Ensure idempotency using `csm_id`. This framework is critical for streamlined learning plan management within the HIL. The MVP will target the RNA Modeling CSM as the first application.",
+    "primary_type": "System Development (Automation Script & Data Processing)",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `curriculum_parser.py` and `task_generator.py` scripts capable of processing Markdown curricula.",
+      "`tasks.json` correctly populated with HPE metadata for the RNA Week 1 curriculum as a test case.",
+      "Documentation for running the parser, its assumptions about Markdown structure, and how to define HPE metadata within curriculum docs.",
+      "Unit tests for parsing logic and `tasks.json` generation/update, covering various curriculum structures and metadata types."
+    ],
+    "notes_questions_dependencies": "Requires a well-defined and consistent structure in the source Markdown curriculum files for reliable parsing. This task involves implementing the design from `curriculum_parser&task_generator.md` and `rna_tasks_hpe_metadata_v1.0.md`."
+  },
+  {
+    "task_id_candidate": "DW_KCV_001",
+    "tentative_title": "Design & Implement Knowledge Graph Core for 'Think Tank'",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation.md", "section": "II. The 'Think Tank' - A.1. Advanced Knowledge Graph"},
+      {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation_2.md", "section": "2.3, 3.2, 5.2, 5.4 - Knowledge Representation, Graph Embeddings, Ontologies, Provenance"}
+    ],
+    "description_objective": "Design the core schema (ontology: nodes, relationships, attributes) for the Cultivation Knowledge Graph (KG), focusing on representing entities like papers, concepts, hypotheses, experiments, datasets, models, and their interconnections. Implement the KG backend (e.g., Neo4j, FalkorDB, or an RDF triple store like GraphDB/Fuseki) and develop initial Python scripts/modules for populating the KG from existing structured data sources (e.g., literature metadata, Flashcore cards, task metadata, simulation results). Include basic visualization capabilities for graph exploration and ensure the schema supports provenance tracking (e.g., PROV-O).",
+    "primary_type": "System Design & Implementation (Knowledge Graph)",
+    "initial_scale_estimate": "Epic (multi-week, iterative development)",
+    "potential_deliverables_outcomes": [
+      "Formal Knowledge Graph schema/ontology documentation (e.g., OWL, Markdown).",
+      "Deployed KG backend (e.g., local Docker instance).",
+      "Python scripts for initial KG population from key data sources, mapping them to the defined schema.",
+      "Jupyter notebook demonstrating KG querying (e.g., Cypher, SPARQL) and visualization (e.g., with `pyvis`, `networkx`, or integrated KG browser).",
+      "Strategy for incremental KG enrichment and schema evolution."
+    ],
+    "notes_questions_dependencies": "Foundational for the KCV layer. Choice of KG technology is critical (GraphDB for RDF/SPARQL vs. Labeled Property Graph like Neo4j). Requires defining how to map existing data into graph structures. PROV-O should be a core part of the schema design for tracking lineage."
+  },
+  {
+    "task_id_candidate": "DW_KCV_002",
+    "tentative_title": "Develop Hypothesis Formalization & Testability Assessment Module (Laboratory - KCV)",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation.md", "section": "I. The 'Laboratory' - A.1. Hypothesis Formalization"},
+      {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation_2.md", "section": "2. Formalizing Research Ideas"}
+    ],
+    "description_objective": "Design and implement a module within the KCV 'Laboratory' to assist users in translating informal research ideas into precise, parameterized, and testable hypotheses. This includes: 1. Structured input templates for hypotheses (e.g., inspired by RIO Journal, linking to KG entities). 2. AI-assisted suggestion of operationalizations, measurable variables, and potential sub-hypotheses by querying the KG and literature corpus (via DocInsight). 3. Integration with ontologies (from DW_KCV_001) for term standardization. 4. A 'testability check' feature that assesses if a formalized hypothesis can be linked to existing simulation models or suggests necessary new model/experiment designs.",
+    "primary_type": "System Development & AI Integration",
+    "initial_scale_estimate": "Large (4-6 days)",
+    "potential_deliverables_outcomes": [
+      "Hypothesis formalization interface/module (can be CLI or simple web UI initially).",
+      "Integration with LLMs (e.g., SciAgents-like prompts leveraging the Cultivation KG) for suggesting hypothesis parameters and structure.",
+      "Linkage to the Cultivation KG for contextual information and entity resolution.",
+      "Documentation of the hypothesis formalization workflow and AI assistance features."
+    ],
+    "notes_questions_dependencies": "Depends on DW_KCV_001 (KG Core). Requires careful LLM prompt engineering and robust human-in-the-loop validation for AI-suggested formalizations. Defining 'testability' within the Cultivation context will involve checking against available simulation models and data sources."
+  },
+  {
+    "task_id_candidate": "DW_KCV_003",
+    "tentative_title": "Implement Simulation Environment & Model Management (Laboratory - KCV MVP)",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation.md", "section": "I. The 'Laboratory' - A.2. Simulation Environment"},
+      {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation_2.md", "section": "4. Simulation and Experimentation Infrastructure"}
+    ],
+    "description_objective": "Develop the MVP for the KCV 'Laboratory' simulation environment. This includes: 1. A version-controlled model library (Git-based, initially for mathematical biology ODE models defined in SBML or a Python-native format). 2. Integration of Python-based ODE solvers (e.g., SciPy's `solve_ivp`, Assimulo). 3. A system for managing model parameters and experimental scenarios (e.g., using YAML configuration files that conform to SED-ML principles). 4. Basic execution pipeline for simulation runs (e.g., using Snakemake or a simpler custom script for MVP), storing results in Parquet and logging provenance to the KG. 5. Tools for basic visualization of simulation outputs.",
+    "primary_type": "System Development & Integration",
+    "initial_scale_estimate": "Epic (multi-week, focus on ODEs and SBML/SED-ML for MVP)",
+    "potential_deliverables_outcomes": [
+      "A Git repository for versioned simulation models (SBML/Python).",
+      "Python wrapper/interface for running ODE simulations with parameters from SED-ML-like config files.",
+      "Standardized Parquet output for simulation results.",
+      "Provenance records in the KG linking simulations to models, parameters, and hypotheses.",
+      "Example: Running and analyzing a model from the Mathematical Biology curriculum via this new framework."
+    ],
+    "notes_questions_dependencies": "Depends on DW_KCV_001 (KG Core) for provenance. Mathematical biology models (e.g., from `chapter_1_single_species.md`) provide initial content. Workflow management (Snakemake) and adherence to standards (SBML, SED-ML) are key for interoperability and reproducibility."
+  },
+  {
+    "task_id_candidate": "DW_KCV_004",
+    "tentative_title": "Develop Analogical Reasoning Assistant (Think Tank - KCV MVP)",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation.md", "section": "II. The 'Think Tank' - A.2. Analogical Reasoning"},
+      {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation_2.md", "section": "3. Bridging Domains: Rigorous Analogical Reasoning"}
+    ],
+    "description_objective": "Implement an MVP for the Analogical Reasoning Assistant within the 'Think Tank'. This involves: 1. Using KG embeddings (from DW_KCV_001) and/or LLMs to retrieve candidate analogous concepts/systems from the Cultivation KG and literature corpus. 2. Developing a human-in-the-loop UI where users can inspect suggested analogies, evaluate their structural validity (based on SMT principles), and map relationships between source and target domains. 3. Implementing safeguards to flag superficial or misleading correlations by requiring explicit justification for mappings and checking against known constraints from the KG.",
+    "primary_type": "AI/ML Development & UI/UX Design",
+    "initial_scale_estimate": "Large (4-6 days)",
+    "potential_deliverables_outcomes": [
+      "Prototype analogical reasoning module that suggests cross-domain connections from the KG.",
+      "Interactive UI for human validation, refinement, and annotation of analogical mappings.",
+      "Documentation of the analogy evaluation process and criteria for assessing structural validity.",
+      "Initial set of validated cross-domain analogies relevant to Cultivation's research interests, stored in the KG."
+    ],
+    "notes_questions_dependencies": "Depends on DW_KCV_001 (KG Core). This is a research-heavy task, especially regarding computational methods for assessing structural similarity and validity beyond surface features. LLM integration requires careful prompt design for candidate generation."
+  },
+  {
+    "task_id_candidate": "DW_KCV_005",
+    "tentative_title": "Implement Conceptual Knowledge Versioning & Provenance within KG (KCV MVP)",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation_2.md", "section": "5. Managing the Research Lifecycle"}
+    ],
+    "description_objective": "Develop an MVP for versioning conceptual entities (ideas, hypotheses, models) within the Cultivation KG. This includes: 1. Extending the KG schema (DW_KCV_001) to include attributes for versioning (version number, timestamp, author, change description). 2. Implementing functions/APIs to create new versions of conceptual entities, linking them using PROV-O relations (e.g., `wasDerivedFrom`, `wasRevisionOf`, `hadPrimarySource`). 3. Ensuring these conceptual versions can be linked to concrete versioned artifacts (Git commits for code/docs, DVC hashes for data, specific simulation run IDs). 4. Providing basic visualization of an idea's or hypothesis's evolution history from the KG.",
+    "primary_type": "System Design & Implementation (Knowledge Management)",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "KG schema extensions for versioned conceptual entities using PROV-O vocabulary.",
+      "Python API for creating and linking versions of hypotheses, models, etc., within the KG.",
+      "Example Jypyter notebook demonstrating the creation and visualization of an idea's lineage, including links to Git commits or data versions.",
+      "Integration with the Hypothesis Formalization module (DW_KCV_002) to version hypotheses as they are refined."
+    ],
+    "notes_questions_dependencies": "Depends on DW_KCV_001 (KG Core). This is a challenging area; MVP should focus on a pragmatic approach (e.g., timestamped snapshots of hypothesis nodes with explicit linkage, rather than complex diffing algorithms for semantic content)."
+  },
+  {
+    "task_id_candidate": "DW_KCV_006",
+    "tentative_title": "Develop External Impact Tracking & Alignment (Patent Office/Journal - KCV MVP)",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation.md", "section": "III. The 'Patent Office/Journal' - A.5. Tracking External Impact"},
+      {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation_2.md", "section": "6. Closing the Loop: Tracking and Integrating Research Impact"}
+    ],
+    "description_objective": "Implement an MVP for tracking external impact of research outputs. This involves: 1. Developing Python scripts to query external APIs (e.g., Semantic Scholar for citations, Altmetric.com for mentions - user must provide DOIs of their publications). 2. Storing this retrieved impact data in a structured format (e.g., new tables in the KG, or a separate Parquet/SQLite store linked to publication DOIs). 3. Creating a simple UI or report to visualize these impact metrics. 4. Providing a manual mechanism for users to link this external feedback/impact data to specific internal 'Idea', 'Hypothesis', or 'Experiment' nodes in the Cultivation KG, thus closing the feedback loop.",
+    "primary_type": "System Integration & Data Processing",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "Python scripts for fetching citation and altmetric data from selected APIs for user-specified DOIs.",
+      "Data store for aggregated impact metrics.",
+      "Basic dashboard or report showing impact trends for linked publications.",
+      "UI or CLI tool for manually associating external impact data with internal KG nodes representing ideas/experiments."
+    ],
+    "notes_questions_dependencies": "Requires user-provided API keys for external services. Semantic alignment of unstructured feedback to KG nodes is complex and for MVP will be manual; NLP-assisted alignment is a future enhancement. Depends on DW_KCV_001 for KG integration."
+  },
+  {
+    "task_id_candidate": "DW_KCV_007",
+    "tentative_title": "Design & Implement Ethical and Epistemic Safeguards Framework (KCV MVP)",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation_2.md", "section": "7. Ensuring Integrity: Ethical and Epistemic Considerations"}
+    ],
+    "description_objective": "Develop an MVP for ethical and epistemic safeguards within the KCV layer. This includes: 1. Implementing comprehensive provenance tracking (via PROV-O in the KG - DW_KCV_001 & DW_KCV_005) for all AI suggestions and user decisions related to hypothesis generation and experiment design. 2. Designing UI elements (e.g., in hypothesis formalization or simulation setup) that explicitly require human review and documented approval for critical AI-generated outputs before they drive further actions. 3. Implementing basic XAI features, such as requiring AI suggestions to link back to supporting evidence nodes in the KG. 4. Drafting an initial \"Ethical Use & Accountability\" statement for users of the KCV features.",
+    "primary_type": "System Design & Policy Implementation",
+    "initial_scale_estimate": "Large (2-4 days)",
+    "potential_deliverables_outcomes": [
+      "Enhanced KG schema and population scripts to ensure detailed PROV-O compliant provenance for KCV actions.",
+      "UI mockups or components for human oversight workflows (e.g., 'Approve AI-Generated Hypothesis' step).",
+      "Initial XAI features demonstrating evidence linking for AI suggestions within the Think Tank/Laboratory modules.",
+      "Draft ethics & accountability statement for KCV layer usage within the Cultivation documentation."
+    ],
+    "notes_questions_dependencies": "Crucial for responsible AI development. Integration with DW_KCV_001 (KG for provenance) and DW_KCV_005 (Conceptual Versioning) is key. UI/UX design for oversight needs careful thought to be effective without being overly burdensome."
+  },
+  {
+
+    "task_id_candidate": "DW_HIL_INFRA_001",
+    "tentative_title": "Establish Comprehensive CI/CD for Holistic Integration Layer Components",
+    "source_reference": [
+      {"file": "project_onboarding.md", "section": "Continuous Integration (CI) and Automation"},
+      {"file": "cultivation/docs/3_design/design_overview.md", "section": "7. CI / CD (GH Actions v0.2)"}
+    ],
+    "description_objective": "Design and implement a comprehensive GitHub Actions CI/CD pipeline for all components of the Core Holistic Integration Layer. This includes: linting, unit tests, and integration tests for `calculate_synergy.py`, `potential_engine.py`, `update_potential_weights.py`, `pid_scheduler.py`, `daily_hpe_planner.py`, and the Focus Predictor software stack (Python components). Automate data validation checks for Parquet outputs. Include scheduled jobs for tasks like monthly Π weight updates. Ensure Lean proofs related to HIL components are also built and checked.",
+    "primary_type": "DevOps & Process Automation",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "New or updated GitHub Actions workflow files (`.github/workflows/`) covering all HIL components.",
+      "Automated testing and validation (including `great_expectations` for Parquet schemas) integrated into the PR process.",
+      "Scheduled jobs for routine HIL operations (e.g., weight updates, daily plan simulation).",
+      "Documentation for CI/CD processes related to HIL, including how to interpret results and troubleshoot failures."
+    ],
+    "notes_questions_dependencies": "Builds upon existing CI skeletons (e.g., for Lean, basic Python tests). Requires test suites for each component to be developed (covered in other DW tasks). `great_expectations` integration for Parquet data contracts is a key addition."
+  },
+  {
+    "task_id_candidate": "DW_HIL_DOCS_001",
+    "tentative_title": "Create Comprehensive Technical Documentation for the Core Holistic Integration Layer",
+    "source_reference": [
+      {"file": "cultivation/docs/3_design/design_overview.md"},
+      {"file": "project_onboarding.md"}
+    ],
+    "description_objective": "Develop comprehensive technical documentation for the Core Holistic Integration Layer. This should cover: 1. Detailed architecture and data flow diagrams (extending `design_overview.md`). 2. In-depth explanation of the Synergy Engine, Potential Engine (Π), and Scheduling systems (PID, block schedulers, daily planner). 3. Precise data schemas (e.g., using JSON Schema or Pandera for Parquets) for all intermediate and final data products (`synergy_score.parquet`, `potential_snapshot.parquet`, `daily_plan.json`, domain-specific KPIs). 4. API contracts for integration points (e.g., Focus Predictor API, inputs/outputs of each script). 5. Operational procedures (e.g., how Π weights are updated, how daily plans are generated and consumed). 6. Contribution guidelines for developers working on this layer, including testing strategies and coding standards.",
+    "primary_type": "Documentation",
+    "initial_scale_estimate": "Large (2-4 days)",
+    "potential_deliverables_outcomes": [
+      "A dedicated section or set of Markdown files within `cultivation/docs/systems/core_integration/` (or similar) providing comprehensive technical documentation.",
+      "Updated `design_overview.md` to serve as the canonical C4 Level 1 diagram and high-level component responsibility list, linking to detailed docs.",
+      "Clear diagrams illustrating HIL data flows and component interactions.",
+      "Machine-readable schema definitions (e.g., JSON Schema) for key data artifacts, versioned with the code.",
+      "Integration into the project's overall MkDocs site."
+    ],
+    "notes_questions_dependencies": "This is a critical documentation task to ensure the complex HIL is understandable, maintainable, and extensible."
+  },
+  {
+    "task_id_candidate": "DW_HIL_META_001",
+    "tentative_title": "Maintain Comprehensive Project Analysis and Deep Work Task Elicitation for HIL & KCV",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/potential_overview.md", "section": "Project Analysis & Deep Work Task Elicitation (user summary, 2025-05-28)"},
+      {"file": "cultivation/outputs/deep_work_candidates/deep_work_candidates_outline.json", "comment": "This is one of the outputs to be consolidated."},
+      {"file": "cultivation/outputs/deep_work_candidates/knowledge_system_deep_work_candidates.json", "comment": "Another source to consolidate."}
+    ],
+    "description_objective": "Continuously maintain and refine a living 'Project Analysis & Deep Work Task Elicitation' document (or set of documents/JSON files like this one) covering the **Core Holistic Integration Layer (HIL)** and the **Knowledge Creation & Validation Layer (KCV)**. This involves: 1. Regularly reviewing all project artifacts relevant to HIL & KCV. 2. Systematically identifying and deducing potential deep work tasks using the methodology outlined in 'TASK_FINDER' prompt. 3. Structuring these tasks in the standardized JSON format. 4. Prioritizing and refining these tasks based on evolving project needs, completed work, and strategic goals. This meta-task ensures the project's deep work backlog for these advanced layers remains current, comprehensive, and aligned with its ultimate objectives. Regularly consolidate outputs from various deep work candidate JSONs into a master list or per-component refined lists for HIL and KCV.",
+    "primary_type": "Project Management & Strategic Planning",
+    "initial_scale_estimate": "Epic (Ongoing, periodic deep work sessions)",
+    "potential_deliverables_outcomes": [
+      "Up-to-date, version-controlled master list(s) of HIL & KCV-specific deep work tasks (like this JSON output).",
+      "Periodic reports summarizing newly identified tasks and changes in priorities for HIL & KCV.",
+      "Input into the Task Master system for actionable planning of HIL & KCV development.",
+      "Enhanced clarity on project scope and next steps for these advanced layers."
+    ],
+    "notes_questions_dependencies": "This is a meta-level, recurring task. It consumes all other project documentation relevant to HIL & KCV and outputs refined task lists like this one. Requires dedicated time for analysis, synthesis, and ensuring no overlap with tasks for already mature subsystems."
+  }
+]

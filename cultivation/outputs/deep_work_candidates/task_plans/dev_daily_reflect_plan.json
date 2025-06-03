@@ -1,0 +1,195 @@
+[
+  {
+    "task_id_candidate": "DW_DDR_CORE_001",
+    "tentative_title": "Robustify Core Data Ingestion and Processing Logic",
+    "source_reference": [
+      {"file": "cultivation/scripts/software/dev_daily_reflect/ingest_git.py"},
+      {"file": "cultivation/scripts/software/dev_daily_reflect/metrics/commit_processor.py"},
+      {"file": "cultivation/scripts/software/commit_metrics_prototyping.py", "section": "Concerns: Merge commits, non-code LOC, Radon/Ruff error handling"}
+    ],
+    "description_objective": "Perform a comprehensive audit and refactoring of `ingest_git.py` and `commit_processor.py`. Key objectives: 1. Implement robust logic in `ingest_git.py` to accurately handle Git merge commits, preventing skewed LOC/churn metrics (e.g., using `--first-parent` for main line analysis or advanced diff parsing). 2. Introduce configurable filtering in `ingest_git.py` to distinguish 'code LOC' (from specified extensions like '.py') from 'total LOC', providing more relevant productivity metrics. 3. Enhance `commit_processor.py` for more resilient metric calculation: ensure it gracefully handles parsing errors from Radon/Ruff for individual files (logging issues without crashing), and correctly processes files with unusual encodings or syntax. 4. Make file types for quality analysis (CC, MI, Ruff) configurable via `daily_review.yaml` (e.g., `quality_metric_extensions: ['.py', '.js']`). 5. Standardize logging and error reporting across these core scripts for better debuggability.",
+    "primary_type": "System Refinement & Core Engineering",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "Updated `ingest_git.py` with accurate LOC accounting for specified code files and intelligent merge commit handling.",
+      "Updated `commit_processor.py` with configurable file type analysis and improved error resilience.",
+      "Raw `git_commits_YYYY-MM-DD.json` and enriched `git_commits_enriched_YYYY-MM-DD.json` reflecting more accurate and detailed data.",
+      "Comprehensive unit and integration tests for LOC calculation, merge commit parsing, and robust metric extraction across various file states.",
+      "Updated `daily_review.yaml` with new configuration options.",
+      "Detailed documentation of the refined ingestion and processing logic."
+    ],
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "This is foundational for the accuracy of all downstream metrics and insights. Requires careful research into `git log` options for merge diffs. Configuration for 'code file types' and 'quality metric extensions' will be critical."
+  },
+  {
+    "task_id_candidate": "DW_DDR_COACH_001",
+    "tentative_title": "Develop Core Insight & Guidance Engine (`coach/rules_engine.py`) - MVP",
+    "source_reference": [
+      {"file": "cultivation/scripts/software/dev_daily_reflect/README.md", "section": "Program: DevDailyReflect - Insight & Guidance Engine Layer"},
+      {"file": "cultivation/scripts/software/dev_daily_reflect/config/daily_review.yaml", "section": "Needs `code_quality_thresholds` and other rule params"}
+    ],
+    "description_objective": "Implement the first functional version of `coach/rules_engine.py`. This MVP will: 1. Consume enriched commit data (from `git_commits_enriched_YYYY-MM-DD.json`). 2. Apply a set of configurable rules (defined in `daily_review.yaml` or a dedicated rules configuration file) to identify: (a) 'Risky Commits' based on initial thresholds (e.g., high LOC churn *and* high total CC, very low MI, or a high number of Ruff errors). (b) Newly introduced 'TODO' or 'FIXME' comments by scanning commit diffs (requires `git show <sha>` for changed lines). 3. Output a structured list of these insights (e.g., JSON format) that includes insight type, severity, relevant commit SHA, file path(s), and a human-readable description. This output will be the primary input for the enhanced reporting layer.",
+    "primary_type": "Algorithm Development & Feature Implementation",
+    "initial_scale_estimate": "Large (4-6 days)",
+    "potential_deliverables_outcomes": [
+      "A functional `coach/rules_engine.py` script located in `cultivation/scripts/software/dev_daily_reflect/coach/`.",
+      "Initial set of configurable rules for risky commits and TODO/FIXME patterns in `daily_review.yaml` or a new `rules_config.yaml`.",
+      "A defined JSON schema and example `insights_YYYY-MM-DD.json` output file.",
+      "Unit tests for each rule's logic and the overall engine's processing flow.",
+      "Documentation for the rules engine, including how to define and configure new rules."
+    ],
+    "notes_questions_dependencies": "This task is central to making DevDailyReflect actionable. Depends on stable and accurate output from `commit_processor.py` (DW_DDR_CORE_001). Efficiently getting commit diffs for TODO/FIXME scanning will be a key implementation detail."
+  },
+  {
+    "task_id_candidate": "DW_DDR_DATASRC_001",
+    "tentative_title": "Integrate GitHub API for Pull Request & Issue Data Ingestion",
+    "source_reference": [
+      {"file": "EXTRA CONTXT for original prompt", "section": "Prospective enhancements: PR and Issue data"},
+      {"file": "cultivation/scripts/software/dev_daily_reflect/README.md", "section": "Data Ingestion Layer (Future Enhancement: github_api_ingestor.py)"}
+    ],
+    "description_objective": "Develop a new Python script, `ingest/github_api_ingestor.py`, to interact with the GitHub API. This script will: 1. Fetch data for the configured repository (`daily_review.yaml`) over the defined `lookback_days` period. 2. Retrieve information on Pull Requests (PRs): title, author, status (open, merged, closed), creation date, last update date, review comments count, linked issues. 3. Retrieve information on Issues: title, author, status (open, closed), creation date, labels, assignees. 4. Store this data in daily raw JSON files (e.g., `raw/github_prs_YYYY-MM-DD.json`, `raw/github_issues_YYYY-MM-DD.json`). 5. Implement robust GitHub API authentication (using `GITHUB_TOKEN`), error handling, pagination, and respect for API rate limits.",
+    "primary_type": "Feature Implementation (New Data Source & API Integration)",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `github_api_ingestor.py` script.",
+      "Defined JSON schemas and example raw JSON output files for PR and Issue data.",
+      "Reusable utility functions/classes for GitHub API interaction within the Cultivation project.",
+      "Comprehensive documentation on script setup, required GitHub token permissions, and API usage strategies.",
+      "Unit tests with mocked GitHub API responses to cover various scenarios."
+    ],
+    "notes_questions_dependencies": "Requires `PyGithub` or `requests` library. Decision on specific fields to fetch for PRs/Issues to balance data richness vs. API usage. This data is crucial for advanced insights like identifying stale PRs (DW_DDR_COACH_002)."
+  },
+  {
+    "task_id_candidate": "DW_DDR_DATASRC_002",
+    "tentative_title": "Integrate CI/CD Data (Build Status & Test Coverage) into DevDailyReflect",
+    "source_reference": [
+      {"file": "EXTRA CONTXT for original prompt", "section": "Prospective enhancements: CI/CD run statuses, test coverage deltas"},
+      {"file": "cultivation/scripts/software/dev_daily_reflect/config/daily_review.yaml"}
+    ],
+    "description_objective": "Extend the data ingestion capabilities to include CI/CD outcomes. This involves: 1. Developing logic (likely within `github_api_ingestor.py` or a new script) to fetch GitHub Actions workflow run statuses (pass/fail, duration) associated with commits in the lookback period. 2. Implementing a reliable method to retrieve test coverage reports (e.g., `coverage.xml` for Python) produced by CI runs. This might involve fetching build artifacts via the GitHub API or accessing them from a predefined path if CI stores them consistently. 3. Parsing these coverage reports to extract key metrics (e.g., overall line/branch coverage) and calculating coverage delta from a baseline (e.g., parent commit or main branch). 4. Storing this CI and coverage data in structured formats (e.g., `raw/ci_runs_YYYY-MM-DD.json`, `processed/commit_coverage_YYYY-MM-DD.parquet`) and integrating coverage metrics into the enriched commit data.",
+    "primary_type": "System Integration & Feature Implementation",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "Scripts/modules for fetching CI run statuses and retrieving/parsing coverage reports.",
+      "Test coverage metrics (e.g., percentage, delta) added to the enriched commit data model.",
+      "Robust error handling for scenarios where CI data or coverage reports are unavailable.",
+      "Documentation detailing assumptions about CI setup (e.g., artifact naming/paths, coverage report format)."
+    ],
+    "notes_questions_dependencies": "This is a technically complex task requiring reliable correlation between CI runs and specific commits. Strategy for determining the 'baseline' coverage for delta calculation needs careful thought (e.g., main branch vs. parent commit). Depends on consistent CI artifact management."
+  },
+  {
+    "task_id_candidate": "DW_DDR_COACH_002",
+    "tentative_title": "Extend Insight Engine for PR/Issue/CI Based Alerts",
+    "source_reference": [
+      {"file": "DW_DDR_COACH_001 (this plan)"},
+      {"file": "DW_DDR_DATASRC_001 (this plan)"},
+      {"file": "DW_DDR_DATASRC_002 (this plan)"},
+      {"file": "EXTRA CONTXT for original prompt", "section": "Planned Insight & Guidance Engine functionalities"}
+    ],
+    "description_objective": "Substantially enhance `coach/rules_engine.py` to leverage PR, Issue, and CI/CD data. Implement rules to: 1. Identify 'Stale PRs' (e.g., open beyond a configurable duration without updates or reviews). 2. Identify 'Stale Issues'. 3. Flag commits associated with 'CI Failures'. 4. Detect significant 'Test Coverage Drops'. These insights should be added to the structured output (e.g., `insights_YYYY-MM-DD.json`) with appropriate severity and context.",
+    "primary_type": "Algorithm Development & Feature Implementation",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "Significantly enhanced `coach/rules_engine.py` with rules for PR, Issue, and CI data.",
+      "Updated insight JSON schema to accommodate new alert types (e.g., 'STALE_PR', 'CI_FAILURE', 'COVERAGE_DROP').",
+      "Unit tests for all new rule logic and data integration points.",
+      "Expanded configuration options in `daily_review.yaml` for new thresholds (staleness, coverage drop percentage)."
+    ],
+    "notes_questions_dependencies": "Depends critically on DW_DDR_DATASRC_001 and DW_DDR_DATASRC_002 for input data. This task transforms the Insight Engine into a more holistic development monitor."
+  },
+  {
+    "task_id_candidate": "DW_DDR_REPORT_001",
+    "tentative_title": "Overhaul Markdown Report for Actionability and Comprehensive Insights",
+    "source_reference": [
+      {"file": "cultivation/scripts/software/dev_daily_reflect/report_md.py"},
+      {"file": "DW_DDR_COACH_001 (this plan)"},
+      {"file": "DW_DDR_COACH_002 (this plan)"}
+    ],
+    "description_objective": "Completely refactor `report_md.py` to produce a highly actionable and comprehensive daily development report. The new report structure should: 1. Feature a prominent 'Key Alerts & Suggested Actions' section at the top, derived from `rules_engine.py`. 2. Provide clear, concise tables for Productivity Snapshot (commits, LOC), Code Quality Snapshot (CC, MI, Ruff), Test Coverage (overall, delta), PR Health (open, stale), and Issue Health (open, stale). 3. Include a dedicated 'CI Status' section (summary of pass/fail for recent builds). 4. Maintain an optional, collapsible 'Detailed Commit Log' with enriched metrics. Focus on visual hierarchy, clarity, and directing the user's attention to the most critical information for planning their day.",
+    "primary_type": "UI/UX Refinement & Reporting",
+    "initial_scale_estimate": "Medium (2-3 days)",
+    "potential_deliverables_outcomes": [
+      "A significantly revised `report_md.py` script.",
+      "A new, well-structured Markdown report template that effectively presents all key insights.",
+      "Sample reports demonstrating the improved layout and actionability.",
+      "Updated tests for `report_md.py` verifying correct rendering of all new sections and data types."
+    ],
+    "notes_questions_dependencies": "Depends on the full output structure of the enhanced `rules_engine.py` (DW_DDR_COACH_001 & DW_DDR_COACH_002) and data from all ingestion scripts. Iterative design based on actual usage and feedback will be key."
+  },
+  {
+    "task_id_candidate": "DW_DDR_INTEGRATION_001",
+    "tentative_title": "Implement Task Master Integration for DevDailyReflect Actionable Items",
+    "source_reference": [
+      {"file": "EXTRA CONTXT for original prompt", "section": "Automated task generation in Task Master"},
+      {"file": "cultivation/docs/6_scheduling/task_master_integration.md"}
+    ],
+    "description_objective": "Develop a robust script or module (e.g., `dev_reflect_to_taskmaster.py`) that parses the `insights_YYYY-MM-DD.json` from `rules_engine.py`. For specific actionable insight types (e.g., 'ACTION_ITEM_TODO', 'RISKY_COMMIT_REVIEW_NEEDED', 'STALE_PR_FOLLOWUP', 'CI_FAILURE_INVESTIGATION'), this script will automatically create corresponding tasks in the Task Master system (`tasks.json`). Tasks should be populated with relevant details (commit SHA, file path, insight description, link to report/PR/issue) and assigned appropriate labels, priorities, and potentially estimated effort. Implement idempotency to avoid creating duplicate tasks for the same underlying issue on subsequent days if it remains unresolved.",
+    "primary_type": "System Integration & Process Automation",
+    "initial_scale_estimate": "Large (2-4 days)",
+    "potential_deliverables_outcomes": [
+      "A script/module for creating/updating Task Master tasks based on DevDailyReflect insights.",
+      "Demonstrated examples of tasks generated in `tasks.json` from sample insights.",
+      "Configuration options for enabling this feature and controlling task properties.",
+      "Clear documentation on the mapping logic from insights to Task Master tasks and the idempotency strategy."
+    ],
+    "notes_questions_dependencies": "Depends on a stable Task Master system and a well-defined API or reliable method for programmatic interaction with `tasks.json`. The design of insight-to-task mapping is critical for utility."
+  },
+  {
+    "task_id_candidate": "DW_DDR_ANALYSIS_001",
+    "tentative_title": "Develop Historical Trend Analysis and Visualization Dashboard for Dev Metrics",
+    "source_reference": [
+      {"file": "cultivation/scripts/software/commit_metrics_prototyping.py", "section": "Contains example plots"},
+      {"file": "cultivation/outputs/software/dev_daily_reflect/rollup/", "section": "Source of historical daily data"},
+      {"file": "cultivation/outputs/figures/software_eda/", "section": "Location for EDA outputs"}
+    ],
+    "description_objective": "Create an advanced Jupyter notebook or a standalone Python script (e.g., `dev_trends_analyzer.py`) that: 1. Consolidates historical daily rollup data (`dev_metrics_YYYY-MM-DD.csv`) and potentially repository-level health data (`repo_health_trends.parquet` from DW_DDR_003 from V3 analysis) into a single analytical dataset (e.g., a DuckDB database or a master Parquet file). 2. Generates time-series visualizations for key metrics (Net LOC, Avg MI, Ruff Errors per KLOC, Risky Commits Frequency, Test Coverage Percentage, PR Cycle Time trends). 3. Allows filtering by author or period. 4. Outputs these visualizations as static images or an interactive HTML report (e.g., using Plotly or Bokeh) for periodic (e.g., weekly/monthly) review of development trends.",
+    "primary_type": "Data Analysis & Visualization",
+    "initial_scale_estimate": "Large (2-3 days)",
+    "potential_deliverables_outcomes": [
+      "A Jupyter notebook or script for comprehensive historical trend analysis and visualization.",
+      "A suite of generated plots/dashboards showing trends in key development metrics.",
+      "A documented process for updating the consolidated analytical dataset.",
+      "This could eventually feed a more permanent dashboard solution (e.g., Streamlit, Grafana)."
+    ],
+    "notes_questions_dependencies": "Requires a sufficient accumulation of historical daily data. Will leverage Pandas, Matplotlib/Seaborn, and potentially Plotly/Bokeh for interactivity."
+  },
+  {
+    "task_id_candidate": "DW_DDR_TEST_001",
+    "tentative_title": "Achieve Comprehensive Test Coverage for DevDailyReflect Pipeline",
+    "source_reference": [
+      {"file": "tests/test_ingest_git.py", "comment": "and other existing test_*.py files"},
+      {"file": "cultivation/scripts/software/dev_daily_reflect/"}
+    ],
+    "description_objective": "Systematically review and expand the unit and integration test suite for all DevDailyReflect Python components. Target high test coverage (e.g., >85-90%) for all modules, including `config_loader.py`, `utils.py`, `ingest_git.py`, `commit_processor.py`, `aggregate_daily.py`, `report_md.py`, and all newly developed modules (`rules_engine.py`, `github_api_ingestor.py`, etc.). Implement comprehensive tests for: 1. Edge cases in Git history parsing (empty repos, various merge types, unusual commit messages). 2. Robust mocking of external dependencies (GitPython `Repo` object, `subprocess` calls, GitHub API). 3. Validation of metric calculations against known inputs. 4. Verification of output file formats and content against expected schemas. 5. Testing the logic of the orchestration script (`test_dev_daily_reflect.sh` or its Python successor), especially the backfill feature.",
+    "primary_type": "Testing & Quality Assurance",
+    "initial_scale_estimate": "Epic (multi-sprint, ongoing alongside feature development)",
+    "potential_deliverables_outcomes": [
+      "A `pytest` suite with demonstrably high test coverage for all DevDailyReflect modules.",
+      "Reusable and robust mocking fixtures for external dependencies.",
+      "Integration tests covering the end-to-end data flow for various scenarios.",
+      "CI workflow that runs all tests and reports coverage statistics.",
+      "Improved confidence in the reliability and correctness of the entire pipeline."
+    ],
+    "notes_questions_dependencies": "This is a critical, ongoing task. Requires deep familiarity with `pytest`, mocking libraries (like `unittest.mock`, `pytest-mock`, `responses`), and potentially tools for creating temporary Git repositories for testing."
+  },
+  {
+    "task_id_candidate": "DW_DDR_DOCS_001",
+    "tentative_title": "Create Comprehensive User and Developer Documentation for DevDailyReflect",
+    "source_reference": [
+      {"file": "cultivation/scripts/software/dev_daily_reflect/README.md"},
+      {"file": "cultivation/scripts/software/Readme.md"},
+      {"file": "cultivation/docs/project_onboarding.md", "section": "Software Development Metrics component"}
+    ],
+    "description_objective": "Develop comprehensive documentation for the DevDailyReflect system, intended for both users and developers. This should include: 1. **User Guide:** How to interpret the daily reports, understand the metrics presented, and utilize the 'Suggested Next Actions'. 2. **Developer Guide:** Detailed explanation of the system architecture, data flow between scripts, functionalities of each module, data schemas for all outputs (JSON, CSV, Parquet), configuration options in `daily_review.yaml`, instructions for local setup and manual execution, and guidelines for extending the system (e.g., adding new rules to `rules_engine.py`, supporting new metrics or file types). 3. **Troubleshooting Guide:** Common issues and their resolutions. Consolidate and significantly expand upon existing READMEs. Ensure the documentation is well-structured and suitable for inclusion in the project's MkDocs site.",
+    "primary_type": "Documentation",
+    "initial_scale_estimate": "Large (2-4 days)",
+    "potential_deliverables_outcomes": [
+      "A dedicated section or set of Markdown files within `cultivation/docs/systems/dev_daily_reflect/` (or similar) providing comprehensive documentation.",
+      "Clear diagrams illustrating architecture and data flow.",
+      "Code examples for extension points.",
+      "Updated README files at script/module levels, pointing to the main documentation.",
+      "Integration into the project's overall MkDocs navigation."
+    ],
+    "notes_questions_dependencies": "This should be an iterative process, with documentation updated as features are developed and refined. Maintaining consistency with the evolving codebase is key."
+  }
+]

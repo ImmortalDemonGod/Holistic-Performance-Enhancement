@@ -1,0 +1,246 @@
+[
+  {
+    "task_id_candidate": "DW_IA_CI_001",
+    "tentative_title": "Establish Comprehensive Project-Wide CI/CD Strategy and Reusable Workflow Templates",
+    "source_reference": [
+      {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Strengths (Effective Use of GitHub Actions), Weaknesses (Testing Depth, Documentation of Automation, Error Handling)"},
+      {"file": "cultivation/docs/3_design/roadmap_vSigma.md", "section": "CI-First Doctrine"},
+      {"file": "cultivation/docs/3_design/design_overview.md", "section": "7. CI / CD (GH Actions v0.2)"},
+      {"comment": "Inspired by DW_HIL_INFRA_001, DW_FC_AUTO_002, DW_FM_001 but generalized for project-wide application."}
+    ],
+    "description_objective": "Design, document, and implement a comprehensive, project-wide Continuous Integration and Continuous Deployment (CI/CD) strategy leveraging GitHub Actions. This foundational task involves: 1. Defining clear standards for all CI workflows (e.g., naming conventions, trigger strategies for push/PR/schedule, job structuring, matrix builds). 2. Developing a library of reusable workflow templates or callable/composite actions for common operational needs such as Python environment setup (with caching), Lean 4 toolchain setup (with mathlib caching), Node.js environment setup (for Task Master tooling), Docker image builds and pushes (e.g., for DocInsight), and standardized artifact handling (uploading reports, test results, coverage data). 3. Establishing robust testing infrastructure within CI for Python (unit, integration via pytest), Lean 4 (`lake build`), and Jupyter Notebooks (`nbconvert --execute`). 4. Integrating automated code quality checks (linting with Ruff, formatting with Black/isort) into CI. 5. Setting up automated documentation builds and deployments (e.g., MkDocs to GitHub Pages). This strategy will form the backbone for ensuring consistent, reliable, and automated quality assurance and operational processes across all current and future project components.",
+    "primary_type": "DevOps & Process Automation, System Design",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "A `CI_CD_STRATEGY.md` document detailing the project-wide CI/CD standards, template usage, and best practices.",
+      "A set of well-documented, reusable GitHub Actions workflow templates (e.g., in `.github/workflow-templates/`) or callable/composite actions.",
+      "Core CI jobs for Python testing (including coverage reporting), Lean builds, Notebook execution, and data validation implemented using these templates/standards.",
+      "Automated code linting and formatting enforced via CI for relevant file types.",
+      "An automated build and deployment process for the project's documentation site (see DW_IA_DOCS_TOOLING_001).",
+      "Updated Pull Request templates to include checklists for CI adherence."
+    ],
+    "notes_questions_dependencies": "This task is pivotal for the 'CI-First' doctrine. It provides the framework for all other CI-related tasks. It learns from mature system CI setups (Flashcore, Formal Methods) to create general standards, not to modify their specific CI unless for non-breaking standardization. `requirements.txt` stability is a precursor."
+  },
+  {
+    "task_id_candidate": "DW_IA_TOOLING_001",
+    "tentative_title": "Implement Standardized Project Task Runner (Makefile or Taskfile)",
+    "source_reference": [
+      {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Weakness: Makefile/Task Runner Standardization"},
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "comment": "Mentions `make flash-sync`"},
+      {"file": "cultivation/docs/4_analysis/systems‑map_and_market‑cheatsheet.md", "comment": "Mentions `make diagram`, `make nb-test`"}
+    ],
+    "description_objective": "Evaluate, select, and implement a project-wide command-line task runner (e.g., `Makefile` or `Taskfile.yml` using Go Task) to provide standardized, discoverable, and easily memorable commands for all common development, build, test, and operational tasks. Initial scope must cover: development environment setup/bootstrap (Python venv, Node.js, Elan/Lake), dependency installation, running linters (Ruff for Python, potentially yamllint, markdownlint), executing test suites (Python, Lean, Notebooks), building documentation, running key data pipelines locally (e.g., DevDailyReflect, literature fetch), and cleaning build artifacts. This will ensure consistency between local development execution and CI workflow steps, and simplify onboarding.",
+    "primary_type": "Tooling & Developer Experience",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "A well-documented `Makefile` or `Taskfile.yml` at the project root.",
+      "Standardized commands for at least 7-10 key development lifecycle operations.",
+      "Updated developer setup documentation in `README.md` or `DEVELOPMENT.md` to prioritize use of the task runner.",
+      "Relevant CI workflows refactored to use these standardized task runner commands, promoting DRY principles in CI scripts."
+    ],
+    "notes_questions_dependencies": "This task directly addresses a key gap identified in project audits. The choice of tool (Make vs. Task vs. others) should consider cross-platform compatibility (especially for Windows/WSL users), ease of use, and dependency management capabilities. Output from existing shell scripts (e.g., `debug_process_runs.sh`) can inform initial Makefile/Taskfile targets."
+  },
+  {
+    "task_id_candidate": "DW_IA_PRECOMMIT_001",
+    "tentative_title": "Implement Comprehensive Pre-Commit Hook Framework for Proactive Quality Assurance",
+    "source_reference": [
+      {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Weakness: Pre-commit Hooks"},
+      {"file": "cultivation/docs/3_design/Progress.md", "section": "Suggests pre-commit hooks for black/ruff/isort, YAML validation"},
+      {"file": "cultivation/outputs/deep_work_candidates/flashcore_deep_work_plan_v1.0.json", "task_id_candidate": "DW_FC_AUTO_001", "comment": "Flashcore `tm-fc vet` hook is domain-specific; this task is for project-wide general hooks."}
+    ],
+    "description_objective": "Establish and configure a comprehensive pre-commit hook framework using the `pre-commit` tool to enforce code style, linting, and basic validation checks automatically before code is committed. The framework must include hooks for: 1. Python code formatting (e.g., Black). 2. Python import sorting (e.g., isort). 3. Python linting (Ruff, configured project-wide). 4. YAML file linting/validation (e.g., `yamllint`). 5. Markdown file linting (e.g., `markdownlint`). 6. General file checks such as end-of-file fixing, trailing whitespace removal, and detection of large files accidentally added to Git (outside of LFS/DVC). This infrastructure should be extensible for future custom validation hooks (like `tm-fc vet` from Flashcore, though that hook's specific implementation belongs to Flashcore).",
+    "primary_type": "Tooling & Code Quality Automation",
+    "initial_scale_estimate": "Medium (1 day)",
+    "potential_deliverables_outcomes": [
+      "A `.pre-commit-config.yaml` file in the project root, configured with a suite of standard, widely-used hooks for Python, YAML, and Markdown.",
+      "Successful local execution and validation of these hooks on the existing codebase.",
+      "Clear documentation for developers on how to install (`pre-commit install`) and use the pre-commit hooks.",
+      "A CI job step (e.g., in the main Python CI workflow from DW_INFRA_CI_001) that runs `pre-commit run --all-files` to ensure PRs meet pre-commit standards."
+    ],
+    "notes_questions_dependencies": "Requires the `pre-commit` package. This is a high-leverage task for improving code quality proactively and reducing CI churn due to simple formatting or linting issues. The Flashcore-specific `tm-fc vet` hook is a separate concern, but this framework enables its easy integration."
+  },
+  {
+    "task_id_candidate": "DW_INFRA_DOCS_TOOLING_001",
+    "tentative_title": "Setup and Configure Automated Documentation Generation and Publishing System (e.g., MkDocs)",
+    "source_reference": [
+      {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Weakness: Documentation of Automation (implies need for discoverable IA docs), Gap: Docs Site Automation"},
+      {"file": "cultivation/docs/3_design/Progress.md", "section": "Suggests MkDocs/Docusaurus for doc site"},
+      {"file": "cultivation/docs/3_design/design_overview.md", "section": "CI/CD job for `mkdocs build --strict`"}
+    ],
+    "description_objective": "Select, fully set up, and configure a static site generator (e.g., MkDocs with Material theme, or Docusaurus, as per `Progress.md`'s suggestion) for the project's extensive Markdown documentation located in `cultivation/docs/`. This task includes: 1. Installing and configuring the chosen tool, including defining the site navigation structure that reflects the `docs/` hierarchy, customizing the theme (for readability and any project branding), and enabling essential plugins (e.g., for Mermaid diagram rendering, robust search functionality, code highlighting, and potentially versioning if supported). 2. Developing a CI workflow (e.g., `docs.yml` or integrated into DW_INFRA_CI_001) that automatically builds the documentation site on every merge to the `main` branch. 3. Implementing automated deployment of the built site to GitHub Pages. 4. Verifying that all existing Markdown documentation renders correctly, internal links are functional, and assets are properly displayed. 5. Documenting the local build and preview process for contributors to enable easy documentation updates.",
+    "primary_type": "Documentation Infrastructure & Automation",
+    "initial_scale_estimate": "Large (2-3 days)",
+    "potential_deliverables_outcomes": [
+      "A fully configured static site generator setup (e.g., `mkdocs.yml` and all supporting files).",
+      "A GitHub Actions workflow that automatically builds and deploys the documentation website to GitHub Pages.",
+      "A live, well-structured, and easily navigable documentation website for the Cultivation project.",
+      "Clear instructions for contributors on how to write, structure, and preview documentation changes locally before committing."
+    ],
+    "notes_questions_dependencies": "MkDocs with the Material theme is a strong candidate given prior mentions (`mkdocs build --strict`). This is critical for making the project's vast documentation accessible and maintainable. Requires careful attention to relative paths for links and assets to ensure portability between local preview and deployed site."
+  },
+  {
+    "task_id_candidate": "DW_INFRA_SECURITY_001",
+    "tentative_title": "Implement Standardized Secrets Management and Automated Security Scanning Framework",
+    "source_reference": [
+      {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Gap: Pre-commit Hooks (for secrets), Weakness: Configuration Management Scalability (secrets part)"},
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "Security & compliance (detect-secrets)"},
+      {"file": "README.md", "section": "Secrets and Environment Variables"}
+    ],
+    "description_objective": "Establish a standardized, secure, and well-documented approach for managing secrets (API keys, tokens, sensitive credentials) and performing automated security scanning across the Cultivation project. This includes: 1. Formalizing the use of `.env` files (with a comprehensive `.env.template` committed to Git) for all local development secrets, ensuring `.env` itself is robustly gitignored. 2. Standardizing the use of GitHub Secrets for all secrets required by CI/CD workflows. 3. Integrating an automated secret scanning tool (e.g., `detect-secrets` or `gitleaks`) into both the pre-commit hooks (DW_INFRA_PRECOMMIT_001) and the CI pipeline to prevent accidental commitment of secrets. 4. Auditing all existing scripts that handle sensitive data to ensure they load secrets securely from environment variables (e.g., via `python-dotenv` and `os.getenv`) and explicitly do not log or expose these secrets. 5. Creating a `SECURITY.md` document outlining the project's secrets management policy, procedures for reporting vulnerabilities, and guidelines for developers on handling sensitive information.",
+    "primary_type": "Security & Process Automation",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "A root-level `.env.template` file detailing all necessary local secrets for project components.",
+      "Automated secret scanning (e.g., `detect-secrets`) integrated into both the pre-commit framework and a dedicated CI check, with a `.secrets.baseline` file committed if using `detect-secrets`.",
+      "Audit report of existing scripts handling secrets, with any necessary refactoring for secure loading completed.",
+      "A comprehensive `SECURITY.md` document detailing the project's security policies and procedures, including secrets management."
+    ],
+    "notes_questions_dependencies": "Requires tools like `detect-secrets`. This task enhances the overall security posture of the project. It generalizes the specific security concerns noted for systems like Flashcore to be project-wide and robustly automated."
+  },
+  {
+    "task_id_candidate": "DW_INFRA_TESTING_001",
+    "tentative_title": "Establish Project-Wide Testing Standards, Coverage Infrastructure, and Data Contract Validation Strategy",
+    "source_reference": [
+      {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Weakness: Testing Depth and Coverage, Gap: Formalized Data Contract Enforcement"},
+      {"file": "cultivation/docs/3_design/design_overview.md", "section": "6. Testing & Quality Gates (mentions pytest, hypothesis, great_expectations, pytest-benchmark)"}
+    ],
+    "description_objective": "Define, document, and implement project-wide testing standards and supporting infrastructure. This includes: 1. Establishing conventions for `pytest` usage (test file organization, fixture management, use of markers for different test types like unit, integration, end-to-end/e2e). 2. Setting clear guidelines and target test coverage levels (e.g., >85% line coverage) for all new Python modules. 3. Integrating automated test coverage reporting (e.g., using `pytest-cov` and `coverage.py`) into the Python CI workflow, generating user-friendly reports (HTML, XML) and potentially integrating with services like Codecov or Coveralls for trend tracking and PR comments. 4. Formalizing and implementing a strategy for data contract validation for all key Parquet and CSV data artifacts using Pandera (already in use in `metrics_literature.py`) or Great Expectations, and integrating these validation checks into relevant CI data processing workflows. 5. Providing guidelines on the appropriate use of property-based testing (e.g., `hypothesis`) and performance benchmarking (e.g., `pytest-benchmark`) for critical algorithms or data pipelines.",
+    "primary_type": "Testing & Quality Assurance Infrastructure",
+    "initial_scale_estimate": "Large (2-4 days for framework setup, documentation, and initial integration)",
+    "potential_deliverables_outcomes": [
+      "A `TESTING_GUIDELINES.md` document outlining testing standards, methodologies for different test types, tool usage recommendations (pytest, Pandera/Great Expectations, hypothesis, pytest-benchmark), and coverage expectations.",
+      "The main Python CI workflow (from DW_INFRA_CI_001) configured to run `pytest` and generate/upload comprehensive coverage reports.",
+      "Setup and integration of Codecov or Coveralls for tracking test coverage trends (optional, but highly recommended).",
+      "A framework and initial examples of data contract definitions (e.g., Pandera schemas) for 2-3 critical datasets, with CI jobs that validate these contracts.",
+      "Example test suites demonstrating best practices for unit, integration, and data validation tests within the Cultivation project."
+    ],
+    "notes_questions_dependencies": "This task focuses on creating the *infrastructure and standards* for testing and data validation. Actually writing all the tests for every component is part of each component's own development lifecycle (e.g., DW_DDR_TEST_001 for DevDailyReflect). Pandera is already in use for `metrics_literature.py`; this task aims to systematize and expand this practice. Great Expectations is noted as a P1 target in `design_overview.md`."
+  },
+  {
+    "task_id_candidate": "DW_INFRA_LOGGING_001",
+    "tentative_title": "Implement Standardized Project-Wide Logging Framework for Python Scripts",
+    "source_reference": [
+      {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Weakness: Standardized Logging Framework"},
+      {"file": "cultivation/scripts/sync_habitdash.py", "comment": "Uses basic logging"},
+      {"file": "cultivation/scripts/literature/fetch_paper.py", "comment": "Uses basic logging"}
+    ],
+    "description_objective": "Design and implement a standardized, easy-to-use logging framework for all Python scripts within the Cultivation project. This framework should: 1. Create a shared Python utility module (e.g., `cultivation.utils.logger_setup.py`) for initializing and configuring loggers consistently. 2. Define standard logging levels (DEBUG, INFO, WARNING, ERROR, CRITICAL) and establish clear guidelines for their usage across the project. 3. Implement a consistent, structured log message format (e.g., including timestamp, logger name, module path, line number, level, message) to facilitate parsing and analysis. 4. Configure log output destinations: `stdout`/`stderr` for local development and CI, with options for future extension to structured file logging or centralized logging services if the project scales significantly. 5. Refactor key existing scripts to adopt this standardized logging framework, serving as examples.",
+    "primary_type": "Tooling & Developer Experience, Observability",
+    "initial_scale_estimate": "Medium (1 day)",
+    "potential_deliverables_outcomes": [
+      "A shared Python logging utility module providing easy logger setup and configuration.",
+      "A `LOGGING_GUIDELINES.md` document detailing logging standards, levels, formatting, and best practices.",
+      "Refactoring of at least 3-5 existing key automation scripts (e.g., `sync_habitdash.py`, `fetch_paper.py`, a scheduler) to use the new logging framework.",
+      "Demonstrably consistent and informative log output across different project components, aiding in debugging and monitoring of automated processes."
+    ],
+    "notes_questions_dependencies": "This task is crucial for improving debuggability and operational monitoring. The framework should be lightweight and straightforward for developers to integrate into new and existing scripts. Consider using Python's standard `logging` module with custom formatters and handlers."
+  },
+  {
+    "task_id_candidate": "DW_INFRA_ENV_MGMT_001",
+    "tentative_title": "Define and Document Comprehensive Multi-Environment Management Strategy",
+    "source_reference": [
+      {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Strengths (Environment Management), Gaps (Centralized CI/CD Documentation)"},
+      {"file": "cultivation/README.md", "comment": "Mentions .venv"},
+      {"file": "cultivation/docs/2_requirements/formal_system/lean_guide.md", "comment": "Lean setup using elan/lake"},
+      {"file": "cultivation/docs/6_scheduling/task_master_integration.md", "comment": "Node.js for task-master-ai"},
+      {"file": "cultivation/docs/3_design/knowledge_system/literature_system_overview.md", "comment": "Docker for DocInsight service"}
+    ],
+    "description_objective": "Develop and thoroughly document a clear, unified strategy for managing all diverse development and runtime environments required by the Cultivation project. This includes: 1. Standardizing Python environment management (strict use of `.venv` with `requirements.txt`, defining update procedures and conflict resolution, and potentially evaluating Poetry/PDM for complex scenarios if `requirements.txt` becomes unwieldy). 2. Documenting Lean 4 toolchain setup, version control (`lean-toolchain` file), and `mathlib4` dependency management. 3. Outlining Node.js environment setup for tools like `task-master-ai` (e.g., recommending `nvm` for version management, standardizing `package.json` scripts). 4. Establishing best practices for using Docker for service dependencies (DocInsight, future services like KG databases or ML model servers), including base image selection policies, Dockerfile conventions for project services, and local `docker-compose.yml` configurations for multi-service development setups. 5. Ensuring CI workflows (DW_INFRA_CI_001) correctly and efficiently set up these varied environments using consistent, cached methods.",
+    "primary_type": "DevOps & Developer Experience, Documentation",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "A comprehensive `DEVELOPMENT_ENVIRONMENTS_GUIDE.md` document detailing setup, versioning, and management practices for Python, Lean, Node.js, and Docker environments within the Cultivation project.",
+      "Standardized templates or examples for `requirements.txt`, `lean-toolchain`, `package.json`, and `Dockerfile`/`docker-compose.yml` specific to project needs.",
+      "Refined CI workflow templates (from DW_INFRA_CI_001) that implement these environment setup best practices efficiently (e.g., optimized caching).",
+      "Reduced onboarding friction for new contributors and improved reproducibility across development and CI environments."
+    ],
+    "notes_questions_dependencies": "This task consolidates and formalizes existing environment practices into a coherent, documented strategy. Key for ensuring reproducibility and simplifying the developer setup process as project complexity grows."
+  },
+  {
+    "task_id_candidate": "DW_INFRA_ERROR_RESILIENCE_001",
+    "tentative_title": "Implement Project-Wide Error Handling, Retry Mechanisms, and Alerting Strategy for Automated Workflows",
+    "source_reference": [
+      {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Weakness: Error Handling and Resilience"}
+    ],
+    "description_objective": "Design and implement a systematic approach to error handling, retries, and alerting for all critical automated processes and CI/CD workflows within the Cultivation project. This involves: 1. Developing a Python utility library for common retry logic (e.g., exponential backoff with jitter) for external API calls or network-dependent operations. 2. Establishing standardized error logging practices (building on DW_INFRA_LOGGING_001) to ensure failures are captured with sufficient context. 3. Implementing robust `try-except` blocks and fallback mechanisms in key automation scripts (e.g., data ingestion pipelines, schedulers) to handle expected failures gracefully (e.g., DocInsight being unavailable, as noted in `literature_system_overview.md`). 4. Integrating a centralized alerting mechanism (e.g., posting to a dedicated Slack channel via webhook, creating priority GitHub issues) for persistent or critical failures in automated jobs, especially scheduled ones. 5. Documenting this strategy and providing guidelines for developers on implementing resilient automation.",
+    "primary_type": "System Refinement & Reliability Engineering",
+    "initial_scale_estimate": "Large (2-4 days)",
+    "potential_deliverables_outcomes": [
+      "A Python utility module for retry logic (e.g., `cultivation.utils.resilience`).",
+      "Refactored key automation scripts (e.g., `sync_habitdash.py`, `fetch_arxiv_batch.py`, schedulers) to incorporate enhanced error handling and retry logic.",
+      "A demonstrated alerting mechanism integrated with at least one critical CI workflow (e.g., nightly literature fetch failure posts to Slack).",
+      "A `WORKFLOW_RESILIENCE_GUIDE.md` documenting the error handling strategy, retry patterns, and alerting setup."
+    ],
+    "notes_questions_dependencies": "This task focuses on making existing and future automation more robust. Critical for maintaining system uptime and data integrity. Requires configuration of alerting channels (e.g., Slack webhook as a GitHub Secret)."
+  },
+  {
+    "task_id_candidate": "DW_INFRA_IDEMPOTENCY_001",
+    "tentative_title": "Audit and Enforce Idempotency for State-Modifying Automated Scripts and Workflows",
+    "source_reference": [
+      {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Weakness: Idempotency of Automated Scripts"}
+    ],
+    "description_objective": "Conduct a thorough audit of all automated scripts and CI workflow steps that modify repository state (e.g., commit back data like `sync_habitdash.py`, `daily_dev_review.yml` report commit, literature artifact commits) or update external systems (e.g., creating Task Master tasks, future KCV actions). For each identified process, refactor the logic as necessary to ensure full idempotency, meaning that running the script or workflow step multiple times with the same initial conditions produces the same final state without unintended side effects (e.g., no duplicate data entries, no erroneous cumulative calculations, no multiple identical GitHub issues). Implement specific tests to verify the idempotent behavior of these critical state-modifying operations.",
+    "primary_type": "System Refinement & Reliability Engineering",
+    "initial_scale_estimate": "Large (2-3 days for audit and refactoring of key scripts)",
+    "potential_deliverables_outcomes": [
+      "An audit report identifying all state-modifying automated processes and their current idempotency status.",
+      "Updated scripts and CI workflow steps with robust idempotency logic implemented (e.g., check-before-create, conditional commits, use of unique identifiers to prevent duplicates).",
+      "Specific `pytest` test cases or integration tests demonstrating idempotent behavior for critical scripts like `sync_habitdash.py` and the DevDailyReflect report commit process.",
+      "Documentation of idempotency patterns adopted in the project for developer guidance."
+    ],
+    "notes_questions_dependencies": "Essential for the reliability of scheduled CI jobs and any automated process that might be re-run due to transient failures or manual triggers. The `git commit ... || echo 'No changes'` pattern is a good start for commit-back idempotency."
+  },
+  {
+    "task_id_candidate": "DW_INFRA_LOCAL_CI_EMU_001",
+    "tentative_title": "Develop and Document Local CI Emulation and Debugging Guidelines for CI-Dependent Features",
+    "source_reference": [
+      {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Weakness: Local Development Experience for CI-Dependent Features"}
+    ],
+    "description_objective": "Create a comprehensive guide and potentially supporting tools/scripts to assist developers in emulating GitHub Actions workflows and debugging CI-related issues locally. This includes: 1. Evaluating and recommending tools like `act` (for running GitHub Actions locally) or providing alternative strategies for simulating CI environments. 2. Developing guidelines and examples for mocking external services (e.g., GitHub API, DocInsight, HabitDash API) or system interactions (e.g., file system changes committed back by a bot) during local testing of CI-dependent scripts. 3. Documenting how to reproduce CI environment variables, tool versions (Python, Node, Lean), and execution contexts on a local machine. 4. Providing tips for effective interpretation of CI logs and diagnosing common classes of CI failures specific to the Cultivation project.",
+    "primary_type": "Tooling & Developer Experience, Documentation",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "A `LOCAL_CI_DEBUGGING_GUIDE.md` document in `cultivation/docs/developer/` (or similar).",
+      "Example configurations or wrapper scripts for using `act` (if adopted) with Cultivation workflows.",
+      "A small library of Python mocking utilities for common external APIs used in CI (e.g., a mock `gh issue create` function).",
+      "Improved developer velocity and reduced reliance on \"push-to-test\" for CI-dependent features."
+    ],
+    "notes_questions_dependencies": "Researching the current capabilities and limitations of tools like `act` for complex Cultivation workflows (e.g., those involving Docker services or matrix builds) is a key part of this task. Focus on high-impact features like `fatigue_watch.py` or commit-back scripts."
+  },
+  {
+    "task_id_candidate": "DW_INFRA_LARGE_DATA_MGMT_001",
+    "tentative_title": "Define and Implement a Scalable Strategy for Versioning and Managing Large Data Artifacts",
+    "source_reference": [
+      {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Weakness: Data Management Strategy (Large Data)"},
+      {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation_2.md", "section": "5.3 Versioning Research Code and Data (mentions DVC, Git LFS)"}
+      ],
+    "description_objective": "Develop, document, and implement a clear, scalable strategy for managing large data artifacts generated or consumed by the Cultivation project. This includes: 1. Evaluating tools like Git LFS, DVC (Data Version Control), or direct cloud storage solutions (e.g., S3/GCS with versioning capabilities) based on project needs (data size, access patterns, versioning granularity, collaboration requirements, cost). 2. Implementing the chosen strategy for at least two representative large data use cases (e.g., versioning of LanceDB indexes for DocInsight, large raw physiological datasets, or trained ML models for KCV). 3. Documenting procedures for versioning, accessing, sharing, and archiving this data for all project contributors. 4. Integrating the chosen large data management system with CI/CD workflows where appropriate (e.g., pulling specific data versions for model training or testing pipelines).",
+    "primary_type": "System Design & Data Engineering",
+    "initial_scale_estimate": "Large (2-4 days for evaluation, decision, and initial implementation for two use cases)",
+    "potential_deliverables_outcomes": [
+      "An Architecture Decision Record (ADR) in `cultivation/docs/adr/` detailing the chosen large data management strategy, its rationale, and comparison with alternatives.",
+      "Successful implementation and integration of the chosen tool/strategy for at least two significant data use cases within the project.",
+      "Comprehensive documentation for developers and users on how to interact with the large data management system (adding new data, retrieving versions, etc.).",
+      "CI workflow modifications to support fetching/caching of versioned large data artifacts if needed for builds or tests."
+    ],
+    "notes_questions_dependencies": "Critical for long-term project sustainability as data volumes (especially for ML models, simulations, and detailed telemetry) are expected to grow significantly with the KCV layer. DVC is mentioned as a potential tool in the KCV design document."
+  },
+  {
+    "task_id_candidate": "DW_INFRA_ORCH_001",
+    "tentative_title": "Research and Design Long-Term Strategy for Advanced Workflow Orchestration (Post-GitHub Actions Chaining)",
+    "source_reference": [
+      {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Weakness: Scalability of Orchestration (Long-term)"},
+      {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation_2.md", "section": "4.3 Simulation Integration Pipelines (mentions Snakemake, Nextflow, CWL for complex simulation workflows)"}
+    ],
+    "description_objective": "Conduct in-depth research into advanced workflow orchestration tools (e.g., Airflow, Prefect, Dagster, Argo Workflows, or domain-specific WMS like Snakemake/Nextflow) specifically considering the anticipated future needs of the Cultivation project's KCV (Knowledge Creation & Validation) layer. This layer is expected to involve complex, multi-stage, and interdependent data processing, simulation, and machine learning pipelines. The research should result in: 1. A comparative analysis of 2-3 promising tools against the option of continuing with complex GitHub Actions chaining. 2. A small proof-of-concept (PoC) implementation of a representative hypothetical KCV pipeline using the top-ranked tool. 3. An Architecture Decision Record (ADR) summarizing findings, pros/cons of each approach, and providing a clear recommendation and potential migration path/trigger points for adopting a more advanced WMS if/when GitHub Actions becomes insufficient for managing pipeline complexity and operational needs (monitoring, retries, parameterization, dynamic DAGs).",
+    "primary_type": "System Design & Research, Prototyping",
+    "initial_scale_estimate": "Large (3-5 days for research, PoC, and ADR)",
+    "potential_deliverables_outcomes": [
+      "A comprehensive ADR (`cultivation/docs/adr/`) on workflow orchestration strategy, including a comparative analysis of tools and a decision matrix.",
+      "A functional proof-of-concept for a sample complex workflow implemented in the highest-rated WMS (if a new tool is recommended).",
+      "Clear trigger conditions or metrics that would indicate the need to migrate from GitHub Actions chaining to a dedicated WMS.",
+      "Enhanced understanding of the operational requirements for future complex data pipelines within Cultivation."
+    ],
+    "notes_questions_dependencies": "This is a forward-looking strategic task. The KCV layer's design documents mention tools like Snakemake and Nextflow. The ADR should consider factors like ease of Python integration, local development/testing, scalability, monitoring capabilities, community support, and learning curve. For now, GitHub Actions is deemed sufficient as per the IA Layer analysis."
+  }
+]

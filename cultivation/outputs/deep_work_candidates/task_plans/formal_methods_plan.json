@@ -1,0 +1,317 @@
+[
+  {
+    "task_id_candidate": "DW_FM_001",
+    "tentative_title": "Setup Core Lean 4 Project with CI and Basic Utilities Proofs (P0)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/lean_guide.md", "section": "2  Folder & Namespace Layout, 3  Setup Steps, 7 CI / CD"},
+      {"file": "cultivation/docs/3_design/roadmap_vSigma.md", "section": "P0 Milestones: Lean core utils"},
+      {"file": "cultivation/docs/3_design/design_overview.md", "section": "FORMAL CI, CI / CD (GH Actions v0.2)"}
+    ],
+    "description_objective": "Initialize the Lean 4 project within `cultivation/lean/` using `lake init Cultivation`. Establish the directory structure (e.g., `Cultivation/Core/`, `Cultivation/Running/`, etc.). Create initial utility files like `Cultivation/Core/Common.lean` or `Cultivation/Core/Arithmetic.lean`, and implement foundational definitions and proofs for basic arithmetic properties, list operations, or other common mathematical utilities needed across the project. Configure and validate the GitHub Actions workflow (`.github/workflows/lean.yml`) to automatically run `lake build` on every push/pull request, ensuring that mathlib4 dependencies are correctly managed and cached for efficiency.",
+    "primary_type": "Formal Proof Development, System Setup, Process Automation",
+    "initial_scale_estimate": "Medium (1-2 full deep work sessions, ~4-8 hours)",
+    "potential_deliverables_outcomes": [
+      "A functional Lean 4 project located in `cultivation/lean/`, including a `lakefile.lean` and `lean-toolchain` file specifying Lean and mathlib versions.",
+      "At least one `.lean` file (e.g., `Common.lean`) containing simple, successfully proven theorems (e.g., properties of real numbers, list functions).",
+      "A GitHub Actions workflow (`lean.yml`) that automatically builds the Lean project and correctly handles mathlib4 caching, providing pass/fail status.",
+      "Initial documentation within `cultivation/lean/README.md` detailing local setup, build commands (`lake build`), and testing procedures for contributors."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from roadmap and guides)",
+    "notes_questions_dependencies": "This is a critical P0 deliverable for the 'Formal Safety Net'. Establishes the foundation for all subsequent Lean work. Choice of initial theorems should be simple but demonstrate toolchain functionality."
+  },
+  {
+    "task_id_candidate": "DW_FM_002",
+    "tentative_title": "Develop and Document Lean Proof Conventions for Cultivation Project",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/lean_guide.md", "section": "4 Proof Conventions"}
+    ],
+    "description_objective": "Formulate, codify, and comprehensively document a set of proof style guidelines and conventions specifically for the Cultivation Lean codebase. This document must cover: naming conventions (for theorems, definitions, variables), import policies (e.g., minimizing `open Classical` in library files), commenting standards (including doc-strings for theorems and definitions), preferred order and usage of tactics (e.g., `simp` before `linarith`), strategies for proof automation (e.g., custom tactics, `by` blocks), and guidelines for handling physical units or domain-specific notations within proofs. These conventions are essential for ensuring the readability, maintainability, and reusability of formal proofs across diverse project domains.",
+    "primary_type": "Documentation, Process Standardization",
+    "initial_scale_estimate": "Medium (1-2 full deep work sessions, ~4-8 hours)",
+    "potential_deliverables_outcomes": [
+      "A dedicated Markdown document (e.g., `cultivation/lean/PROOF_CONVENTIONS.md`) detailing all established proof conventions.",
+      "A set of illustrative example proofs within `Cultivation/Core/Examples.lean` (or similar) that explicitly demonstrate adherence to these conventions.",
+      "A checklist or section in the PR template for reviewing Lean code contributions against these standards."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly stated in `lean_guide.md`)",
+    "notes_questions_dependencies": "This should be a living document, regularly reviewed and updated as new proof patterns emerge or as the team gains more experience with Lean 4. Input from all potential Lean contributors is valuable."
+  },
+  {
+    "task_id_candidate": "DW_FM_003",
+    "tentative_title": "Develop Comprehensive Onboarding Materials for Lean & Formal Methods within Cultivation",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/lean_guide.md", "section": "3 Setup Steps, 8 LeanDojo Quick-Start, 9 Learning Resources"}
+    ],
+    "description_objective": "Create a comprehensive suite of onboarding materials designed to rapidly bring new contributors up to speed with the Formal Methods layer of the Cultivation project. This includes: 1. Detailed, step-by-step guides for setting up the Lean 4 development environment (elan, Lake, VS Code/Neovim extensions). 2. An introduction to `mathlib4` tailored to the project's needs, highlighting key libraries and tactics. 3. Practical tutorials on using LeanDojo for interacting with existing proofs and retrieving premises. 4. Annotated example proofs drawn from Cultivation's domains (e.g., a simplified ODE property or control loop concept) to illustrate project-specific formalization patterns and adherence to conventions.",
+    "primary_type": "Content Creation, Learning Facilitation, Documentation",
+    "initial_scale_estimate": "Large (2-4 days)",
+    "potential_deliverables_outcomes": [
+      "A dedicated `ONBOARDING_FORMAL_METHODS.md` guide within `cultivation/lean/` or `cultivation/docs/`.",
+      "Step-by-step setup tutorials for Linux, macOS, and Windows (WSL).",
+      "A curated list of essential Lean 4 and `mathlib4` learning resources, contextualized for the project.",
+      "A small, self-contained example project or set of exercises for new contributors to complete."
+    ],
+    "implicit_reasoning_confidence": "High (Essential for project sustainability and team growth)",
+    "notes_questions_dependencies": "Should be updated as tooling (LeanDojo, AI provers) and project conventions evolve. Input from experienced Lean developers is crucial for quality and relevance."
+  },
+  {
+    "task_id_candidate": "DW_FM_004",
+    "tentative_title": "Develop Robust Lean-Python Cross-Verification Framework",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/lean_guide.md", "section": "6 Interfacing Lean ⇄ Python"}
+    ],
+    "description_objective": "Design and implement a robust and maintainable framework for enabling automated cross-verification between Lean 4 proofs and Python implementations of algorithms. This involves: 1. Defining a standardized method for exporting Lean definitions, theorem statements, or specific reference values derived from proofs (e.g., via JSON, direct code generation, or parsing `.olean` files). 2. Developing Python test utilities and `pytest` fixtures that can load these Lean-derived artifacts. 3. Creating example test cases that demonstrate how Python numerical algorithms or logical functions can be validated against their formally verified Lean counterparts. Evaluate the feasibility and utility of experimental `lean-python` bindings for more direct runtime interactions.",
+    "primary_type": "System Development, Integration, Testing",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "A documented strategy and set of scripts/tools for exporting verifiable data from Lean (e.g., a custom `lake exe export_verified_data`).",
+      "Python modules/classes providing helper functions for parsing Lean exports and performing comparisons.",
+      "A suite of `pytest` test cases demonstrating cross-verification for at least one key algorithm from the Cultivation project (e.g., aspects of the PID controller or an ODE solver step).",
+      "A report on the evaluation of `lean-python` bindings for the project's needs."
+    ],
+    "implicit_reasoning_confidence": "High (Implied by Section 6 of `lean_guide.md` and the project's focus on rigor)",
+    "notes_questions_dependencies": "Requires stable Lean proofs that produce verifiable numerical outputs or clearly defined logical properties. The choice of export format and parsing mechanism in Python will be critical design decisions."
+  },
+  {
+    "task_id_candidate": "DW_FM_005",
+    "tentative_title": "Formalize Running Domain ODE Models and Prove Key Properties (P1)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/lean_guide.md", "section": "5 Road-map ↔ Lean, Running.lean"},
+      {"file": "cultivation/docs/3_design/roadmap_vSigma.md", "section": "P1 Milestones: Running VO₂/HR ODE fits"},
+      {"file": "cultivation/docs/2_requirements/formal_system/math_stack.md", "section": "Running-Performance Analytics: Calculus & ODEs"},
+      {"file": "cultivation/docs/5_biology/MATHEMATICAL_BIO/chapter_1_single_species.md"}
+    ],
+    "description_objective": "Develop formal Lean 4 specifications and proofs for critical properties of the Ordinary Differential Equations (ODEs) used to model physiological responses in the Running domain. This includes, but is not limited to, models for heart rate recovery (e.g., biexponential decay) and VO₂ kinetics. Proofs should address existence and uniqueness of solutions, stability of equilibria (if applicable), and potentially parameter sensitivities. All formalizations are to be located in `lean/Cultivation/Running.lean`.",
+    "primary_type": "Formal Proof Development",
+    "initial_scale_estimate": "Large (3-5 days per distinct ODE model/property)",
+    "potential_deliverables_outcomes": [
+      "`lean/Cultivation/Running.lean` file containing formalized ODEs from the running domain and their proven properties (e.g., `theorem hr_recovery_model_stable (params : HRRecoveryParams) : is_stable (hr_recovery_ode params)`).",
+      "Clear documentation within the Lean files linking formal definitions to the mathematical models described in project documents (e.g., `chapter_1_single_species.md` for analogous model types).",
+      "Reference values or conditions derived from the proofs, suitable for use in the Lean-Python cross-verification framework (DW_FM_004)."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from roadmap and guides)",
+    "notes_questions_dependencies": "Depends on DW_FM_001 (Lean project setup). Requires access to precise mathematical specifications of the ODEs used in the running domain's Python scripts. Leverages ODE theory from `mathlib4.Analysis.ODE`."
+  },
+  {
+    "task_id_candidate": "DW_FM_006",
+    "tentative_title": "Formalize Biological Domain ODE Models (e.g., Logistic Growth, Budworm) and Prove Key Properties (P1)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/lean_guide.md", "section": "5 Road-map ↔ Lean (Biology.lean)"},
+      {"file": "cultivation/docs/3_design/roadmap_vSigma.md", "section": "P1 Milestones: logistic stability"},
+      {"file": "cultivation/docs/5_biology/MATHEMATICAL_BIO/chapter_1_single_species.md", "section": "Models like Logistic, Spruce Budworm"},
+      {"file": "cultivation/docs/2_requirements/formal_system/math_stack.md", "section": "Biological Modeling & Lab Data (Deterministic ODE/PDE)"}
+    ],
+    "description_objective": "Develop formal Lean 4 specifications and proofs for properties of mathematical models used in the Biological Knowledge Acquisition domain, starting with models from `chapter_1_single_species.md`. This includes proving stability of equilibria for the logistic growth equation and potentially exploring formal properties of the spruce budworm outbreak model (e.g., conditions for existence of multiple steady states). Proofs to be located in `lean/Cultivation/Biology.lean`.",
+    "primary_type": "Formal Proof Development",
+    "initial_scale_estimate": "Large (3-5 days per model)",
+    "potential_deliverables_outcomes": [
+      "`lean/Cultivation/Biology.lean` file with formalized biological models and their proven properties (e.g., `theorem logistic_growth_carrying_capacity_is_stable (r K : ℝ) (hK : K > 0) : is_stable_equilibrium (logistic_ode r K) K`).",
+      "Documentation within Lean files connecting formal proofs to the concepts presented in the Mathematical Biology curriculum.",
+      "Insights from formal analysis that could feedback into the teaching materials or simulation design for these models."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from roadmap and guides)",
+    "notes_questions_dependencies": "Depends on DW_FM_001. Requires `mathlib4` for ODE and dynamical systems theory. Collaboration with a domain expert for interpreting and correctly formalizing the biological models would be beneficial."
+  },
+  {
+    "task_id_candidate": "DW_FM_007",
+    "tentative_title": "Formalize PID Controller Algorithm and Prove Stability/Boundedness (P2)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/lean_guide.md", "section": "5 Road-map ↔ Lean (Synergy.lean)"},
+      {"file": "cultivation/docs/3_design/roadmap_vSigma.md", "section": "P2 Milestones: PID closed-loop boundedness"},
+      {"file": "cultivation/docs/2_requirements/formal_system/math_stack.md", "section": "Synergy / Potential Engine: Control theory – PID"},
+      {"file": "cultivation/scripts/running/pid_scheduler.py", "section": "Target algorithm for verification"}
+    ],
+    "description_objective": "Develop a formal Lean 4 model of the Proportional-Integral-Derivative (PID) controller algorithm, as specified or intended for use in `cultivation/scripts/running/pid_scheduler.py`. Prove key properties such as closed-loop stability and boundedness of the output under defined conditions and assumptions. These formalizations will reside in `lean/Cultivation/Synergy.lean` or a dedicated `lean/Cultivation/Control.lean`.",
+    "primary_type": "Formal Proof Development",
+    "initial_scale_estimate": "Large (4-7 days, involves control theory)",
+    "potential_deliverables_outcomes": [
+      "A `.lean` file containing the formal specification of the PID controller and rigorous proofs of its stability and/or boundedness properties.",
+      "Clear documentation mapping parameters and assumptions in the formal model to the Python implementation of the PID scheduler.",
+      "Identification of specific conditions (e.g., gain parameter ranges, system dynamics) under which the proven properties hold, which can inform safe PID tuning."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from roadmap and project documents)",
+    "notes_questions_dependencies": "Depends on DW_FM_001. Requires a precise mathematical specification of the PID algorithm as implemented/planned. Will leverage control theory concepts, potentially requiring contributions or extensions to `mathlib4` if not already covered."
+  },
+  {
+    "task_id_candidate": "DW_FM_008",
+    "tentative_title": "Integrate AI-Assisted Proving Tools (e.g., DeepSeek-Prover-V2 with Lean Copilot)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/lean_tools.md", "section": "Lean Copilot integration, Quick-start"},
+      {"file": "cultivation/docs/2_requirements/formal_system/lean_guide.md", "section": "Lean Copilot setup"}
+    ],
+    "description_objective": "Set up and integrate advanced AI-assisted proving tools into the Cultivation project's formal methods workflow. This primarily involves configuring Lean Copilot to use DeepSeek-Prover-V2 (e.g., the 7B variant for local feasibility if model weights are accessible, or via API). Develop any necessary interface scripts or adapt Copilot's communication logic to effectively leverage DeepSeek for generating proof plan suggestions, completing tactics, and accelerating formalization tasks. Document the setup, usage patterns, and best practices for these AI tools within the Cultivation context.",
+    "primary_type": "Tool Integration, Workflow Development, AI Engineering",
+    "initial_scale_estimate": "Large (3-5 days, including model setup, potential Copilot adjustments, and testing)",
+    "potential_deliverables_outcomes": [
+      "A functional and documented setup for Lean Copilot utilizing DeepSeek-Prover-V2 (or equivalent AI prover).",
+      "Internal guidelines and examples for developers on how to effectively use AI-assisted proving for Cultivation tasks, including prompt engineering strategies if applicable.",
+      "A report assessing the initial impact of these tools on proof development velocity and quality for a sample set of project-specific lemmas or theorems."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicit integration opportunity outlined in `lean_tools.md`)",
+    "notes_questions_dependencies": "Requires access to DeepSeek-Prover-V2 (model weights or API). Familiarity with Lean Copilot's architecture or extensibility points may be necessary. This task focuses on *making the tool usable*; benchmarking its effectiveness is DW_FM_009."
+  },
+  {
+    "task_id_candidate": "DW_FM_009",
+    "tentative_title": "Benchmark AI-Assisted Provers on Cultivation-Specific Formal Proof Tasks",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/lean_tools.md", "section": "ProverBench, Headline results, How this compares"}
+    ],
+    "description_objective": "Design and execute a systematic benchmarking protocol to evaluate the performance of AI-assisted proving tools (initially the integrated DeepSeek-Prover-V2 setup from DW_FM_008) on a representative corpus of formal proof tasks derived from Cultivation's domains (e.g., lemmas from `Running.lean`, `Biology.lean`, `Synergy.lean`). Metrics to compare include automated proof success rates, proof length, time-to-proof, and the quality/naturalness of generated proofs, contrasted against manual efforts or simpler automated tactics like `aesop` or `Sledgehammer` (if ported/available).",
+    "primary_type": "Experimentation, Evaluation, Analysis",
+    "initial_scale_estimate": "Medium (2-3 days for initial suite design, execution, and analysis)",
+    "potential_deliverables_outcomes": [
+      "A defined and documented set of benchmark proof tasks in Lean 4 format, reflecting a range of difficulties and styles relevant to Cultivation.",
+      "Scripts and methodology for consistently running and evaluating AI provers on this benchmark suite.",
+      "A detailed performance analysis report comparing AI-assisted proving with baseline methods, identifying strengths and weaknesses for different types of problems.",
+      "Actionable recommendations for optimizing the use of AI provers within the Cultivation project's formal methods workflow."
+    ],
+    "implicit_reasoning_confidence": "High (Implied by `lean_tools.md` sections discussing ProverBench and the need for evaluation)",
+    "notes_questions_dependencies": "Depends on DW_FM_008 (functional AI prover integration). The selection of representative benchmark tasks is crucial for generating meaningful and relevant results."
+  },
+  {
+    "task_id_candidate": "DW_FM_010",
+    "tentative_title": "Develop LoRA Fine-Tuning Workflow for AI Provers on Cultivation's Domain-Specific Proofs",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/lean_tools.md", "section": "LoRA fine-tuning, Why you might care"}
+    ],
+    "description_objective": "Design, implement, and test a workflow for Low-Rank Adaptation (LoRA) based fine-tuning of an accessible AI prover model (e.g., DeepSeek-Prover-V2 7B variant) using the growing corpus of Cultivation's domain-specific Lean proofs. The goal is to adapt the general-purpose prover to better handle the specific mathematical notations, theories, and proof styles prevalent in Cultivation's formalizations (e.g., ODEs for physiology, control theory for scheduling, specific combinatorics for ARC), thereby potentially improving its performance and relevance for project tasks.",
+    "primary_type": "Machine Learning, Workflow Development, Experimentation, AI Engineering",
+    "initial_scale_estimate": "Large (3-5 days, plus GPU time for fine-tuning experiments)",
+    "potential_deliverables_outcomes": [
+      "Scripts, configurations, and documentation for the LoRA fine-tuning pipeline.",
+      "A curated and preprocessed dataset of Cultivation-specific Lean proofs suitable for fine-tuning.",
+      "At least one set of fine-tuned LoRA adapter weights for the chosen AI prover model.",
+      "An evaluation report comparing the performance of the fine-tuned model against the baseline model on a held-out set of domain-specific proof tasks (linking to DW_FM_009 benchmark)."
+    ],
+    "implicit_reasoning_confidence": "Medium (Explicitly suggested as a potential benefit in `lean_tools.md`)",
+    "notes_questions_dependencies": "Requires GPU resources for fine-tuning. Success is contingent on having a sufficiently large and diverse corpus of existing Cultivation proofs to serve as training data. Deep understanding of LoRA principles and LLM fine-tuning techniques."
+  },
+  {
+    "task_id_candidate": "DW_FM_011",
+    "tentative_title": "EPIC: Systematically Audit and Ensure Formalization Coverage of Core Math Stack (`math_stack.md`)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/math_stack.md", "section": "Layer / Domain Table"},
+      {"file": "cultivation/docs/3_design/roadmap_vSigma.md", "section": "Capability Waves introducing new math"}
+    ],
+    "description_objective": "Conduct a comprehensive and ongoing audit of all mathematical concepts, algorithms, and models listed in `cultivation/docs/2_requirements/formal_system/math_stack.md` for each active Cultivation domain. For every critical mathematical element, determine its current formalization status: (a) adequately covered by `mathlib4`, (b) formalized within a Cultivation Lean module, (c) planned for formalization (linking to a specific task), or (d) requiring new formalization efforts. This epic involves creating and prioritizing new formal proof development tasks (like DW_FM_005, DW_FM_006, DW_FM_007) to fill identified gaps, ensuring alignment with the vSigma roadmap's introduction of new mathematical capabilities.",
+    "primary_type": "Code Audit, Formal Proof Development Planning, System Integration, Project Management",
+    "initial_scale_estimate": "Epic (multi-week/month, ongoing activity that needs to be broken down into per-domain or per-mathematical-concept sub-tasks)",
+    "potential_deliverables_outcomes": [
+      "A living audit document or database tracking the formalization status of each item in `math_stack.md`.",
+      "Regularly updated `math_stack.md` document enriched with direct links to corresponding Lean proofs in `mathlib4` or `Cultivation/` modules.",
+      "A prioritized backlog of new deep work tasks for formalizing currently unproven critical mathematical components, aligned with project phases.",
+      "Identification of potential contributions back to `mathlib4` if general mathematical theories are formalized that are missing from the main library."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly derived from the structure and purpose of `math_stack.md`)",
+    "notes_questions_dependencies": "This is a large, coordinating meta-task that drives many specific formalization efforts. Requires deep familiarity with both `mathlib4`'s contents and the project's evolving mathematical requirements. Initial deep work should focus on developing the audit methodology and performing the first pass for P0-P2 roadmap math."
+  },
+  {
+    "task_id_candidate": "DW_FM_012",
+    "tentative_title": "Formalize and Verify Cross-Domain 'Glue Math': Synergy Equations & Global Potential Function",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/math_stack.md", "section": "Cross‑Domain Glue Math"},
+      {"file": "cultivation/docs/1_background/synergy_concept.md", "section": "Operational Definition of Synergy"},
+      {"file": "cultivation/docs/3_design/design_overview.md", "section": "3.1 Synergy Score S_A->B, 3.2 Global Potential Π"}
+    ],
+    "description_objective": "Develop precise formal Lean 4 definitions for the core cross-domain mathematical constructs of the Cultivation project: the synergy coefficient (S_A→B = ΔB_obs(w) - ΔB_pred_baseline(w)) and the Global Potential function (Π(P,C,S,A)=w_P P^α + w_C C^β + λ ΣS_i->j + ε). Prove key mathematical properties of these functions, such as their behavior under specific input conditions, sensitivities to parameters, or well-definedness. Ensure these formalizations align with their Python implementations and are documented in a suitable shared Lean module (e.g., `Cultivation/Core/HolisticMetrics.lean`).",
+    "primary_type": "Formal Proof Development, System Integration, Theoretical Modeling",
+    "initial_scale_estimate": "Large (4-7 days, as it involves defining potentially novel mathematical concepts formally)",
+    "potential_deliverables_outcomes": [
+      "Lean files containing formal definitions and proven properties for the synergy coefficient and Global Potential function components.",
+      "Detailed documentation clarifying the formal model, its assumptions, and its correspondence to the conceptual framework outlined in project documents.",
+      "Cross-verification tests or specifications to link these formal models with their Python implementations (`calculate_synergy.py`, `potential_engine.py`) via the framework from DW_FM_004."
+    ],
+    "implicit_reasoning_confidence": "High (Explicit cross-domain mathematical components defined in `math_stack.md` and `design_overview.md`)",
+    "notes_questions_dependencies": "This task is critical for bringing rigor to the project's central integration mechanisms. Requires careful translation of prose descriptions and algebraic formulas into formal Lean statements. The stability of the conceptual formulas in design documents is a prerequisite."
+  },
+  {
+    "task_id_candidate": "DW_FM_013",
+    "tentative_title": "Automate `math_stack.md` Documentation: Linking, Status Tracking, and CI Badge Integration",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/formal_system/math_stack.md", "section": "Next‑Up TODOs"}
+    ],
+    "description_objective": "Develop and implement scripts or tools to automate the maintenance and enrichment of the `cultivation/docs/2_requirements/formal_system/math_stack.md` document. Key functionalities include: 1. Generating stable anchor links for each mathematical concept or tool listed. 2. Parsing Lean files (or a manifest) to automatically update the formalization status (e.g., Not Started, In Progress, Proven in `mathlib4`, Proven in `Cultivation/*` ) for each item. 3. Integrating the Lean build status from CI (e.g., via a GitHub Actions badge) directly into the `math_stack.md` document.",
+    "primary_type": "Process Automation, Documentation Enhancement, Tooling",
+    "initial_scale_estimate": "Medium (1-3 days)",
+    "potential_deliverables_outcomes": [
+      "Python or shell scripts for generating anchor links and updating formalization statuses within `math_stack.md`.",
+      "An updated `math_stack.md` that includes dynamic or semi-automated status indicators and a CI build badge for the Lean project.",
+      "Documentation for the automation scripts and the process for maintaining `math_stack.md`."
+    ],
+    "implicit_reasoning_confidence": "High (Directly from TODOs in `math_stack.md`)",
+    "notes_questions_dependencies": "Requires a clear convention for linking Lean proofs (filenames, theorem names) back to specific items in `math_stack.md`. May involve parsing Lean doc-comments or maintaining a separate mapping file if direct parsing is too complex."
+  },
+  {
+    "task_id_candidate": "DW_FM_014",
+    "tentative_title": "Define and Document Lean Proof Maintenance and Versioning Strategy",
+    "source_reference": [
+      {"file": "General Software Engineering Best Practices for Formal Methods Projects"},
+      {"file": "Inspired by V2 analysis: DW_FM_MAINT_001"}
+    ],
+    "description_objective": "Develop a comprehensive strategy and documented process for the long-term maintenance and evolution of the Lean 4 proof base within the Cultivation project. This strategy must address: 1. Guidelines for refactoring proofs for clarity or efficiency. 2. Procedures for managing dependencies on `mathlib4`, including handling `mathlib4` updates and a process for contributing improvements back to `mathlib4`. 3. Strategies for mitigating 'proof rot' when underlying algorithms, Python code, or mathematical definitions change. 4. Criteria for prioritizing which components or properties receive formal verification effort as the project grows. 5. Versioning scheme for proofs and formal specifications.",
+    "primary_type": "Process Standardization, Documentation, Project Management",
+    "initial_scale_estimate": "Medium (1-2 full deep work sessions, ~4-8 hours)",
+    "potential_deliverables_outcomes": [
+      "A dedicated Markdown document (e.g., `cultivation/lean/PROOF_MAINTENANCE_STRATEGY.md`) detailing the proof maintenance lifecycle.",
+      "Guidelines for versioning formal specifications and proofs, potentially aligning with software versioning.",
+      "A defined process for auditing the proof base periodically and identifying areas needing updates or refactoring.",
+      "A decision framework or rubric for selecting new verification targets based on risk, criticality, and feasibility."
+    ],
+    "implicit_reasoning_confidence": "High (Essential for the long-term viability and trustworthiness of the Formal Methods layer)",
+    "notes_questions_dependencies": "This is a critical process task that underpins the sustainability of the entire formal verification effort. Requires input from all team members involved in formal methods."
+  },
+  {
+    "task_id_candidate": "DW_FM_015",
+    "tentative_title": "EPIC Research: Formalization of Potential Theorems for Inter-Domain Growth",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/outline.md", "section": "12.1.1 Potential Theorems for Inter-Domain Growth"}
+    ],
+    "description_objective": "Conduct foundational research to translate the conceptual 'Potential Theorems for Inter-Domain Growth' (e.g., Conservation of Domain-Specific Resource Allocation, Monotonic Convergence under Controlled Feedback, Potential Acceleration via Resonant Synergy) from the theoretical outline in `outline.md` into precise mathematical statements. Identify suitable axiomatic systems or existing mathematical frameworks (e.g., dynamical systems theory, information theory, category theory) for their formalization. Develop initial proof sketches and assess the feasibility of full formalization in Lean 4.",
+    "primary_type": "Research, Theoretical Modeling, Pre-Formalization",
+    "initial_scale_estimate": "Epic (multi-week/month, requiring significant focused research sprints and iterative refinement)",
+    "potential_deliverables_outcomes": [
+      "A whitepaper or series of technical reports detailing the mathematical investigation and formulation of the proposed theorems.",
+      "Identification of necessary axioms, definitions, and prerequisite mathematical theories, including potential gaps in `mathlib4`.",
+      "A feasibility assessment for formalizing each proposed theorem in Lean 4, including estimated effort and challenges.",
+      "Initial, high-level Lean 4 files with definitions and proof attempts/sketches for one or two core theorems."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly outlined as a future research direction)",
+    "notes_questions_dependencies": "This is a highly advanced, P5+ level research-oriented task. It precedes full Lean implementation and may require collaboration with domain experts or research mathematicians. Initial deep work should focus on literature review and defining precise mathematical statements for one theorem."
+  },
+  {
+    "task_id_candidate": "DW_FM_016",
+    "tentative_title": "EPIC Research: Development of Formal Logic Systems for Potential Boundaries",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/outline.md", "section": "12.1.2 Formal Logic for Determining Effective Potential Boundaries"}
+    ],
+    "description_objective": "Investigate, design, and evaluate different formal logical frameworks (e.g., classical logic with rich types, modal logics, multi-valued logics, or fuzzy logics) for their suitability in defining, reasoning about, and determining 'effective potential boundaries' as conceptualized in the Cultivation project's theoretical framework. Develop a proposal for an axiomatic foundation for potential boundaries and explore logical procedures for their determination, with an eye towards eventual Lean 4 implementation.",
+    "primary_type": "Research, Theoretical Modeling, Logic System Design",
+    "initial_scale_estimate": "Epic (multi-week/month, research-heavy)",
+    "potential_deliverables_outcomes": [
+      "A comparative analysis document evaluating various logical frameworks for representing potential boundaries.",
+      "A proposed axiomatic system (set of definitions and axioms) for potential boundaries within the chosen logical framework.",
+      "Exploration and documentation of logical procedures (e.g., model checking, Galois connections, Kripke semantics) for boundary determination.",
+      "A feasibility study on translating these logical structures into Lean 4, including potential challenges and `mathlib4` requirements."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly outlined for future research)",
+    "notes_questions_dependencies": "This is a P5+ level task, highly theoretical, requiring expertise in mathematical logic, knowledge representation, and potentially philosophy of science, in addition to Lean 4 capabilities."
+  },
+  {
+    "task_id_candidate": "DW_FM_017",
+    "tentative_title": "EPIC Research: Mathematical Framework Development for a Unified Theory of Potential (P,C,S,A)",
+    "source_reference": [
+      {"file": "cultivation/docs/1_background/outline.md", "section": "12.1.3 Unified Theory of Potential—Physical, Cognitive, Social, Astronomical"}
+    ],
+    "description_objective": "Undertake the foundational research and mathematical development for the proposed 'Unified Theory of Potential,' which aims to integrate Physical (P), Cognitive (C), Social (S), and Astronomical (A) dimensions. This involves: 1. Defining the structure of an n-dimensional potential manifold. 2. Formulating the 'Tensor of Interactions' to capture cross-dimensional synergy. 3. Developing the global potential function Π(P,C,S,A). Explore suitable mathematical fields (e.g., differential geometry, tensor calculus, information geometry, complex systems theory) to provide a rigorous basis for this framework, with the long-term goal of formalization in Lean 4.",
+    "primary_type": "Research, Theoretical Modeling, Advanced Mathematics",
+    "initial_scale_estimate": "Epic (multi-month/year, representing a grand theoretical challenge and ongoing research program)",
+    "potential_deliverables_outcomes": [
+      "A series of research papers or a monograph detailing the mathematical specification and conceptual underpinnings of the Unified Theory of Potential.",
+      "Precise mathematical definitions for the potential manifold, interaction tensor, global potential function Π, and its P,C,S,A components.",
+      "Identification of mathematical prerequisites and foundational work required for eventual formalization in Lean 4.",
+      "A research roadmap outlining stages for developing and validating this theory, potentially starting with simplified (e.g., P,C only) versions."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly outlined as a grand ambition and long-term research goal)",
+    "notes_questions_dependencies": "This is the most ambitious formalization task within the project, representing a significant research program. It will require original mathematical development and likely collaboration with specialists in relevant advanced mathematical and scientific fields. Initial deep work could focus on defining the P and C components based on existing project metrics."
+  }
+]

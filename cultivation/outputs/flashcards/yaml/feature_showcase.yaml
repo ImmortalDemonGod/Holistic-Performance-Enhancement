@@ -60,7 +60,7 @@ cards:
 
   # Card 5: Card with only global tags, no card-level tags field (implicitly empty)
   - q: How are global tags applied if a card has no 'tags' field?
-    a: Global tags from the YAML file are applied. It's equivalent to `tags: []`.
+    a: "Global tags from the YAML file are applied. It's equivalent to `tags: []`."
 
   # Card 6: Multi-line answer and markdown, showcasing 'internal_note'
   - q: What is the purpose of the `internal_note` field in the Card model?

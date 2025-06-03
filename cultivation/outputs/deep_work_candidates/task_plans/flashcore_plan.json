@@ -1,0 +1,459 @@
+[
+  {
+    "task_id_candidate": "DW_FC_CORE_001",
+    "tentative_title": "Audit, Finalize, and Test `flashcore.card` Pydantic Models",
+    "source_reference": [
+      {"file": "cultivation/scripts/flashcore/card.py", "section": "Whole file"},
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "3. YAML schema (defines card fields)"},
+      {"file": "cultivation/outputs/flashcards/yaml/feature_showcase.yaml", "section": "Example field usage"},
+      {"file": "tests/flashcore/test_card.py", "section": "Existing tests"}
+    ],
+    "description_objective": "Conduct a final audit of the `Card` and `Review` Pydantic models in `flashcore.card.py`. Ensure all fields, types, validators (e.g., kebab-case tags, text lengths), and default factories align perfectly with the `flashcards_1.md` specification and practical needs. Confirm system-assignment of `uuid` (if not provided) and `added_at`. Ensure `internal_note` is correctly handled as authorable from YAML. Enhance `test_card.py` to cover every validation rule, default behavior, and edge case for both models.",
+    "primary_type": "System Refinement & Testing",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "Audited and finalized `card.py` with fully specified Pydantic models.",
+      "Comprehensive `pytest` suite in `tests/flashcore/test_card.py` achieving high coverage.",
+      "Updated `feature_showcase.yaml` to reflect correct `added_at` (system-assigned) and `internal_note` usage.",
+      "Clear documentation for the `Card` and `Review` data models within the codebase or supporting docs."
+    ],
+    "implicit_reasoning_confidence": "N/A (Core model validation)",
+    "notes_questions_dependencies": "Existing models and tests are a strong base. Focus on meticulous spec alignment and edge-case testing. The `added_at` field in `feature_showcase.yaml` (card 6) is an authoring error if `yaml_processor.py` forbids it; clarify and fix example. `internal_note` is authorable in `yaml_processor.py`."
+  },
+  {
+    "task_id_candidate": "DW_FC_CORE_002",
+    "tentative_title": "Audit, Finalize, and Test `flashcore.database` DuckDB Layer",
+    "source_reference": [
+      {"file": "cultivation/scripts/flashcore/database.py", "section": "Whole file"},
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "2. Folder layout, 5. Build pipeline"},
+      {"file": "tests/flashcore/test_database.py", "section": "Existing tests"}
+    ],
+    "description_objective": "Perform a thorough audit of the `FlashcardDatabase` class in `database.py`. Verify schema creation (including `review_seq`, `ON DELETE CASCADE`), all CRUD operations for `Card` and `Review` objects, data type marshalling (Pydantic models to/from DB, including UUIDs, Paths, Sets, timezone-aware datetimes), transaction management, and query logic (especially `get_due_cards`). Enhance `test_database.py` for complete coverage of all methods, constraints (FKs, CHECKs), and error handling.",
+    "primary_type": "System Refinement & Testing",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "Audited and finalized `database.py` module.",
+      "Comprehensive `pytest` suite in `tests/flashcore/test_database.py` achieving high coverage.",
+      "Documentation for the database schema, methods, indexing strategy, and conventions.",
+      "Confirmation of robust error handling for DB operations."
+    ],
+    "implicit_reasoning_confidence": "N/A (Core data persistence layer)",
+    "notes_questions_dependencies": "Existing DB layer and tests are strong. `get_due_cards` logic needs re-evaluation after FSRS `next_due` is available (simpler query might be possible). Test read-only mode thoroughly."
+  },
+  {
+    "task_id_candidate": "DW_FC_YAML_001",
+    "tentative_title": "Audit, Finalize, and Test `flashcore.yaml_processor`",
+    "source_reference": [
+      {"file": "cultivation/scripts/flashcore/yaml_processor.py", "section": "Whole file"},
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "1. Design principles, 3. YAML schema, 8. Security & compliance"},
+      {"file": "tests/flashcore/test_yaml_processor.py", "section": "Existing tests"}
+    ],
+    "description_objective": "Conduct a final audit of `flashcore.yaml_processor.py`. Ensure it correctly implements all specified loading, validation (schema including kebab-case tags, media file existence/paths relative to assets root, secrets detection), content sanitization (HTML via Bleach), and transformation of flashcard YAML files into `Card` objects. Confirm correct handling of `internal_note` as authorable. Verify robust error reporting (YAMLProcessingError). Enhance `test_yaml_processor.py` to cover all validation rules and error conditions described in `flashcards_1.md` and discovered during review.",
+    "primary_type": "System Refinement & Testing",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "Audited and finalized `yaml_processor.py` module.",
+      "Comprehensive `pytest` suite in `tests/flashcore/test_yaml_processor.py` covering all validation and transformation logic.",
+      "Updated documentation for the YAML authoring format, including constraints and security measures.",
+      "Ensure `skip_media_validation` and `skip_secrets_detection` flags work as intended."
+    ],
+    "implicit_reasoning_confidence": "N/A (Core ingestion component)",
+    "notes_questions_dependencies": "Existing processor and tests are robust. Key areas for audit: secret patterns, Bleach configuration, media path resolution logic across different OS, error message clarity. `flashcards_1.md` lists specific forbidden content like `<script>` tags and absolute file paths for media."
+  },
+  {
+    "task_id_candidate": "DW_FC_SCHED_001",
+    "tentative_title": "Implement Core FSRS Algorithm in `flashcore.scheduler`",
+    "source_reference": [
+      {"file": "cultivation/scripts/biology/flashcards_playground (1).py", "section": "fsrs_once function"},
+      {"file": "cultivation/scripts/flashcore/scheduler.py", "section": "Stub file"},
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "Build pipeline (implies scheduling for review)"}
+    ],
+    "description_objective": "Develop the `flashcore.scheduler` module by implementing the FSRS algorithm. This module must: 1. Initialize FSRS parameters for new cards. 2. Accept a card's review history (sequence of `Review` objects) and a new rating event. 3. Calculate and return the updated FSRS parameters: new stability, new difficulty, and the next review date. 4. Ensure compatibility with standard FSRS principles and handle edge cases like lapsed reviews or first reviews. The `fsrs_once` function from the playground serves as an initial prototype.",
+    "primary_type": "Algorithm Development & Implementation",
+    "initial_scale_estimate": "Large (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `flashcore.scheduler.FSRSAlgorithm` class or equivalent functions.",
+      "A primary method like `scheduler.compute_next_state(card_uuid: UUID, current_reviews: List[Review], new_rating: int, review_ts: datetime) -> Tuple[float, float, date]` (returning stab_after, diff_after, next_due).",
+      "Unit tests for FSRS calculations covering diverse scenarios: first review, subsequent reviews with different ratings, lapsed reviews, reviews with different elapsed_days_at_review.",
+      "Documentation of the FSRS parameters, implementation choices, and API for `ReviewManager`."
+    ],
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Depends on `flashcore.card.Review` model and `flashcore.database` (for fetching review history). Crucial decision: use an existing Python FSRS library (e.g., pyFSRS, if suitable and license-compatible) or implement from scratch based on algorithm papers. Parameterization: use library defaults or allow user-tuning via a config file (see `flashcore/config.py`)."
+  },
+  {
+    "task_id_candidate": "DW_FC_REVIEW_001",
+    "tentative_title": "Implement `ReviewSessionManager` Core Logic",
+    "source_reference": [
+      {"file": "cultivation/scripts/flashcore/review_manager.py", "section": "Stub file"},
+      {"file": "cultivation/scripts/flashcore/database.py", "section": "`get_due_cards` method"}
+    ],
+    "description_objective": "Develop the core logic for `ReviewSessionManager` in `flashcore.review_manager.py`. This class will be responsible for: 1. Fetching a batch of due cards from `FlashcardDatabase` using `get_due_cards`. 2. Managing the state of the current review session (e.g., queue of cards to review, current card). 3. Providing methods to get the next card for review. 4. Accepting a user's rating and response time for the current card. 5. Invoking `flashcore.scheduler` to calculate the new FSRS state (`stab_after`, `diff`, `next_due`). 6. Constructing a new `Review` object with all required fields populated. 7. Persisting the new `Review` object to the database.",
+    "primary_type": "System Development (Application Logic)",
+    "initial_scale_estimate": "Large (2-3 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `ReviewSessionManager` class with methods like `start_session()`, `get_next_card()`, `submit_review(rating: int, resp_ms: Optional[int])`.",
+      "Integration with `FlashcardDatabase` for fetching due cards and saving new `Review` objects.",
+      "Integration with `flashcore.scheduler` for FSRS updates.",
+      "Unit tests for session management logic (e.g., card queue handling, state transitions, correct FSRS invocation and DB persistence)."
+    ],
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Depends on DW_FC_CORE_002 (Database) and DW_FC_SCHED_001 (Scheduler). This module provides the backend logic; the UI (CLI/GUI) is a separate concern that will consume this manager."
+  },
+  {
+    "task_id_candidate": "DW_FC_REVIEW_002",
+    "tentative_title": "Develop Review UI (CLI MVP & GUI Placeholder)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "CLI (`tm-fc review --gui`), FAQ (Streamlit GUI)"},
+      {"file": "cultivation/scripts/biology/flashcards_playground (1).py", "section": "ipywidgets review UI prototype"}
+    ],
+    "description_objective": "Develop the user interface for card review, callable via `tm-fc review`. Implement a command-line interface (CLI) as the Minimum Viable Product (MVP) for reviewing cards, showing front, then back, and accepting rating input. Also, create a placeholder or basic structure for a GUI version (e.g., using Streamlit as hinted in `flashcards_1.md` FAQ) that can be enhanced later. Both should use `ReviewSessionManager`.",
+    "primary_type": "System Development (UI)",
+    "initial_scale_estimate": "Large (2-4 days for CLI MVP + GUI structure)",
+    "potential_deliverables_outcomes": [
+      "Functional CLI review experience.",
+      "Basic structure for a Streamlit (or other chosen GUI framework) review app.",
+      "Rendering of card content (Markdown, KaTeX, media links/previews).",
+      "Mechanism for user input (ratings).",
+      "Clear display of card statistics (e.g., current stability, next due) if desired."
+    ],
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Depends on DW_FC_REVIEW_001 (`ReviewSessionManager`). GUI choice (Streamlit, Textual TUI, simple web app) needs to be confirmed. Media rendering in CLI is limited (show path); GUI can be richer."
+  },
+  {
+    "task_id_candidate": "DW_FC_EXPORT_001",
+    "tentative_title": "Implement Anki Exporter with Media Support",
+    "source_reference": [
+      {"file": "cultivation/scripts/flashcore/exporters/anki_exporter.py", "section": "Stub file"},
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "Build pipeline (export_anki.py), Security & compliance (licence footer)"}
+    ],
+    "description_objective": "Develop `anki_exporter.py` to query cards from DuckDB and generate Anki `.apkg` files using `genanki`. Key features: map `Card` fields to Anki note fields, handle deck hierarchy (e.g., `DeckA::SubDeck` -> Anki subdecks), convert tags, embed media files (images, audio) from the assets directory into the `.apkg`, and optionally append a license footer to card backs if `FLASH_LICENCE` env var is set. One `.apkg` per top-level deck.",
+    "primary_type": "Feature Implementation (Exporter)",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `anki_exporter.py` script/module.",
+      "Generation of valid `.apkg` files with embedded media and correct deck structure.",
+      "Unit tests verifying `.apkg` content, media inclusion, and license footer logic."
+    ],
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Requires `genanki`. Media paths in `Card.media` are relative to `assets_root_directory`; ensure these are correctly resolved and packaged. Define Anki note type(s) to be used."
+  },
+  {
+    "task_id_candidate": "DW_FC_EXPORT_002",
+    "tentative_title": "Implement Markdown Exporter with Deck Structure",
+    "source_reference": [
+      {"file": "cultivation/scripts/flashcore/exporters/markdown_exporter.py", "section": "Stub file"},
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "Build pipeline (export_markdown.py), Security & compliance (licence footer)"}
+    ],
+    "description_objective": "Develop `markdown_exporter.py` to query cards from DuckDB and generate human-readable Markdown. The primary output should be a single `flashcards.md` file in `dist/flashcards/`, with cards organized by deck (e.g., using H2/H3 for deck names). Include front, back, tags, and links/references to media. Optionally append license footer. Formatting should clearly distinguish Q/A.",
+    "primary_type": "Feature Implementation (Exporter)",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `markdown_exporter.py` script/module.",
+      "Well-formatted `flashcards.md` output.",
+      "Unit tests verifying Markdown content and structure."
+    ],
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Decide on specific Markdown syntax for card elements (e.g., Q: A:, --- separators, KaTeX representation). Media links should be relative to a logical path if the Markdown is to be browsed alongside assets."
+  },
+  {
+    "task_id_candidate": "DW_FC_CLI_001",
+    "tentative_title": "Implement `tm-fc` CLI Framework and `ingest` Subcommand",
+    "source_reference": [
+      {"file": "cultivation/scripts/flashcards_cli.py", "section": "Stub file"},
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "CLI cheat-sheet"}
+    ],
+    "description_objective": "Develop the main `tm-fc` CLI application structure in `flashcards_cli.py` (e.g., using `click` or `argparse`). Implement the first subcommand, `tm-fc ingest`, which will wrap the functionality of the existing `ingest_flashcards.py` script, taking similar arguments (source-dir, assets-dir, db-path, strict).",
+    "primary_type": "System Development (CLI)",
+    "initial_scale_estimate": "Medium (1 day)",
+    "potential_deliverables_outcomes": [
+      "Basic `tm-fc` CLI structure.",
+      "Functional `tm-fc ingest` subcommand.",
+      "Unit tests for the `ingest` subcommand's argument parsing and invocation of core logic.",
+      "Initial CLI help text and documentation."
+    ],
+    "implicit_reasoning_confidence": "N/A",
+    "notes_questions_dependencies": "Depends on DW_FC_YAML_001 and DW_FC_CORE_002. Choose a CLI framework (`click` is often preferred for richer features)."
+  },
+  {
+    "task_id_candidate": "DW_FC_CLI_002",
+    "tentative_title": "Implement `tm-fc add` Subcommand",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "CLI cheat-sheet, 7. Task Master hooks"}
+    ],
+    "description_objective": "Implement the `tm-fc add` subcommand for manual card creation. It should take arguments for deck, front, back, and optional tags. This command will likely create/append to a specified YAML file (or a default 'inbox.yaml') which can then be processed by `tm-fc ingest`. Alternatively, it could write directly to the database using `yaml_processor` logic for validation and `database` for insertion.",
+    "primary_type": "System Development (CLI)",
+    "initial_scale_estimate": "Medium (1 day)",
+    "potential_deliverables_outcomes": [
+      "Functional `tm-fc add` subcommand.",
+      "Mechanism to add cards (either to YAML or directly to DB).",
+      "Unit tests for card creation via CLI.",
+      "CLI help text."
+    ],
+    "implicit_reasoning_confidence": "N/A",
+    "notes_questions_dependencies": "Decision needed on whether `add` writes to YAML (requiring subsequent `ingest`) or directly to DB (more complex but immediate). Directly to DB means `tm-fc add` needs to know about `assets_root_directory` if media is supported via this command."
+  },
+  {
+    "task_id_candidate": "DW_FC_CLI_003",
+    "tentative_title": "Implement `tm-fc vet` Subcommand (Validation & Formatting)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "4. Author workflow"}
+    ],
+    "description_objective": "Implement the `tm-fc vet` subcommand. This tool is critical for the authoring workflow. It must: 1. Validate specified YAML files against the schema (using `yaml_processor` logic). 2. Inject UUIDs into cards lacking an `id` field. 3. Alpha-sort cards within a deck file (e.g., by the `q` field, configurable). 4. De-duplicate cards with identical question fronts within the *same file* (strategy: keep first, warn/error on others). 5. Support a `--check` mode for CI (reports errors without modifying files) and an in-place modification mode for pre-commit hooks.",
+    "primary_type": "Tool Development (CLI & YAML Manipulation)",
+    "initial_scale_estimate": "Large (2-3 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `tm-fc vet` subcommand with `--check` and in-place modification modes.",
+      "Reliable YAML parsing, modification (UUID injection, sorting, deduplication), and rewriting that preserves comments and structure.",
+      "Unit tests for all `vet` functionalities.",
+      "CLI help text."
+    ],
+    "implicit_reasoning_confidence": "N/A",
+    "notes_questions_dependencies": "Requires a YAML library that supports comment and style preservation (e.g., `ruamel.yaml`). Strategy for sorting and deduplication needs careful thought (e.g., case sensitivity for sorting/deduping fronts). This is a complex but high-value tool."
+  },
+  {
+    "task_id_candidate": "DW_FC_CLI_004",
+    "tentative_title": "Implement `tm-fc review` Subcommand Interface",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "CLI cheat-sheet"}
+    ],
+    "description_objective": "Implement the `tm-fc review` subcommand. This command will act as the entry point to start a review session. It should primarily invoke the `ReviewSessionManager` and interface with the chosen UI (CLI MVP, and Streamlit/GUI via `--gui` flag).",
+    "primary_type": "System Development (CLI)",
+    "initial_scale_estimate": "Small (0.5-1 day for CLI wrapper)",
+    "potential_deliverables_outcomes": [
+      "Functional `tm-fc review` subcommand that launches the review UI.",
+      "Argument parsing for options like `--deck`, `--limit`, `--gui`.",
+      "Unit tests for CLI argument handling and `ReviewSessionManager` invocation.",
+      "CLI help text."
+    ],
+    "implicit_reasoning_confidence": "N/A",
+    "notes_questions_dependencies": "Depends on DW_FC_REVIEW_001 and DW_FC_REVIEW_002. This task is mainly about the CLI plumbing."
+  },
+  {
+    "task_id_candidate": "DW_FC_CLI_005",
+    "tentative_title": "Implement `tm-fc export` Subcommands",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "CLI cheat-sheet"}
+    ],
+    "description_objective": "Implement `tm-fc export anki` and `tm-fc export md` subcommands. These will invoke the respective exporter modules (`anki_exporter.py`, `markdown_exporter.py`) with appropriate arguments (e.g., output path, deck filters).",
+    "primary_type": "System Development (CLI)",
+    "initial_scale_estimate": "Small (0.5-1 day)",
+    "potential_deliverables_outcomes": [
+      "Functional `tm-fc export anki` and `tm-fc export md` subcommands.",
+      "Argument parsing for exporter options.",
+      "Unit tests for CLI argument handling and exporter invocation.",
+      "CLI help text."
+    ],
+    "implicit_reasoning_confidence": "N/A",
+    "notes_questions_dependencies": "Depends on DW_FC_EXPORT_001 and DW_FC_EXPORT_002."
+  },
+  {
+    "task_id_candidate": "DW_FC_SEC_001",
+    "tentative_title": "Finalize and Integrate Security Measures",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "1·Design principles, 3·YAML schema, 8·Security & compliance"},
+      {"file": "cultivation/scripts/flashcore/yaml_processor.py", "section": "Secrets detection and HTML sanitization"}
+    ],
+    "description_objective": "Review and finalize security measures: 1. Secrets detection patterns in `yaml_processor.py`. 2. `bleach` configuration for HTML sanitization in `yaml_processor.py`. 3. Integrate `detect-secrets` tool into pre-commit hooks or CI for broader scanning of YAML files. 4. Ensure XSS prevention is robust. 5. Confirm license footer appending in exporters works correctly. This task refines and completes DW_FC_SEC_001 from previous list.",
+    "primary_type": "System Feature (Security & Compliance)",
+    "initial_scale_estimate": "Medium (1 day)",
+    "potential_deliverables_outcomes": [
+      "Hardened secrets detection patterns and `bleach` configuration.",
+      "Integration of `detect-secrets` into CI/pre-commit.",
+      "Verified license footer functionality in exporters.",
+      "Updated security model documentation."
+    ],
+    "implicit_reasoning_confidence": "N/A",
+    "notes_questions_dependencies": "Requires `detect-secrets` tool. This builds upon existing security features in `yaml_processor.py`."
+  },
+  {
+    "task_id_candidate": "DW_FC_AUTO_001",
+    "tentative_title": "Implement Full Pre-Commit Hook Workflow",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "4·Author workflow"}
+    ],
+    "description_objective": "Finalize and deploy the pre-commit hook strategy. This includes configuring `.pre-commit-config.yaml` to run `tm-fc vet` on staged YAML files, and potentially other linters like `ruff` or `yamllint` for general YAML health. Ensure the `tm-fc vet` command provides clear output and correctly modifies files or exits with error for `--check` mode.",
+    "primary_type": "Process Automation & Tooling",
+    "initial_scale_estimate": "Medium (1 day)",
+    "potential_deliverables_outcomes": [
+      "Functional `.pre-commit-config.yaml` for comprehensive YAML linting and formatting via `tm-fc vet`.",
+      "Robust error handling and user feedback from the hook.",
+      "Documentation for developer setup of pre-commit hooks."
+    ],
+    "implicit_reasoning_confidence": "N/A",
+    "notes_questions_dependencies": "Depends on DW_FC_CLI_003 (`tm-fc vet`). Testing pre-commit hooks can be tricky and requires local setup."
+  },
+  {
+    "task_id_candidate": "DW_FC_AUTO_002",
+    "tentative_title": "Implement Full Flashcard System CI/CD Workflows",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "6·CI integration"}
+    ],
+    "description_objective": "Implement the two GitHub Actions workflows: 1. `flashcards-lint.yml`: On PRs, run `tm-fc vet --check` (or `tm-fc ingest --lint-only --strict`). Also run Python linters/tests for `flashcore` code. 2. `flashcards-build-nightly.yml`: Scheduled job for `make flash-sync` (which runs `tm-fc ingest`, `tm-fc export anki`, `tm-fc export md`) and uploads `dist/flashcards` as a build artifact. Ensure notification for build failures.",
+    "primary_type": "Process Automation (CI/CD)",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "`.github/workflows/flashcards-lint.yml` and `flashcards-build-nightly.yml` fully implemented and tested.",
+      "Makefile with `flash-sync` target or equivalent CI script.",
+      "Successful CI runs demonstrating linting, testing, artifact generation, and upload.",
+      "Notification setup for build failures (e.g., Slack webhook or email)."
+    ],
+    "implicit_reasoning_confidence": "N/A",
+    "notes_questions_dependencies": "Depends on all relevant `tm-fc` subcommands being functional. Requires GitHub secrets for any notifications."
+  },
+  {
+    "task_id_candidate": "DW_FC_INT_001",
+    "tentative_title": "Implement Task Master `[[fc]]` Hook for Card Creation",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "7·Task Master hooks"},
+      {"file": "cultivation/docs/6_scheduling/task_master_integration.md", "section": "Hooks into Flash-Memory layer"}
+    ],
+    "description_objective": "Develop `scripts/post_task_complete.py` (or equivalent Task Master hook) to parse completed task descriptions for `[[fc]]` tags. If found, extract Q/A content (e.g., from task title/details, or specially formatted sections within the description) and deck/tags (e.g., from task labels). Use `tm-fc add` to create the flashcard. Implement error handling and logging.",
+    "primary_type": "System Integration, Scripting",
+    "initial_scale_estimate": "Medium (1 day)",
+    "potential_deliverables_outcomes": [
+      "Functional Task Master hook script.",
+      "Documentation on the `[[fc]]` syntax and how Q/A/deck/tags are derived from tasks.",
+      "Unit tests for the hook's parsing and `tm-fc add` invocation (mocked)."
+    ],
+    "implicit_reasoning_confidence": "N/A",
+    "notes_questions_dependencies": "Depends on DW_FC_CLI_002 (`tm-fc add`) and a stable Task Master hook mechanism. The parsing logic for Q/A from task descriptions needs careful design for robustness."
+  },
+  {
+    "task_id_candidate": "DW_FC_ANALYTICS_001",
+    "tentative_title": "Implement Core Flashcard Analytics in `flashcore.analytics`",
+    "source_reference": [
+      {"file": "cultivation/scripts/flashcore/analytics.py", "section": "Stub file"},
+      {"file": "cultivation/scripts/biology/flashcards_playground (1).py", "section": "Analytics on review data"}
+    ],
+    "description_objective": "Develop the core analytics functions in `flashcore.analytics.py`. This module should query the DuckDB `reviews` table and compute key learning metrics: retention rate (e.g., true retention from FSRS parameters), number of mature/young/lapsed cards, learning streaks, review load (cards due per day/week), and distributions of card stability and difficulty. Output should be easily consumable (e.g., Pandas DataFrames, dicts).",
+    "primary_type": "Feature Implementation (Data Analysis)",
+    "initial_scale_estimate": "Large (2-3 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `flashcore.analytics.py` module with documented metric calculation functions.",
+      "Unit tests for all key metric calculations using sample review data.",
+      "Example usage in a Jupyter notebook or script."
+    ],
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Depends on DW_FC_CORE_002 (Database) and DW_FC_SCHED_001 (for understanding FSRS parameters like stability). Precise definitions of metrics (e.g., 'mature card') are needed."
+  },
+  {
+    "task_id_candidate": "DW_FC_ANALYTICS_002",
+    "tentative_title": "Develop Flashcard Analytics Dashboard (Streamlit MVP)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "Roadmap (Superset dashboard), CLI (`tm-fc review --gui` implies GUI capability)"}
+    ],
+    "description_objective": "Create an initial dashboard using Streamlit (or similar lightweight framework) to visualize the metrics generated by `flashcore.analytics.py`. The dashboard should display trends in retention, card states, review load, and potentially allow filtering by deck or tags. This serves as an MVP for the Superset dashboard mentioned in the roadmap.",
+    "primary_type": "Feature Implementation (Visualization)",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "A functional Streamlit application that reads data from DuckDB (via `flashcore.analytics`) and displays key visualizations.",
+      "Charts for retention over time, card state distribution, upcoming review load.",
+      "Basic filtering capabilities."
+    ],
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Depends on DW_FC_ANALYTICS_001. The choice of Streamlit aligns with `tm-fc review --gui` and is good for rapid prototyping. Superset would be a more complex, later integration."
+  },
+  {
+    "task_id_candidate": "DW_FC_DOCS_001",
+    "tentative_title": "Create Flashcore User Guide: Authoring and Basic Usage",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "Overall specification"}
+    ],
+    "description_objective": "Develop the initial user documentation for Flashcore. This guide should cover: 1. YAML authoring format in detail (all fields, Markdown/KaTeX usage, media linking). 2. How to use VS Code snippets. 3. How to use `tm-fc vet` for validation and formatting. 4. How to use `tm-fc ingest` to build the database. 5. How to use `tm-fc review` (CLI and basic GUI). 6. How to use `tm-fc export` commands.",
+    "primary_type": "Documentation",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "Markdown-based User Guide in `cultivation/docs/flashcore/user_guide.md`.",
+      "Clear examples and step-by-step instructions.",
+      "Published as part of the project's MkDocs site."
+    ],
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Best written as features stabilize. Requires a decision on the final documentation platform (MkDocs assumed)."
+  },
+  {
+    "task_id_candidate": "DW_FC_DOCS_002",
+    "tentative_title": "Create Flashcore Developer Guide: Architecture and Contribution",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_1.md", "section": "Overall specification"}
+    ],
+    "description_objective": "Develop technical documentation for Flashcore contributors. This guide should cover: 1. System architecture (overview of modules: `card`, `yaml_processor`, `database`, `scheduler`, `review_manager`, `exporters`, CLI). 2. Key data models and database schema. 3. FSRS integration points. 4. Setup instructions for development environment. 5. Testing strategy and how to run/add tests. 6. Contribution guidelines (coding style, PR process).",
+    "primary_type": "Documentation",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "Markdown-based Developer Guide in `cultivation/docs/flashcore/developer_guide.md`.",
+      "Code comments and API documentation generated (e.g., via Sphinx or pdoc).",
+      "Published as part of the project's MkDocs site."
+    ],
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Should evolve with the codebase. Clear API documentation for modules like `scheduler` and `review_manager` is crucial."
+  },
+  {
+    "task_id_candidate": "DW_FC_EPIC_SAT",
+    "tentative_title": "EPIC: Develop Advanced Self-Assessment Tool (flashcards_2.md Vision)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_2.md", "section": "Entire document"},
+      {"ref_original_tasks": ["DW_005", "DW_006", "DW_007", "DW_008", "DW_009", "DW_FLASHSYS_010"]}
+    ],
+    "description_objective": "Design and implement the broader self-assessment tool envisioned in `flashcards_2.md`. This system will feature a modular question bank supporting multiple question types (flashcards, short-answer, coding, reflection), sophisticated session management with timing controls, versatile UI frontends (console MVP, with plans for GUI/web), robust answer capture and storage mechanisms, comprehensive analytics, and an advanced evaluation/scoring module. The tool will integrate `flashcore` to use its flashcard functionality as one of its question types.",
+    "primary_type": "System Development (New Application Epic)",
+    "initial_scale_estimate": "Epic (multi-month, requires detailed breakdown into sub-tasks based on original DW_005-009, DW_FLASHSYS_010)",
+    "potential_deliverables_outcomes": [
+      "Modular Question Bank supporting diverse question formats and metadata.",
+      "Session Manager with features for progress tracking, question selection logic, and configurable time constraints (per-question and per-session).",
+      "Answer Capture & Storage module (e.g., dedicated database schema for diverse answer types and metadata).",
+      "Evaluation & Scoring module supporting auto-grading for objective types and hooks for manual/semi-automated grading for subjective types.",
+      "Initial UI: Console-based MVP for core functionality.",
+      "Plan for future GUI/Web interfaces.",
+      "Analytics and reporting capabilities specific to self-assessment performance (timing, error patterns, etc.).",
+      "Clear API for integrating question sources, with `flashcore` being the first integration."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly specified in design doc)",
+    "notes_questions_dependencies": "This is a substantial, distinct project that builds upon the core Flashcore system. Requires careful architectural design for modularity (pluggable UIs, question types, grading modules). The Flashcore system (especially its API for card retrieval) needs to be stable first. Critical considerations include data privacy for stored answers and the complexity of the evaluation/scoring module."
+  },
+  {
+    "task_id_candidate": "DW_FC_EPIC_KD",
+    "tentative_title": "EPIC: Integrate Knowledge Dimension Tagging and Assessment (flashcards_3.md Vision)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_3.md", "section": "Entire document"},
+      {"ref_original_tasks": ["DW_010", "DW_011", "DW_012", "DW_013", "DW_FLASHSYS_011"]}
+    ],
+    "description_objective": "Extend the Flashcore system and the Advanced Self-Assessment Tool (if developed) to incorporate the 'Integrated Measurement Framework' from `flashcards_3.md`. This involves: 1. Conducting the literature review on knowledge dimensions (Declarative, Procedural, Conceptual, Metacognitive). 2. Updating the `Card` model, YAML schema, and authoring tools to allow tagging cards with these dimensions and supporting cross-linking. 3. Developing specific assessment instruments and methods for each knowledge dimension. 4. Implementing analytics to track progress and proficiency across these dimensions.",
+    "primary_type": "System Design & Feature Implementation (Advanced Pedagogy Epic)",
+    "initial_scale_estimate": "Epic (multi-month, requires detailed breakdown based on original DW_010-013, DW_FLASHSYS_011)",
+    "potential_deliverables_outcomes": [
+      "Comprehensive literature review document on the four knowledge dimensions (output of original DW_010).",
+      "Updated `Card` Pydantic model and YAML schema to include fields for knowledge dimension tags and inter-card relationships.",
+      "Enhanced authoring guidelines and `tm-fc vet` support for managing knowledge dimension tags.",
+      "An assessment framework including item banks, rubrics, and scoring guides for each knowledge dimension (as per original DW_011).",
+      "Modifications to the review UI or Self-Assessment Tool to present and assess dimension-specific items.",
+      "New analytics dashboards showing learning profiles and progress per knowledge dimension.",
+      "Migration scripts or strategies for tagging existing flashcards."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly specified in design doc)",
+    "notes_questions_dependencies": "This represents a significant conceptual and technical expansion. The literature review (DW_010) is a critical prerequisite. Requires a deep understanding of the pedagogical framework and psychometrics. Needs careful UI/UX design for both authoring tags and presenting dimension-specific assessments. Consensus on the taxonomy and its application is crucial. Likely integrates heavily with FS_EPIC_SAT."
+  },
+  {
+    "task_id_candidate": "DW_FC_EPIC_ANKI_SYNC",
+    "tentative_title": "EPIC: Develop Anki Add-on for Custom Backend Sync (flashcards_4.md Vision)",
+    "source_reference": [
+      {"file": "cultivation/docs/2_requirements/flashcard_system/flashcards_4.md", "section": "Entire document"},
+      {"ref_original_tasks": ["DW_014", "DW_015", "DW_016", "DW_017", "DW_FLASHSYS_012"]}
+    ],
+    "description_objective": "Implement a robust Anki add-on that facilitates bi-directional (or carefully orchestrated one-way with reconciliation) synchronization between the Anki desktop client and the `flashcore` system (DuckDB backend). This includes: 1. Syncing card content (front, back, tags, media) from Flashcore to Anki notes. 2. Overriding Anki's native scheduler to use `next_due` dates provided by Flashcore's FSRS engine. 3. Capturing review events (ratings, timestamps) performed within Anki and writing them back to the Flashcore `reviews` table. 4. Implementing mechanisms for handling data integrity, concurrency, and potential conflicts.",
+    "primary_type": "Plugin Development & System Integration (Epic)",
+    "initial_scale_estimate": "Epic (multi-month, requires detailed breakdown based on original DW_014-017, DW_FLASHSYS_012)",
+    "potential_deliverables_outcomes": [
+      "A distributable Anki add-on package (.ankiaddon file).",
+      "Functionality for syncing card content from Flashcore DuckDB to Anki (creating/updating Anki notes, handling media).",
+      "Mechanism to set Anki card due dates based on `next_due` from Flashcore's `reviews` table.",
+      "Anki hooks to capture review events (card UUID, rating, timestamp, response time if available) and log them to Flashcore's DuckDB.",
+      "Backend `flashcore` scripts (e.g., as part of `tm-fc review` or a separate sync command) to process these Anki-originated reviews using the FSRS scheduler and update the DuckDB.",
+      "A clear data synchronization protocol, including handling of UUID mapping, conflict resolution strategy, and initial sync procedures.",
+      "Robust concurrency safeguards for DuckDB access (e.g., lock files, transactional logic if feasible with Anki's environment).",
+      "Comprehensive user documentation for installing, configuring, and using the add-on.",
+      "Automated tests for synchronization logic and error handling scenarios."
+    ],
+    "implicit_reasoning_confidence": "N/A (Explicitly specified in design doc)",
+    "notes_questions_dependencies": "Requires deep expertise in Anki's internal database structure, its Python add-on API, and hook system. Concurrency management for DuckDB (accessed by both Anki add-on and potentially other Flashcore scripts) is a major technical challenge. Ensuring data integrity and handling sync conflicts (e.g., if a card is edited in both places) needs careful design. The Flashcore FSRS scheduler (DW_FC_SCHED_001) and database layer (DW_FC_CORE_002) must be stable and provide clear APIs."
+  }
+]
