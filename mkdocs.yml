@@ -18,95 +18,52 @@ theme:
 docs_dir: cultivation/docs
 nav:
   - Home: index.md
-  - Introduction & Strategy:
-      - Overview: 0_introduction_and_strategy/README.md
-      - Conceptual Framework: 0_introduction_and_strategy/conceptual_framework.md
-      - System Readiness Audit: 0_introduction_and_strategy/system_readiness_audit_2025-04-18.md
-      - Systems Map & Market Cheatsheet: 0_introduction_and_strategy/systems_map_and_market_cheatsheet.md
-      - Project Philosophy & Core Concepts: 0_introduction_and_strategy/project_philosophy_and_core_concepts.md
-      - The Dao of Cultivation: 0_introduction_and_strategy/The_Dao_of_Cultivation_A_Founding_Vision.md
-      - Archive:
-          - README: 0_introduction_and_strategy/archive/README.md
-          - Hyper Detailed Outline: 0_introduction_and_strategy/archive/hyper_detailed_theoretical_outline.md
-  - Background Theory:
-      - README: 1_background_theory/README.md
-      - Domains Scope: 1_background_theory/domains_scope.md
-      - Hyper Detailed Theoretical Outline: 1_background_theory/hyper_detailed_theoretical_outline.md
-  - Requirements & Specifications:
-      - README: 2_requirements_and_specifications/README.md
-      - Flashcard System Spec: 2_requirements_and_specifications/flashcard_system_spec.md
-      - Functional Requirements: 2_requirements_and_specifications/functional_requirements.md
-      - Non-Functional Requirements: 2_requirements_and_specifications/non_functional_requirements.md
-      - Task Master Integration Spec: 2_requirements_and_specifications/task_master_integration_spec.md
-      - Flashcard Sample YAML: 2_requirements_and_specifications/flashcard_sample.yaml
-      - Data Schemas:
-          - README: 2_requirements_and_specifications/data_schemas/README.md
-          - Strength Data Schemas: 2_requirements_and_specifications/data_schemas/strength_data_schemas.md
-      - Formal System:
-          - README: 2_requirements_and_specifications/formal_system/README.md
-          - Lean Guide: 2_requirements_and_specifications/formal_system/lean_guide.md
-          - Lean Tools: 2_requirements_and_specifications/formal_system/lean_tools.md
-          - Math Stack: 2_requirements_and_specifications/formal_system/math_stack.md
-  - Design & Architecture:
-      - README: 3_design_and_architecture/README.md
+  - 0 Introduction And Strategy:
+    - Readme: 0_introduction_and_strategy/README.md
+    - The Dao Of Cultivation A Founding Vision: 0_introduction_and_strategy/The_Dao_of_Cultivation_A_Founding_Vision.md
+    - Archive:
+      - Readme: 0_introduction_and_strategy/archive/README.md
+      - Critique And Refinement: 0_introduction_and_strategy/archive/critique_and_refinement.md
+      - Final Thoughts: 0_introduction_and_strategy/archive/final_thoughts.md
+      - Potential Overview: 0_introduction_and_strategy/archive/potential_overview.md
+      - Synergy Concept: 0_introduction_and_strategy/archive/synergy_concept.md
+      - Systems Map And Market Cheatsheet: 0_introduction_and_strategy/archive/systems_map_and_market_cheatsheet.md
+      - Ultimate Goals: 0_introduction_and_strategy/archive/ultimate_goals.md
+    - Project Philosophy And Core Concepts: 0_introduction_and_strategy/project_philosophy_and_core_concepts.md
+  - 1 Background Theory:
+    - Readme: 1_background_theory/README.md
+    - Domains Scope: 1_background_theory/domains_scope.md
+    - Hyper Detailed Theoretical Outline: 1_background_theory/hyper_detailed_theoretical_outline.md
+  - 2 Requirements And Specifications:
+    - Readme: 2_requirements_and_specifications/README.md
+    - Data Schemas:
+      - Readme: 2_requirements_and_specifications/data_schemas/README.md
+      - Strength Data Schemas: 2_requirements_and_specifications/data_schemas/strength_data_schemas.md
+    - Flashcard System Spec: 2_requirements_and_specifications/flashcard_system_spec.md
+    - Formal System:
+      - Readme: 2_requirements_and_specifications/formal_system/README.md
+      - Lean Guide: 2_requirements_and_specifications/formal_system/lean_guide.md
+      - Lean Tools: 2_requirements_and_specifications/formal_system/lean_tools.md
+      - Math Stack: 2_requirements_and_specifications/formal_system/math_stack.md
+    - Functional Requirements: 2_requirements_and_specifications/functional_requirements.md
+    - Non Functional Requirements: 2_requirements_and_specifications/non_functional_requirements.md
+    - Task Master Integration Spec: 2_requirements_and_specifications/task_master_integration_spec.md
+  - 3 Design And Architecture:
+      - Readme: 3_design_and_architecture/README.md
       - Architecture Overview: 3_design_and_architecture/architecture_overview.md
-      - Roadmap vSigma: 3_design_and_architecture/roadmap_vSigma.md
       - Integrations:
-          - README: 3_design_and_architecture/integrations/README.md
+          - Readme: 3_design_and_architecture/integrations/README.md
           - External Systems Analysis: 3_design_and_architecture/integrations/external_systems_analysis.md
       - Knowledge System:
-          - README: 3_design_and_architecture/knowledge_system/README.md
-          - Flashcard Anki Addon Design: 3_design_and_architecture/knowledge_system/flashcard_anki_addon_design.md
+          - Readme: 3_design_and_architecture/knowledge_system/README.md
+          - Archive:
+              - Flashcard Anki Addon Design: 3_design_and_architecture/knowledge_system/flashcard_anki_addon_design.md
           - Flashcard Self Assessment Design: 3_design_and_architecture/knowledge_system/flashcard_self_assessment_design.md
-          - Knowledge Acquisition Analysis: 3_design_and_architecture/knowledge_system/knowledge_acquistion_analysis.md
-          - Knowledge Creation and Validation: 3_design_and_architecture/knowledge_system/knowledge_creation_and_validation.md
+          - Knowledge Acquistion Analysis: 3_design_and_architecture/knowledge_system/knowledge_acquistion_analysis.md
+          - Knowledge Creation And Validation: 3_design_and_architecture/knowledge_system/knowledge_creation_and_validation.md
           - Knowledge Measurement Theory: 3_design_and_architecture/knowledge_system/knowledge_measurement_theory.md
           - Literature System Overview: 3_design_and_architecture/knowledge_system/literature_system_overview.md
-          - User Experience Knowledge System: 3_design_and_architecture/knowledge_system/user_experience_knowledge_system.md
           - References:
-              - README: 3_design_and_architecture/knowledge_system/references/README.md
-              - Knowledge Creation and Validation Supporting Report: 3_design_and_architecture/knowledge_system/references/knowledge_creation_and_validation_supporting_report.md
-      - Scheduling System:
-          - README: 3_design_and_architecture/scheduling_system/README.md
-          - FocusPredictor Tech Spec: 3_design_and_architecture/scheduling_system/FocusPredictor_TechSpec_v1.1.md
-          - Scheduling Oversized Tasks Strategy: 3_design_and_architecture/scheduling_system/scheduling_oversized_tasks_strategy_v1.0.md
-  - Analysis & Results:
-      - README: 4_analysis_and_results/README.md
-      - Analysis Overview: 4_analysis_and_results/analysis_overview.md
-      - Running Analysis Template: 4_analysis_and_results/running_analysis_template.md
-  - Domain Knowledge & Curricula:
-      - README: 5_domain_knowledge_and_curricula/README.md
-      - Biology:
-          - README: 5_domain_knowledge_and_curricula/biology/README.md
-          - MATHEMATICAL_BIO:
-              - README: 5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/README.md
-              - Chapter 1 Single Species: 5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/chapter_1_single_species.md
-              - Section 1 Test: 5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/section_1_test.md
-          - RNA_MODELING:
-              - README: 5_domain_knowledge_and_curricula/biology/RNA_MODELING/README.md
-              - REPORTS: 5_domain_knowledge_and_curricula/biology/RNA_MODELING/REPORTS.md
-              - SKILL MAP CSM Pillar 1: 5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar1.md
-              - SKILL MAP CSM Pillar 2: 5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar2.md
-              - SKILL MAP CSM Pillar 3: 5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar3.md
-              - SKILL MAP CSM Pillar 4: 5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar4.md
-              - Foundations Week 1-7day: 5_domain_knowledge_and_curricula/biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md
-              - HPE Metadata: 5_domain_knowledge_and_curricula/biology/RNA_MODELING/rna_tasks_hpe_metadata_v1.0.md
-      - Running Methodology:
-          - README: 5_domain_knowledge_and_curricula/running_methodology/README.md
-      - Software Engineering Practices:
-          - README: 5_domain_knowledge_and_curricula/software_engineering_practices/README.md
-  - Personal Schedules & Protocols:
-      - README: 6_personal_schedules_and_protocols/README.md
-      - My Optimized Flex Learning System: 6_personal_schedules_and_protocols/My_Optimized_Flex_Learning_System_v2.0.md
-      - My Optimized Performance Schedule: 6_personal_schedules_and_protocols/My_Optimized_Performance_Schedule_v1.0.md
-  - User Guides & SOPs:
-      - README: 7_user_guides_and_sops/README.md
-      - Comprehensive Debugging Workflow: 7_user_guides_and_sops/comprehensive_debugging_workflow.md
-      - Habitdash Integration Guide: 7_user_guides_and_sops/habitdash_integration_guide.md
-      - Literature System Howto: 7_user_guides_and_sops/literature_system_howto.md
-      - Operational Playbook: 7_user_guides_and_sops/operational_playbook.md
-  - Meta:
-      - README: meta/README.md
-      - Repository Progress Audit: meta/repository_progress_audit_2025-05-31.md
-plugins:
-  - search
+              - Readme: 3_design_and_architecture/knowledge_system/references/README.md
+              - Knowledge Creation And Validation Supporting Report: 3_design_and_architecture/knowledge_system/references/knowledge_creation_and_validation_supporting_report.md
+          - User Experience Knowledge System: 3_design_and_architecture/knowledge_system/user_experience_knowledge_system.md
