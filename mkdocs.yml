@@ -23,19 +23,15 @@ nav:
       - Conceptual Framework: 0_introduction_and_strategy/conceptual_framework.md
       - System Readiness Audit: 0_introduction_and_strategy/system_readiness_audit_2025-04-18.md
       - Systems Map & Market Cheatsheet: 0_introduction_and_strategy/systems_map_and_market_cheatsheet.md
+      - Project Philosophy & Core Concepts: 0_introduction_and_strategy/project_philosophy_and_core_concepts.md
+      - The Dao of Cultivation: 0_introduction_and_strategy/The_Dao_of_Cultivation_A_Founding_Vision.md
       - Archive:
           - README: 0_introduction_and_strategy/archive/README.md
           - Hyper Detailed Outline: 0_introduction_and_strategy/archive/hyper_detailed_theoretical_outline.md
-      - To Be Consolidated:
-          - README: 0_introduction_and_strategy/to_be_consolidated/README.md
-          - Critique and Refinement: 0_introduction_and_strategy/to_be_consolidated/critique_and_refinement.md
-          - Final Thoughts: 0_introduction_and_strategy/to_be_consolidated/final_thoughts.md
-          - Potential Overview: 0_introduction_and_strategy/to_be_consolidated/potential_overview.md
-          - Synergy Concept: 0_introduction_and_strategy/to_be_consolidated/synergy_concept.md
-          - Ultimate Goals: 0_introduction_and_strategy/to_be_consolidated/ultimate_goals.md
   - Background Theory:
       - README: 1_background_theory/README.md
       - Domains Scope: 1_background_theory/domains_scope.md
+      - Hyper Detailed Theoretical Outline: 1_background_theory/hyper_detailed_theoretical_outline.md
   - Requirements & Specifications:
       - README: 2_requirements_and_specifications/README.md
       - Flashcard System Spec: 2_requirements_and_specifications/flashcard_system_spec.md
