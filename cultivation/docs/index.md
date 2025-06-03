@@ -8,17 +8,17 @@ Below is a hierarchical overview of all documentation sections, subfolders, and 
 
 ## 0. Introduction & Strategy
 *Vision, philosophy, and strategic framing for the Cultivation project. Start here for the "why" and big-picture context.*
-- [README](0_introduction_and_strategy/README.md)
+- [README](0_vision_and_strategy/README.md)
 
-- [system_readiness_audit_2025-04-18.md](4_analysis_and_results/repository_audits/system_readiness_audit_2025-04-18.md)
-- [systems_map_and_market_cheatsheet.md](0_introduction_and_strategy/archive/systems_map_and_market_cheatsheet.md)
+- [system_readiness_audit_2025-04-18.md](4_analysis_results_and_audits/repository_audits/system_readiness_audit_2025-04-18.md)
+- [systems_map_and_market_cheatsheet.md](0_vision_and_strategy/archive/systems_map_and_market_cheatsheet.md)
 - **archive/**
 - **to_be_consolidated/**
 
 ## 1. Background Theory
 *Foundational concepts, definitions, and theoretical frameworks underpinning the system. Deep dives into "potential," domain scope, and core ideas.*
-- [README](1_background_theory/README.md)
-- [domains_scope.md](1_background_theory/domains_scope.md)
+- [README](1_background_and_theory/README.md)
+- [domains_scope.md](1_background_and_theory/domains_scope.md)
 
 ## 2. Requirements & Specifications
 *What the system and its components must do. Formal requirements, interface specs, and data schemas for all major subsystems.*
@@ -42,15 +42,15 @@ Below is a hierarchical overview of all documentation sections, subfolders, and 
 
 ## 4. Analysis & Results
 *Lab notebook and results vault. Human-authored analyses, experiment reports, and interpretations of data-driven outcomes.*
-- [README](4_analysis_and_results/README.md)
-- [analysis_overview.md](4_analysis_and_results/analysis_overview.md)
-- [running_analysis_template.md](4_analysis_and_results/running_analysis_template.md)
-- [week21_rpe10_benchmark_analysis.md](4_analysis_and_results/week21_rpe10_benchmark_analysis.md)
-- [2025_04_27_run_report.md](4_analysis_and_results/2025_04_27_run_report.md)
-- [2025_05_01_run_report.md](4_analysis_and_results/2025_05_01_run_report.md)
-- [2025_05_11_run_report.md](4_analysis_and_results/2025_05_11_run_report.md)
-- [2025_05_17_run_report.md](4_analysis_and_results/2025_05_17_run_report.md)
-- [2025_05_24_run_report.md](4_analysis_and_results/2025_05_24_run_report.md)
+- [README](4_analysis_results_and_audits/README.md)
+- [analysis_overview.md](4_analysis_results_and_audits/analysis_overview.md)
+- [running_analysis_template.md](4_analysis_results_and_audits/running_analysis_template.md)
+- [week21_rpe10_benchmark_analysis.md](4_analysis_results_and_audits/week21_rpe10_benchmark_analysis.md)
+- [2025_04_27_run_report.md](4_analysis_results_and_audits/run_reports/2025_04_27_run_report.md)
+- [2025_05_01_run_report.md](4_analysis_results_and_audits/run_reports/2025_05_01_run_report.md)
+- [2025_05_11_run_report.md](4_analysis_results_and_audits/run_reports/2025_05_11_run_report.md)
+- [2025_05_17_run_report.md](4_analysis_results_and_audits/run_reports/2025_05_17_run_report.md)
+- [2025_05_24_run_report.md](4_analysis_results_and_audits/run_reports/2025_05_24_run_report.md)
 - **repository_audits/**
 
 ## 5. Domain Knowledge & Curricula
