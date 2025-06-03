@@ -13,7 +13,16 @@ from pathlib import Path
 from ruamel.yaml import YAML
 
 def format_nav(items, indent=2):
-    """Format nav as YAML with correct indentation."""
+    """
+    Formats a list of navigation items into YAML lines with proper indentation.
+    
+    Args:
+        items: A list of (label, value) tuples representing navigation entries. Values may be strings (file paths) or nested lists for sub-navigation.
+        indent: The number of spaces to use for indentation at the current level.
+    
+    Returns:
+        A list of YAML-formatted strings representing the navigation structure.
+    """
     lines = []
     for label, value in items:
         pad = ' ' * indent
@@ -24,16 +33,20 @@ def format_nav(items, indent=2):
             lines.extend(format_nav(value, indent + 2))
     return lines
 
-def nav_tree(path, relative_base):
-    """
-    Recursively build navigation tree as (label, value) tuples.
 
+def nav_tree(path, rel_base):
+    """
+    Recursively generates a navigation tree of Markdown files and directories.
+    
+    Scans the given directory for Markdown files and subdirectories, creating a list of (label, value) tuples where labels are human-readable names and values are relative file paths or nested navigation groups. Empty directories are excluded from the result.
+    
     Args:
-        path: Directory path to scan
-        relative_base: Base path for calculating relative paths
+        path: The root directory to scan.
+        rel_base: The base directory for computing relative paths.
     
     Returns:
-        List of (label, value) tuples where value is either a file path or nested list
+        A list of (label, value) tuples representing the navigation structure.
+
     """
     items = []
     # Files first, sorted
@@ -51,35 +64,33 @@ def nav_tree(path, relative_base):
     return items
 
 
-def nav_to_yaml_structure(navigation_items):
+def nav_to_yaml_structure(nav_items):
+    # Recursively convert nav_items to the YAML structure expected by mkdocs
     """
-    Convert navigation items to YAML structure expected by MkDocs.
-
-    Args:
-        navigation_items: List of (label, value) tuples
-        
-    Returns:
-        List of dictionaries suitable for MkDocs nav configuration
+    Converts navigation tuples into a nested YAML structure for MkDocs.
+    
+    Recursively processes a list of (label, value) tuples, producing a list of dictionaries mapping labels to file paths or nested navigation structures as required by the MkDocs 'nav' configuration.
     """
-    nav_structure = []
-    for item_label, item_value in navigation_items:
-        if isinstance(item_value, str):
-            nav_structure.append({item_label: item_value})
-        elif isinstance(item_value, list) and item_value:
-            nav_structure.append({item_label: nav_to_yaml_structure(item_value)})
-    return nav_structure
+    nav_struct = []
+    for label, value in nav_items:
+        if isinstance(value, str):
+            nav_struct.append({label: value})
+        elif isinstance(value, list) and value:
+            nav_struct.append({label: nav_to_yaml_structure(value)})
+    return nav_struct
 
 def nav_to_markdown(items, indent=0, top_level=True):
     """
-    Convert navigation items to markdown table of contents format.
-
+    Converts a navigation tree into a Markdown-formatted table of contents.
+    
     Args:
-        items: List of (label, value) tuples
-        indent: Current indentation level
-        top_level: Whether this is the top level of the hierarchy
+        items: List of (label, value) tuples representing files and directories.
+        indent: Current indentation level for nested items.
+        top_level: Whether the current items are at the top level of the tree.
     
     Returns:
-        List of markdown formatted strings
+        A list of Markdown strings representing the hierarchical table of contents, with icons for files and folders.
+
     """
     md = []
     pad = '  ' * indent
