@@ -1,0 +1,3904 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.9">
+    
+    
+      
+        <title>Week 21 RPE 10 Benchmark Analysis & Prediction - Cultivation Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.4af4bdda.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#week-21-rpe-10-benchmark-analysis-prediction" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Cultivation Documentation" class="md-header__button md-logo" aria-label="Cultivation Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Cultivation Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Week 21 RPE 10 Benchmark Analysis &amp; Prediction
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Cultivation Documentation" class="md-nav__button md-logo" aria-label="Cultivation Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Cultivation Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Introduction & Strategy
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Introduction & Strategy
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../0_introduction_and_strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../0_introduction_and_strategy/conceptual_framework/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Conceptual Framework
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../0_introduction_and_strategy/system_readiness_audit_2025-04-18/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    System Readiness Audit
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../0_introduction_and_strategy/systems_map_and_market_cheatsheet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Systems Map & Market Cheatsheet
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Archive
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            Archive
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../0_introduction_and_strategy/archive/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../0_introduction_and_strategy/archive/hyper_detailed_theoretical_outline/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hyper Detailed Outline
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    To Be Consolidated
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            To Be Consolidated
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../0_introduction_and_strategy/to_be_consolidated/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../0_introduction_and_strategy/to_be_consolidated/critique_and_refinement/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Critique and Refinement
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../0_introduction_and_strategy/to_be_consolidated/final_thoughts/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Final Thoughts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../0_introduction_and_strategy/to_be_consolidated/potential_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Potential Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../0_introduction_and_strategy/to_be_consolidated/synergy_concept/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Synergy Concept
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../0_introduction_and_strategy/to_be_consolidated/ultimate_goals/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Ultimate Goals
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Background Theory
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Background Theory
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_background_theory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_background_theory/domains_scope/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Domains Scope
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Requirements & Specifications
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Requirements & Specifications
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_requirements_and_specifications/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_requirements_and_specifications/flashcard_system_spec/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Flashcard System Spec
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_requirements_and_specifications/functional_requirements/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Functional Requirements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_requirements_and_specifications/non_functional_requirements/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Non-Functional Requirements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_requirements_and_specifications/task_master_integration_spec/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Task Master Integration Spec
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_requirements_and_specifications/flashcard_sample.yaml" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Flashcard Sample YAML
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_7" id="__nav_4_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Data Schemas
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_7">
+            <span class="md-nav__icon md-icon"></span>
+            Data Schemas
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_requirements_and_specifications/data_schemas/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_requirements_and_specifications/data_schemas/strength_data_schemas/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Strength Data Schemas
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_8" id="__nav_4_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Formal System
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_8">
+            <span class="md-nav__icon md-icon"></span>
+            Formal System
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_requirements_and_specifications/formal_system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_requirements_and_specifications/formal_system/lean_guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Lean Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_requirements_and_specifications/formal_system/lean_tools/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Lean Tools
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_requirements_and_specifications/formal_system/math_stack/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Math Stack
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Design & Architecture
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Design & Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/architecture_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Architecture Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/roadmap_vSigma/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Roadmap vSigma
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Integrations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            Integrations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/integrations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/integrations/external_systems_analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    External Systems Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_5" id="__nav_5_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Knowledge System
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_5">
+            <span class="md-nav__icon md-icon"></span>
+            Knowledge System
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/knowledge_system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/knowledge_system/flashcard_anki_addon_design/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Flashcard Anki Addon Design
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/knowledge_system/flashcard_self_assessment_design/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Flashcard Self Assessment Design
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/knowledge_system/knowledge_acquistion_analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Knowledge Acquisition Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/knowledge_system/knowledge_creation_and_validation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Knowledge Creation and Validation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/knowledge_system/knowledge_measurement_theory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Knowledge Measurement Theory
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/knowledge_system/literature_system_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Literature System Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/knowledge_system/user_experience_knowledge_system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Experience Knowledge System
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_5_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_5_9" id="__nav_5_5_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    References
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_5_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_5_9">
+            <span class="md-nav__icon md-icon"></span>
+            References
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/knowledge_system/references/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/knowledge_system/references/knowledge_creation_and_validation_supporting_report/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Knowledge Creation and Validation Supporting Report
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_6" id="__nav_5_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Scheduling System
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_6">
+            <span class="md-nav__icon md-icon"></span>
+            Scheduling System
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/scheduling_system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/scheduling_system/FocusPredictor_TechSpec_v1.1/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FocusPredictor Tech Spec
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../3_design_and_architecture/scheduling_system/scheduling_oversized_tasks_strategy_v1.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scheduling Oversized Tasks Strategy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Analysis & Results
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Analysis & Results
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis_overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Analysis Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../running_analysis_template/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Running Analysis Template
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Domain Knowledge & Curricula
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Domain Knowledge & Curricula
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Biology
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            Biology
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/biology/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2_2" id="__nav_7_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    MATHEMATICAL_BIO
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_7_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            MATHEMATICAL_BIO
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/chapter_1_single_species/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Chapter 1 Single Species
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/section_1_test/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Section 1 Test
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2_3" id="__nav_7_2_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    RNA_MODELING
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_7_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            RNA_MODELING
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/REPORTS/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    REPORTS
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar1/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SKILL MAP CSM Pillar 1
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar2/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SKILL MAP CSM Pillar 2
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SKILL MAP CSM Pillar 3
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar4/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SKILL MAP CSM Pillar 4
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundations Week 1-7day
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/biology/RNA_MODELING/rna_tasks_hpe_metadata_v1.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HPE Metadata
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_3" id="__nav_7_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Running Methodology
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            Running Methodology
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/running_methodology/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_4" id="__nav_7_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Software Engineering Practices
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4">
+            <span class="md-nav__icon md-icon"></span>
+            Software Engineering Practices
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_domain_knowledge_and_curricula/software_engineering_practices/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Personal Schedules & Protocols
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Personal Schedules & Protocols
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_personal_schedules_and_protocols/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_personal_schedules_and_protocols/My_Optimized_Flex_Learning_System_v2.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    My Optimized Flex Learning System
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_personal_schedules_and_protocols/My_Optimized_Performance_Schedule_v1.0/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    My Optimized Performance Schedule
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    User Guides & SOPs
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            User Guides & SOPs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../7_user_guides_and_sops/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../7_user_guides_and_sops/comprehensive_debugging_workflow/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Comprehensive Debugging Workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../7_user_guides_and_sops/habitdash_integration_guide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Habitdash Integration Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../7_user_guides_and_sops/literature_system_howto/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Literature System Howto
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../7_user_guides_and_sops/operational_playbook/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Operational Playbook
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Meta
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            Meta
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../meta/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    README
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../meta/repository_progress_audit_2025-05-31/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Repository Progress Audit
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-overall-goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Overall Goal
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-analysis-of-benchmark-performance-week-17-rpe-10-workout" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Analysis of Benchmark Performance: Week 17 RPE 10 Workout
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-summary-of-intervening-training-context-weeks-18-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Summary of Intervening Training &amp; Context (Weeks 18-20)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Summary of Intervening Training &amp; Context (Weeks 18-20)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-week-18-base-ox-week-1-z2-focus-introduction-challenges" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1. Week 18: Base-Ox Week 1 – Z2 Focus Introduction &amp; Challenges
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-week-19-base-ox-week-2-high-volume-aerobic-challenges" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2. Week 19: Base-Ox Week 2 – High Volume &amp; Aerobic Challenges
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-week-20-neuromuscular-economy-maximal-recovery-focus" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.3. Week 20: Neuromuscular Economy &amp; Maximal Recovery Focus
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-key-themes-trends-across-weeks-17-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4. Key Themes &amp; Trends Across Weeks 17-20
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-factors-expected-to-influence-week-21-re-test-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Factors Expected to Influence Week 21 Re-Test Performance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Factors Expected to Influence Week 21 Re-Test Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-positive-factors-potential-for-improvementmaintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.1. Positive Factors (Potential for Improvement/Maintenance)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-negativeuncertain-factors-potential-for-stagnationregression" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.2. Negative/Uncertain Factors (Potential for Stagnation/Regression)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-assumptions-for-prediction" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Assumptions for Prediction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-predicted-performance-for-week-21-rpe-10-re-test-rationale" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Predicted Performance for Week 21 RPE 10 Re-Test &amp; Rationale
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Predicted Performance for Week 21 RPE 10 Re-Test &amp; Rationale">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-overall-prediction-hypothesis-slight-improvement-to-similar-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.1. Overall Prediction Hypothesis: Slight Improvement to Similar Performance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-specific-metric-predictions-compared-to-wk17-rpe-10-baseline-run-only-segment" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.2. Specific Metric Predictions (Compared to Wk17 RPE 10 Baseline - Run-Only Segment)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-detailed-rationale" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.3. Detailed Rationale
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-confidence-in-prediction-key-uncertainties" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Confidence in Prediction &amp; Key Uncertainties
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-key-metrics-for-post-workout-comparison-prediction-error-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Key Metrics for Post-Workout Comparison &amp; Prediction Error Analysis
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-overall-goal_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Overall Goal
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-analysis-of-benchmark-performance-week-17-rpe-10-workout_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Analysis of Benchmark Performance: Week 17 RPE 10 Workout
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-summary-of-intervening-training-context-weeks-18-20_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Summary of Intervening Training &amp; Context (Weeks 18-20)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Summary of Intervening Training &amp; Context (Weeks 18-20)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-week-18-base-ox-week-1-z2-focus-introduction-initial-challenges" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1. Week 18: Base-Ox Week 1 – Z2 Focus Introduction &amp; Initial Challenges
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-week-19-base-ox-week-2-high-volume-poor-wellness-declining-efficiency" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2. Week 19: Base-Ox Week 2 – High Volume, Poor Wellness &amp; Declining Efficiency
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-week-20-neuromuscular-economy-maximal-recovery-focus_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.3. Week 20: Neuromuscular Economy &amp; Maximal Recovery Focus
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-key-themes-trends-across-weeks-17-20_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4. Key Themes &amp; Trends Across Weeks 17-20
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-factors-expected-to-influence-week-21-re-test-performance_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Factors Expected to Influence Week 21 Re-Test Performance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Factors Expected to Influence Week 21 Re-Test Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-positive-factors" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.1. Positive Factors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-negativeuncertain-factors" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.2. Negative/Uncertain Factors
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-assumptions-for-prediction_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Assumptions for Prediction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-predicted-performance-for-week-21-rpe-10-re-test-rationale_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Predicted Performance for Week 21 RPE 10 Re-Test &amp; Rationale
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Predicted Performance for Week 21 RPE 10 Re-Test &amp; Rationale">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-overall-prediction-hypothesis-slight-improvement-similar-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.1. Overall Prediction Hypothesis: Slight Improvement / Similar Performance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-specific-metric-predictions-compared-to-wk17-rpe-10-baseline-run-only-segment_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.2. Specific Metric Predictions (Compared to Wk17 RPE 10 Baseline - Run-Only Segment)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-detailed-rationale-for-metric-predictions" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.3. Detailed Rationale for Metric Predictions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-confidence-in-prediction-key-uncertainties_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Confidence in Prediction &amp; Key Uncertainties
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-key-metrics-for-post-workout-comparison-prediction-error-analysis_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Key Metrics for Post-Workout Comparison &amp; Prediction Error Analysis
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="week-21-rpe-10-benchmark-analysis-prediction">Week 21 RPE 10 Benchmark Analysis &amp; Prediction</h1>
+<h2 id="1-overall-goal">1. Overall Goal</h2>
+<p>To analyze all available run data, training logs, and contextual wellness information from Week 17 (<code>20250425</code>) through the end of Week 20 (<code>20250517</code>) to generate a data-driven prediction for the performance of a repeat Week 17 RPE 10 workout. This re-test is planned for Tuesday of Week 21, following a full rest day on Monday. The analysis will identify key factors influencing potential improvement or regression, leading to specific metric predictions.</p>
+<h2 id="2-analysis-of-benchmark-performance-week-17-rpe-10-workout">2. Analysis of Benchmark Performance: Week 17 RPE 10 Workout</h2>
+<p>The baseline performance is derived from the workout: <code>20250425_201748_afternoon_run_calibration_pre-baseox_RPE_10</code>.</p>
+<ul>
+<li><strong>Date:</strong> 2025-04-25 (Friday, Week 17)</li>
+<li><strong>Conditions (from <code>weather.txt</code>):</strong> Temperature: 20.4 °C, Clear sky.</li>
+<li>
+<p><strong>Pre-Run Wellness Context (from <code>run_summary.txt</code> for this run):</strong></p>
+<ul>
+<li>Garmin RHR: 49.0 bpm (stable Δ1d: +0.0%)</li>
+<li>Garmin Body Battery: 57.1 % (Δ1d: -7.1%)</li>
+<li>Garmin Steps (activity leading into run): 8383.0</li>
+<li>Garmin VO2max: 53.0 ml/kg/min</li>
+<li><em>Interpretation:</em> Moderate to good pre-run state. Not exceptionally fresh (end of week, slight Body Battery dip), but not overly fatigued.</li>
+</ul>
+</li>
+<li>
+<p><strong>Key Metrics for "Run-Only" Segment (Primary analysis segment, from <code>advanced_metrics.txt</code>):</strong></p>
+<ul>
+<li><strong>Distance:</strong> 7.83 km</li>
+<li><strong>Duration:</strong> 39.4 minutes</li>
+<li><strong>Average Pace:</strong> 5.03 min/km (equivalent to 5:02/km or ~8:06/mile)</li>
+<li><strong>Average Heart Rate (HR):</strong> 183.6 bpm (High Zone 4, approaching Z5 based on HRmax 201)</li>
+<li><strong>Max Heart Rate (Session, from <code>hr_distribution.txt</code>):</strong> 199.0 bpm (Zone 5)</li>
+<li><strong>Efficiency Factor (EF):</strong> 0.01804</li>
+<li><strong>Pace/HR Decoupling (PwvHR):</strong> 7.72%</li>
+<li><strong>hrTSS:</strong> 75.0</li>
+<li><strong>Average Cadence (from <code>cadence_distribution.txt</code>):</strong> 164.4 spm</li>
+<li><strong>Pacing Strategy (from <code>pace_over_time.txt</code>):</strong> Positive split (First half: 4.97 min/km, Second half: 5.22 min/km)</li>
+</ul>
+</li>
+<li>
+<p><strong>Key Metrics for Full Session (Including warm-up, cool-down, walks, from <code>session_full_summary.txt</code>):</strong></p>
+<ul>
+<li>Total Distance: 8.30 km</li>
+<li>Total Duration: 46.7 minutes</li>
+<li>Average Pace (total): 5.62 min/km</li>
+<li>Average HR (total): 181.7 bpm</li>
+<li>Walk Time (<code>walk_summary.txt</code>): 7 min 03 s (15.1% of session)</li>
+<li>Average Walk HR (<code>walk_summary.txt</code>): 178.0 bpm (Extremely high for walks, indicating minimal recovery during these periods and likely high overall physiological stress).</li>
+</ul>
+</li>
+<li>
+<p><strong>Time in HR Zones (Full Session, from <code>time_in_hr_zone.txt</code>, HRmax 201bpm, Z2: 145-160bpm):</strong></p>
+<ul>
+<li>Z1 (0-145bpm): 6.7%</li>
+<li>Z2 (145-160bpm): 7.9%</li>
+<li>Z3 (161-175bpm): 11.5%</li>
+<li>Z4 (176-186bpm): 24.3%</li>
+<li>Z5 (187-201bpm): 49.6%</li>
+<li><em>Interpretation:</em> This indicates a very high-intensity effort, with almost 74% of the session spent in Z4 and Z5.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Baseline Summary (Wk17 RPE 10):</strong> A maximal ~40-minute running effort covering ~7.83 km at an average pace of 5:02/km, eliciting a high average HR of 183.6 bpm and reaching 199 bpm. The EF was moderate at 0.01804, with moderate decoupling of 7.72%. Cadence was 164.4 spm. The session included significant walk breaks where HR remained very high, reflecting the overall exhaustive nature. Weather was warm at 20.4°C.</p>
+<h2 id="3-summary-of-intervening-training-context-weeks-18-20">3. Summary of Intervening Training &amp; Context (Weeks 18-20)</h2>
+<p>This period involved a shift in training focus, from initial aerobic base building (Base-Ox) to neuromuscular economy development, with varying degrees of success in execution and significant environmental challenges.</p>
+<h3 id="31-week-18-base-ox-week-1-z2-focus-introduction-challenges">3.1. Week 18: Base-Ox Week 1 – Z2 Focus Introduction &amp; Challenges</h3>
+<ul>
+<li><strong>Objective:</strong> Establish aerobic base, Zone 2 (Z2: 145-160 bpm) HR discipline, cadence improvement.</li>
+<li><strong>Key Sessions &amp; Observations:</strong><ul>
+<li><code>20250429_..._RPE_5_hr_override</code>: Planned Z2+Strides. Run portion: 37.4 min, <strong>Avg HR 175.0 bpm (Z3/Z4)</strong>, Pace 5.23 min/km, EF 0.01822, Cadence 165.2 spm. Weather 20.4°C.<ul>
+<li><em>Note:</em> Failed to maintain Z2 HR despite "RPE 5" intent, indicating poor RPE calibration or underestimation of effort for Z2 pace bands. Cadence goal showed early positive signs.</li>
+</ul>
+</li>
+<li><code>20250501_..._rpe_3</code>: Planned Z2 Steady. Run portion: 17.7 min, <strong>Avg HR 149.5 bpm (✅ Z2 achieved)</strong>, Pace 7.61 min/km, EF 0.01465, Cadence 155.2 spm. Post-flood conditions, extensive walking (34.5%).<ul>
+<li><em>Note:</em> Achieved Z2 HR by drastically reducing pace due to adverse terrain. Low EF attributed to conditions. Cadence target missed.</li>
+</ul>
+</li>
+<li><code>20250503_..._rpe_4_anklepain_2</code>: Planned Z2 Progressive Long Run. Run portion: 45.3 min, <strong>Avg HR 152.7 bpm (✅ Z2 achieved)</strong>, Pace 6.83 min/km, EF 0.01597, Decoupling 14.91% (high), Cadence 157.4 spm. Ankle pain reported. Weather 18.8°C. Mediocre pre-run wellness.<ul>
+<li><em>Note:</em> Maintained Z2 HR, but high decoupling on a longer effort, combined with ankle pain, suggests potential issues.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Week 18 Themes:</strong> Initial struggles with Z2 HR control at planned paces. Low EF values. Cadence remained relatively low. Emergence of physical complaint (ankle pain).</li>
+</ul>
+<h3 id="32-week-19-base-ox-week-2-high-volume-aerobic-challenges">3.2. Week 19: Base-Ox Week 2 – High Volume &amp; Aerobic Challenges</h3>
+<ul>
+<li><strong>Objective:</strong> Continue aerobic base building, increase volume. Runner significantly increased volume (~42.66 km total) compared to the conservative plan, aligning more with their historical norms but often on poor wellness signals. (Primary source: <code>2025_05_11_run_report.md</code>).</li>
+<li><strong>Key Observations &amp; Trends:</strong><ul>
+<li><strong>Wellness:</strong> Consistently poor to mediocre (low HRV, elevated RHR, low Whoop recovery scores).</li>
+<li><strong>Z2 HR vs. Pace:</strong> Average HR <em>during run segments</em> was generally maintained in Z2 (151-155 bpm), but this required very slow paces (6:07-6:56 min/km).</li>
+<li><strong>Efficiency Factor (EF):</strong> Showed a <strong>declining trend</strong> throughout the week, from an initial 0.01754 down to a low of 0.01567 by the long run. This is a significant concern.</li>
+<li><strong>Cadence:</strong> Stagnated around 156-159 spm, consistently missing the ≥160 spm target.</li>
+<li><strong>Walk Ratio:</strong> High across all runs (20-39% of session time), often with elevated HR during walks.</li>
+<li><strong>Environmental Conditions:</strong> Consistently warm (22.7-23.9°C), contributing to increased cardiovascular strain.</li>
+<li><strong>Long Run (<code>20250510_...</code>):</strong> 97.6 min run-only. Avg HR 153.6 (Z2), but EF 0.01567 (lowest). Decoupling 0.15% (exceptionally low, likely an artifact of high fragmentation - 55 walk segments).</li>
+</ul>
+</li>
+<li><strong>Week 19 Themes:</strong> High volume executed on compromised readiness. Good Z2 HR control <em>during running segments</em> but at very slow paces, highlighting poor aerobic efficiency. EF declined markedly. Cadence did not improve. Heat was a consistent stressor. The "Recovery Run" on 05/07 was executed at too high an intensity (Max HR 186).</li>
+</ul>
+<h3 id="33-week-20-neuromuscular-economy-maximal-recovery-focus">3.3. Week 20: Neuromuscular Economy &amp; Maximal Recovery Focus</h3>
+<ul>
+<li><strong>Objective:</strong> Improve running economy (drills, plyos, calisthenics), enhance power, significantly deload running volume, prioritize cadence (165-170 spm), strict wellness gating. (Primary source: <code>2025_05_17_run_report.md</code>).</li>
+<li><strong>Key Sessions &amp; Observations:</strong><ul>
+<li><strong>NME Work:</strong> Successfully implemented drills, plyometrics, and calisthenics. RPEs for strength components were high. Max HR of 176bpm noted post-plyometrics on 05/13.</li>
+<li><strong>Running Volume:</strong> Drastically reduced, actual intentional run distance for the week was ~7.11 km (excluding extensive walking or very short drill movements).</li>
+<li><strong>Cadence Focus:</strong> Targets of 165-170 spm generally met during focused run segments.<ul>
+<li><code>20250514_..._good_cadence_work_168</code>: Run portion 10.1 min, <strong>Avg HR 175.0 bpm (Z3/Z4, NOT Z2)</strong>, Pace 6.67 min/km, EF 0.01428 (very low), Cadence 167.6 spm (✅). Weather 32.7°C (very hot). Poor pre-run wellness.</li>
+<li><code>20250515_..._10_20_30attempt</code>: Run portion 14.1 min, <strong>Avg HR 172.7 bpm (Z3/Z4/Z5)</strong>, Pace 5.75 min/km, EF 0.01679, Decoupling 20.99% (❌ extremely high). Cadence 165.4 spm (✅). Weather 30.0°C. Very poor pre-run wellness (Red Light, workout should have been skipped).</li>
+<li><code>20250517_..._DrillPlyoStr_Z3Z4RunCad165_Hot</code>: Run portion 18.8 min, <strong>Avg HR 170.7 bpm (Z3, NOT Z2)</strong>, Pace 6.02 min/km, EF 0.01621, Decoupling 13.16% (❌ high). Cadence 164.9 spm (✅). Weather 29.9°C. Good pre-run wellness.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Week 20 Themes:</strong> Successful introduction of NME work and achievement of cadence targets during runs. Very low actual running volume as planned. However, Z2 HR targets for any run portions were consistently missed, with efforts drifting into Z3/Z4, primarily due to very hot conditions and, on 05/15, overriding poor wellness signals. EF values for run segments remained low. Critical learning on respecting wellness signals for intensity.</li>
+</ul>
+<h3 id="34-key-themes-trends-across-weeks-17-20">3.4. Key Themes &amp; Trends Across Weeks 17-20</h3>
+<ol>
+<li><strong>Efficiency Factor (EF):</strong> Started moderate (0.01804 in W17 RPE 10). Showed a declining trend through W18-W19 (reaching 0.01567), and remained low (0.01428-0.01679) during W20's short, hotter, higher-intensity-than-planned run segments. Consistently below a "good" aerobic baseline of &gt;0.018 for most efforts.</li>
+<li><strong>Cadence:</strong> Began at 164.4 spm (W17 RPE 10), dipped to 155-159 spm in W18-W19. With explicit focus in Week 20, targets of 165-170 spm were met during running portions (actuals ~165-168 spm).</li>
+<li><strong>Zone 2 HR Adherence:</strong> A significant struggle throughout. Achieved in W18 only when pace was drastically reduced or conditions were favorable. Consistently missed in W19 (despite Z2 HR <em>during</em> run segments, paces were very slow indicating poor Z2 capacity at target <em>paces</em>) and W20 (run segments drifted to Z3/Z4) due to high temperatures, over-exuberance, or pushing through poor wellness signals.</li>
+<li><strong>Impact of Wellness &amp; Autoregulation:</strong> Sessions executed on "Amber" or "Red" wellness days (or days that <em>should</em> have been Amber/Red) generally showed poorer outcomes (higher RPE for effort, missed targets, high decoupling, e.g., 20250515). Adherence to the G/A/R system was inconsistent, with critical learning on 05/15.</li>
+<li><strong>Impact of Heat:</strong> Temperatures from 23°C upwards, and especially &gt;29°C, consistently correlated with higher HRs for any given pace, making Z2 HR control very difficult and likely contributing to lower EF values and higher RPE.</li>
+<li><strong>RPE Calibration:</strong> Earlier RPEs (e.g., RPE 5 leading to Z3/Z4 HR) were poorly calibrated. This seemed to improve slightly with focus, but remains an area for development.</li>
+<li><strong>Walk Strategy:</strong> Significant walk breaks were common, especially in hotter conditions or when fatigued. Walk HR often remained in Z2, limiting their full restorative effect.</li>
+<li><strong>Training Load Structure:</strong> Week 19 saw a return to familiar (higher) volume but on a compromised physiological base and poor readiness. Week 20 correctly deloaded running volume and shifted focus to NME, but execution of remaining runs was still often too intense relative to Z2 HR targets.</li>
+</ol>
+<h2 id="4-factors-expected-to-influence-week-21-re-test-performance">4. Factors Expected to Influence Week 21 Re-Test Performance</h2>
+<p>The Week 21 plan (<code>cultivation/outputs/training_plans/baseox_daily_plans/week21/t.md</code>) schedules the RPE 10 test on Tuesday after a full rest day on Monday.</p>
+<h3 id="41-positive-factors-potential-for-improvementmaintenance">4.1. Positive Factors (Potential for Improvement/Maintenance)</h3>
+<ol>
+<li><strong>Increased Cadence:</strong> Week 20 demonstrated consistent achievement of 165-168 spm when focused. If maintained during the RPE 10 effort, this could improve running economy compared to the W17 baseline of 164.4 spm.</li>
+<li><strong>Neuromuscular Work (Wk20):</strong> One full week of drills, plyometrics, and calisthenics, if recovered from, could potentially improve running mechanics, power output, and ground contact time, leading to better economy or the ability to sustain a faster pace for a given effort.</li>
+<li><strong>Acute Rest &amp; Freshness:</strong> The planned full rest day on Monday of Week 21 is crucial. This should allow for good recovery from Week 20's NME load and any accumulated fatigue, leading to better physiological readiness than the W17 baseline (which was at the end of a training week with moderate pre-run wellness).</li>
+<li><strong>Experience &amp; Pacing:</strong> Having performed a similar test and logged extensive data, the athlete may have improved mental toughness or pacing awareness for a maximal effort.</li>
+<li><strong>Learning from Wellness Gating:</strong> Recent experiences (especially Wk20 Thu) may lead to better execution choices if pre-test wellness is not optimal (though the plan assumes a Green Light).</li>
+</ol>
+<h3 id="42-negativeuncertain-factors-potential-for-stagnationregression">4.2. Negative/Uncertain Factors (Potential for Stagnation/Regression)</h3>
+<ol>
+<li><strong>Reduced Aerobic Running Volume (Wk20):</strong> Week 20 involved a significant deload in actual running distance and time focused on aerobic conditioning. While NME work is beneficial long-term, a ~40-minute RPE 10 effort relies heavily on aerobic endurance, which may have slightly detrained or not progressed due to the low specific running stimulus.</li>
+<li><strong>Persistently Low Running Efficiency (EF):</strong> EF values were consistently low to declining in W18-W20 runs, especially when HR was high or conditions were hot. The W17 RPE 10 EF was 0.01804. Recent "run" EFs in Wk20 were in the 0.014-0.016 range. This is a strong indicator of potential regression or stagnation in pure running economy at higher efforts.</li>
+<li><strong>Lack of Consistent Z2 Adaptation:</strong> Weeks 18 and 19 showed struggles with true Z2 HR training at target paces, and Wk20 runs were mostly above Z2 HR. The aerobic base, crucial for a sustained RPE 10 effort, might not have developed substantially over the past 3 weeks.</li>
+<li><strong>High Decoupling in Recent Higher-Effort Runs:</strong> The 10-20-30 attempt showed 21% decoupling, and the Wk20 Saturday run (albeit at Z3/Z4 HR) showed 13% decoupling. While context-dependent, this suggests difficulty maintaining physiological efficiency under stress.</li>
+<li><strong>Time Lag for NME Benefits to Manifest in Endurance:</strong> One week of focused NME work might not be sufficient time for those adaptations to fully translate into improved running economy or speed during a sustained endurance effort of this nature. Neuromuscular adaptations typically take several weeks to consolidate and integrate effectively into complex movements like running.</li>
+<li><strong>Heat Sensitivity &amp; Test Conditions:</strong> Performance in W19 and Wk20 was significantly impacted by heat (23°C to 33°C). The W17 RPE 10 test was at 20.4°C. If the W21 test is warmer than this baseline, regression is highly probable.</li>
+<li><strong>Residual Fatigue from NME:</strong> If the NME work in Week 20 was particularly strenuous and recovery (even with a rest day) is incomplete, it could impair performance.</li>
+</ol>
+<h2 id="5-assumptions-for-prediction">5. Assumptions for Prediction</h2>
+<ol>
+<li><strong>Wellness:</strong> The athlete will achieve a <strong>"Green Light" state of readiness</strong> (good HRV, normal RHR, good sleep, high Whoop Recovery Score, good subjective feel) for the Tuesday test, facilitated by Monday's full rest.</li>
+<li><strong>Environmental Conditions:</strong> Temperature will be <strong>similar to or slightly cooler than the original Wk17 RPE 10 run (i.e., ≤ 20.4°C)</strong>, with minimal wind and no adverse weather (e.g., heavy rain).</li>
+<li><strong>Execution Intent &amp; Protocol:</strong> The athlete will execute a true RPE 10 effort, aiming for a similar duration of primary running effort (~39-40 minutes) as the W17 test. Walk break strategy, if used, should be comparable or optimized for recovery.</li>
+<li><strong>Pacing Strategy:</strong> The athlete will attempt to pace the effort effectively, avoiding an overly aggressive start.</li>
+</ol>
+<h2 id="6-predicted-performance-for-week-21-rpe-10-re-test-rationale">6. Predicted Performance for Week 21 RPE 10 Re-Test &amp; Rationale</h2>
+<h3 id="61-overall-prediction-hypothesis-slight-improvement-to-similar-performance">6.1. Overall Prediction Hypothesis: <strong>Slight Improvement to Similar Performance</strong></h3>
+<p>The prediction leans towards a slight improvement or, at worst, a performance very similar to the Week 17 benchmark. The primary drivers for this are the planned <strong>acute freshness</strong> from the rest day and the <strong>neuromuscular priming</strong> from Week 20's focus, including improved cadence. However, significant gains are tempered by the very <strong>low specific running volume in Week 20</strong>, the history of <strong>low EF and high HR in warm conditions</strong>, and the potentially <strong>insufficient time for NME benefits to fully translate</strong> into a ~40-minute endurance performance. The goal is to see if targeted, lower-volume, higher-quality work, combined with rest, can offset or slightly improve upon a baseline set after a more traditional training week.</p>
+<h3 id="62-specific-metric-predictions-compared-to-wk17-rpe-10-baseline-run-only-segment">6.2. Specific Metric Predictions (Compared to Wk17 RPE 10 Baseline - Run-Only Segment)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Wk17 RPE 10 Actual</th>
+<th style="text-align: left;">Wk21 RPE 10 Prediction</th>
+<th style="text-align: left;">Predicted Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Duration (Run-Only)</strong></td>
+<td style="text-align: left;">39.4 min</td>
+<td style="text-align: left;"><strong>~39.0 - 40.0 min</strong></td>
+<td style="text-align: left;">Similar</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Distance (Run-Only)</strong></td>
+<td style="text-align: left;">7.83 km</td>
+<td style="text-align: left;"><strong>7.80 - 8.05 km</strong></td>
+<td style="text-align: left;">Similar to +0.22 km</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Average Pace (Run-Only)</strong></td>
+<td style="text-align: left;">5.03 min/km (5:02/km)</td>
+<td style="text-align: left;"><strong>4.98 - 5.08 min/km</strong> (4:59 - 5:05/km)</td>
+<td style="text-align: left;">~4s/km faster to 3s/km slower</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Average HR (Run-Only)</strong></td>
+<td style="text-align: left;">183.6 bpm</td>
+<td style="text-align: left;"><strong>182.0 - 185.0 bpm</strong></td>
+<td style="text-align: left;">Similar / Slightly ↓</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Max HR (Session)</strong></td>
+<td style="text-align: left;">199.0 bpm</td>
+<td style="text-align: left;"><strong>197 - 200 bpm</strong></td>
+<td style="text-align: left;">Similar</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Efficiency Factor (EF)</strong></td>
+<td style="text-align: left;">0.01804</td>
+<td style="text-align: left;"><strong>0.01780 - 0.01850</strong></td>
+<td style="text-align: left;">Slight ↓ to Slight ↑</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Decoupling % (PwvHR)</strong></td>
+<td style="text-align: left;">7.72%</td>
+<td style="text-align: left;"><strong>6.0% - 9.0%</strong></td>
+<td style="text-align: left;">Slight ↓ to Slight ↑</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Average Cadence (Run)</strong></td>
+<td style="text-align: left;">164.4 spm</td>
+<td style="text-align: left;"><strong>166 - 169 spm</strong></td>
+<td style="text-align: left;">Significant ↑</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Walk Ratio (Overall)</strong></td>
+<td style="text-align: left;">15.1%</td>
+<td style="text-align: left;"><strong>12% - 18%</strong></td>
+<td style="text-align: left;">Similar / Slight ↓</td>
+</tr>
+</tbody>
+</table>
+<h3 id="63-detailed-rationale">6.3. Detailed Rationale</h3>
+<ul>
+<li><strong>Duration &amp; Distance/Pace:</strong> The primary expectation is that the athlete can sustain a similar duration of maximal effort.<ul>
+<li>If freshness and NME/cadence improvements have a positive net effect on economy and sustainable power, a slightly faster pace (e.g., <strong>4:59-5:02/km</strong>) for the same duration, or slightly more distance, is possible.</li>
+<li>If the reduced aerobic running volume in Wk20 has a slightly detraining effect on specific endurance for this duration, pace might be slightly slower (e.g., <strong>5:03-5:05/km</strong>) or distance slightly less.</li>
+<li>The range provided accounts for these competing factors. The freshness should prevent a significant regression if conditions are good.</li>
+</ul>
+</li>
+<li><strong>Average HR &amp; Max HR:</strong> An RPE 10 effort should elicit a very high average HR, likely similar to the baseline. If efficiency has improved, a slightly lower average HR for a similar or better pace might be observed, but this is less likely for a maximal effort. Max HR should still approach its true maximum.</li>
+<li><strong>Efficiency Factor (EF):</strong> This is a key metric.<ul>
+<li>The recent trend of low EF in W20 (0.014-0.016 range) is a major concern. However, those runs were often in extreme heat and/or after poor wellness.</li>
+<li>The Wk17 RPE 10 EF (0.01804) was achieved in cooler conditions and moderate wellness.</li>
+<li><strong>Prediction:</strong> With good wellness and similar/cooler conditions for the Wk21 test, plus improved cadence, EF <em>should not regress significantly</em> from the W17 baseline. A slight improvement (e.g., 0.0182-0.0185) is hoped for if NME and cadence gains translate. However, if the underlying aerobic efficiency for sustained running hasn't improved, it might remain similar or slightly lower (0.0178-0.0180).</li>
+</ul>
+</li>
+<li><strong>Decoupling % (PwvHR):</strong><ul>
+<li>Freshness and potentially better pacing from experience could lead to slightly lower decoupling (e.g., 6-7%).</li>
+<li>However, if underlying endurance has not improved or the effort is pushed very hard from the start, it could be similar or slightly higher than the W17 baseline (7.7-9.0%). Recent high decoupling in Z3/Z4 runs (albeit in heat) suggests a risk here.</li>
+</ul>
+</li>
+<li><strong>Average Cadence:</strong><ul>
+<li>This is where the clearest improvement is expected due to focused work in Wk20. A sustained cadence of 166-169 spm is predicted.</li>
+</ul>
+</li>
+<li><strong>Walk Ratio:</strong> Better freshness and potentially improved running economy might reduce the <em>need</em> for extensive walk breaks, or allow for more effective recovery during them.</li>
+</ul>
+<p><strong>Overall Rationale Summary:</strong>
+The prediction for slight improvement to similar performance is driven by the expected benefits of acute freshness and neuromuscular work (especially cadence) from Week 20, hopefully counteracting or slightly outweighing the potential negative impact of reduced specific running volume in Week 20 and the previously observed low EF values. The very low EFs in Wk20 were often in extreme heat and/or poor wellness; the Wk21 test assumes better conditions. A significant breakthrough is not anticipated given the short duration of NME focus and the limited recent aerobic running. Conversely, a major regression is also not expected if wellness and weather assumptions hold, due to the rest and targeted prep.</p>
+<h2 id="7-confidence-in-prediction-key-uncertainties">7. Confidence in Prediction &amp; Key Uncertainties</h2>
+<ul>
+<li><strong>Confidence:</strong> Moderate.</li>
+<li><strong>Key Uncertainties:</strong><ol>
+<li><strong>Net Impact of Wk20 Training:</strong> The biggest uncertainty is the trade-off between the positive effects of NME work/cadence/freshness and the potential negative effect of significantly reduced running volume on specific endurance for a ~40-minute RPE 10 test.</li>
+<li><strong>Translation Time for NME:</strong> How much of the NME work will translate into improved running economy and power in a practical endurance setting after only one focused week and a rest day?</li>
+<li><strong>Actual Weather Conditions:</strong> If significantly hotter than 20.4°C, performance will almost certainly be negatively impacted, skewing towards regression.</li>
+<li><strong>True "Green Light" Wellness:</strong> The prediction relies on the athlete being genuinely well-recovered and ready. Any lingering unlogged fatigue or illness will negatively impact results.</li>
+<li><strong>Pacing Execution:</strong> A true RPE 10 effort requires careful pacing. An overly aggressive start could lead to premature fatigue and worse metrics.</li>
+</ol>
+</li>
+</ul>
+<h2 id="8-key-metrics-for-post-workout-comparison-prediction-error-analysis">8. Key Metrics for Post-Workout Comparison &amp; Prediction Error Analysis</h2>
+<p>Upon completion of the Week 21 RPE 10 workout, the following actual metrics should be compared against both the Week 17 baseline and the predictions above:</p>
+<ol>
+<li><strong>Primary Performance Metrics (Run-Only Segment):</strong><ul>
+<li>Average Pace</li>
+<li>Total Distance (if duration constrained) / Total Duration (if distance constrained)</li>
+</ul>
+</li>
+<li><strong>Internal Load &amp; Efficiency Metrics (Run-Only Segment):</strong><ul>
+<li>Average Heart Rate</li>
+<li>Max Heart Rate (Session)</li>
+<li>Efficiency Factor (EF)</li>
+<li>Pace/HR Decoupling (%)</li>
+<li>hrTSS</li>
+</ul>
+</li>
+<li><strong>Form &amp; Mechanics Metrics (Run-Only Segment):</strong><ul>
+<li>Average Cadence</li>
+</ul>
+</li>
+<li><strong>Contextual Factors:</strong><ul>
+<li>Pre-run Wellness metrics (HRV, RHR, Recovery Score, Sleep, Subjective Feel).</li>
+<li>Environmental Temperature, humidity, and conditions.</li>
+<li>Athlete's subjective RPE and qualitative feedback on how the effort felt compared to Wk17.</li>
+<li>Walk break strategy, duration, and average HR during walks.</li>
+<li>Pacing strategy observed (e.g., positive/negative/even split based on <code>pace_over_time.txt</code>).</li>
+</ul>
+</li>
+</ol>
+<p>Analyzing deviations between predicted and actual values across these metrics will provide valuable insights into which factors (freshness, NME, cadence, aerobic base, heat, etc.) had the most significant impact, thereby refining the predictive model and understanding of the athlete's training response.```Okay, this document provides a comprehensive and systematic analysis of your running data from Week 17 through Week 20, culminating in a data-driven prediction for your repeat Week 17 RPE 10 workout scheduled for Tuesday of Week 21. The aim is to provide a robust baseline for future comparison and understanding of prediction error.</p>
+<h2 id="1-overall-goal_1">1. Overall Goal</h2>
+<p>To analyze all available run data, training logs, and contextual wellness information from the benchmark Week 17 RPE 10 workout (<code>20250425_201748_afternoon_run_calibration_pre-baseox_RPE_10</code>) through the completion of Week 20 (<code>20250517</code>) to generate a detailed, evidence-based prediction for the performance of a repeat Week 17 RPE 10 workout. This re-test is planned for Tuesday of Week 21, following a full rest day on Monday. The analysis will identify key factors influencing potential improvement or regression, leading to specific metric predictions.</p>
+<h2 id="2-analysis-of-benchmark-performance-week-17-rpe-10-workout_1">2. Analysis of Benchmark Performance: Week 17 RPE 10 Workout</h2>
+<p>The baseline performance against which the Week 21 re-test will be compared is the workout: <code>20250425_201748_afternoon_run_calibration_pre-baseox_RPE_10</code>.</p>
+<ul>
+<li><strong>Date:</strong> 2025-04-25 (Friday, Week 17)</li>
+<li><strong>Conditions (from <code>outputs/.../weather.txt</code>):</strong> Temperature: 20.4 °C, Clear sky.</li>
+<li>
+<p><strong>Pre-Run Wellness Context (from <code>outputs/.../run_summary.txt</code> for this run):</strong></p>
+<ul>
+<li>Garmin Resting Heart Rate (RHR): 49.0 bpm (stable compared to previous day)</li>
+<li>Garmin Body Battery: 57.1% (a slight dip from the previous day)</li>
+<li>Garmin Steps (activity leading into run): 8383.0 (moderately active day)</li>
+<li>Garmin VO2max: 53.0 ml/kg/min</li>
+<li><em>Interpretation:</em> The athlete entered this benchmark workout in a moderate to good physiological state. It was the end of a training week, so not peak freshness, but not indicative of excessive fatigue.</li>
+</ul>
+</li>
+<li>
+<p><strong>Key Metrics for "Run-Only" Segment (Primary analysis segment, from <code>outputs/.../advanced_metrics.txt</code>):</strong></p>
+<ul>
+<li><strong>Distance:</strong> 7.83 km</li>
+<li><strong>Duration:</strong> 39.4 minutes</li>
+<li><strong>Average Pace:</strong> 5.03 min/km (equivalent to 5:02/km or approximately 8:06/mile)</li>
+<li><strong>Average Heart Rate (HR):</strong> 183.6 bpm (High Zone 4, based on HRmax of 201 bpm from <code>zones_personal.yml</code>)</li>
+<li><strong>Max Heart Rate (Session, from <code>outputs/.../hr_distribution.txt</code>):</strong> 199.0 bpm (Zone 5)</li>
+<li><strong>Efficiency Factor (EF):</strong> 0.01804</li>
+<li><strong>Pace/HR Decoupling (PwvHR):</strong> 7.72%</li>
+<li><strong>hrTSS:</strong> 75.0</li>
+<li><strong>Average Cadence (from <code>outputs/.../cadence_distribution.txt</code>):</strong> 164.4 spm</li>
+<li><strong>Pacing Strategy (from <code>outputs/.../pace_over_time.txt</code>):</strong> Positive split (First half: 4.97 min/km, Second half: 5.22 min/km), suggesting some fatigue accumulation or an overly optimistic start.</li>
+</ul>
+</li>
+<li>
+<p><strong>Key Metrics for Full Session (Including warm-up, cool-down, walks, from <code>outputs/.../session_full_summary.txt</code>):</strong></p>
+<ul>
+<li>Total Distance: 8.30 km</li>
+<li>Total Duration: 46.7 minutes</li>
+<li>Average Pace (total): 5.62 min/km</li>
+<li>Average HR (total): 181.7 bpm</li>
+<li>Walk Time (<code>outputs/.../walk_summary.txt</code>): 7 min 03 s (15.1% of session)</li>
+<li>Average Walk HR (<code>outputs/.../walk_summary.txt</code>): 178.0 bpm (This is extremely high for walk breaks, indicating minimal physiological recovery during these periods and reflecting the overall exhaustive nature of the RPE 10 effort).</li>
+</ul>
+</li>
+<li>
+<p><strong>Time in HR Zones (Full Session, from <code>outputs/.../time_in_hr_zone.txt</code>, HR Zones from <code>cultivation/data/zones_personal.yml</code> with HRmax 201bpm: Z1 Rec: 0-145, Z2 Aero: 145-160, Z3 Tempo: 161-175, Z4 Thres: 176-186, Z5 VO2: 187-201):</strong></p>
+<ul>
+<li>Z1 (Recovery): 6.7%</li>
+<li>Z2 (Aerobic): 7.9%</li>
+<li>Z3 (Tempo): 11.5%</li>
+<li>Z4 (Threshold): 24.3%</li>
+<li>Z5 (VO2max): 49.6%</li>
+<li><em>Interpretation:</em> The session was predominantly a very high-intensity effort, with almost 74% of the total time spent in Z4 and Z5.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Baseline Summary (Wk17 RPE 10):</strong> A maximal ~40-minute running effort covering ~7.83 km at an average pace of 5:02/km. This elicited a high average HR of 183.6 bpm, reaching 199 bpm. The EF was moderate at 0.01804, with moderate decoupling of 7.72%. Cadence averaged 164.4 spm. The session included significant walk breaks where HR remained very high, indicating the overall exhaustive nature of the workout. Weather conditions were warm at 20.4°C.</p>
+<h2 id="3-summary-of-intervening-training-context-weeks-18-20_1">3. Summary of Intervening Training &amp; Context (Weeks 18-20)</h2>
+<p>This period saw a shift in training focus from aerobic base building (Base-Ox phase) to neuromuscular economy development, characterized by varying execution success, significant environmental challenges (heat), and critical learnings regarding wellness management.</p>
+<h3 id="31-week-18-base-ox-week-1-z2-focus-introduction-initial-challenges">3.1. Week 18: Base-Ox Week 1 – Z2 Focus Introduction &amp; Initial Challenges</h3>
+<ul>
+<li><strong>Objective:</strong> Establish an aerobic base by running in Zone 2 (Z2 HR: 145-160 bpm), improve HR discipline, and begin focus on cadence.</li>
+<li><strong>Key Sessions &amp; Observations:</strong><ul>
+<li><strong><code>20250429_..._RPE_5_hr_override</code> (Planned Z2 + Strides):</strong> Run portion: 37.4 min, <strong>Avg HR 175.0 bpm (Z3/Z4)</strong>, Pace 5.23 min/km, EF 0.01822, Cadence 165.2 spm. Weather 20.4°C. Excellent pre-run wellness.<ul>
+<li><em>Note:</em> The Z2 HR target was missed; actual HR was in Z3/Z4, likely due to attempting to maintain a pace too fast for current Z2 HR fitness. Cadence showed early positive response.</li>
+</ul>
+</li>
+<li><strong><code>20250501_..._rpe_3</code> (Planned Z2 Steady):</strong> Run portion: 17.7 min, <strong>Avg HR 149.5 bpm (✅ Z2 achieved)</strong>, Pace 7.61 min/km, EF 0.01465 (low, attributed to "post-flood" conditions), Cadence 155.2 spm. Extensive walking (34.5%).<ul>
+<li><em>Note:</em> Z2 HR was achieved by drastically reducing pace due to adverse terrain. Low EF is context-dependent. Cadence target (164-168 spm) missed.</li>
+</ul>
+</li>
+<li><strong><code>20250503_..._rpe_4_anklepain_2</code> (Planned Z2 Progressive Long Run):</strong> Run portion: 45.3 min, <strong>Avg HR 152.7 bpm (✅ Z2 achieved)</strong>, Pace 6.83 min/km, EF 0.01597, Decoupling 14.91% (high), Cadence 157.4 spm. Ankle pain reported. Weather 18.8°C. Mediocre pre-run wellness.<ul>
+<li><em>Note:</em> Z2 HR maintained. High decoupling indicates difficulty sustaining efficiency even at Z2 HR. Ankle pain is a concern.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Week 18 Themes:</strong> Initial struggles with matching Z2 HR targets to planned Z2 paces. Low EF values persisted. Cadence remained relatively low. Physical complaints (ankle pain) began to surface.</li>
+</ul>
+<h3 id="32-week-19-base-ox-week-2-high-volume-poor-wellness-declining-efficiency">3.2. Week 19: Base-Ox Week 2 – High Volume, Poor Wellness &amp; Declining Efficiency</h3>
+<ul>
+<li><strong>Objective:</strong> Continue aerobic base building with increased volume. The athlete significantly increased actual weekly volume to ~42.66 km, closer to historical norms but against the plan's conservative progression and often with poor pre-run wellness signals. (Primary source: <code>cultivation/outputs/reports/2025_05_11_run_report.md</code>).</li>
+<li><strong>Key Observations &amp; Trends:</strong><ul>
+<li><strong>Wellness:</strong> Consistently poor to mediocre (low HRV, elevated RHR, low Whoop recovery scores).</li>
+<li><strong>Z2 HR vs. Pace:</strong> Average HR <em>during active running segments</em> was generally maintained in Z2 (151-155 bpm). However, this required very slow running paces (average ~6:07-6:56 min/km).</li>
+<li><strong>Efficiency Factor (EF):</strong> A critical concern emerged with a <strong>clear declining trend in EF</strong> throughout the week, dropping from 0.01754 to 0.01567.</li>
+<li><strong>Cadence:</strong> Remained stagnant, averaging 156-159 spm, below the ≥160 spm target.</li>
+<li><strong>Walk Ratio:</strong> High across all runs (20-39% of total session time), with walk HR frequently remaining in Z2.</li>
+<li><strong>Environmental Conditions:</strong> Consistently warm (22.7-23.9°C), increasing physiological strain.</li>
+<li><strong>Long Run (<code>20250510_...</code>):</strong> 97.6 min of run-only segments. Avg HR 153.6 bpm (Z2), but EF was the lowest of the week at 0.01567. Decoupling was exceptionally low at 0.15%, likely an artifact of extreme fragmentation (55 walk segments), suggesting good control <em>within</em> very short running bouts rather than sustained endurance.</li>
+</ul>
+</li>
+<li><strong>Week 19 Themes:</strong> High training volume was executed despite compromised physiological readiness. Z2 HR targets were met during running segments but at the cost of very slow paces, indicating poor aerobic efficiency for the planned paces. EF declined significantly. Cadence did not improve. Heat remained a major stressor. The "Recovery Run" on 05/07 was executed at an inappropriately high intensity (Max HR 186bpm).</li>
+</ul>
+<h3 id="33-week-20-neuromuscular-economy-maximal-recovery-focus_1">3.3. Week 20: Neuromuscular Economy &amp; Maximal Recovery Focus</h3>
+<ul>
+<li><strong>Objective:</strong> Shift focus to improving running economy via drills, plyometrics, and calisthenics; enhance neuromuscular power; significantly deload running volume; prioritize cadence (165-170 spm); and strictly adhere to wellness gating. (Primary source: <code>cultivation/outputs/reports/2025_05_17_run_report.md</code> and <code>cultivation/outputs/training_plans/baseox_daily_plans/week20/GOAL.md</code>).</li>
+<li><strong>Key Sessions &amp; Observations:</strong><ul>
+<li><strong>NME Work Implementation:</strong> Drills, plyometrics, and calisthenics were successfully introduced. RPEs for strength components were high, indicating significant effort.</li>
+<li><strong>Running Volume Deload:</strong> Actual intentional run distance for the week was substantially reduced to ~7.11 km (excluding minimal drill movements or extensive walk/cool-downs), aligning with the plan.</li>
+<li><strong>Cadence Focus:</strong> Targets of 165-170 spm were generally met during focused run segments, averaging 165-168 spm.<ul>
+<li><strong><code>20250514_..._good_cadence_work_168_Z3Z4run_RW_hot</code>:</strong> Run portion (10.1 min): <strong>Avg HR 175.0 bpm (Z3/Z4, NOT Z2)</strong>, Pace 6.67 min/km, EF 0.01428 (very low), Cadence 167.6 spm (✅). Weather 32.7°C (very hot). Poor pre-run wellness (ignored Red flags as per plan).</li>
+<li><strong><code>20250515_..._10_20_30attempt_Z3Z5_high_decoup21p_heavy_walk_warm26C</code>:</strong> Run portion (14.1 min): <strong>Avg HR 172.7 bpm (Z3/Z4/Z5)</strong>, Pace 5.75 min/km, EF 0.01679, Decoupling 20.99% (❌ extremely high). Cadence 165.4 spm (✅). Weather 30.0°C. Very poor pre-run wellness ("Red Light" day, workout should have been skipped/modified per plan).</li>
+<li><strong><code>20250517_..._DrillPlyoStr_Z3Z4RunCad165_Hot</code>:</strong> Run portion (18.8 min): <strong>Avg HR 170.7 bpm (Z3, NOT Z2)</strong>, Pace 6.02 min/km, EF 0.01621, Decoupling 13.16% (❌ high). Cadence 164.9 spm (✅). Weather 29.9°C. Good pre-run wellness.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Week 20 Themes:</strong> Successful introduction of NME work and achievement of cadence targets during runs. Running volume was significantly reduced as planned. However, Z2 HR targets for run portions were consistently missed, with efforts drifting into Z3/Z4, primarily due to very hot conditions and, crucially on 05/15, overriding clear "Red Light" wellness signals. EF values for run segments remained low. This week highlighted critical learning regarding the importance of respecting wellness signals for intensity modulation.</li>
+</ul>
+<h3 id="34-key-themes-trends-across-weeks-17-20_1">3.4. Key Themes &amp; Trends Across Weeks 17-20</h3>
+<ol>
+<li><strong>Efficiency Factor (EF):</strong> Started moderate (0.01804 in W17 RPE 10). Trended downwards through W18-W19, reaching as low as 0.01567. Remained low (0.01428-0.01679) during W20's short, hotter, higher-intensity-than-planned run segments. This persistent sub-0.018 EF for most efforts is a primary concern.</li>
+<li><strong>Cadence:</strong> Showed clear improvement in Week 20 (165-168 spm) when specifically targeted with a metronome, up from 164.4 spm in W17 and stagnant 155-159 spm in W18-W19.</li>
+<li><strong>Zone 2 HR Adherence vs. Pace:</strong> A consistent struggle. Maintaining Z2 HR (145-160 bpm) often required paces far slower than initial plan estimates, particularly in warmer conditions. Runs in Week 20 intended as Z2 often became Z3/Z4 efforts.</li>
+<li><strong>Impact of Wellness &amp; Autoregulation:</strong> Sessions executed on days with poor wellness markers (or against "Red Light" advice) consistently yielded poor outcomes (e.g., 20250515 10-20-30 attempt with 21% decoupling). The G/A/R light system was not consistently applied, providing valuable lessons.</li>
+<li><strong>Impact of Heat:</strong> Temperatures consistently above 23°C, and especially &gt;29°C, significantly elevated HR for any given pace, making Z2 HR control extremely difficult and negatively impacting EF and RPE.</li>
+<li><strong>RPE Calibration:</strong> Initial RPE ratings were often misaligned with internal load (HR). This showed some improvement but remains an area for continued focus.</li>
+<li><strong>Walk Strategy:</strong> Significant walk breaks were common. Walk HR often remained in Z2, limiting their full restorative benefit and contributing to overall session load.</li>
+<li><strong>Training Load Structure &amp; Adaptation:</strong> Week 19 highlighted issues with high volume on a compromised base. Week 20's deload in running was appropriate, but the intensity of remaining runs (often due to heat/wellness choices) compromised some aerobic goals.</li>
+</ol>
+<h2 id="4-factors-expected-to-influence-week-21-re-test-performance_1">4. Factors Expected to Influence Week 21 Re-Test Performance</h2>
+<p>The Week 21 plan (<code>cultivation/outputs/training_plans/baseox_daily_plans/week21/t.md</code>) schedules the RPE 10 test on Tuesday after a full rest day on Monday.</p>
+<h3 id="41-positive-factors">4.1. Positive Factors</h3>
+<ol>
+<li><strong>Improved Cadence:</strong> Week 20 demonstrated consistent achievement of 166-168 spm. If this carries over, it could improve mechanical efficiency.</li>
+<li><strong>Neuromuscular Priming (Wk20):</strong> One week of focused drills, plyometrics, and calisthenics, if recovered from, could enhance running mechanics, power transfer, and stiffness.</li>
+<li><strong>Acute Rest &amp; Supercompensation:</strong> The full rest day on Monday of Week 21 is critical and should lead to significantly better freshness compared to the W17 baseline (which was end-of-week). This is the strongest factor arguing for potential improvement.</li>
+<li><strong>Experience &amp; Learning:</strong> Previous RPE 10 test experience and learning from Wk20's wellness gating (especially the negative outcome of the 05/15 run) might lead to better pacing and decision-making.</li>
+</ol>
+<h3 id="42-negativeuncertain-factors">4.2. Negative/Uncertain Factors</h3>
+<ol>
+<li><strong>Reduced Specific Aerobic Running Volume (Wk20):</strong> The significant reduction in actual running time and distance focused on aerobic conditioning in Week 20 (~7km of intentional running) may have led to a slight detraining of specific endurance required for a ~40-minute RPE 10 effort.</li>
+<li><strong>Persistently Low Running Efficiency (EF):</strong> EF values remained low in W18-W20, even in some better wellness contexts when heat was present. This indicates underlying economy issues.</li>
+<li><strong>Questionable Aerobic Base Development:</strong> The struggle to consistently train in Z2 HR at reasonable paces over Weeks 18-20 suggests the aerobic foundation may not have substantially improved for sustained high-intensity efforts.</li>
+<li><strong>High Decoupling in Recent Efforts:</strong> High decoupling percentages in Wk20's more intense runs (even if short) suggest difficulty maintaining physiological efficiency under stress.</li>
+<li><strong>Short Time for NME Adaptation Transfer:</strong> One week of NME work may not be enough for adaptations to fully manifest in improved endurance performance. These benefits often take several weeks to consolidate.</li>
+<li><strong>Heat Sensitivity &amp; Test Conditions:</strong> Performance is highly sensitive to heat. If test day is warmer than 20.4°C, it will likely negatively impact the outcome.</li>
+</ol>
+<h2 id="5-assumptions-for-prediction_1">5. Assumptions for Prediction</h2>
+<ol>
+<li><strong>Optimal Wellness:</strong> The athlete will achieve a "Green Light" state of readiness for the Tuesday test, resulting from effective rest and recovery on Monday.</li>
+<li><strong>Favorable Environmental Conditions:</strong> Temperature will be similar to or cooler than the W17 test (i.e., <strong>≤ 20.4°C</strong>), with minimal wind and no adverse weather.</li>
+<li><strong>True RPE 10 Execution:</strong> The athlete will execute a genuine RPE 10 effort, aiming for a similar duration of primary running (~39-40 minutes) as the W17 benchmark.</li>
+<li><strong>Cadence Maintenance:</strong> The athlete will attempt to maintain the improved cadence (166-169 spm) during the run.</li>
+</ol>
+<h2 id="6-predicted-performance-for-week-21-rpe-10-re-test-rationale_1">6. Predicted Performance for Week 21 RPE 10 Re-Test &amp; Rationale</h2>
+<h3 id="61-overall-prediction-hypothesis-slight-improvement-similar-performance">6.1. Overall Prediction Hypothesis: <strong>Slight Improvement / Similar Performance</strong></h3>
+<p>The prediction is for a performance that is <strong>slightly improved or very similar</strong> to the Week 17 RPE 10 benchmark.
+The <strong>primary drivers for potential slight improvement</strong> are:
+*   <strong>Acute Freshness:</strong> The planned full rest day should lead to significantly better readiness than the W17 test.
+*   <strong>Improved Cadence:</strong> The demonstrated ability to run at a higher cadence (166-169 spm) should contribute to better mechanical efficiency.
+*   <strong>Neuromuscular Priming:</strong> Even one week of NME work might provide a small boost in "pop" or force application.</p>
+<p>These are weighed against:
+*   <strong>Reduced Recent Running Volume:</strong> The low specific running volume in Week 20 may limit gains in sustained aerobic power.
+*   <strong>Persistent Low EF:</strong> The history of low EF values indicates underlying economy issues not fully resolved.
+*   <strong>Short NME Adaptation Window:</strong> Full benefits of NME work typically take longer to realize in endurance contexts.</p>
+<p>The freshness and cadence are expected to at least offset any minor detraining from reduced Wk20 running volume, leading to a performance that is not worse, and potentially marginally better if the NME work provides a small immediate benefit.</p>
+<h3 id="62-specific-metric-predictions-compared-to-wk17-rpe-10-baseline-run-only-segment_1">6.2. Specific Metric Predictions (Compared to Wk17 RPE 10 Baseline - Run-Only Segment)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Wk17 RPE 10 Actual</th>
+<th style="text-align: left;">Wk21 RPE 10 Prediction</th>
+<th style="text-align: left;">Predicted Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Duration (Run-Only)</strong></td>
+<td style="text-align: left;">39.4 min</td>
+<td style="text-align: left;"><strong>~39.0 - 40.0 min</strong></td>
+<td style="text-align: left;">Similar</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Distance (Run-Only)</strong></td>
+<td style="text-align: left;">7.83 km</td>
+<td style="text-align: left;"><strong>7.85 - 8.10 km</strong></td>
+<td style="text-align: left;">Similar to +0.27 km (~0-3.5%)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Average Pace (Run-Only)</strong></td>
+<td style="text-align: left;">5.03 min/km (5:02/km)</td>
+<td style="text-align: left;"><strong>4:57 - 5:05 min/km</strong></td>
+<td style="text-align: left;">~5s/km faster to ~3s/km slower</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Average HR (Run-Only)</strong></td>
+<td style="text-align: left;">183.6 bpm</td>
+<td style="text-align: left;"><strong>181.0 - 184.0 bpm</strong></td>
+<td style="text-align: left;">Similar / Slightly ↓</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Max HR (Session)</strong></td>
+<td style="text-align: left;">199.0 bpm</td>
+<td style="text-align: left;"><strong>197 - 200 bpm</strong></td>
+<td style="text-align: left;">Similar</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Efficiency Factor (EF)</strong></td>
+<td style="text-align: left;">0.01804</td>
+<td style="text-align: left;"><strong>0.01810 - 0.01870</strong></td>
+<td style="text-align: left;">Similar / Slight ↑</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Decoupling % (PwvHR)</strong></td>
+<td style="text-align: left;">7.72%</td>
+<td style="text-align: left;"><strong>5.5% - 8.0%</strong></td>
+<td style="text-align: left;">Slight ↓ to Similar</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Average Cadence (Run)</strong></td>
+<td style="text-align: left;">164.4 spm</td>
+<td style="text-align: left;"><strong>166 - 169 spm</strong></td>
+<td style="text-align: left;">Noticeable ↑</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Walk Ratio (Overall)</strong></td>
+<td style="text-align: left;">15.1%</td>
+<td style="text-align: left;"><strong>10% - 16%</strong></td>
+<td style="text-align: left;">Similar / Slight ↓</td>
+</tr>
+</tbody>
+</table>
+<h3 id="63-detailed-rationale-for-metric-predictions">6.3. Detailed Rationale for Metric Predictions</h3>
+<ul>
+<li><strong>Pace/Distance:</strong> The most likely scenario is a pace very close to baseline, or slightly faster due to freshness and improved mechanics (cadence). A 5s/km improvement over ~8km equates to ~40 seconds, a modest but tangible gain. If aerobic specific endurance has suffered more than expected from Wk20's low volume, pace could be marginally slower.</li>
+<li><strong>Average HR:</strong> For a true RPE 10, HR will be high. If efficiency has improved, the same pace might be achieved at a slightly lower HR, or a faster pace at the same HR. The prediction reflects a tight range around the baseline HR.</li>
+<li><strong>Efficiency Factor (EF):</strong> Given the W17 EF of 0.01804, and recent low EFs (often in heat), a major jump is unlikely. However, with freshness, cooler conditions (assumed), and higher cadence, EF should ideally not regress and might see a small improvement (e.g., to 0.0181-0.0187). If EF is still below 0.0180, it would confirm persistent economy issues even when fresh.</li>
+<li><strong>Decoupling %:</strong> Freshness and better pacing could lead to slightly improved decoupling. However, a maximal effort will always induce some drift. The target is to keep it below the W17 value.</li>
+<li><strong>Cadence:</strong> The Wk20 focus should directly translate to a higher average cadence during the RPE 10 effort.</li>
+</ul>
+<h2 id="7-confidence-in-prediction-key-uncertainties_1">7. Confidence in Prediction &amp; Key Uncertainties</h2>
+<ul>
+<li><strong>Confidence Level:</strong> Moderate.</li>
+<li><strong>Key Uncertainties Dominating the Prediction:</strong><ol>
+<li><strong>Impact of Week 20's Low Running Volume:</strong> The most significant unknown is how much the drastic reduction in specific running in Week 20 will affect endurance capacity for a ~40-minute maximal effort, despite the NME focus.</li>
+<li><strong>Immediate Efficacy of NME Work:</strong> The extent to which one week of NME work can translate into tangible improvements in running economy and power for this specific test duration is uncertain.</li>
+<li><strong>Weather on Test Day:</strong> This is critical. If conditions are significantly warmer than 20.4°C, the prediction shifts towards stagnation or regression, particularly in pace and EF.</li>
+<li><strong>True Athlete Readiness:</strong> The prediction hinges on the athlete achieving optimal "Green Light" wellness.</li>
+<li><strong>Pacing and Execution:</strong> How the athlete manages the RPE 10 effort will influence outcomes.</li>
+</ol>
+</li>
+</ul>
+<h2 id="8-key-metrics-for-post-workout-comparison-prediction-error-analysis_1">8. Key Metrics for Post-Workout Comparison &amp; Prediction Error Analysis</h2>
+<p>Upon completion of the Week 21 RPE 10 workout, the following actual metrics will be compared against both the Week 17 baseline and the predictions outlined above to assess prediction error and refine understanding:</p>
+<ol>
+<li><strong>Primary Outcome Metrics (Run-Only Segment):</strong><ul>
+<li>Average Pace (min/km)</li>
+<li>Total Distance Run (km) (if effort is time-constrained around ~39.4 min)</li>
+<li>Total Duration (min) (if effort is distance-constrained around ~7.83 km)</li>
+</ul>
+</li>
+<li><strong>Internal Load &amp; Efficiency Metrics (Run-Only Segment):</strong><ul>
+<li>Average Heart Rate (bpm)</li>
+<li>Max Heart Rate (bpm) (Session)</li>
+<li>Efficiency Factor (EF)</li>
+<li>Pace/HR Decoupling (%)</li>
+<li>hrTSS</li>
+</ul>
+</li>
+<li><strong>Form &amp; Mechanics Metrics (Run-Only Segment):</strong><ul>
+<li>Average Cadence (spm)</li>
+</ul>
+</li>
+<li><strong>Contextual Factors for Analysis:</strong><ul>
+<li><strong>Pre-Run Wellness Metrics:</strong> HRV, RHR (Whoop &amp; Garmin), Recovery Score, Sleep metrics, Body Battery, Subjective Feel.</li>
+<li><strong>Environmental Conditions:</strong> Temperature (°C), humidity, weather description (e.g., clear, cloudy, windy).</li>
+<li><strong>Athlete's Subjective RPE:</strong> Confirmation of RPE 10 effort and qualitative feedback on how it felt compared to the Week 17 test.</li>
+<li><strong>Walk Break Strategy:</strong> Duration, frequency, and average HR during walk breaks (<code>walk_summary.txt</code>).</li>
+<li><strong>Pacing Strategy:</strong> Analysis of splits from <code>pace_over_time.txt</code> (positive, negative, or even).</li>
+</ul>
+</li>
+</ol>
+<p>This systematic comparison will allow for a detailed analysis of the prediction error, attributing discrepancies to specific factors (e.g., underestimation of NME impact, overestimation of freshness benefit, unaccounted environmental effects) and thereby improving the predictive model for future training cycles.
+```
+======
+Okay, that clarifies the objective significantly! An average pace of <strong>7:47 min/mile</strong> for the entire ~5-mile (or ~8km / ~39-40 minute) RPE 10 effort is a <em>very ambitious</em> target compared to the W17 baseline of 8:06 min/mile.</p>
+<p>To average 7:47 min/mile, you're looking to shave off approximately 19 seconds per mile from your previous best RPE 10 average. This is a substantial improvement.</p>
+<p><strong>Let's Re-evaluate the Pacing Strategy with a 7:47 min/mile Average Goal:</strong></p>
+<p>Your previous strategy:
+*   Mile 1: 8:06
+*   Mile 2: Slightly sub 8:00 (e.g., 7:55)
+*   Miles 3-5: Mid 7s to sub 7s (e.g., trying to average ~7:30 for these)</p>
+<p>This strategy is aggressive, especially the jump in the later miles. While it <em>could</em> lead to a 7:47 average if you absolutely crush the back half, it also carries a higher risk of early fatigue if the 8:06 start is too close to your current limit for that duration, or if you misjudge the effort for the sub-8:00 second mile.</p>
+<p><strong>Do I have an adjustment to the strategy? Yes, aiming for a 7:47 min/mile average "by any means necessary" calls for smart, controlled aggression, not reckless abandon.</strong></p>
+<p>The risk with your initial "8:06, then sub-8, then crank it" strategy for achieving a <em>specific average</em> like 7:47 is that if Mile 1 at 8:06 is already very close to your current threshold for that sustained RPE 10 effort, the subsequent accelerations might be too much, too soon, leading to a significant slowdown later that jeopardizes the average.</p>
+<p><strong>Alternative Pacing Strategy for a 7:47 min/mile Average (More Even Distribution of Effort, Progressively Negative):</strong></p>
+<p>The goal is to hit a <strong>total time of approximately 38:55</strong> (7.78333 min/mile * 5 miles).</p>
+<p>Let's think about a more controlled progression, still negative splitting, but perhaps not as extreme a jump late in the race. This strategy aims to "bank" a little time early without going into the red, then gradually increase the effort.</p>
+<ul>
+<li>
+<p><strong>Mile 1: ~7:55 - 8:00 min/mile</strong></p>
+<ul>
+<li><strong>Rationale:</strong> Start <em>slightly faster</em> than your W17 average, but not dramatically so. This pace should feel hard but controlled for an RPE 10 sustained effort. The goal here is to be <em>just under</em> what might feel like an "all-out from the gun" pace for that specific mile if you were <em>only</em> running one mile. You're signaling to your body that this is a hard effort, but you need to save something.</li>
+<li><strong>Time Banked/Lost vs. 7:47 Avg:</strong> You're slightly "behind" your average target pace here (by 8-13 seconds for this mile).</li>
+</ul>
+</li>
+<li>
+<p><strong>Mile 2: ~7:45 - 7:50 min/mile</strong></p>
+<ul>
+<li><strong>Rationale:</strong> A distinct pick-up from Mile 1. You're now hitting or slightly exceeding your target average pace. This is where you start to work hard and assess if the 7:47 average feels achievable. Your HR will be high, breathing will be labored.</li>
+<li><strong>Time Banked/Lost vs. 7:47 Avg:</strong> You're now at or slightly "ahead" of your target average pace for this mile.</li>
+</ul>
+</li>
+<li>
+<p><strong>Mile 3: ~7:40 - 7:45 min/mile</strong></p>
+<ul>
+<li><strong>Rationale:</strong> This is the "make or break" mile for a specific average. You need to solidify being under your target average. This will feel very tough. Focus on rhythm, form, and cadence.</li>
+<li><strong>Time Banked/Lost vs. 7:47 Avg:</strong> You're banking a few more seconds against your average.</li>
+</ul>
+</li>
+<li>
+<p><strong>Mile 4: ~7:35 - 7:40 min/mile</strong></p>
+<ul>
+<li><strong>Rationale:</strong> You're deep into the effort now. If you've paced well, you might find you can push this. This is where the "crank it down" begins, but from a more stable platform.</li>
+<li><strong>Time Banked/Lost vs. 7:47 Avg:</strong> Banking more significant time.</li>
+</ul>
+</li>
+<li>
+<p><strong>Mile 5 (or final ~1.2 miles if it's an 8km effort): As fast as possible, aiming for sub-7:35, ideally closer to ~7:20 - 7:30 min/mile if you have anything left.</strong></p>
+<ul>
+<li><strong>Rationale:</strong> Empty the tank. If the previous miles were paced well, you should have <em>something</em> left for a strong finish.</li>
+<li><strong>Time Banked/Lost vs. 7:47 Avg:</strong> This is where you make up any remaining deficit and try to get further under the average.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Why this revised strategy might be smarter for a specific average target:</strong></p>
+<ol>
+<li><strong>More Even Effort Distribution:</strong> It avoids an overly conservative start (like 8:06 if your actual current capability is much higher) which would require <em>heroic</em> later miles. It also avoids an overly aggressive jump from an already fast pace.</li>
+<li><strong>Risk Management:</strong> Starting at 7:55-8:00 allows you to gauge your current RPE 10 capability more accurately in the first mile. If that feels like an absolute redline, then a 7:47 average is likely out of reach, and you can adjust to simply aim for a PR without blowing up.</li>
+<li><strong>Progressive Negative Split:</strong> This is generally considered an optimal strategy for longer efforts. It allows the body to warm up into the effort and finish strong.</li>
+<li><strong>Psychological Pacing:</strong> Hitting or being slightly under your target average by mile 2 can be a psychological boost.</li>
+</ol>
+<p><strong>Comparison of Total Times (Illustrative, assuming roughly 5 miles):</strong></p>
+<ul>
+<li>
+<p><strong>Your Original Strategy (Illustrative numbers):</strong></p>
+<ul>
+<li>Mile 1: 8:06</li>
+<li>Mile 2: 7:55</li>
+<li>Mile 3: 7:30</li>
+<li>Mile 4: 7:30</li>
+<li>Mile 5: 7:20</li>
+<li><strong>Total: 38:21 (Average: 7:40 min/mile)</strong> - This works, but relies on a huge jump and sustained effort in miles 3-5.</li>
+</ul>
+</li>
+<li>
+<p><strong>Revised Strategy (Illustrative numbers for 7:47 average):</strong></p>
+<ul>
+<li>Mile 1: 7:58</li>
+<li>Mile 2: 7:48</li>
+<li>Mile 3: 7:42</li>
+<li>Mile 4: 7:38</li>
+<li>Mile 5: 7:30 (needs to be this fast to pull the average down)</li>
+<li><strong>Total: 38:36 (Average: ~7:43 min/mile)</strong> - This example illustrates that even with this more controlled progression, the later miles still need to be significantly faster than the average.</li>
+</ul>
+</li>
+</ul>
+<p>To hit exactly 7:47 (38:55 for 5 miles):
+*   Mile 1: 8:00
+*   Mile 2: 7:50 (cumulative 15:50)
+*   Mile 3: 7:45 (cumulative 23:35)
+*   Mile 4: 7:40 (cumulative 31:15)
+*   Mile 5: <strong>7:40</strong> (Total 38:55)
+    This "even keel then hold strong" is another option if the early accelerations feel too risky.</p>
+<p><strong>The "By Any Means Necessary" Consideration:</strong></p>
+<p>If the goal is truly 7:47 average "by any means," then the key is to not "lose" too much time in the first mile relative to that average.
+*   Starting around <strong>7:50-7:55 min/mile</strong> for the first mile gives you a very small deficit or even a slight surplus against a 7:47 average.
+*   Then, the goal for the subsequent miles is to maintain or slightly improve on 7:47.
+*   <strong>Example for 7:47 Average (Aggressive but more even):</strong>
+    *   Mile 1: 7:50
+    *   Mile 2: 7:45
+    *   Mile 3: 7:45
+    *   Mile 4: 7:45
+    *   Mile 5: 7:40
+    *   <strong>Total: 38:45 (Average: 7:45 min/mile)</strong> - This gets you there with less extreme late-race heroism.</p>
+<p><strong>Final Recommendation on Pacing Strategy for a 7:47 Average:</strong></p>
+<ol>
+<li><strong>Do NOT start at 8:06.</strong> This immediately puts you 19 seconds "in the hole" for the first mile if your target average is 7:47. You'll need to make that up, which adds pressure.</li>
+<li><strong>Mile 1 Target: ~7:50 - 7:55 min/mile.</strong><ul>
+<li>This is still a very strong start (11-16 seconds faster than your W17 average).</li>
+<li>Assess how this feels. If it's an RPE 9.5+, then 7:47 average might be too ambitious today.</li>
+</ul>
+</li>
+<li><strong>Miles 2-4: Aim to lock into a rhythm around 7:40 - 7:50 min/mile.</strong><ul>
+<li>Focus on consistency. Use your cadence.</li>
+<li>If you feel good, try to trend towards the faster end of this.</li>
+</ul>
+</li>
+<li><strong>Final Mile (or last 1.2 miles for 8km): Give it everything you have left.</strong> If you've paced well, you should be able to dip into the 7:30s or even faster if it's a true "blowout" performance.</li>
+</ol>
+<p><strong>Key Adjustment from Your Initial Thought:</strong>
+The main adjustment is to start slightly faster than your W17 average, closer to your target average pace, rather than significantly slower. This distributes the effort more evenly and reduces the need for a heroic surge in the later stages, which is often less reliable.</p>
+<p>This adjusted strategy is still very aggressive and requires a significant fitness improvement, but it's a <em>smarter</em> aggressive strategy for hitting a specific average target.</p>
+<p>Be prepared to adjust based on how you feel, especially with the heat. Good luck! This will be a fascinating test.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>
