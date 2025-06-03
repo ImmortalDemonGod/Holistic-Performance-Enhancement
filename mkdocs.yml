@@ -17,22 +17,32 @@ theme:
 docs_dir: cultivation/docs
 nav:
   - Home: index.md
-  - 0 Introduction And Strategy:
-    - Readme: 0_introduction_and_strategy/README.md
-    - The Dao Of Cultivation A Founding Vision: 0_introduction_and_strategy/The_Dao_of_Cultivation_A_Founding_Vision.md
-    - Project Philosophy And Core Concepts: 0_introduction_and_strategy/project_philosophy_and_core_concepts.md
+  - Index: index.md
+  - 0 Vision And Strategy:
+    - Readme: 0_vision_and_strategy/README.md
+    - The Dao Of Cultivation A Founding Vision: 0_vision_and_strategy/The_Dao_of_Cultivation_A_Founding_Vision.md
+    - Project Philosophy And Core Concepts: 0_vision_and_strategy/project_philosophy_and_core_concepts.md
     - Archive:
-      - Readme: 0_introduction_and_strategy/archive/README.md
-      - Critique And Refinement: 0_introduction_and_strategy/archive/critique_and_refinement.md
-      - Final Thoughts: 0_introduction_and_strategy/archive/final_thoughts.md
-      - Potential Overview: 0_introduction_and_strategy/archive/potential_overview.md
-      - Synergy Concept: 0_introduction_and_strategy/archive/synergy_concept.md
-      - Systems Map And Market Cheatsheet: 0_introduction_and_strategy/archive/systems_map_and_market_cheatsheet.md
-      - Ultimate Goals: 0_introduction_and_strategy/archive/ultimate_goals.md
-  - 1 Background Theory:
-    - Readme: 1_background_theory/README.md
-    - Domains Scope: 1_background_theory/domains_scope.md
-    - Hyper Detailed Theoretical Outline: 1_background_theory/hyper_detailed_theoretical_outline.md
+      - Readme: 0_vision_and_strategy/archive/README.md
+      - Critique And Refinement: 0_vision_and_strategy/archive/critique_and_refinement.md
+      - Final Thoughts: 0_vision_and_strategy/archive/final_thoughts.md
+      - Potential Overview: 0_vision_and_strategy/archive/potential_overview.md
+      - Systems Map And Market Cheatsheet: 0_vision_and_strategy/archive/systems_map_and_market_cheatsheet.md
+      - Ultimate Goals: 0_vision_and_strategy/archive/ultimate_goals.md
+      - Synergy Concept: 0_vision_and_strategy/archive/synergy_concept.md
+    - Strategic Initiatives:
+      - Cultivation Svep Master V1 0: 0_vision_and_strategy/strategic_initiatives/CULTIVATION_SVEP_MASTER_V1_0.md
+  - 1 Background And Theory:
+    - Readme: 1_background_and_theory/README.md
+    - Domains Scope: 1_background_and_theory/domains_scope.md
+    - Hyper Detailed Theoretical Outline: 1_background_and_theory/hyper_detailed_theoretical_outline.md
+    - External Project Analyses:
+      - Docinsight: 1_background_and_theory/external_project_analyses/DocInsight.md
+      - Primordialencounters: 1_background_and_theory/external_project_analyses/PrimordialEncounters.md
+      - Pytest-Error-Fixing-Framework: 1_background_and_theory/external_project_analyses/Pytest-Error-Fixing-Framework.md
+      - Rna Predict: 1_background_and_theory/external_project_analyses/RNA_PREDICT.md
+      - Simplest Arc Agi: 1_background_and_theory/external_project_analyses/Simplest_ARC_AGI.md
+      - External Systems Analysis: 1_background_and_theory/external_project_analyses/external_systems_analysis.md
   - 2 Requirements And Specifications:
     - Readme: 2_requirements_and_specifications/README.md
     - Flashcard System Spec: 2_requirements_and_specifications/flashcard_system_spec.md
@@ -53,7 +63,6 @@ nav:
     - Roadmap Vsigma: 3_design_and_architecture/roadmap_vSigma.md
     - Integrations:
       - Readme: 3_design_and_architecture/integrations/README.md
-      - External Systems Analysis: 3_design_and_architecture/integrations/external_systems_analysis.md
     - Knowledge System:
       - Readme: 3_design_and_architecture/knowledge_system/README.md
       - Flashcard Anki Addon Design: 3_design_and_architecture/knowledge_system/flashcard_anki_addon_design.md
@@ -70,18 +79,20 @@ nav:
       - Focuspredictor Techspec V1.1: 3_design_and_architecture/scheduling_system/FocusPredictor_TechSpec_v1.1.md
       - Readme: 3_design_and_architecture/scheduling_system/README.md
       - Scheduling Oversized Tasks Strategy V1.0: 3_design_and_architecture/scheduling_system/scheduling_oversized_tasks_strategy_v1.0.md
-  - 4 Analysis And Results:
-    - 2025 04 27 Run Report: 4_analysis_and_results/2025_04_27_run_report.md
-    - 2025 05 01 Run Report: 4_analysis_and_results/2025_05_01_run_report.md
-    - 2025 05 11 Run Report: 4_analysis_and_results/2025_05_11_run_report.md
-    - 2025 05 17 Run Report: 4_analysis_and_results/2025_05_17_run_report.md
-    - 2025 05 24 Run Report: 4_analysis_and_results/2025_05_24_run_report.md
-    - Readme: 4_analysis_and_results/README.md
-    - Analysis Overview: 4_analysis_and_results/analysis_overview.md
-    - Running Analysis Template: 4_analysis_and_results/running_analysis_template.md
-    - Week21 Rpe10 Benchmark Analysis: 4_analysis_and_results/week21_rpe10_benchmark_analysis.md
+  - 4 Analysis Results And Audits:
+    - Readme: 4_analysis_results_and_audits/README.md
+    - Analysis Overview: 4_analysis_results_and_audits/analysis_overview.md
+    - Running Analysis Template: 4_analysis_results_and_audits/running_analysis_template.md
+    - Week21 Rpe10 Benchmark Analysis: 4_analysis_results_and_audits/week21_rpe10_benchmark_analysis.md
     - Repository Audits:
-      - System Readiness Audit 2025-04-18: 4_analysis_and_results/repository_audits/system_readiness_audit_2025-04-18.md
+      - Architectural Review And Task Consolidation 2025-05-29: 4_analysis_results_and_audits/repository_audits/architectural_review_and_task_consolidation_2025-05-29.md
+      - System Readiness Audit 2025-04-18: 4_analysis_results_and_audits/repository_audits/system_readiness_audit_2025-04-18.md
+    - Run Reports:
+      - 2025 04 27 Run Report: 4_analysis_results_and_audits/run_reports/2025_04_27_run_report.md
+      - 2025 05 01 Run Report: 4_analysis_results_and_audits/run_reports/2025_05_01_run_report.md
+      - 2025 05 11 Run Report: 4_analysis_results_and_audits/run_reports/2025_05_11_run_report.md
+      - 2025 05 17 Run Report: 4_analysis_results_and_audits/run_reports/2025_05_17_run_report.md
+      - 2025 05 24 Run Report: 4_analysis_results_and_audits/run_reports/2025_05_24_run_report.md
   - 5 Domain Knowledge And Curricula:
     - Readme: 5_domain_knowledge_and_curricula/README.md
     - Biology:
