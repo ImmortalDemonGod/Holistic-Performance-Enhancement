@@ -64,7 +64,7 @@
     "tentative_title": "Integrate CI/CD Data (Build Status & Test Coverage) into DevDailyReflect",
     "source_reference": [
       {"file": "EXTRA CONTXT for original prompt", "section": "Prospective enhancements: CI/CD run statuses, test coverage deltas"},
-      {"file": "DW_DDR_CORE_001 (this plan, mentions coverage)"}
+      {"file": "cultivation/scripts/software/dev_daily_reflect/config/daily_review.yaml"}
     ],
     "description_objective": "Extend the data ingestion capabilities to include CI/CD outcomes. This involves: 1. Developing logic (likely within `github_api_ingestor.py` or a new script) to fetch GitHub Actions workflow run statuses (pass/fail, duration) associated with commits in the lookback period. 2. Implementing a reliable method to retrieve test coverage reports (e.g., `coverage.xml` for Python) produced by CI runs. This might involve fetching build artifacts via the GitHub API or accessing them from a predefined path if CI stores them consistently. 3. Parsing these coverage reports to extract key metrics (e.g., overall line/branch coverage) and calculating coverage delta from a baseline (e.g., parent commit or main branch). 4. Storing this CI and coverage data in structured formats (e.g., `raw/ci_runs_YYYY-MM-DD.json`, `processed/commit_coverage_YYYY-MM-DD.parquet`) and integrating coverage metrics into the enriched commit data.",
     "primary_type": "System Integration & Feature Implementation",
