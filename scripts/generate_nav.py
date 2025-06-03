@@ -43,16 +43,20 @@ def nav_to_yaml_structure(nav_items):
             nav_struct.append({label: nav_to_yaml_structure(value)})
     return nav_struct
 
-def nav_to_markdown(items, indent=0):
+def nav_to_markdown(items, indent=0, top_level=True):
     md = []
+    pad = '  ' * indent
     for label, value in items:
         if isinstance(value, str):
-            # Always use a single dash, no extra indentation to avoid code blocks
-            md.append(f"- [{label}]({value})")
+            # File: always show with 📄
+            md.append(f"{pad}- [📄 {label}]({value})")
         elif isinstance(value, list) and value:
-            # Section header for folders, no extra blank line
-            md.append(f"\n### {label}\n")
-            md.extend(nav_to_markdown(value, indent + 1))
+            # Folder: bold and 📁 if top-level, regular 📁 if nested
+            if top_level:
+                md.append(f"{pad}- **📁 {label}**")
+            else:
+                md.append(f"{pad}- 📁 {label}")
+            md.extend(nav_to_markdown(value, indent + 1, top_level=False))
     return md
 
 if __name__ == '__main__':
