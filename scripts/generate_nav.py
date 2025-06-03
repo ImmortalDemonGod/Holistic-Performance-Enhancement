@@ -1,5 +1,16 @@
+"""
+Script to automatically generate MkDocs navigation structure and table of contents.
+
+This script scans the documentation directory to build a hierarchical navigation tree,
+updates mkdocs.yml with the generated structure, and creates an auto-generated ToC
+in index.md.
+"""
+
 import sys
+import subprocess
+import re
 from pathlib import Path
+from ruamel.yaml import YAML
 
 def format_nav(items, indent=2):
     """Format nav as YAML with correct indentation."""
@@ -13,37 +24,63 @@ def format_nav(items, indent=2):
             lines.extend(format_nav(value, indent + 2))
     return lines
 
-def nav_tree(path, rel_base):
-    """Recursively build nav as (label, value) tuples. Skip empty groups."""
+def nav_tree(path, relative_base):
+    """
+    Recursively build navigation tree as (label, value) tuples.
+
+    Args:
+        path: Directory path to scan
+        relative_base: Base path for calculating relative paths
+    
+    Returns:
+        List of (label, value) tuples where value is either a file path or nested list
+    """
     items = []
     # Files first, sorted
-    files = sorted([f for f in path.iterdir() if f.is_file() and f.suffix == '.md'])
-    for f in files:
-        label = f.stem.replace('_', ' ').title()
-        items.append((label, str(f.relative_to(rel_base))))
+    files = sorted([file for file in path.iterdir() if file.is_file() and file.suffix == '.md'])
+    for file in files:
+        label = file.stem.replace('_', ' ').title()
+        items.append((label, str(file.relative_to(relative_base))))
     # Dirs next, sorted
-    dirs = sorted([d for d in path.iterdir() if d.is_dir()])
-    for d in dirs:
-        child_items = nav_tree(d, rel_base)
+    dirs = sorted([directory for directory in path.iterdir() if directory.is_dir()])
+    for directory in dirs:
+        child_items = nav_tree(directory, relative_base)
         if child_items:  # Only include non-empty groups
-            label = d.name.replace('_', ' ').title()
+            label = directory.name.replace('_', ' ').title()
             items.append((label, child_items))
     return items
 
-import subprocess
-from ruamel.yaml import YAML
 
-def nav_to_yaml_structure(nav_items):
-    # Recursively convert nav_items to the YAML structure expected by mkdocs
-    nav_struct = []
-    for label, value in nav_items:
-        if isinstance(value, str):
-            nav_struct.append({label: value})
-        elif isinstance(value, list) and value:
-            nav_struct.append({label: nav_to_yaml_structure(value)})
-    return nav_struct
+def nav_to_yaml_structure(navigation_items):
+    """
+    Convert navigation items to YAML structure expected by MkDocs.
+
+    Args:
+        navigation_items: List of (label, value) tuples
+        
+    Returns:
+        List of dictionaries suitable for MkDocs nav configuration
+    """
+    nav_structure = []
+    for item_label, item_value in navigation_items:
+        if isinstance(item_value, str):
+            nav_structure.append({item_label: item_value})
+        elif isinstance(item_value, list) and item_value:
+            nav_structure.append({item_label: nav_to_yaml_structure(item_value)})
+    return nav_structure
 
 def nav_to_markdown(items, indent=0, top_level=True):
+    """
+    Convert navigation items to markdown table of contents format.
+
+    Args:
+        items: List of (label, value) tuples
+        indent: Current indentation level
+        top_level: Whether this is the top level of the hierarchy
+    
+    Returns:
+        List of markdown formatted strings
+    """
     md = []
     pad = '  ' * indent
     for label, value in items:
@@ -76,17 +113,17 @@ if __name__ == '__main__':
     try:
         with mkdocs_path.open('r') as f:
             data = yaml.load(f)
-    except Exception as e:
+    except (yaml.YAMLError, FileNotFoundError, PermissionError) as e:
         # Fallback: clean up duplicate navs using regex, keep only the last one
         print('[WARN] YAML load failed (likely duplicate nav keys). Attempting to clean up...')
-        text = mkdocs_path.read_text()
+        text = mkdocs_path.read_text(encoding='utf-8')
         import re
         nav_blocks = list(re.finditer(r'^nav:\n[\s\S]*?(?=^\w|^plugins:|\Z)', text, re.MULTILINE))
         if len(nav_blocks) > 1:
             # Remove all but the last nav block
             last_nav = nav_blocks[-1]
             cleaned = text[:nav_blocks[0].start()] + text[last_nav.start():]
-            mkdocs_path.write_text(cleaned)
+            mkdocs_path.write_text(cleaned, encoding='utf-8')
             print(f'[INFO] Removed {len(nav_blocks)-1} duplicate nav section(s). Retrying YAML load...')
         else:
             print('[ERROR] Could not find duplicate navs, aborting.')
@@ -94,7 +131,7 @@ if __name__ == '__main__':
         with mkdocs_path.open('r') as f:
             data = yaml.load(f)
     data['nav'] = nav_struct
-    with mkdocs_path.open('w') as f:
+    with mkdocs_path.open('w', encoding='utf-8') as f:
         yaml.dump(data, f)
     print('[INFO] mkdocs.yml nav section replaced (ruamel.yaml, no duplicates).')
 
@@ -131,7 +168,7 @@ if __name__ == '__main__':
 
     # Run mkdocs build --strict
     print('[INFO] Running mkdocs build --strict...')
-    result = subprocess.run(['mkdocs', 'build', '--strict'], capture_output=True, text=True)
+    result = subprocess.run(['mkdocs', 'build', '--strict'], capture_output=True, text=True, check=False)
     print(result.stdout)
     if result.stderr:
         print(result.stderr)
