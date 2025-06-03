@@ -425,7 +425,8 @@ class FlashcardDatabase:
                     result = cursor.execute(sql, params).fetchone()
                     result_ids.append(int(result[0]))
                 cursor.commit()
-            review_ids = [int(r[0]) for r in result]
+            review_ids = result_ids
+            logger.info("Successfully batch-added %d reviews.", len(review_ids))
             logger.info(f"Successfully batch-added {len(review_ids)} reviews.")
             return review_ids
         except duckdb.Error as e:
