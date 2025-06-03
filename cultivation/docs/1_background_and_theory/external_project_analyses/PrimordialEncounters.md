@@ -199,7 +199,7 @@ The PrimordialEncounters repository contains a Python-based software framework d
     *   **C.5. Issue Tracker Activity (if public and accessible):** Not applicable (local repository).
     *   **C.6. Number of Contributors (if easily visible from platform):** `setup.py` lists `author="ImmortalDemonGod"`. The `docs/onboarding-guide.md` is structured for multiple contributors.
 *   **D. Licensing & Contribution:**
-    *   **D.1. License:** `README.md` states: "This project is offered under the [MIT License](LICENSE)." However, no `LICENSE` file is present in the provided file map.
+    *   **D.1. License:** `README.md` states: "This project is offered under the [MIT License](https://github.com/ImmortalDemonGod/PrimordialEncounters/blob/main/LICENSE)." However, no `LICENSE` file is present in the provided file map.
     *   **D.2. Contribution Guidelines:** A detailed `docs/onboarding-guide.md` is present, outlining a comprehensive workflow for contributing, including environment setup, task management with an external tool ("TaskMaster"), git practices, coding standards, testing, and documentation. This indicates an openness to contributions and a structured process.
 
 **IV. Technical Architecture & Implementation Details:**

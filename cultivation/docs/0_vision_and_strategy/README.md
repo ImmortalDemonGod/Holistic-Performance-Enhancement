@@ -10,7 +10,7 @@ This section houses the foundational vision, philosophy, and high-level strategi
   - [`strategic_initiatives/CULTIVATION_SVEP_MASTER_V1_0.md`](strategic_initiatives/CULTIVATION_SVEP_MASTER_V1_0.md): The Systematic Visibility & Engagement Plan (SVEP) — a comprehensive strategy for increasing project visibility, fostering engagement, and integrating outreach with core development workflows.
 
 - **Archive**
-  - [`archive/`](archive/): Superseded or historical strategic documents, including deep dives on synergy, critiques, final thoughts, and market/system mapping. Useful for tracing the evolution of project thinking.
+  - [archive/](archive/README.md): Superseded or historical strategic documents, including deep dives on synergy, critiques, final thoughts, and market/system mapping. Useful for tracing the evolution of project thinking.
     - `critique_and_refinement.md`: Evolution of the synergy concept and the demand for quantification.
     - `final_thoughts.md`: Reflections on domain selection, synergy, and alignment with ultimate goals.
     - `synergy_concept.md`: Early attempts to define holistic potential and cross-domain synergy.
