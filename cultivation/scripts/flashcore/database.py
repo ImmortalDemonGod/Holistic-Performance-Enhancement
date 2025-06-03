@@ -159,6 +159,15 @@ class FlashcardDatabase:
 
     # --- Data Marshalling Helpers (Internal) ---
     def _card_to_db_params_list(self, cards: Sequence['Card']) -> List[Tuple]:
+        """
+        Converts a sequence of Card objects into a list of tuples for database insertion.
+        
+        Args:
+            cards: Sequence of Card objects to be converted.
+        
+        Returns:
+            A list of tuples, each containing the database-ready parameters for a Card.
+        """
         params_list = []
         for card in cards:
             params_list.append((
@@ -176,6 +185,11 @@ class FlashcardDatabase:
         return params_list
 
     def _db_row_to_card(self, row_dict: Dict[str, Any]) -> 'Card':
+        """
+        Converts a database row dictionary into a Card object.
+        
+        The method transforms database row fields into appropriate Python types, including converting media path strings to Path objects, tags to a set, and the source YAML file to a Path if present.
+        """
         media_paths = row_dict.pop("media_paths", None)
         row_dict["media"] = [Path(p) for p in media_paths] if media_paths else None
         if row_dict.get("source_yaml_file"):
@@ -378,6 +392,19 @@ class FlashcardDatabase:
             raise ReviewOperationError(f"Failed to add review: {e}", original_exception=e)
 
     def add_reviews_batch(self, reviews: Sequence['Review']) -> List[int]:
+        """
+        Inserts multiple review records into the database and returns their assigned IDs.
+        
+        Args:
+            reviews: A sequence of Review objects to be inserted.
+        
+        Returns:
+            A list of integers representing the newly inserted review IDs.
+        
+        Raises:
+            DatabaseConnectionError: If called in read-only mode.
+            ReviewOperationError: If the batch insertion fails.
+        """
         if not reviews:
             return []
         if self.read_only:
