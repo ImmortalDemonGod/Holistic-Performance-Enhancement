@@ -147,4 +147,3 @@ These three domains are prioritized, but the framework can be adapted to other f
 
 ---
 
-[emoji]: Would you like to dive deeper into any particular domain’s specifics (e.g., a sample Python script structure for data analysis, a more detailed method for tracking biological knowledge, or a training plan outline for running)? Or is there another next step you’d prefer?
