@@ -46,7 +46,7 @@
     "source_reference": [
       {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Weakness: Pre-commit Hooks"},
       {"file": "cultivation/docs/3_design/Progress.md", "section": "Suggests pre-commit hooks for black/ruff/isort, YAML validation"},
-      {"file": "cultivation/outputs/deep_work_candiates/flashcore_deep_work_plan_v1.0.json", "task_id_candidate": "DW_FC_AUTO_001", "comment": "Flashcore `tm-fc vet` hook is domain-specific; this task is for project-wide general hooks."}
+      {"file": "cultivation/outputs/deep_work_candidates/flashcore_deep_work_plan_v1.0.json", "task_id_candidate": "DW_FC_AUTO_001", "comment": "Flashcore `tm-fc vet` hook is domain-specific; this task is for project-wide general hooks."}
     ],
     "description_objective": "Establish and configure a comprehensive pre-commit hook framework using the `pre-commit` tool to enforce code style, linting, and basic validation checks automatically before code is committed. The framework must include hooks for: 1. Python code formatting (e.g., Black). 2. Python import sorting (e.g., isort). 3. Python linting (Ruff, configured project-wide). 4. YAML file linting/validation (e.g., `yamllint`). 5. Markdown file linting (e.g., `markdownlint`). 6. General file checks such as end-of-file fixing, trailing whitespace removal, and detection of large files accidentally added to Git (outside of LFS/DVC). This infrastructure should be extensible for future custom validation hooks (like `tm-fc vet` from Flashcore, though that hook's specific implementation belongs to Flashcore).",
     "primary_type": "Tooling & Code Quality Automation",
@@ -203,7 +203,7 @@
       "A `LOCAL_CI_DEBUGGING_GUIDE.md` document in `cultivation/docs/developer/` (or similar).",
       "Example configurations or wrapper scripts for using `act` (if adopted) with Cultivation workflows.",
       "A small library of Python mocking utilities for common external APIs used in CI (e.g., a mock `gh issue create` function).",
-      "Improved developer velocity and reduced reliance on "push-to-test" for CI-dependent features."
+      "Improved developer velocity and reduced reliance on \"push-to-test\" for CI-dependent features."
     ],
     "notes_questions_dependencies": "Researching the current capabilities and limitations of tools like `act` for complex Cultivation workflows (e.g., those involving Docker services or matrix builds) is a key part of this task. Focus on high-impact features like `fatigue_watch.py` or commit-back scripts."
   },
@@ -213,7 +213,7 @@
     "source_reference": [
       {"file": "Infrastructure and Automation Layer Analysis (Provided Context)", "section": "Weakness: Data Management Strategy (Large Data)"},
       {"file": "cultivation/docs/3_design/knowledge_system/knowledge_creation_and_validation_2.md", "section": "5.3 Versioning Research Code and Data (mentions DVC, Git LFS)"}
-    ],
+      ],
     "description_objective": "Develop, document, and implement a clear, scalable strategy for managing large data artifacts generated or consumed by the Cultivation project. This includes: 1. Evaluating tools like Git LFS, DVC (Data Version Control), or direct cloud storage solutions (e.g., S3/GCS with versioning capabilities) based on project needs (data size, access patterns, versioning granularity, collaboration requirements, cost). 2. Implementing the chosen strategy for at least two representative large data use cases (e.g., versioning of LanceDB indexes for DocInsight, large raw physiological datasets, or trained ML models for KCV). 3. Documenting procedures for versioning, accessing, sharing, and archiving this data for all project contributors. 4. Integrating the chosen large data management system with CI/CD workflows where appropriate (e.g., pulling specific data versions for model training or testing pipelines).",
     "primary_type": "System Design & Data Engineering",
     "initial_scale_estimate": "Large (2-4 days for evaluation, decision, and initial implementation for two use cases)",
