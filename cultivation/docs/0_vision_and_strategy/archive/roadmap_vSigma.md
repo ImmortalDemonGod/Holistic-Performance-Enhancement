@@ -1,7 +1,7 @@
 ---
 **STATUS: ARCHIVED & SUPERSEDED**
 This roadmap (`roadmap_vSigma.md`) has been superseded by the new canonical plan:
-[`roadmap_Cultivation_Integrated_v1.0.md`](./roadmap_Cultivation_Integrated_v1.0.md).
+[`roadmap_Cultivation_Integrated_v1.0.md`](../../3_design_and_architecture/roadmap_Cultivation_Integrated_v1.0.md).
 This document is retained for historical context and evolutionary reference only.
 Please refer to `roadmap_Cultivation_Integrated_v1.0.md` for current project planning.
 Date Archived: 2025-06-04
