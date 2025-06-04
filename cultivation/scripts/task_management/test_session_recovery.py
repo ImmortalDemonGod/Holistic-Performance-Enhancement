@@ -65,9 +65,6 @@ def test_recovery_entry_closes_session(tmp_path):
     ]
     write_log_lines(log_file, log_lines)
     # Now simulate recovery: log END
-    log_session("1.1", s1, e1, e1-s1, "RECOVERED: test", log_file=str(log_file))
-    # Manually add Status: END for this test
-    with open(log_file, "a") as f:
-        f.write(f"Task: 1.1\tStart: {s1.isoformat()}\tEnd: {e1.isoformat()}\tDuration: 0:30:00\tNote: RECOVERED: test\tStatus: END\n")
+    log_session("1.1", s1, e1, e1-s1, "RECOVERED: test", status="END", log_file=str(log_file))
     unclosed = parse_log_for_unclosed(log_file)
     assert unclosed == []
