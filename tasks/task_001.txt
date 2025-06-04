@@ -11,7 +11,7 @@ Create a dedicated section in your personal knowledge management system (e.g., O
 Verify the knowledge base structure is complete with all required sections and placeholder files. Ensure the organization follows a logical progression that supports the learning objectives.
 
 # Subtasks:
-## 1. Create Main Knowledge Base Structure and Root Section [pending]
+## 1. Create Main Knowledge Base Structure and Root Section [done]
 ### Dependencies: None
 ### Description: Set up the main knowledge base folder/section and create the root 'Pillar 1 Foundations: RNA Biochemistry & Thermodynamics' section with an index or overview document
 ### Details:
@@ -23,7 +23,7 @@ Verify the knowledge base structure is complete with all required sections and p
 6. Add metadata tags for easy reference and searching (e.g., #RNA, #biophysics, #foundations)
 7. Test by ensuring the root document is properly saved and accessible
 
-## 2. Establish Six Core Subsections with Folder Structure [pending]
+## 2. Establish Six Core Subsections with Folder Structure [done]
 ### Dependencies: 1.1
 ### Description: Create the six required subsections as separate folders/sections with index documents for each topic area
 ### Details:
@@ -39,7 +39,7 @@ Verify the knowledge base structure is complete with all required sections and p
 4. Add consistent metadata tags to each subsection for organization
 5. Test by navigating between the main index and each subsection to verify links work correctly
 
-## 3. Create Content Template Files for Each Subsection [pending]
+## 3. Create Content Template Files for Each Subsection [done]
 ### Dependencies: 1.2
 ### Description: Develop and implement standardized template files for notes, diagrams, and explanations within each subsection
 ### Details:
