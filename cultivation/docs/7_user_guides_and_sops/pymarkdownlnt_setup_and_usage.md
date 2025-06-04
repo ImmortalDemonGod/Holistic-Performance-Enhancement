@@ -67,8 +67,12 @@ pre-commit install
 Add this step to your workflow YAML to lint Markdown on every PR:
 
 ```yaml
+- name: Set up Python
+  uses: actions/setup-python@v4
+- name: Install PyMarkdown Lint
+  run: pip install pymarkdownlnt
 - name: Lint Markdown
-  run: .venv/bin/pymarkdown scan cultivation/docs/
+  run: pymarkdown scan cultivation/docs/
 ```
 
 ---

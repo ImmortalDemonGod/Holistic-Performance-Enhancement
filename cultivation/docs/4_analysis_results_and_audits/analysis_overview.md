@@ -112,6 +112,7 @@ CI can assert these files exist and include a `## Next Action` section → green
 
 Below are the most important analysis documents and templates available in this section:
 
+- [General Analysis Report Template](../meta/templates/general_analysis_report_template.md): Use this template to generate new analyses.
 - [Running Analysis Template](../meta/templates/running_analysis_template.md): Use this template to generate new run or experiment reports.
 - [Week 21 RPE10 Benchmark Analysis](week21_rpe10_benchmark_analysis.md): In-depth analysis of the week 21 benchmark run, including methodology, results, and actionable insights.
 - [2025-04-27 Run Report](run_reports/2025_04_27_run_report.md): Example of a detailed run report for April 27, 2025.
