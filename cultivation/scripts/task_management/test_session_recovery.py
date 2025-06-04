@@ -8,7 +8,7 @@ import pytest
 
 # Ensure import from script directory
 sys.path.insert(0, str(pathlib.Path(__file__).parent.resolve()))
-from session_timer import log_session
+from session_timer import log_session, parse_log_for_unclosed
 
 # --- Helper for simulating log lines ---
 def write_log_lines(log_file, lines):
@@ -16,25 +16,6 @@ def write_log_lines(log_file, lines):
         for line in lines:
             f.write(line + "\n")
 
-def parse_log_for_unclosed(log_file):
-    """Minimal stub: returns (task_id, start_time, note) for any unclosed session."""
-    starts = {}
-    ends = set()
-    with open(log_file) as f:
-        for line in f:
-            if "Status: START" in line:
-                parts = line.split("\t")
-                task = parts[0].split(": ")[1]
-                start = parts[1].split(": ")[1]
-                note = parts[-1].split(": ")[1].strip()
-                starts[(task, start)] = note
-            elif "Status: END" in line:
-                parts = line.split("\t")
-                task = parts[0].split(": ")[1]
-                start = parts[1].split(": ")[1]
-                ends.add((task, start))
-    # Return any starts not closed
-    return [(task, start, note) for (task, start), note in starts.items() if (task, start) not in ends]
 
 def test_detects_unclosed_session(tmp_path):
     log_file = tmp_path / "log.txt"
