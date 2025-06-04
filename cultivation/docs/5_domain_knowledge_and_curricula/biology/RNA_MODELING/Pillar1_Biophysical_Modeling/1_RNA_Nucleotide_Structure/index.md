@@ -60,13 +60,14 @@ version: "1.1"
 
 **Application/Influence:**
 - [Thermodynamic Principles](../4_Thermodynamic_Principles/index.md): The properties described here underpin the energetic rules governing RNA behavior.
+- [Environmental Factors](../6_Environmental_Factors/index.md): Nucleotide chemistry influences how RNA responds to environmental conditions.
 
 > For each link above, see the corresponding section for a reciprocal reference back to RNA Nucleotide Structure.
 
 
 ## 8. Quiz Questions / Self-Assessment Prompts
 1. Q: [Question 1 related to this section's content?]
-   A: 
+   A:
 2. Q: [Question 2...]
    A:
 3. Prompt: "Explain [key concept from this section] in your own words as if to a colleague."

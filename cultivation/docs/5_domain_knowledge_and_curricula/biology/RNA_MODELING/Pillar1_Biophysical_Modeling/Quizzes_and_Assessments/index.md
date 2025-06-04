@@ -28,5 +28,10 @@ Welcome to the self-assessment section for **Pillar 1: Biophysical Modeling**. H
 - [Quiz 1.6: Environmental Factors](Quiz-1.6-Environmental-Factors.md)
   - Effects of ions, temperature, and environmental variables on RNA structure and stability.
 
+## Cross-References & Key Relationships
+
+**Application/Influence:**
+- [Environmental Factors](../6_Environmental_Factors/index.md): Quiz 1.6 tests understanding of how environmental conditions affect RNA structure and stability.
+
 ---
 > **Tip:** If you find any concept challenging, revisit the corresponding knowledge base section and create flashcards for review.

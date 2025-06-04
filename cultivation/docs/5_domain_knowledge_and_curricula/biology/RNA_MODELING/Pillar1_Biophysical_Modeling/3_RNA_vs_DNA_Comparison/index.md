@@ -60,13 +60,14 @@ version: "1.1"
 
 **Application/Influence:**
 - [Energetic Contributions to RNA Stability](../5_Energetic_Contributions/index.md): Structural differences influence stacking and hydrogen bonding.
+- [Environmental Factors](../6_Environmental_Factors/index.md): RNA-DNA structural differences affect environmental sensitivity and stability.
 
 > For each link above, see the corresponding section for a reciprocal reference back to RNA vs DNA Comparison.
 
 
 ## 8. Quiz Questions / Self-Assessment Prompts
 1. Q: [Question 1 related to this section's content?]
-   A: 
+   A:
 2. Q: [Question 2...]
    A:
 3. Prompt: "Explain [key concept from this section] in your own words as if to a colleague."
