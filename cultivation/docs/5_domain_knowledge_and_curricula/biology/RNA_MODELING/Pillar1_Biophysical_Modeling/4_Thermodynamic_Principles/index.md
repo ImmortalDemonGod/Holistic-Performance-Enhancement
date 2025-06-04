@@ -7,9 +7,9 @@ tags:
   - energy
   - folding
 date_created: "2025-06-03"
-date_modified: "2025-06-03"
-status: "stub"
-version: "1.0"
+date_modified: "2025-06-04"
+status: "review"
+version: "1.1"
 ---
 
 # Thermodynamic Principles
@@ -45,9 +45,24 @@ version: "1.0"
 - [Advanced topic paper/link]
 - [Related concept review]
 
-## 7. Links to Related Topics
-- See: [`[Link Text]`](../[Other_Subsection]/index.md)
-- Related: [`[Link Text]`](../../[Another_Pillar_Or_Domain]/index.md)
+## 7. Cross-References & Key Relationships
+
+**Prerequisite Concepts:**
+- [RNA Nucleotide Structure](../1_RNA_Nucleotide_Structure/index.md): The chemical properties of nucleotides underpin thermodynamic rules.
+- [Phosphodiester Backbone](../2_Phosphodiester_Backbone/index.md): Backbone flexibility and constraints influence folding energetics.
+- [RNA vs DNA Comparison](../3_RNA_vs_DNA_Comparison/index.md): Chemical differences impact thermodynamic behavior.
+
+**Dependent Concepts / Builds Upon This Section:**
+- [Energetic Contributions to RNA Stability](../5_Energetic_Contributions/index.md): Stacking, hydrogen bonding, and other energetic factors are governed by the thermodynamic principles described here.
+
+**Comparative Concepts:**
+- [RNA vs DNA Comparison](../3_RNA_vs_DNA_Comparison/index.md): Differences in folding and stability reflect underlying thermodynamic differences.
+
+**Application/Influence:**
+- [Environmental Factors](../6_Environmental_Factors/index.md): Thermodynamic stability is modulated by salt, temperature, and other environmental conditions.
+
+> For each link above, see the corresponding section for a reciprocal reference back to Thermodynamic Principles.
+
 
 ## 8. Quiz Questions / Self-Assessment Prompts
 1. Q: [Question 1 related to this section's content?]
