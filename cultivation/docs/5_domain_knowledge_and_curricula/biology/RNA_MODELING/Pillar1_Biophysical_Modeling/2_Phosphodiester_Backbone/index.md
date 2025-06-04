@@ -7,9 +7,9 @@ tags:
   - backbone
   - linkage
 date_created: "2025-06-03"
-date_modified: "2025-06-03"
-status: "stub"
-version: "1.0"
+date_modified: "2025-06-04"
+status: "review"
+version: "1.1"
 ---
 
 # Phosphodiester Backbone
@@ -45,9 +45,23 @@ version: "1.0"
 - [Advanced topic paper/link]
 - [Related concept review]
 
-## 7. Links to Related Topics
-- See: [`[Link Text]`](../[Other_Subsection]/index.md)
-- Related: [`[Link Text]`](../../[Another_Pillar_Or_Domain]/index.md)
+## 7. Cross-References & Key Relationships
+
+**Prerequisite Concepts:**
+- [RNA Nucleotide Structure](../1_RNA_Nucleotide_Structure/index.md): Understanding nucleotide chemistry is essential for grasping backbone formation.
+
+**Dependent Concepts / Builds Upon This Section:**
+- [Thermodynamic Principles](../4_Thermodynamic_Principles/index.md): Backbone flexibility and constraints influence RNA folding energetics.
+- [Energetic Contributions to RNA Stability](../5_Energetic_Contributions/index.md): The backbone affects stacking and hydrogen bonding patterns.
+
+**Comparative Concepts:**
+- [RNA vs DNA Comparison](../3_RNA_vs_DNA_Comparison/index.md): Backbone chemistry differs between RNA and DNA, impacting structure and function.
+
+**Application/Influence:**
+- [Environmental Factors](../6_Environmental_Factors/index.md): Backbone conformation is sensitive to salt, temperature, and other environmental conditions.
+
+> For each link above, see the corresponding section for a reciprocal reference back to Phosphodiester Backbone.
+
 
 ## 8. Quiz Questions / Self-Assessment Prompts
 1. Q: [Question 1 related to this section's content?]
