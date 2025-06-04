@@ -59,7 +59,7 @@
       "id": 1,
       "title": "Set up RNA Biophysics Knowledge Base Structure",
       "description": "Create the initial knowledge base structure for organizing RNA biochemistry and thermodynamics concepts, including sections for notes, diagrams, and summaries.",
-      "status": "pending",
+      "status": "done",
       "dependencies": [],
       "priority": "high",
       "details": "Create a dedicated section in your personal knowledge management system (e.g., Obsidian, Notion, or local Markdown files) titled 'Pillar 1 Foundations: RNA Biochemistry & Thermodynamics'. Set up subsections for: 1) RNA Nucleotide Structure, 2) Phosphodiester Backbone, 3) RNA vs DNA Comparison, 4) Thermodynamic Principles, 5) Energetic Contributions to RNA Stability, and 6) Environmental Factors. Include placeholder files for diagrams, explanations, and quiz materials.",
@@ -104,7 +104,7 @@
             2
           ],
           "details": "1. Create a 'Quizzes and Assessments' folder within the Pillar 1 section\n2. Design a standardized quiz template with sections for:\n   - Multiple choice questions\n   - Short answer questions\n   - Diagram interpretation exercises\n   - Problem-solving scenarios\n3. Create six quiz template files, one for each subsection (e.g., 'Quiz-1.1-RNA-Nucleotide-Structure.md')\n4. Add placeholder questions in each quiz file related to the corresponding topic\n5. Create an index file for the quiz section explaining how to use the materials\n6. Link the quiz section in the main Pillar 1 index document\n7. Test by reviewing each quiz template for consistency and proper formatting",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 1
         },
         {
@@ -117,7 +117,7 @@
             4
           ],
           "details": "1. Review all created sections and reorder if necessary to ensure logical learning progression\n2. Update the main index document to include a suggested learning path through the materials\n3. Create a 'Cross-References' section in each subsection index document\n4. Identify and document relationships between topics (e.g., how RNA structure affects thermodynamic properties)\n5. Add bidirectional links between related concepts across different subsections\n6. Create a visual concept map document showing relationships between all topics\n7. Verify the entire knowledge base structure by:\n   - Checking all links work correctly\n   - Confirming all required sections and placeholders exist\n   - Testing navigation through the suggested learning path\n   - Ensuring consistent formatting and naming conventions throughout",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 1
         }
       ],
