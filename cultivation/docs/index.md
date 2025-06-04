@@ -4,132 +4,157 @@
 
 ## Comprehensive Table of Contents (Auto-generated)
 
-Below is a hierarchical overview of all documentation sections, subfolders, and key files.
-Click any link to jump directly to that document.
+Below is a hierarchical overview of all documentation sections,
+subfolders, and key files.
+Click any link to jump directly to that document,
+or use the navigation panel on the left.
 
----
+## 📁 0 Vision And Strategy
 
-- **📁 0 Vision And Strategy**
-  - [📄 Readme](0_vision_and_strategy/README.md)
-  - [📄 The Dao Of Cultivation A Founding Vision](0_vision_and_strategy/The_Dao_of_Cultivation_A_Founding_Vision.md)
-  - [📄 Project Philosophy And Core Concepts](0_vision_and_strategy/project_philosophy_and_core_concepts.md)
-  - 📁 Archive
-    - [📄 Readme](0_vision_and_strategy/archive/README.md)
-    - [📄 Critique And Refinement](0_vision_and_strategy/archive/critique_and_refinement.md)
-    - [📄 Final Thoughts](0_vision_and_strategy/archive/final_thoughts.md)
-    - [📄 Potential Overview](0_vision_and_strategy/archive/potential_overview.md)
-    - [📄 Synergy Concept](0_vision_and_strategy/archive/synergy_concept.md)
-    - [📄 Systems Map And Market Cheatsheet](0_vision_and_strategy/archive/systems_map_and_market_cheatsheet.md)
-    - [📄 Ultimate Goals](0_vision_and_strategy/archive/ultimate_goals.md)
-  - 📁 Strategic Initiatives
-    - [📄 Cultivation Svep Master V1 0](0_vision_and_strategy/strategic_initiatives/CULTIVATION_SVEP_MASTER_V1_0.md)
-- **📁 1 Background And Theory**
-  - [📄 Readme](1_background_and_theory/README.md)
-  - [📄 Domains Scope](1_background_and_theory/domains_scope.md)
-  - [📄 Hyper Detailed Theoretical Outline](1_background_and_theory/hyper_detailed_theoretical_outline.md)
-  - 📁 External Project Analyses
-    - [📄 Docinsight](1_background_and_theory/external_project_analyses/DocInsight.md)
-    - [📄 Primordialencounters](1_background_and_theory/external_project_analyses/PrimordialEncounters.md)
-    - [📄 Pytest-Error-Fixing-Framework](1_background_and_theory/external_project_analyses/Pytest-Error-Fixing-Framework.md)
-    - [📄 Rna Predict](1_background_and_theory/external_project_analyses/RNA_PREDICT.md)
-    - [📄 Simplest Arc Agi](1_background_and_theory/external_project_analyses/Simplest_ARC_AGI.md)
-    - [📄 External Systems Analysis](1_background_and_theory/external_project_analyses/external_systems_analysis.md)
-- **📁 2 Requirements And Specifications**
-  - [📄 Readme](2_requirements_and_specifications/README.md)
-  - [📄 Flashcard System Spec](2_requirements_and_specifications/flashcard_system_spec.md)
-  - [📄 Functional Requirements](2_requirements_and_specifications/functional_requirements.md)
-  - [📄 Non Functional Requirements](2_requirements_and_specifications/non_functional_requirements.md)
+- [📄 Readme](0_vision_and_strategy/README.md)
+- [📄 The Dao Of Cultivation A Founding Vision](0_vision_and_strategy/The_Dao_of_Cultivation_A_Founding_Vision.md)
+- [📄 Project Philosophy And Core Concepts](0_vision_and_strategy/project_philosophy_and_core_concepts.md)
+- 📁 Archive
+  - [📄 Readme](0_vision_and_strategy/archive/README.md)
+  - [📄 Critique And Refinement](0_vision_and_strategy/archive/critique_and_refinement.md)
+  - [📄 Final Thoughts](0_vision_and_strategy/archive/final_thoughts.md)
+  - [📄 Potential Overview](0_vision_and_strategy/archive/potential_overview.md)
+  - [📄 Synergy Concept](0_vision_and_strategy/archive/synergy_concept.md)
+  - [📄 Systems Map And Market Cheatsheet](0_vision_and_strategy/archive/systems_map_and_market_cheatsheet.md)
+  - [📄 Ultimate Goals](0_vision_and_strategy/archive/ultimate_goals.md)
+- 📁 Strategic Initiatives
+  - [📄 Cultivation Svep Master V1 0](0_vision_and_strategy/strategic_initiatives/CULTIVATION_SVEP_MASTER_V1_0.md)
+
+## 📁 1 Background And Theory
+
+- [📄 Readme](1_background_and_theory/README.md)
+- [📄 Domains Scope](1_background_and_theory/domains_scope.md)
+- [📄 Hyper Detailed Theoretical Outline](1_background_and_theory/hyper_detailed_theoretical_outline.md)
+- 📁 External Project Analyses
+  - [📄 Docinsight](1_background_and_theory/external_project_analyses/DocInsight.md)
+  - [📄 Primordialencounters](1_background_and_theory/external_project_analyses/PrimordialEncounters.md)
+  - [📄 Pytest-Error-Fixing-Framework](1_background_and_theory/external_project_analyses/Pytest-Error-Fixing-Framework.md)
+  - [📄 Rna Predict](1_background_and_theory/external_project_analyses/RNA_PREDICT.md)
+  - [📄 Simplest Arc Agi](1_background_and_theory/external_project_analyses/Simplest_ARC_AGI.md)
+  - [📄 External Systems Analysis](1_background_and_theory/external_project_analyses/external_systems_analysis.md)
+
+## 📁 2 Requirements And Specifications
+
+- [📄 Readme](2_requirements_and_specifications/README.md)
+- [📄 Flashcard System Spec](2_requirements_and_specifications/flashcard_system_spec.md)
+- [📄 Functional Requirements](2_requirements_and_specifications/functional_requirements.md)
+- [📄 Non Functional Requirements](2_requirements_and_specifications/non_functional_requirements.md)
+- [📄 Task Master Integration Spec](2_requirements_and_specifications/task_master_integration_spec.md)
+- 📁 Data Schemas
+  - [📄 Readme](2_requirements_and_specifications/data_schemas/README.md)
+  - [📄 Strength Data Schemas](2_requirements_and_specifications/data_schemas/strength_data_schemas.md)
+- 📁 Formal System
+  - [📄 Readme](2_requirements_and_specifications/formal_system/README.md)
+  - [📄 Lean Guide](2_requirements_and_specifications/formal_system/lean_guide.md)
+  - [📄 Lean Tools](2_requirements_and_specifications/formal_system/lean_tools.md)
+  - [📄 Math Stack](2_requirements_and_specifications/formal_system/math_stack.md)
   - [📄 Task Master Integration Spec](2_requirements_and_specifications/task_master_integration_spec.md)
   - 📁 Data Schemas
     - [📄 Readme](2_requirements_and_specifications/data_schemas/README.md)
     - [📄 Strength Data Schemas](2_requirements_and_specifications/data_schemas/strength_data_schemas.md)
-  - 📁 Formal System
-    - [📄 Readme](2_requirements_and_specifications/formal_system/README.md)
-    - [📄 Lean Guide](2_requirements_and_specifications/formal_system/lean_guide.md)
-    - [📄 Lean Tools](2_requirements_and_specifications/formal_system/lean_tools.md)
-    - [📄 Math Stack](2_requirements_and_specifications/formal_system/math_stack.md)
-- **📁 3 Design And Architecture**
-  - [📄 Readme](3_design_and_architecture/README.md)
-  - [📄 Architecture Overview](3_design_and_architecture/architecture_overview.md)
-  - [📄 Roadmap Vsigma](3_design_and_architecture/roadmap_vSigma.md)
-  - 📁 Integrations
-    - [📄 Readme](3_design_and_architecture/integrations/README.md)
-  - 📁 Knowledge System
-    - [📄 Readme](3_design_and_architecture/knowledge_system/README.md)
-    - [📄 Flashcard Anki Addon Design](3_design_and_architecture/knowledge_system/flashcard_anki_addon_design.md)
-    - [📄 Flashcard Self Assessment Design](3_design_and_architecture/knowledge_system/flashcard_self_assessment_design.md)
-    - [📄 Knowledge Acquistion Analysis](3_design_and_architecture/knowledge_system/knowledge_acquistion_analysis.md)
-    - [📄 Knowledge Creation And Validation](3_design_and_architecture/knowledge_system/knowledge_creation_and_validation.md)
-    - [📄 Knowledge Measurement Theory](3_design_and_architecture/knowledge_system/knowledge_measurement_theory.md)
-    - [📄 Literature System Overview](3_design_and_architecture/knowledge_system/literature_system_overview.md)
-    - [📄 User Experience Knowledge System](3_design_and_architecture/knowledge_system/user_experience_knowledge_system.md)
-    - 📁 References
-      - [📄 Readme](3_design_and_architecture/knowledge_system/references/README.md)
-      - [📄 Knowledge Creation And Validation Supporting Report](3_design_and_architecture/knowledge_system/references/knowledge_creation_and_validation_supporting_report.md)
-  - 📁 Scheduling System
-    - [📄 Focuspredictor Techspec V1.1](3_design_and_architecture/scheduling_system/FocusPredictor_TechSpec_v1.1.md)
-    - [📄 Readme](3_design_and_architecture/scheduling_system/README.md)
-    - [📄 Scheduling Oversized Tasks Strategy V1.0](3_design_and_architecture/scheduling_system/scheduling_oversized_tasks_strategy_v1.0.md)
-- **📁 4 Analysis Results And Audits**
-  - [📄 Readme](4_analysis_results_and_audits/README.md)
-  - [📄 Analysis Overview](4_analysis_results_and_audits/analysis_overview.md)
-  - [📄 Running Analysis Template](4_analysis_results_and_audits/running_analysis_template.md)
-  - [📄 Week21 Rpe10 Benchmark Analysis](4_analysis_results_and_audits/week21_rpe10_benchmark_analysis.md)
-  - 📁 Repository Audits
-    - [📄 Architectural Review And Task Consolidation 2025-05-29](4_analysis_results_and_audits/repository_audits/architectural_review_and_task_consolidation_2025-05-29.md)
-    - [📄 System Readiness Audit 2025-04-18](4_analysis_results_and_audits/repository_audits/system_readiness_audit_2025-04-18.md)
-  - 📁 Run Reports
-    - [📄 2025 04 27 Run Report](4_analysis_results_and_audits/run_reports/2025_04_27_run_report.md)
-    - [📄 2025 05 01 Run Report](4_analysis_results_and_audits/run_reports/2025_05_01_run_report.md)
-    - [📄 2025 05 11 Run Report](4_analysis_results_and_audits/run_reports/2025_05_11_run_report.md)
-    - [📄 2025 05 17 Run Report](4_analysis_results_and_audits/run_reports/2025_05_17_run_report.md)
-    - [📄 2025 05 24 Run Report](4_analysis_results_and_audits/run_reports/2025_05_24_run_report.md)
-- **📁 5 Domain Knowledge And Curricula**
 
-  - [📄 Readme](5_domain_knowledge_and_curricula/README.md)
+## 📁 3 Design And Architecture
 
-  - 📁 Biology
+- [📄 Readme](3_design_and_architecture/README.md)
 
-    - [📄 Readme](5_domain_knowledge_and_curricula/biology/README.md)
+- [📄 Architecture Overview](3_design_and_architecture/architecture_overview.md)
+- [📄 Roadmap Vsigma](3_design_and_architecture/roadmap_vSigma.md)
 
-    - 📁 Mathematical Bio
-      - [📄 Readme](5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/README.md)
-      - [📄 Chapter 1 Single Species](5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/chapter_1_single_species.md)
-      - [📄 Section 1 Test](5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/section_1_test.md)
-    - 📁 Rna Modeling
-      - [📄 Readme](5_domain_knowledge_and_curricula/biology/RNA_MODELING/README.md)
-      - [📄 Reports](5_domain_knowledge_and_curricula/biology/RNA_MODELING/REPORTS.md)
-      - [📄 Skill Map Csm Pillar1](5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar1.md)
-      - [📄 Skill Map Csm Pillar2](5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar2.md)
-      - [📄 Skill Map Csm Pillar3](5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar3.md)
-      - [📄 Skill Map Csm Pillar4](5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar4.md)
-      - [📄 Rna-Modeling P1-Foundations Week1-7Day](5_domain_knowledge_and_curricula/biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md)
-      - [📄 Rna Tasks Hpe Metadata V1.0](5_domain_knowledge_and_curricula/biology/RNA_MODELING/rna_tasks_hpe_metadata_v1.0.md)
-  - 📁 Running Methodology
-    - [📄 Readme](5_domain_knowledge_and_curricula/running_methodology/README.md)
-    - 📁 References
-      - [📄 Long Distance Running Principles](5_domain_knowledge_and_curricula/running_methodology/references/long_distance_running_principles.md)
-      - [📄 Pace And Hr Zones](5_domain_knowledge_and_curricula/running_methodology/references/pace_and_hr_zones.md)
-      - [📄 Running Performance Prediction Concepts](5_domain_knowledge_and_curricula/running_methodology/references/running_performance_prediction_concepts.md)
-    - 📁 Training Blocks
-      - [📄 Base Ox Block](5_domain_knowledge_and_curricula/running_methodology/training_blocks/base_ox_block.md)
-      - [📄 Synergistic Performance Amplification Block W22 W25 V1](5_domain_knowledge_and_curricula/running_methodology/training_blocks/synergistic_performance_amplification_block_w22_w25_v1.md)
-  - 📁 Software Engineering Practices
-    - [📄 Readme](5_domain_knowledge_and_curricula/software_engineering_practices/README.md)
-  - 📁 Strength Training Methodology
-    - 📁 Training Blocks
-      - [📄 Strength Block Prototype V2025-Q2](5_domain_knowledge_and_curricula/strength_training_methodology/training_blocks/strength_block_prototype_v2025-Q2.md)
-- **📁 6 Personal Schedules And Protocols**
-  - [📄 My Optimized Flex Learning System V2.0](6_personal_schedules_and_protocols/My_Optimized_Flex_Learning_System_v2.0.md)
-  - [📄 My Optimized Performance Schedule V1.0](6_personal_schedules_and_protocols/My_Optimized_Performance_Schedule_v1.0.md)
-  - [📄 Readme](6_personal_schedules_and_protocols/README.md)
-- **📁 7 User Guides And Sops**
-  - [📄 Readme](7_user_guides_and_sops/README.md)
-  - [📄 Comprehensive Debugging Workflow](7_user_guides_and_sops/comprehensive_debugging_workflow.md)
-  - [📄 Habitdash Integration Guide](7_user_guides_and_sops/habitdash_integration_guide.md)
-  - [📄 Literature System Howto](7_user_guides_and_sops/literature_system_howto.md)
-  - [📄 Operational Playbook](7_user_guides_and_sops/operational_playbook.md)
-- **📁 Meta**
-  - [📄 Readme](meta/README.md)
-  - [📄 Repository Progress Audit 2025-05-31](meta/repository_progress_audit_2025-05-31.md)
+- 📁 Integrations
+  - [📄 Readme](3_design_and_architecture/integrations/README.md)
+
+- 📁 Knowledge System
+  - [📄 Readme](3_design_and_architecture/knowledge_system/README.md)
+  - [📄 Flashcard Anki Addon Design](3_design_and_architecture/knowledge_system/flashcard_anki_addon_design.md)
+  - [📄 Flashcard Self Assessment Design](3_design_and_architecture/knowledge_system/flashcard_self_assessment_design.md)
+  - [📄 Knowledge Acquistion Analysis](3_design_and_architecture/knowledge_system/knowledge_acquistion_analysis.md)
+  - [📄 Knowledge Creation And Validation](3_design_and_architecture/knowledge_system/knowledge_creation_and_validation.md)
+  - [📄 Knowledge Measurement Theory](3_design_and_architecture/knowledge_system/knowledge_measurement_theory.md)
+  - [📄 Literature System Overview](3_design_and_architecture/knowledge_system/literature_system_overview.md)
+  - [📄 User Experience Knowledge System](3_design_and_architecture/knowledge_system/user_experience_knowledge_system.md)
+  - 📁 References
+    - [📄 Readme](3_design_and_architecture/knowledge_system/references/README.md)
+    - [📄 Knowledge Creation And Validation Supporting Report](3_design_and_architecture/knowledge_system/references/knowledge_creation_and_validation_supporting_report.md)
+
+- 📁 Scheduling System
+  - [📄 Focuspredictor Techspec V1.1](3_design_and_architecture/scheduling_system/FocusPredictor_TechSpec_v1.1.md)
+  - [📄 Readme](3_design_and_architecture/scheduling_system/README.md)
+  - [📄 Scheduling Oversized Tasks Strategy V1.0](3_design_and_architecture/scheduling_system/scheduling_oversized_tasks_strategy_v1.0.md)
+
+## 📁 4 Analysis Results And Audits
+
+- [📄 Readme](4_analysis_results_and_audits/README.md)
+
+- [📄 Analysis Overview](4_analysis_results_and_audits/analysis_overview.md)
+- [📄 Running Analysis Template](4_analysis_results_and_audits/running_analysis_template.md)
+- [📄 Week21 Rpe10 Benchmark Analysis](4_analysis_results_and_audits/week21_rpe10_benchmark_analysis.md)
+
+- 📁 Repository Audits
+  - [📄 Architectural Review And Task Consolidation 2025-05-29](4_analysis_results_and_audits/repository_audits/architectural_review_and_task_consolidation_2025-05-29.md)
+  - [📄 System Readiness Audit 2025-04-18](4_analysis_results_and_audits/repository_audits/system_readiness_audit_2025-04-18.md)
+
+- 📁 Run Reports
+  - [📄 2025 04 27 Run Report](4_analysis_results_and_audits/run_reports/2025_04_27_run_report.md)
+  - [📄 2025 05 01 Run Report](4_analysis_results_and_audits/run_reports/2025_05_01_run_report.md)
+  - [📄 2025 05 11 Run Report](4_analysis_results_and_audits/run_reports/2025_05_11_run_report.md)
+  - [📄 2025 05 17 Run Report](4_analysis_results_and_audits/run_reports/2025_05_17_run_report.md)
+  - [📄 2025 05 24 Run Report](4_analysis_results_and_audits/run_reports/2025_05_24_run_report.md)
+
+## 📁 5 Domain Knowledge And Curricula
+
+- [📄 Readme](5_domain_knowledge_and_curricula/README.md)
+- 📁 Biology
+  - [📄 Readme](5_domain_knowledge_and_curricula/biology/README.md)
+  - 📁 Mathematical Bio
+    - [📄 Readme](5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/README.md)
+    - [📄 Chapter 1 Single Species](5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/chapter_1_single_species.md)
+    - [📄 Section 1 Test](5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/section_1_test.md)
+  - 📁 Rna Modeling
+    - [📄 Readme](5_domain_knowledge_and_curricula/biology/RNA_MODELING/README.md)
+    - [📄 Reports](5_domain_knowledge_and_curricula/biology/RNA_MODELING/REPORTS.md)
+    - [📄 Skill Map Csm Pillar1](5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar1.md)
+    - [📄 Skill Map Csm Pillar2](5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar2.md)
+    - [📄 Skill Map Csm Pillar3](5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar3.md)
+    - [📄 Skill Map Csm Pillar4](5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar4.md)
+    - [📄 Rna-Modeling P1-Foundations Week1-7Day](5_domain_knowledge_and_curricula/biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md)
+    - [📄 Rna Tasks Hpe Metadata V1.0](5_domain_knowledge_and_curricula/biology/RNA_MODELING/rna_tasks_hpe_metadata_v1.0.md)
+- 📁 Running Methodology
+  - [📄 Readme](5_domain_knowledge_and_curricula/running_methodology/README.md)
+  - 📁 References
+    - [📄 Long Distance Running Principles](5_domain_knowledge_and_curricula/running_methodology/references/long_distance_running_principles.md)
+    - [📄 Pace And Hr Zones](5_domain_knowledge_and_curricula/running_methodology/references/pace_and_hr_zones.md)
+    - [📄 Running Performance Prediction Concepts](5_domain_knowledge_and_curricula/running_methodology/references/running_performance_prediction_concepts.md)
+  - 📁 Training Blocks
+    - [📄 Base Ox Block](5_domain_knowledge_and_curricula/running_methodology/training_blocks/base_ox_block.md)
+    - [📄 Synergistic Performance Amplification Block W22 W25 V1](5_domain_knowledge_and_curricula/running_methodology/training_blocks/synergistic_performance_amplification_block_w22_w25_v1.md)
+- 📁 Software Engineering Practices
+  - [📄 Readme](5_domain_knowledge_and_curricula/software_engineering_practices/README.md)
+- 📁 Strength Training Methodology
+  - 📁 Training Blocks
+    - [📄 Strength Block Prototype V2025-Q2](5_domain_knowledge_and_curricula/strength_training_methodology/training_blocks/strength_block_prototype_v2025-Q2.md)
+
+## 📁 6 Personal Schedules And Protocols
+
+- [📄 My Optimized Flex Learning System V2.0](6_personal_schedules_and_protocols/My_Optimized_Flex_Learning_System_v2.0.md)
+- [📄 My Optimized Performance Schedule V1.0](6_personal_schedules_and_protocols/My_Optimized_Performance_Schedule_v1.0.md)
+- [📄 Readme](6_personal_schedules_and_protocols/README.md)
+
+## 📁 7 User Guides And Sops
+
+- [📄 Readme](7_user_guides_and_sops/README.md)
+- [📄 Comprehensive Debugging Workflow](7_user_guides_and_sops/comprehensive_debugging_workflow.md)
+- [📄 Habitdash Integration Guide](7_user_guides_and_sops/habitdash_integration_guide.md)
+- [📄 Literature System Howto](7_user_guides_and_sops/literature_system_howto.md)
+- [📄 Operational Playbook](7_user_guides_and_sops/operational_playbook.md)
+
+## 📁 Meta
+
+- [📄 Readme](meta/README.md)
+- [📄 Repository Progress Audit 2025-05-31](meta/repository_progress_audit_2025-05-31.md)
+
 <!-- AUTO-TOC-END -->
