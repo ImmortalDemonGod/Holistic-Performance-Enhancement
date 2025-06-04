@@ -35,22 +35,35 @@ import os
 # The log file is now stored in the repo by default; override with LOG_FILE env var for testing or custom setups.
 LOG_FILE = os.environ.get("LOG_FILE", DEFAULT_LOG_FILE)
 
+import json
+
 def log_session(task_id_display, start_time, end_time, duration_td, note_str, status, log_file=None):
+    """
+    Log a session as a JSON object per line for robust parsing and encoding safety.
+    Args:
+        task_id_display (str): Human-readable task ID or label.
+        start_time (datetime): Session start time.
+        end_time (datetime): Session end time.
+        duration_td (timedelta): Session duration.
+        note_str (str): Notes (may contain tabs or special chars).
+        status (str): Task/session status.
+        log_file (str, optional): Path to log file. Defaults to LOG_FILE env or DEFAULT_LOG_FILE.
+    """
     if log_file is None:
         log_file = os.environ.get("LOG_FILE", DEFAULT_LOG_FILE)
     log_dir = os.path.dirname(log_file)
     if log_dir and not os.path.exists(log_dir):
         os.makedirs(log_dir, exist_ok=True)
-    log_line = (
-        f"Task: {task_id_display}\t"
-        f"Start: {start_time.isoformat()}\t"
-        f"End: {end_time.isoformat()}\t"
-        f"Duration: {str(duration_td)}\t"
-        f"Note: {note_str}\t"
-        f"Status: {status}\n"
-    )
-    with open(log_file, "a") as f:
-        f.write(log_line)
+    log_entry = {
+        "task": task_id_display,
+        "start": start_time.isoformat(),
+        "end": end_time.isoformat(),
+        "duration": str(duration_td),
+        "note": note_str,
+        "status": status
+    }
+    with open(log_file, "a", encoding="utf-8") as f:
+        f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
 def mac_notify(title, msg):
     subprocess.run([
@@ -205,12 +218,17 @@ def main():
         minutes_str = prompt(f"Session duration for Task {task_id_display} (minutes)", default="60")
         try:
             minutes = int(minutes_str)
-            if minutes <= 0:
-                print("Duration must be a positive number of minutes.")
-                sys.exit(1)
         except ValueError:
             print("Invalid duration. Please enter a number.")
             sys.exit(1)
+    try:
+        minutes = int(minutes)
+    except (TypeError, ValueError):
+        print("Invalid duration. Please enter a number.")
+        sys.exit(1)
+    if minutes <= 0:
+        print("Duration must be a positive number of minutes.")
+        sys.exit(1)
     session_note_str = args.note if args.note is not None else prompt("Session note (optional)", default="")
     print(f"Starting timer for Task {task_id_display} ({minutes} min)...")
     start_time_dt = datetime.now()
