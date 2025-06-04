@@ -58,7 +58,6 @@ version: "1.1"
 - [Phosphodiester Backbone](../2_Phosphodiester_Backbone/index.md): Backbone conformation is sensitive to environmental conditions.
 
 **Application/Influence:**
-- [Real-world RNA systems](../../../../../../some_path/for_future_expansion.md): Environmental effects are critical in biological and experimental contexts.
 
 > For each link above, see the corresponding section for a reciprocal reference back to Environmental Factors.
 
