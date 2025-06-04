@@ -63,7 +63,7 @@ or use the navigation panel on the left.
 - [📄 Readme](3_design_and_architecture/README.md)
 
 - [📄 Architecture Overview](3_design_and_architecture/architecture_overview.md)
-- [📄 Roadmap Vsigma](3_design_and_architecture/roadmap_vSigma.md)
+<!-- Roadmap Vsigma removed: file no longer exists -->
 
 - 📁 Integrations
   - [📄 Readme](3_design_and_architecture/integrations/README.md)
@@ -91,7 +91,7 @@ or use the navigation panel on the left.
 - [📄 Readme](4_analysis_results_and_audits/README.md)
 
 - [📄 Analysis Overview](4_analysis_results_and_audits/analysis_overview.md)
-- [📄 Running Analysis Template](4_analysis_results_and_audits/running_analysis_template.md)
+- [📄 Running Analysis Template](meta/templates/running_analysis_template.md)
 - [📄 Week21 Rpe10 Benchmark Analysis](4_analysis_results_and_audits/week21_rpe10_benchmark_analysis.md)
 
 - 📁 Repository Audits
