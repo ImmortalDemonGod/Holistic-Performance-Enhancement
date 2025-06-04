@@ -1,5 +1,5 @@
 # Analysis Overview
-🧙🏾‍♂️ **The “4_analysis/” layer = the living lab notebook of the repo**  
+🧙🏾‍♂️ **The “4_analysis/” layer = the living lab notebook of the repo**
 Think of `cultivation/docs/4_analysis/` as the **results vault**: every time data flow runs, a test finishes, or a proof sheds light on real‑world performance, the distilled *story* lands here.
 
 Below’s a practical blueprint of **what belongs there**, **how to structure it**, and **how it evolves phase‑by‑phase**.
@@ -112,7 +112,7 @@ CI can assert these files exist and include a `## Next Action` section → green
 
 Below are the most important analysis documents and templates available in this section:
 
-- [Running Analysis Template](running_analysis_template.md): Use this template to generate new run or experiment reports.
+- [Running Analysis Template](../meta/templates/running_analysis_template.md): Use this template to generate new run or experiment reports.
 - [Week 21 RPE10 Benchmark Analysis](week21_rpe10_benchmark_analysis.md): In-depth analysis of the week 21 benchmark run, including methodology, results, and actionable insights.
 - [2025-04-27 Run Report](run_reports/2025_04_27_run_report.md): Example of a detailed run report for April 27, 2025.
 - [2025-05-01 Run Report](run_reports/2025_05_01_run_report.md): Example of a detailed run report for May 1, 2025.
@@ -127,8 +127,8 @@ Below are the most important analysis documents and templates available in this 
 Put *every* finalized result, figure, and conclusion into `docs/4_analysis/`, organized by domain ⇒ date/version. Each file becomes a bite‑sized lab report that tells (a) what you did, (b) what you saw, (c) what you’ll do next. When CI or humans rerun things, they create a fresh file or update the existing one, keeping the project’s scientific memory intact.
 
 Let me know if you’d like me to scaffold the folder, add a template file, or wire a CI snippet to auto‑publish notebook summaries 🚀
-### Short answer  
-**Yes — but don’t drop the whole kitchen sink into `4_analysis/`**. Treat your old Kaggle comps and legacy software as **reference case‑studies and data sources**, then surface only the distilled *lessons* (and any reusable assets) inside the Cultivation tree.  
+### Short answer
+**Yes — but don’t drop the whole kitchen sink into `4_analysis/`**. Treat your old Kaggle comps and legacy software as **reference case‑studies and data sources**, then surface only the distilled *lessons* (and any reusable assets) inside the Cultivation tree.
 
 ---
 
@@ -142,7 +142,7 @@ Let me know if you’d like me to scaffold the folder, add a template file, or w
 | **Reusable helper libs / utilities** | Promote into `scripts/legacy_utils/` or a dedicated PyPI package | Anything you expect to call from current pipelines should be importable, test‑covered, CI’d. |
 | **Old software projects** (complete repos) | Leave in their own repos; add links + high‑level summary in `docs/1_background/related_projects.md` | Avoid code rot & dependency conflicts inside Cultivation. |
 
-> **Folder to add:**  
+> **Folder to add:**
 > ```
 > cultivation/
 > └── archive/
@@ -155,20 +155,20 @@ Let me know if you’d like me to scaffold the folder, add a template file, or w
 
 ## How to make legacy work *useful* for Cultivation
 
-1. **Extract metrics that map to current goals**  
+1. **Extract metrics that map to current goals**
    *Example:* Your Kaggle “predict heart‑rate variability” model → pull final leaderboard RMSE and any feature‑engineering tricks; cite them in `docs/4_analysis/legacy/` as a benchmark for the new running‑VO₂ project.
 
-2. **Harvest proven code snippets**  
-   - Data loaders, cross‑validation wrappers, LightGBM tuning grids, etc.  
+2. **Harvest proven code snippets**
+   - Data loaders, cross‑validation wrappers, LightGBM tuning grids, etc.
    - Relocate to `scripts/common/` with tests so current CI keeps them alive.
 
-3. **Convert lessons into *design constraints* or *requirements***  
+3. **Convert lessons into *design constraints* or *requirements***
    - If a past project taught you “never trust early stopping without a hold‑out fold,” note that in `docs/2_requirements/testing-requirements.md`.
 
-4. **Tag legacy analyses clearly**  
+4. **Tag legacy analyses clearly**
    - Prefix filenames with `legacy_` or nest them under `legacy/` so future readers know these results don’t come from the new integrated pipeline.
 
-5. **Set up CI to ignore legacy folders**  
+5. **Set up CI to ignore legacy folders**
    - Add path filters so broken notebooks in `archive/` don’t fail the build.
 
 ---
@@ -183,10 +183,10 @@ Let me know if you’d like me to scaffold the folder, add a template file, or w
 
 ---
 
-### TL;DR  
-*Archive the bulky stuff, surface the insights.*  
-- **Archive or link** full notebooks / repos so you can reproduce them.  
-- **Write concise “what we learned” reports** in `docs/4_analysis/legacy/` following the same template as new analyses.  
-- **Promote only reusable utilities** into `scripts/` and protect them with CI.  
+### TL;DR
+*Archive the bulky stuff, surface the insights.*
+- **Archive or link** full notebooks / repos so you can reproduce them.
+- **Write concise “what we learned” reports** in `docs/4_analysis/legacy/` following the same template as new analyses.
+- **Promote only reusable utilities** into `scripts/` and protect them with CI.
 
 That way the Cultivation project stays lean, coherent, and forward‑focused—while still harvesting every drop of value from your Kaggle glory days and past software adventures. 🚀

@@ -62,8 +62,8 @@ version: "1.0"
 ## 7. Links to Related Topics
 <!-- Internal links to other relevant sections within the Cultivation knowledge base. -->
 
--   See: [`[Link Text]`](../[Other_Subsection]/index.md)
--   Related: [`[Link Text]`](../../[Another_Pillar_Or_Domain]/index.md)
+-   _Add links to related topics here when available._
+
 
 ## 8. Quiz Questions / Self-Assessment Prompts
 <!-- A few targeted questions or prompts to check understanding of this section's content. -->

@@ -12,12 +12,12 @@ date_created: "YYYY-MM-DD" # To be filled
 date_modified: "YYYY-MM-DD" # To be filled
 status: "stub" # stub | draft | complete
 version: "1.0"
-associated_kb_section: "../[SUBSECTION_FOLDER_NAME]/index.md" # e.g., ../1_RNA_Nucleotide_Structure/index.md
+# associated_kb_section: (reference to associated knowledge base section, add when available) # e.g., ../1_RNA_Nucleotide_Structure/index.md
 ---
 
 # Quiz: [SUBSECTION_TITLE_PLACEHOLDER]
 
-**Associated Knowledge Base Section:** [`[PARENT_SECTION_TITLE_PLACEHOLDER]`](../[SUBSECTION_FOLDER_NAME]/index.md)
+**Associated Knowledge Base Section:** _Reference associated knowledge base section here when available._
 
 **Instructions:** This quiz is designed to help you assess your understanding of "[SUBSECTION_TITLE_PLACEHOLDER]". Attempt all questions to the best of your ability without referring to your notes initially. After completing each section, check your answers. For any concepts you find challenging, please revisit the associated knowledge base section.
 
@@ -125,6 +125,6 @@ associated_kb_section: "../[SUBSECTION_FOLDER_NAME]/index.md" # e.g., ../1_RNA_N
 ---
 > **Self-Assessment Guide:**
 > - Review your answers critically against the "Correct Answer" or "Expected Key Points".
-> - For any incorrect answers or areas where you felt unsure, revisit the [`[PARENT_SECTION_TITLE_PLACEHOLDER]`](../[SUBSECTION_FOLDER_NAME]/index.md) knowledge base section.
+> - For any incorrect answers or areas where you felt unsure, revisit the associated knowledge base section when available.
 > - Consider creating flashcards for any definitions, principles, or problem-solving steps you found difficult.
 > - Once you have reviewed and feel confident, update the `status` in this file's frontmatter (e.g., from `stub` to `draft` or `complete` if you've filled in actual questions).
