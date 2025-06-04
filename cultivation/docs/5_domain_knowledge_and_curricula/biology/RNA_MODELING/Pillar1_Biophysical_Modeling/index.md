@@ -4,6 +4,9 @@ tags:
   - RNA
   - biophysics
   - foundations
+date_modified: "2025-06-04"
+status: "complete"
+version: "1.1"
 ---
 
 # Pillar 1 Foundations: RNA Biochemistry & Thermodynamics
@@ -19,6 +22,18 @@ This pillar covers:
 - Energetic contributions to RNA stability
 - Environmental factors affecting RNA
 
+## Suggested Learning Path
+For a structured understanding of RNA biophysical modeling foundations, we recommend progressing through the subsections in the following order. Each topic builds upon the previous ones, providing a coherent learning experience:
+
+1.  **[RNA Nucleotide Structure](./1_RNA_Nucleotide_Structure/index.md):** Start with the basic building blocks.
+2.  **[Phosphodiester Backbone](./2_Phosphodiester_Backbone/index.md):** Learn how these blocks connect to form the RNA polymer.
+3.  **[RNA vs DNA Comparison](./3_RNA_vs_DNA_Comparison/index.md):** Understand the unique chemical nature of RNA.
+4.  **[Thermodynamic Principles](./4_Thermodynamic_Principles/index.md):** Grasp the fundamental energetic rules governing RNA behavior.
+5.  **[Energetic Contributions to RNA Stability](./5_Energetic_Contributions/index.md):** Delve into the specific forces that stabilize RNA structures.
+6.  **[Environmental Factors](./6_Environmental_Factors/index.md):** Explore how external conditions influence RNA structure and stability.
+7.  **[Quizzes and Assessments](./Quizzes_and_Assessments/index.md):** After covering the material, use the quizzes to test your understanding.
+8.  **[Concept Map](./Concept_Map.md):** Visualize the relationships between all topics in Pillar 1.
+
 ## Table of Contents
 1. [RNA Nucleotide Structure](./1_RNA_Nucleotide_Structure/index.md)
 2. [Phosphodiester Backbone](./2_Phosphodiester_Backbone/index.md)
@@ -27,6 +42,7 @@ This pillar covers:
 5. [Energetic Contributions to RNA Stability](./5_Energetic_Contributions/index.md)
 6. [Environmental Factors](./6_Environmental_Factors/index.md)
 7. [Quizzes and Assessments](./Quizzes_and_Assessments/index.md)
+8. [Concept Map](./Concept_Map.md)
 
 ---
 

@@ -1,8 +1,10 @@
-Below is a **“v Σ” (Sigma) Road‑map**—a **hybrid plan** that cherry‑picks the best ideas from V1 → V4, adds explicit *risk‑gates* and *tooling checkpoints*, and weaves every domain (Running / Synergy / RNA / PBH / ARC / Lean) into a single, **capability‑first growth curve**.
-
-You can paste this straight into  
-`cultivation/docs/3_design/roadmap_vSigma.md`.
-
+---
+**STATUS: ARCHIVED & SUPERSEDED**
+This roadmap (`roadmap_vSigma.md`) has been superseded by the new canonical plan:
+[`roadmap_Cultivation_Integrated_v1.0.md`](./roadmap_Cultivation_Integrated_v1.0.md).
+This document is retained for historical context and evolutionary reference only.
+Please refer to `roadmap_Cultivation_Integrated_v1.0.md` for current project planning.
+Date Archived: 2025-06-04
 ---
 
 ## Guiding DNA
