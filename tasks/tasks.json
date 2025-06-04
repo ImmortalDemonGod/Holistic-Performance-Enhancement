@@ -5,7 +5,9 @@
       "title": "P1.W1.Day1 Passive: Intro to Nucleotides (Reading & Initial Notes)",
       "description": "Focused reading on RNA nucleotide components (phosphate, ribose, bases) and creating initial notes/flashcards.",
       "status": "pending",
-      "dependencies": [1],
+      "dependencies": [
+        1
+      ],
       "priority": "high",
       "details": "Refer to CSM Day 1, Passive Block, Task 1.A. Read relevant sections from chosen resources on nucleotide structure. Summarize key concepts. Start creating flashcards for basic definitions.",
       "testStrategy": "Key concepts of nucleotide structure noted. Initial flashcards for base definitions created.",
@@ -19,17 +21,26 @@
         "learning_objective_summary": "Gain initial understanding of RNA nucleotide components through focused reading and note-taking.",
         "estimated_effort_tshirt": "M",
         "estimated_effort_hours_raw": "1.0-1.5 hours",
-        "estimated_effort_hours_min": 1.0,
+        "estimated_effort_hours_min": 1,
         "estimated_effort_hours_max": 1.5,
         "mastery_criteria_summary": "Completed reading on nucleotide structure. Initial notes and basic flashcards created.",
         "activity_type": "focused_reading_initial_notetaking_flashcard_creation",
         "recommended_block": "passive_review",
-        "deliverables": ["Initial notes on nucleotide structure.", "First batch of basic definition flashcards."]
+        "deliverables": [
+          "Initial notes on nucleotide structure.",
+          "First batch of basic definition flashcards."
+        ]
       },
       "hpe_scheduling_meta": {
         "planned_day_of_week": 1,
         "curriculum_part_title": "Day 1 Passive: Nucleotide Introduction",
-        "csm_tags": ["rna_modeling", "biochemistry", "nucleotides", "initial_reading", "day1_passive"]
+        "csm_tags": [
+          "rna_modeling",
+          "biochemistry",
+          "nucleotides",
+          "initial_reading",
+          "day1_passive"
+        ]
       },
       "labels": [
         "passive",
@@ -44,7 +55,6 @@
         "curriculum-aligned"
       ]
     },
-
     {
       "id": 1,
       "title": "Set up RNA Biophysics Knowledge Base Structure",
@@ -61,7 +71,7 @@
           "description": "Set up the main knowledge base folder/section and create the root 'Pillar 1 Foundations: RNA Biochemistry & Thermodynamics' section with an index or overview document",
           "dependencies": [],
           "details": "1. Choose and prepare your knowledge management system (Obsidian, Notion, or local Markdown files)\n2. Create a main folder/section for the RNA Biophysics Knowledge Base\n3. Create a root document titled 'Pillar 1 Foundations: RNA Biochemistry & Thermodynamics'\n4. In the root document, write a brief overview describing the purpose and scope of this pillar\n5. Create a table of contents that will link to each subsection\n6. Add metadata tags for easy reference and searching (e.g., #RNA, #biophysics, #foundations)\n7. Test by ensuring the root document is properly saved and accessible",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 1
         },
         {
@@ -72,7 +82,7 @@
             1
           ],
           "details": "1. Within the main Pillar 1 folder, create six separate folders/sections titled:\n   - 1.1 RNA Nucleotide Structure\n   - 1.2 Phosphodiester Backbone\n   - 1.3 RNA vs DNA Comparison\n   - 1.4 Thermodynamic Principles\n   - 1.5 Energetic Contributions to RNA Stability\n   - 1.6 Environmental Factors\n2. For each subsection, create an index document that briefly describes the topic and its importance\n3. Update the root document's table of contents with links to each subsection\n4. Add consistent metadata tags to each subsection for organization\n5. Test by navigating between the main index and each subsection to verify links work correctly",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 1
         },
         {
@@ -83,7 +93,7 @@
             2
           ],
           "details": "1. Design a standardized template format for three types of content:\n   - Notes template (with headers for key concepts, definitions, and references)\n   - Diagram placeholder (with instructions for diagram types needed)\n   - Explanation template (with sections for detailed explanations and examples)\n2. For each of the six subsections, create these three template files\n3. Name files consistently (e.g., '1.1-Notes.md', '1.1-Diagrams.md', '1.1-Explanations.md')\n4. Add placeholder text in each file describing the expected content\n5. Include metadata and tagging consistent with the knowledge base structure\n6. Test by opening each file to verify template structure is consistent and properly formatted",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 1
         },
         {
@@ -955,7 +965,7 @@
         "estimated_effort_tshirt": "M",
         "estimated_effort_hours_raw": "1.5-2 hours",
         "estimated_effort_hours_min": 1.5,
-        "estimated_effort_hours_max": 2.0,
+        "estimated_effort_hours_max": 2,
         "mastery_criteria_summary": "Comprehensive 15-20 question quiz created with answer key. Practical assessment task designed with clear instructions. Detailed grading rubrics for both developed, targeting >=85% for mastery.",
         "activity_type": "assessment_design_quiz_creation_rubric_development",
         "recommended_block": "active_learning",
@@ -969,7 +979,12 @@
         "planned_day_of_week": 6,
         "curriculum_part_title": "Part 3: Self-Assessment - Material Creation",
         "csm_tags": [
-          "rna_modeling", "self_assessment", "quiz_design", "rubric_creation", "pedagogy", "week1_review_prep"
+          "rna_modeling",
+          "self_assessment",
+          "quiz_design",
+          "rubric_creation",
+          "pedagogy",
+          "week1_review_prep"
         ]
       },
       "labels": [
@@ -1004,7 +1019,7 @@
         "estimated_effort_tshirt": "S",
         "estimated_effort_hours_raw": "0.5-1 hour",
         "estimated_effort_hours_min": 0.5,
-        "estimated_effort_hours_max": 1.0,
+        "estimated_effort_hours_max": 1,
         "mastery_criteria_summary": "Written learning reflection completed. Week 1 flashcards finalized and organized for SRS. All study time and deliverables for Week 1 logged in Task Master.",
         "activity_type": "reflection_flashcard_review_logging_consolidation",
         "recommended_block": "passive_review",
@@ -1018,7 +1033,12 @@
         "planned_day_of_week": 7,
         "curriculum_part_title": "Part 3: Reflection, Finalization & Logging",
         "csm_tags": [
-          "rna_modeling", "reflection", "hpe_logging", "flashcard_review", "consolidation", "week1_wrapup"
+          "rna_modeling",
+          "reflection",
+          "hpe_logging",
+          "flashcard_review",
+          "consolidation",
+          "week1_wrapup"
         ]
       },
       "labels": [
@@ -1085,7 +1105,7 @@
         "learning_objective_summary": "Complete the self-created quiz and the practical assessment task for Week 1 RNA foundations, aiming for >=85% mastery, and self-grade.",
         "estimated_effort_tshirt": "M",
         "estimated_effort_hours_raw": "1.0-1.5 hours",
-        "estimated_effort_hours_min": 1.0,
+        "estimated_effort_hours_min": 1,
         "estimated_effort_hours_max": 1.5,
         "mastery_criteria_summary": "Self-quiz completed and scored (>=85% target). Practical task completed and self-graded against rubric (satisfactory).",
         "activity_type": "self_assessment_active_execution",
@@ -1099,7 +1119,11 @@
         "planned_day_of_week": 6,
         "curriculum_part_title": "Part 3: Execute Self-Assessments",
         "csm_tags": [
-          "rna_modeling", "self_assessment", "quiz_taking", "practical_execution", "week1_mastery_check"
+          "rna_modeling",
+          "self_assessment",
+          "quiz_taking",
+          "practical_execution",
+          "week1_mastery_check"
         ]
       },
       "labels": [
@@ -1209,8 +1233,8 @@
         "learning_objective_summary": "Design, implement, and validate a learning reflection and progress tracking system for the HPE platform, supporting integration with Task Master and flashcard tools.",
         "estimated_effort_tshirt": "XL",
         "estimated_effort_hours_raw": "8-16 hours",
-        "estimated_effort_hours_min": 8.0,
-        "estimated_effort_hours_max": 16.0,
+        "estimated_effort_hours_min": 8,
+        "estimated_effort_hours_max": 16,
         "mastery_criteria_summary": "Fully functional reflection and tracking system deployed, passing all integration and usability tests.",
         "activity_type": "software_development",
         "recommended_block": "deep_work",
