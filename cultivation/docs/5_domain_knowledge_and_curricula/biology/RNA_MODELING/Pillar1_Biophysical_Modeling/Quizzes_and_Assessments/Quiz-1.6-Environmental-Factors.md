@@ -10,27 +10,45 @@ tags:
   - ions
   - temperature
 date_created: "2025-06-03"
-date_modified: "2025-06-03"
+date_modified: "2025-06-04"
 status: "stub"
 version: "1.0"
-associated_kb_section: ../6_Environmental_Factors/index.md
+associated_kb_section: "../6_Environmental_Factors/index.md"
 ---
 
 # Quiz: Environmental Factors
 
 **Associated Knowledge Base Section:** [`6. Environmental Factors`](../6_Environmental_Factors/index.md)
 
-**Instructions:** Answer the following questions to the best of your ability without referring to your notes initially. After completing a section, check your answers and review any challenging concepts.
+**Instructions:** This quiz assesses your understanding of environmental influences on RNA structure and function. Attempt all questions without referring to your notes. After each section, check your answers and revisit the knowledge base for any concepts you find challenging.
+
+---
 
 ## Part A: Multiple Choice Questions
 
-1.  **Q: Which environmental factor most directly affects RNA folding?**
+*Instructions: Select the best answer for each question.*
+
+1.  **Q:** Which environmental factor most directly affects RNA folding?
     *   A) Light intensity
     *   B) Ion concentration
     *   C) Oxygen level
     *   D) Pressure
-    *   **Correct Answer:** [B]
+    *   **Correct Answer:** B
     *   *Feedback/Explanation:* Ions (e.g., Mg2+) stabilize RNA folding.
+
+2.  **Q:** What is the effect of removing Mg2+ from an RNA solution?
+    *   A) RNA folds more tightly
+    *   B) RNA structure destabilizes
+    *   C) No effect
+    *   D) RNA is degraded
+    *   **Correct Answer:** B
+
+3.  **Q:** Which temperature condition is most likely to denature RNA structure?
+    *   A) Low temperature
+    *   B) Room temperature
+    *   C) High temperature
+    *   D) Freezing
+    *   **Correct Answer:** C
 
 ## Part B: Short Answer Questions
 

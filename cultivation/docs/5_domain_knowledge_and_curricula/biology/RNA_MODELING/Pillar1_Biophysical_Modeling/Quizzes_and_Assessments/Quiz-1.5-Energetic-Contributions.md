@@ -10,27 +10,45 @@ tags:
   - stacking
   - base-pairing
 date_created: "2025-06-03"
-date_modified: "2025-06-03"
+date_modified: "2025-06-04"
 status: "stub"
 version: "1.0"
-associated_kb_section: ../5_Energetic_Contributions/index.md
+associated_kb_section: "../5_Energetic_Contributions/index.md"
 ---
 
 # Quiz: Energetic Contributions
 
 **Associated Knowledge Base Section:** [`5. Energetic Contributions`](../5_Energetic_Contributions/index.md)
 
-**Instructions:** Answer the following questions to the best of your ability without referring to your notes initially. After completing a section, check your answers and review any challenging concepts.
+**Instructions:** This quiz assesses your understanding of the energetic contributions to RNA structure and stability. Attempt all questions without referring to your notes. After each section, check your answers and revisit the knowledge base for any concepts you find challenging.
+
+---
 
 ## Part A: Multiple Choice Questions
 
-1.  **Q: Which interaction provides the major energetic contribution to RNA helix stability?**
+*Instructions: Select the best answer for each question.*
+
+1.  **Q:** Which interaction provides the major energetic contribution to RNA helix stability?
     *   A) Base stacking
     *   B) Hydrogen bonding
     *   C) Van der Waals forces
     *   D) Electrostatic repulsion
-    *   **Correct Answer:** [A]
+    *   **Correct Answer:** A
     *   *Feedback/Explanation:* Base stacking interactions are the main source of helix stability.
+
+2.  **Q:** Which base pair is generally more stable in RNA?
+    *   A) AU
+    *   B) GC
+    *   C) AT
+    *   D) GU
+    *   **Correct Answer:** B
+
+3.  **Q:** Which factor decreases base stacking interactions in RNA?
+    *   A) Lower temperature
+    *   B) Disruption by chemical modification
+    *   C) More GC content
+    *   D) Higher salt concentration
+    *   **Correct Answer:** B
 
 ## Part B: Short Answer Questions
 

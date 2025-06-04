@@ -10,27 +10,45 @@ tags:
   - energy
   - stability
 date_created: "2025-06-03"
-date_modified: "2025-06-03"
+date_modified: "2025-06-04"
 status: "stub"
 version: "1.0"
-associated_kb_section: ../4_Thermodynamic_Principles/index.md
+associated_kb_section: "../4_Thermodynamic_Principles/index.md"
 ---
 
 # Quiz: Thermodynamic Principles
 
 **Associated Knowledge Base Section:** [`4. Thermodynamic Principles`](../4_Thermodynamic_Principles/index.md)
 
-**Instructions:** Answer the following questions to the best of your ability without referring to your notes initially. After completing a section, check your answers and review any challenging concepts.
+**Instructions:** This quiz assesses your understanding of the thermodynamic principles governing RNA structure. Attempt all questions without referring to your notes. After each section, check your answers and revisit the knowledge base for any concepts you find challenging.
+
+---
 
 ## Part A: Multiple Choice Questions
 
-1.  **Q: What is the primary thermodynamic factor stabilizing RNA secondary structure?**
+*Instructions: Select the best answer for each question.*
+
+1.  **Q:** What is the primary thermodynamic factor stabilizing RNA secondary structure?
     *   A) Hydrophobic interactions
     *   B) Hydrogen bonding
     *   C) Ionic bonds
     *   D) Covalent bonds
-    *   **Correct Answer:** [B]
+    *   **Correct Answer:** B
     *   *Feedback/Explanation:* Hydrogen bonds between bases stabilize secondary structure.
+
+2.  **Q:** What is the effect of increasing temperature on RNA secondary structure?
+    *   A) Stabilizes base pairing
+    *   B) Causes melting/denaturation
+    *   C) Increases hydrogen bonding
+    *   D) No effect
+    *   **Correct Answer:** B
+
+3.  **Q:** Which of the following will generally increase the melting temperature (Tm) of an RNA molecule?
+    *   A) More GC base pairs
+    *   B) More AU base pairs
+    *   C) Lower salt concentration
+    *   D) Fewer hydrogen bonds
+    *   **Correct Answer:** A
 
 ## Part B: Short Answer Questions
 

@@ -10,27 +10,45 @@ tags:
   - comparison
   - bases
 date_created: "2025-06-03"
-date_modified: "2025-06-03"
+date_modified: "2025-06-04"
 status: "stub"
 version: "1.0"
-associated_kb_section: ../3_RNA_vs_DNA_Comparison/index.md
+associated_kb_section: "../3_RNA_vs_DNA_Comparison/index.md"
 ---
 
 # Quiz: RNA vs DNA Comparison
 
 **Associated Knowledge Base Section:** [`3. RNA vs DNA Comparison`](../3_RNA_vs_DNA_Comparison/index.md)
 
-**Instructions:** Answer the following questions to the best of your ability without referring to your notes initially. After completing a section, check your answers and review any challenging concepts.
+**Instructions:** This quiz assesses your understanding of the similarities and differences between RNA and DNA. Attempt all questions without referring to your notes. After each section, check your answers and revisit the knowledge base for any concepts you find challenging.
+
+---
 
 ## Part A: Multiple Choice Questions
 
-1.  **Q: Which base is found in RNA but not in DNA?**
+*Instructions: Select the best answer for each question.*
+
+1.  **Q:** Which base is found in RNA but not in DNA?
     *   A) Adenine
     *   B) Thymine
     *   C) Uracil
     *   D) Cytosine
-    *   **Correct Answer:** [C]
+    *   **Correct Answer:** C
     *   *Feedback/Explanation:* Uracil is unique to RNA; Thymine is unique to DNA.
+
+2.  **Q:** Which sugar is present in DNA?
+    *   A) Ribose
+    *   B) Deoxyribose
+    *   C) Glucose
+    *   D) Fructose
+    *   **Correct Answer:** B
+
+3.  **Q:** Which statement best describes the typical structure of RNA compared to DNA?
+    *   A) Both are double-stranded
+    *   B) Both are single-stranded
+    *   C) RNA is usually single-stranded, DNA is double-stranded
+    *   D) RNA is more stable than DNA
+    *   **Correct Answer:** C
 
 ## Part B: Short Answer Questions
 
