@@ -1,0 +1,13 @@
+{
+  "plugins": [
+    "pymarkdown.plugin.default"
+  ],
+  "plugins.allowlist": [],
+  "plugins.blocklist": [],
+  "plugins.rules": [],
+  "rules": {
+    "md013": {
+      "line_length": 120
+    }
+  }
+}

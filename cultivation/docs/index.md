@@ -1,9 +1,11 @@
-<!-- AUTO-TOC-START -->
 # Cultivation Documentation
 
-> **Comprehensive Table of Contents (Auto-generated)**
+<!-- AUTO-TOC-START -->
 
-Below is a hierarchical overview of all documentation sections, subfolders, and key files. Click any link to jump directly to that document.
+## Comprehensive Table of Contents (Auto-generated)
+
+Below is a hierarchical overview of all documentation sections, subfolders, and key files.
+Click any link to jump directly to that document.
 
 ---
 
@@ -83,9 +85,13 @@ Below is a hierarchical overview of all documentation sections, subfolders, and 
     - [📄 2025 05 17 Run Report](4_analysis_results_and_audits/run_reports/2025_05_17_run_report.md)
     - [📄 2025 05 24 Run Report](4_analysis_results_and_audits/run_reports/2025_05_24_run_report.md)
 - **📁 5 Domain Knowledge And Curricula**
+
   - [📄 Readme](5_domain_knowledge_and_curricula/README.md)
+
   - 📁 Biology
+
     - [📄 Readme](5_domain_knowledge_and_curricula/biology/README.md)
+
     - 📁 Mathematical Bio
       - [📄 Readme](5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/README.md)
       - [📄 Chapter 1 Single Species](5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/chapter_1_single_species.md)
