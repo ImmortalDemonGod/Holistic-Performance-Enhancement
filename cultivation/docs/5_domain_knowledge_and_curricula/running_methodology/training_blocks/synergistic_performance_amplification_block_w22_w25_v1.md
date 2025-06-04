@@ -80,14 +80,14 @@ This block will be guided by the following principles to drive systematic improv
     *   **Running Drills (Quality Focus):** A-Skips, B-Skips, High Knees, Butt Kicks, Straight Leg Bounds (2 sets x 20-30m each, focus on crisp form, posture, quick ground contact).
     *   **Plyometrics (Introductory/Form Focus):** Ankle Hops (2x12-15), Pogo Jumps (in place, 2x12-15), Low Box Jumps/Step-offs (2x6-8/leg, focus soft, stable landing & explosive up).
     *   **Calisthenics Strength (Push/Core Focus):** Select 2-3 exercises (e.g., Push-up variations, Pike Push-ups, Dips, Plank variations, L-sits). Aim for 2-3 sets, RPE 7-9, focusing on controlled movement and good form.
-    *   **Short Cadence Run:** 5-10 min @ target cadence (e.g., 167-172spm), Z1/Low Z2 HR.
+    *   **Short Cadence Run:** 5-10 min @ target cadence (e.g., 167-172spm, primary focus), Z1/Low Z2 HR (secondary focus).
     *   **Cool-down.**
 *   **NME2 (Power/Reactivity Focus):**
     *   **Dynamic Warm-up:** 10 min.
     *   **Running Drills:** As NME1, potentially with more dynamic variations.
     *   **Plyometrics (Progression - Focus: Reactivity/Power):** Tuck Jumps (2x6-10), Standing Broad Jumps (2x4-6, stick landing), Depth Jumps (low drop, if appropriate & safe, 2x4-6), Bounding (for distance/height, 2x20-30m).
     *   **Calisthenics Strength (Pull/Leg Focus):** Select 2-3 exercises (e.g., Pull-up/Row variations, SL Squats/Lunges, SL RDLs, Glute Bridges, Hamstring Curls/Walkouts). Aim for 2-3 sets, RPE 7-9.
-    *   **Short Cadence Run:** 5-10 min @ target cadence, Z1/Low Z2 HR.
+    *   **Short Cadence Run:** 5-10 min @ target cadence (e.g., 167-172spm, primary focus), Z1/Low Z2 HR (secondary focus).
     *   **Cool-down.**
 
 **D. Calisthenics/Strength Integration:**
