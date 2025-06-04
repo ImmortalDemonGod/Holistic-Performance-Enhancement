@@ -1,0 +1,86 @@
+This TODO is for DEEP WORK on 2025-06-04
+
+That's a good question. Consolidating actual "templates" (files intended to be copied and filled out) into `cultivation/docs/meta/templates/` is a good practice for organization and discoverability.
+
+Let's review the files we previously identified as "template-like" and decide which ones make sense to move or to extract a template *from*.
+
+**Criteria for Moving/Creating a Template in `docs/meta/templates/`:**
+
+1.  **Direct Reusability:** The file (or its core structure) is meant to be copied and filled in repeatedly to create new instances of similar documents.
+2.  **Boilerplate Nature:** A significant portion of the file is placeholder text or structural guidance, rather than finished content.
+3.  **Central Reference:** It serves as a "master" or "gold standard" for how a certain type of document should be structured.
+
+**Analysis of Candidates:**
+
+1.  **`cultivation/docs/4_analysis_results_and_audits/running_analysis_template.md`**:
+    *   **Assessment:** This is explicitly named a template and designed to be copied for each new run analysis.
+    *   **Decision:** **Yes, move this.**
+    *   **New Path:** `cultivation/docs/meta/templates/running_analysis_template.md`
+
+2.  **The template section within `cultivation/docs/4_analysis_results_and_audits/analysis_overview.md`**:
+    *   **Assessment:** This `analysis_overview.md` *describes* a template and includes an example. The actual template itself is not a standalone file.
+    *   **Decision:** **Extract this example template into its own file.**
+    *   **New Path:** `cultivation/docs/meta/templates/general_analysis_report_template.md`
+    *   `analysis_overview.md` should then *refer* to this new canonical template file.
+
+3.  **`cultivation/docs/2_requirements_and_specifications/flashcard_sample.yaml`**:
+    *   **Assessment:** This is more of a *sample* or *example* than a fillable template. Users are more likely to use VS Code snippets (as mentioned in `flashcard_system_spec.md`) or the `tm-fc add` command for new cards.
+    *   **Decision:** **Keep as is.** It serves well as a quick example within the requirements section. It's not a "blank form" in the same way the others are.
+
+4.  **Structure of `rna-modeling_p1-foundations_week1-7day.md`**:
+    *   **Assessment:** This file is *content-rich* for a specific week. Its *structure* is indeed template-worthy for other weekly plans.
+    *   **Decision:** **Do not move the original file.** Instead, **extract its structural outline** (headings, section purposes, placeholder prompts for daily tasks) into a new template file.
+    *   **New Path:** `cultivation/docs/meta/templates/weekly_learning_plan_template.md`
+
+5.  **Structure of `cultivation/docs/5_domain_knowledge_and_curricula/biology/MATHEMATICAL_BIO/section_1_test.md`**:
+    *   **Assessment:** Similar to the weekly plan, this is a *specific instance* of a test. Its structure (Parts A-E) is excellent for templating other tests.
+    *   **Decision:** **Do not move the original file.** **Extract its structural outline** into a new template.
+    *   **New Path:** `cultivation/docs/meta/templates/self_assessment_test_template.md`
+
+6.  **Structure of `cultivation/docs/5_domain_knowledge_and_curricula/strength_training_methodology/training_blocks/strength_block_prototype_v2025-Q2.md`**:
+    *   **Assessment:** A specific training block. Its sections (log analysis, volume landmarks, weekly exercise table, reconciliation, injury watch) are good for templating other strength blocks.
+    *   **Decision:** **Do not move the original file.** **Extract its structural outline.**
+    *   **New Path:** `cultivation/docs/meta/templates/strength_training_block_template.md`
+
+7.  **Structure of `cultivation/docs/0_vision_and_strategy/systems_map_and_market_cheatsheet.md`**:
+    *   **Assessment:** This is a high-level strategic document template.
+    *   **Decision:** **Do not move the original file (it's a good example).** **Extract its structural outline.**
+    *   **New Path:** `cultivation/docs/meta/templates/strategic_project_overview_template.md`
+
+8.  **Structure of `cultivation/docs/0_vision_and_strategy/strategic_initiatives/CULTIVATION_SVEP_MASTER_V1_0.md`**:
+    *   **Assessment:** A comprehensive plan for a specific initiative. Its structure is template-worthy.
+    *   **Decision:** **Do not move the original file.** **Extract its structural outline.**
+    *   **New Path:** `cultivation/docs/meta/templates/strategic_initiative_plan_template.md`
+
+9.  **`cultivation/docs/7_user_guides_and_sops/comprehensive_debugging_workflow.md`**:
+    *   **Assessment:** This is a Standard Operating Procedure (SOP). It's a guide to *follow*, not a blank form to *fill in* to create a new, unique debugging workflow each time.
+    *   **Decision:** **Keep as is.** It's correctly placed as an SOP.
+
+10. **Schema-Defining Documents (e.g., `strength_data_schemas.md`, YAML schema in `flashcard_system_spec.md`, schema excerpts in `architecture_overview.md`)**:
+    *   **Assessment:** These *define* the structure for data or configuration. They are not templates for creating new documents in the same way a report template is.
+    *   **Decision:** **Keep them where they are.** They serve as specifications.
+
+**Summary of Actions:**
+
+**Files to MOVE to `cultivation/docs/meta/templates/`:**
+
+1.  `cultivation/docs/4_analysis_results_and_audits/running_analysis_template.md`
+    *   **TO:** `cultivation/docs/meta/templates/running_analysis_template.md`
+
+**New Template Files to CREATE in `cultivation/docs/meta/templates/` (by extracting structure from existing content-rich documents):**
+
+1.  `cultivation/docs/meta/templates/knowledge_base_subsection_template.md` (Already discussed, this is the one we just defined based on Task 1.3 for `Pillar1_Biophysical_Modeling` subsections)
+2.  `cultivation/docs/meta/templates/general_analysis_report_template.md` (Extracted from the example within `analysis_overview.md`)
+3.  `cultivation/docs/meta/templates/weekly_learning_plan_template.md` (Extracted from the structure of `rna-modeling_p1-foundations_week1-7day.md`)
+4.  `cultivation/docs/meta/templates/self_assessment_test_template.md` (Extracted from the structure of `MATHEMATICAL_BIO/section_1_test.md`)
+5.  `cultivation/docs/meta/templates/strength_training_block_template.md` (Extracted from the structure of `strength_block_prototype_v2025-Q2.md`)
+6.  `cultivation/docs/meta/templates/strategic_project_overview_template.md` (Extracted from `systems_map_and_market_cheatsheet.md`)
+7.  `cultivation/docs/meta/templates/strategic_initiative_plan_template.md` (Extracted from `CULTIVATION_SVEP_MASTER_V1_0.md`)
+
+**Files/Structures to KEEP IN PLACE (not to be moved/extracted to `templates/`):**
+
+*   `cultivation/docs/2_requirements_and_specifications/flashcard_sample.yaml` (It's a sample, not a blank template)
+*   `cultivation/docs/7_user_guides_and_sops/comprehensive_debugging_workflow.md` (It's an SOP)
+*   All schema-defining documents (they are specifications).
+
+This approach keeps content-rich documents in their logical domain-specific or analytical locations, while centralizing the *reusable boilerplate structures* in the `templates/` directory. This should improve organization and make it easier to create new, consistent documents across the project.

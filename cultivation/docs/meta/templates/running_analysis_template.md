@@ -96,11 +96,11 @@ TASK
 
 STYLE & CONSTRAINTS
 -------------------
-* Begin with “🧙🏾‍♂️:” (alignment), then “🏃‍♂️:” (main body)  
+* Begin with "🧙🏾‍♂️:" (alignment), then "🏃‍♂️:" (main body)  
 * End with a clarifying question or suggested next step  
-* No invented values—quote only from actual files; use “n/a” if missing  
+* No invented values—quote only from actual files; use "n/a" if missing  
 * Default HRmax = 201 unless overridden in YAML  
-* Treat “pause?” tags as walk unless stated otherwise  
+* Treat "pause?" tags as walk unless stated otherwise  
 * Flag ZONE_YAML `model` ≠ ZONE_DOC_PATH model as critical error  
 
 OUTPUT FORMAT
@@ -135,7 +135,7 @@ For this session, you MUST systematically analyze the contents of EVERY file in 
   - walk_pace_distribution.txt
   - weather.txt
 
-Do NOT ignore any file. If a file is empty, missing, or not relevant, explicitly state this in your output. Quote directly from each file as needed. Use “n/a” if data is missing.
+Do NOT ignore any file. If a file is empty, missing, or not relevant, explicitly state this in your output. Quote directly from each file as needed. Use "n/a" if data is missing.
 
 Continue with the standard audit as described below:
 

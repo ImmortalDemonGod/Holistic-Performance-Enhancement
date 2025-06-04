@@ -8,7 +8,7 @@
 ### How to use this page  
 1. **Index → Code** Each row shows *exactly* which repo paths or Lean imports need that math.  
 2. **Timeline link** Pair this list with the live roadmap:  
-   [`docs/3_design_and_architecture/roadmap_vSigma.md`](../../3_design_and_architecture/roadmap_vSigma.md).  
+   <!-- Reference to roadmap_vSigma.md removed: file no longer exists -->
 3. **Lean tags** Bullets in *lavender* ⊚ tell you which `mathlib4` modules (or upcoming community files) we’ll import when proofs start.
 
 ---

@@ -16,6 +16,7 @@ Below is a hierarchical overview of all documentation sections, subfolders, and 
     - [📄 Critique And Refinement](0_vision_and_strategy/archive/critique_and_refinement.md)
     - [📄 Final Thoughts](0_vision_and_strategy/archive/final_thoughts.md)
     - [📄 Potential Overview](0_vision_and_strategy/archive/potential_overview.md)
+    - [📄 Roadmap Vsigma](0_vision_and_strategy/archive/roadmap_vSigma.md)
     - [📄 Synergy Concept](0_vision_and_strategy/archive/synergy_concept.md)
     - [📄 Systems Map And Market Cheatsheet](0_vision_and_strategy/archive/systems_map_and_market_cheatsheet.md)
     - [📄 Ultimate Goals](0_vision_and_strategy/archive/ultimate_goals.md)
@@ -49,7 +50,7 @@ Below is a hierarchical overview of all documentation sections, subfolders, and 
 - **📁 3 Design And Architecture**
   - [📄 Readme](3_design_and_architecture/README.md)
   - [📄 Architecture Overview](3_design_and_architecture/architecture_overview.md)
-  - [📄 Roadmap Vsigma](3_design_and_architecture/roadmap_vSigma.md)
+  - [📄 Roadmap Cultivation Integrated V1.0](3_design_and_architecture/roadmap_Cultivation_Integrated_v1.0.md)
   - 📁 Integrations
     - [📄 Readme](3_design_and_architecture/integrations/README.md)
   - 📁 Knowledge System
@@ -71,7 +72,6 @@ Below is a hierarchical overview of all documentation sections, subfolders, and 
 - **📁 4 Analysis Results And Audits**
   - [📄 Readme](4_analysis_results_and_audits/README.md)
   - [📄 Analysis Overview](4_analysis_results_and_audits/analysis_overview.md)
-  - [📄 Running Analysis Template](4_analysis_results_and_audits/running_analysis_template.md)
   - [📄 Week21 Rpe10 Benchmark Analysis](4_analysis_results_and_audits/week21_rpe10_benchmark_analysis.md)
   - 📁 Repository Audits
     - [📄 Architectural Review And Task Consolidation 2025-05-29](4_analysis_results_and_audits/repository_audits/architectural_review_and_task_consolidation_2025-05-29.md)
@@ -99,6 +99,29 @@ Below is a hierarchical overview of all documentation sections, subfolders, and 
       - [📄 Skill Map Csm Pillar4](5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar4.md)
       - [📄 Rna-Modeling P1-Foundations Week1-7Day](5_domain_knowledge_and_curricula/biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md)
       - [📄 Rna Tasks Hpe Metadata V1.0](5_domain_knowledge_and_curricula/biology/RNA_MODELING/rna_tasks_hpe_metadata_v1.0.md)
+      - 📁 Pillar1 Biophysical Modeling
+        - [📄 Concept Map](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/Concept_Map.md)
+        - [📄 Index](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/index.md)
+        - 📁 1 Rna Nucleotide Structure
+          - [📄 Index](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/1_RNA_Nucleotide_Structure/index.md)
+        - 📁 2 Phosphodiester Backbone
+          - [📄 Index](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/2_Phosphodiester_Backbone/index.md)
+        - 📁 3 Rna Vs Dna Comparison
+          - [📄 Index](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/3_RNA_vs_DNA_Comparison/index.md)
+        - 📁 4 Thermodynamic Principles
+          - [📄 Index](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/4_Thermodynamic_Principles/index.md)
+        - 📁 5 Energetic Contributions
+          - [📄 Index](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/5_Energetic_Contributions/index.md)
+        - 📁 6 Environmental Factors
+          - [📄 Index](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/6_Environmental_Factors/index.md)
+        - 📁 Quizzes And Assessments
+          - [📄 Quiz-1.1-Rna-Nucleotide-Structure](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/Quizzes_and_Assessments/Quiz-1.1-RNA-Nucleotide-Structure.md)
+          - [📄 Quiz-1.2-Phosphodiester-Backbone](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/Quizzes_and_Assessments/Quiz-1.2-Phosphodiester-Backbone.md)
+          - [📄 Quiz-1.3-Rna-Vs-Dna-Comparison](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/Quizzes_and_Assessments/Quiz-1.3-RNA-vs-DNA-Comparison.md)
+          - [📄 Quiz-1.4-Thermodynamic-Principles](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/Quizzes_and_Assessments/Quiz-1.4-Thermodynamic-Principles.md)
+          - [📄 Quiz-1.5-Energetic-Contributions](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/Quizzes_and_Assessments/Quiz-1.5-Energetic-Contributions.md)
+          - [📄 Quiz-1.6-Environmental-Factors](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/Quizzes_and_Assessments/Quiz-1.6-Environmental-Factors.md)
+          - [📄 Index](5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/Quizzes_and_Assessments/index.md)
   - 📁 Running Methodology
     - [📄 Readme](5_domain_knowledge_and_curricula/running_methodology/README.md)
     - 📁 References
@@ -123,7 +146,12 @@ Below is a hierarchical overview of all documentation sections, subfolders, and 
   - [📄 Habitdash Integration Guide](7_user_guides_and_sops/habitdash_integration_guide.md)
   - [📄 Literature System Howto](7_user_guides_and_sops/literature_system_howto.md)
   - [📄 Operational Playbook](7_user_guides_and_sops/operational_playbook.md)
+  - [📄 Pymarkdownlnt Setup And Usage](7_user_guides_and_sops/pymarkdownlnt_setup_and_usage.md)
 - **📁 Meta**
   - [📄 Readme](meta/README.md)
   - [📄 Repository Progress Audit 2025-05-31](meta/repository_progress_audit_2025-05-31.md)
+  - 📁 Templates
+    - [📄 Knowledge Base Subsection Template](meta/templates/knowledge_base_subsection_template.md)
+    - [📄 Quiz Subsection Template](meta/templates/quiz_subsection_template.md)
+    - [📄 Running Analysis Template](meta/templates/running_analysis_template.md)
 <!-- AUTO-TOC-END -->

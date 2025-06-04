@@ -1,0 +1,26 @@
+name: Markdown Lint
+
+on:
+  pull_request:
+    paths:
+      - 'cultivation/docs/**/*.md'
+      - '.pymarkdown.json'
+      - '.github/workflows/markdown-lint.yml'
+  push:
+    branches: [main, master]
+
+jobs:
+  markdown-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+
+      - name: Install PyMarkdown Lint
+        run: pip install pymarkdownlnt
+
+      - name: Lint Markdown
+        run: pymarkdown scan cultivation/docs/

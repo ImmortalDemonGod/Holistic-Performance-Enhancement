@@ -1,4 +1,4 @@
-Based on the provided Task Master documentation (v0.15.0 and surrounding files), here are the key features you should be aware of to effectively set up and utilize it for managing your learning tasks from `RNA_MODELING_SKILL_MAP_CSM.md` and your daily schedule:
+# Task Master How-To Guide for RNA Modeling Curriculum & Daily Scheduling
 
 **I. Core Task Management & Structure:**
 

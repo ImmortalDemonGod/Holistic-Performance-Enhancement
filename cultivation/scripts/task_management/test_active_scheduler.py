@@ -77,6 +77,10 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
 
     def test_task1_scheduled_on_day1(self):
         target_date = "2025-05-19"
+        modifications = [
+            {"id": 1, "status": "pending"}
+        ]
+        self._modify_tasks(modifications)
         scheduled_block = self._run_scheduler(self.current_tasks_data, target_date)
         self.assertTrue(len(scheduled_block) >= 1, "Expected at least one task to be scheduled.")
         scheduled_csm_ids = [t.get("id") for t in scheduled_block]
