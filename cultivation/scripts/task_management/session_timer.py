@@ -13,7 +13,12 @@ import subprocess
 from datetime import datetime, timedelta
 
 # --- CONFIG ---
-DEFAULT_LOG_FILE = os.path.expanduser("~/.taskmaster/session_log.txt")
+# --- LOG FILE CONFIG ---
+# The session log is now stored inside the repo for version control and collaboration.
+# Default: cultivation/logs/session_log.txt (relative to project root)
+# Can override with LOG_FILE env variable for testing or custom setups.
+REPO_LOG_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../logs/session_log.txt'))
+DEFAULT_LOG_FILE = REPO_LOG_FILE
 TASK_MASTER = "task-master"
 PYTHON_EXEC = os.path.abspath(".venv/bin/python")
 
@@ -25,15 +30,10 @@ def prompt(msg, default=None):
         return input(f"{msg} [{default}]: ") or default
     return input(f"{msg}: ")
 
-# --- Prompt for session info ---
-def prompt(msg, default=None):
-    if default:
-        return input(f"{msg} [{default}]: ") or default
-    return input(f"{msg}: ")
-
 import os
 
-LOG_FILE = os.path.expanduser("~/.taskmaster/session_log.txt")
+# The log file is now stored in the repo by default; override with LOG_FILE env var for testing or custom setups.
+LOG_FILE = os.environ.get("LOG_FILE", DEFAULT_LOG_FILE)
 
 def log_session(task_id_display, start_time, end_time, duration_td, note_str, status, log_file=None):
     if log_file is None:
