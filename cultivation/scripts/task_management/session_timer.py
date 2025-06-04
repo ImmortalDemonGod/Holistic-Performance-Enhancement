@@ -37,33 +37,23 @@ LOG_FILE = os.environ.get("LOG_FILE", DEFAULT_LOG_FILE)
 
 import json
 
-def log_session(task_id_display, start_time, end_time, duration_td, note_str, status, log_file=None):
-    """
-    Log a session as a JSON object per line for robust parsing and encoding safety.
-    Args:
-        task_id_display (str): Human-readable task ID or label.
-        start_time (datetime): Session start time.
-        end_time (datetime): Session end time.
-        duration_td (timedelta): Session duration.
-        note_str (str): Notes (may contain tabs or special chars).
-        status (str): Task/session status.
-        log_file (str, optional): Path to log file. Defaults to LOG_FILE env or DEFAULT_LOG_FILE.
-    """
+def log_session(task_id_display, start_time, end_time, duration_td, note_str, status=None, log_file=None):
+    """Log session in tab-separated legacy format."""
     if log_file is None:
         log_file = os.environ.get("LOG_FILE", DEFAULT_LOG_FILE)
     log_dir = os.path.dirname(log_file)
     if log_dir and not os.path.exists(log_dir):
         os.makedirs(log_dir, exist_ok=True)
-    log_entry = {
-        "task": task_id_display,
-        "start": start_time.isoformat(),
-        "end": end_time.isoformat(),
-        "duration": str(duration_td),
-        "note": note_str,
-        "status": status
-    }
+    line = (
+        f"Task: {task_id_display}\t"
+        f"Start: {start_time.isoformat()}\t"
+        f"End: {end_time.isoformat()}\t"
+        f"Duration: {duration_td}\t"
+        f"Note: {note_str}\t"
+        f"Status: {status}"
+    )
     with open(log_file, "a", encoding="utf-8") as f:
-        f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+        f.write(line + "\n")
 
 def mac_notify(title, msg):
     subprocess.run([
@@ -243,7 +233,7 @@ def manual_stop(task_id_for_tm, task_id_display, note, log_file):
         comment = (
             f"Manual timed session: {start_time.strftime('%Y-%m-%d %H:%M')} - "
             f"{end_time.strftime('%H:%M')} (Actual: {int(duration.total_seconds()/60)} min). "
-            f"Note: {session_note}"
+            f"Outcome: MANUAL. Note: {session_note}"
         )
         update_task_master(task_id_for_tm, comment)
     if prompt(
@@ -276,7 +266,7 @@ def timed_session(args, task_id_for_tm, task_id_display, log_file):
     except (TypeError, ValueError):
         print("Invalid duration. Please enter a number.")
         sys.exit(1)
-    if minutes <= 0:
+    if minutes < 0:
         print("Duration must be a positive number of minutes.")
         sys.exit(1)
     note = args.note or prompt("Session note (optional)", default="")

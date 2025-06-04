@@ -273,7 +273,9 @@ class TestPassiveLearningBlockScheduler(unittest.TestCase):
 
     def test_baseline_default_only(self):
         target_date = "2025-05-25"
-        # All tasks pending, none eligible
+        # All tasks pending, none eligible - set all to done to make them ineligible
+        modifications = [{"id": i, "status": "done"} for i in range(1, 20)]  # Cover all task IDs
+        self._modify_tasks(modifications)
         scheduled = self._run_scheduler(self.current_tasks_data, target_date)
         self.assertEqual(len(scheduled), 1)
         self.assertEqual(scheduled[0]["id"], "Default.Passive.Review")
