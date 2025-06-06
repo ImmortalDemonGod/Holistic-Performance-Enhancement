@@ -348,7 +348,7 @@ def main():
             'Z2 (Aerobic)':  {'bpm': _ascending(args.aet, args.lt-1), 'pace_min_per_km': _ascending(9.0, 9.4)},
             'Z3 (Tempo)':    {'bpm': _ascending(args.lt, args.lt+9), 'pace_min_per_km': _ascending(8.5, 8.9)},
             'Z4 (Threshold)':{'bpm': _ascending(args.lt+10, args.hrmax-15), 'pace_min_per_km': _ascending(8.1, 8.4)},
-            'Z5 (VO2max)':   {'bpm': _ascending(args.hrmax-14, args.hrmax), 'pace_min_per_km': _ascending(0, 8.0)},
+            'Z5 (VO₂max)':   {'bpm': _ascending(args.hrmax-14, args.hrmax), 'pace_min_per_km': _ascending(0, 8.0)},
         }
         # Optional: sanity check for reversed bounds
         for name, z in zones.items():
