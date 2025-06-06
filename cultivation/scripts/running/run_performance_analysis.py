@@ -431,15 +431,15 @@ def main():
             return float(val)
         except Exception:
             return None
-    if 'skin_temp_whoop' in wellness_context and wellness_context['skin_temp_whoop'] is not None:
-        val = _to_float(wellness_context['skin_temp_whoop'])
-        wellness_context['skin_temp_whoop'] = val * 9/5 + 32 if val is not None else wellness_context['skin_temp_whoop']
-    if 'skin_temp_whoop_1d' in wellness_context and wellness_context['skin_temp_whoop_1d'] is not None:
-        val = _to_float(wellness_context['skin_temp_whoop_1d'])
-        wellness_context['skin_temp_whoop_1d'] = val * 9/5 + 32 if val is not None else wellness_context['skin_temp_whoop_1d']
-    if 'skin_temp_whoop_7d' in wellness_context and wellness_context['skin_temp_whoop_7d'] is not None:
-        val = _to_float(wellness_context['skin_temp_whoop_7d'])
-        wellness_context['skin_temp_whoop_7d'] = val * 9/5 + 32 if val is not None else wellness_context['skin_temp_whoop_7d']
+    if 'skin_temperature_whoop' in wellness_context and wellness_context['skin_temperature_whoop'] is not None:
+        val = _to_float(wellness_context['skin_temperature_whoop'])
+        wellness_context['skin_temperature_whoop'] = val * 9/5 + 32 if val is not None else wellness_context['skin_temperature_whoop']
+    if 'skin_temperature_whoop_1d' in wellness_context and wellness_context['skin_temperature_whoop_1d'] is not None:
+        val = _to_float(wellness_context['skin_temperature_whoop_1d'])
+        wellness_context['skin_temperature_whoop_1d'] = val * 9/5 + 32 if val is not None else wellness_context['skin_temperature_whoop_1d']
+    if 'skin_temperature_whoop_7d' in wellness_context and wellness_context['skin_temperature_whoop_7d'] is not None:
+        val = _to_float(wellness_context['skin_temperature_whoop_7d'])
+        wellness_context['skin_temperature_whoop_7d'] = val * 9/5 + 32 if val is not None else wellness_context['skin_temperature_whoop_7d']
 
     # Format block
     def _fmt(val, unit, *, convert_s_to_h=False, convert_s_to_min=False):
@@ -481,24 +481,12 @@ def main():
 
     # For each metric, add daily and weekly delta if possible
     metric_specs = [
-        ("hrv_whoop", "HRV (Whoop)", "ms", None),
-        ("rhr_whoop", "RHR (Whoop)", "bpm", None),
-        ("rhr_garmin", "RHR (Garmin)", "bpm", None),
+        ("heart_rate_variability_whoop", "HRV (Whoop)", "ms", None),
+        ("resting_heart_rate_whoop", "RHR (Whoop)", "bpm", None),
+        ("resting_heart_rate_garmin", "RHR (Garmin)", "bpm", None),
         ("recovery_score_whoop", "Recovery Score (Whoop)", "%", None),
         ("sleep_score_whoop", "Sleep Score (Whoop)", "%", None),
         ("body_battery_garmin", "Body Battery (Garmin)", "%", None),
-        ("avg_stress_garmin_prev_day", "Avg Stress (Garmin, Prev Day)", "%", None),
-        ("sleep_total_whoop", "Sleep Duration (Whoop)", "h", lambda x: x/3600 if x is not None else None),
-        ("sleep_consistency_whoop", "Sleep Consistency (Whoop)", "%", None),
-        ("sleep_disturbances_per_hour_whoop", "Sleep Disturbances/hr (Whoop)", "", None),
-        ("strain_score_whoop", "Strain Score (Whoop)", "", None),
-        ("skin_temp_whoop", "Skin Temp (Whoop)", "°F", None),
-        ("resp_rate_whoop", "Resp Rate (Whoop)", "rpm", None),
-        ("steps_garmin", "Steps (Garmin)", "", None),
-        ("total_activity_garmin", "Total Activity (Garmin)", "min", lambda x: x/60 if x is not None else None),
-        ("resp_rate_garmin", "Resp Rate (Garmin)", "rpm", None),
-        ("vo2max_garmin", "VO2max (Garmin)", "ml/kg/min", None),
-    ]
     if wellness_context:
         run_date = df.index[0].date() if hasattr(df.index[0], 'date') else pd.to_datetime(df.index[0]).date()
         summary_lines.append("\n--- Pre-Run Wellness Context (Data for {}) ---".format(run_date))
@@ -529,7 +517,7 @@ def main():
             else:
                 summary_lines.append(f"  {label}: {disp_val}")
             # Insert separator ONLY after vo2max_garmin
-            if key == "vo2max_garmin":
+            if key == "vo₂_max_garmin":
                 summary_lines.append("  ---")
     else:
         summary_lines.append("\n--- Pre-Run Wellness Context: n/a ---")
