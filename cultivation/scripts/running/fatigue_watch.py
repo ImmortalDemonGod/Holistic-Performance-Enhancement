@@ -46,8 +46,8 @@ def main():
         recovery_obj = []
         for d in date_list:
             if wellness_df is not None and d in wellness_df.index:
-                rest_hr_obj.append(wellness_df.loc[d].get("rhr_whoop", None))
-                hrv_obj.append(wellness_df.loc[d].get("hrv_whoop", None))
+                rest_hr_obj.append(wellness_df.loc[d].get("resting_heart_rate_whoop", None))
+                hrv_obj.append(wellness_df.loc[d].get("heart_rate_variability_whoop", None))
                 recovery_obj.append(wellness_df.loc[d].get("recovery_score_whoop", None))
             else:
                 rest_hr_obj.append(None)
