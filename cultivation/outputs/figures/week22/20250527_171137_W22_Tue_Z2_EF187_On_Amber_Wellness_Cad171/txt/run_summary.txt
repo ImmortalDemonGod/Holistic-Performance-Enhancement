@@ -1,0 +1,84 @@
+
+Run Summary:
+  Start time: 2025-05-27 17:12:00+00:00
+  End time: 2025-05-27 18:06:40+00:00
+  Duration: 0 days 00:54:40
+  Total distance (km): 7.89
+  Avg pace (min/km): 5.89
+  Avg HR: 153.9
+  Max HR: 175.0
+  Avg cadence: 170.8
+  Elevation gain (m): N/A
+
+  --- Advanced Metrics (run_metrics) ---
+    distance_km: 6.1
+    duration_min: 35.4
+    avg_pace_min_per_km: 5.8
+    avg_hr: 153.9
+    efficiency_factor: 0.01867
+    decoupling_%: 0.3
+    hrTSS: 40.8
+    zones_applied:
+      Z1 (Recovery): {'bpm': [0, 145], 'pace_min_per_km': [7.0, 999]}
+      Z2 (Aerobic): {'bpm': [145, 160], 'pace_min_per_km': [6.85, 8.7]}
+      Z3 (Tempo): {'bpm': [161, 175], 'pace_min_per_km': [5.2, 6.85]}
+      Z4 (Threshold): {'bpm': [176, 186], 'pace_min_per_km': [4.8, 5.2]}
+      Z5 (VO2max): {'bpm': [187, 201], 'pace_min_per_km': [0.0, 4.8]}
+
+
+--- Pre-Run Wellness Context (Data for 2025-05-27) ---
+  HRV (Whoop): 111.4 ms
+  HRV (Whoop) 1d Δ: -20.7%
+  HRV (Whoop) 7d Δ: -1.5%
+  ---
+  RHR (Whoop): 55.0 bpm
+  RHR (Whoop) 1d Δ: +17.0%
+  RHR (Whoop) 7d Δ: +2.7%
+  ---
+  RHR (Garmin): 50.0 bpm
+  RHR (Garmin) 1d Δ: +11.1%
+  RHR (Garmin) 7d Δ: +1.2%
+  ---
+  Recovery Score (Whoop): 68.0 %
+  Recovery Score (Whoop) 1d Δ: -29.2%
+  Recovery Score (Whoop) 7d Δ: -17.1%
+  ---
+  Sleep Score (Whoop): 89.0 %
+  Sleep Score (Whoop) 1d Δ: +2.3%
+  Sleep Score (Whoop) 7d Δ: +10.1%
+  ---
+  Body Battery (Garmin): 57.1 %
+  Body Battery (Garmin) 1d Δ: -8.6%
+  Body Battery (Garmin) 7d Δ: +8.7%
+  ---
+  Total Sleep (Whoop): 9.5 h
+  Total Sleep (Whoop) 1d Δ: +11.6%
+  Total Sleep (Whoop) 7d Δ: +14.7%
+  ---
+  Strain (Whoop): 13.2 
+  Strain (Whoop) 1d Δ: +111.1%
+  Strain (Whoop) 7d Δ: +27.9%
+  ---
+  Respiratory Rate (Whoop): 17.6 rpm
+  Respiratory Rate (Whoop) 1d Δ: +6.3%
+  Respiratory Rate (Whoop) 7d Δ: +2.3%
+  ---
+  Skin Temp (Whoop): 93.2 °F
+  Skin Temp (Whoop) 1d Δ: +0.0%
+  Skin Temp (Whoop) 7d Δ: +0.5%
+  ---
+  VO2max (Garmin): 54.0 ml/kg/min
+  VO2max (Garmin) 1d Δ: --
+  VO2max (Garmin) 7d Δ: +0.0%
+  ---
+  Total Activity (Garmin): 8.4 min
+  Total Activity (Garmin) 1d Δ: -5.1%
+  Total Activity (Garmin) 7d Δ: -9.5%
+  ---
+  Start location: (34.60698, -98.42568)
+  Weather at start:
+    Temperature: 24.3 °C (feels like N/A)
+    Precipitation: 0.0 mm
+    Humidity: N/A %
+    Wind speed: 10.8 km/h
+    Description: Clear sky
