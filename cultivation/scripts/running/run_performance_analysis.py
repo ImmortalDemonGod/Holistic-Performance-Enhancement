@@ -13,7 +13,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 
-from utilities.analyze_habitdash_export_vs_cache import fetch_weather_open_meteo, get_weather_description  # type: ignore
+from weather_utils import fetch_weather_open_meteo, get_weather_description  # type: ignore
 from metrics import load_personal_zones, compute_training_zones, run_metrics, lower_z2_bpm  # type: ignore
 
 def time_in_zone(df, zone_col='zone_hr'):
@@ -185,7 +185,7 @@ def main():
     # Now set the wellness context date if possible
     if wellness_df is not None and not wellness_df.empty:
         run_date = df.index[0].date() if hasattr(df.index[0], 'date') else pd.to_datetime(df.index[0]).date()
-        # Ensure both index and lookup are datetime.date
+        wellness_df.index = pd.to_datetime(wellness_df.index, errors='coerce')
         idx = [d if isinstance(d, datetime.date) and not isinstance(d, pd.Timestamp) else d.date() for d in wellness_df.index]
         run_date_dt = run_date if isinstance(run_date, datetime.date) and not isinstance(run_date, pd.Timestamp) else run_date.date()
         mask = [d <= run_date_dt for d in idx]
@@ -418,21 +418,10 @@ def main():
     else:
         summary_lines.append(f"  [metrics] Could not compute advanced metrics: {adv_metrics_error}")
     summary_lines.append("")
-    # Convert skin_temp_whoop and its comparison values from C to F before summary
-    def _to_float(val):
-        try:
-            return float(val)
-        except Exception:
-            return None
-    if 'skin_temperature_whoop' in wellness_context and wellness_context['skin_temperature_whoop'] is not None:
-        val = _to_float(wellness_context['skin_temperature_whoop'])
-        wellness_context['skin_temperature_whoop'] = val * 9/5 + 32 if val is not None else wellness_context['skin_temperature_whoop']
-    if 'skin_temperature_whoop_1d' in wellness_context and wellness_context['skin_temperature_whoop_1d'] is not None:
-        val = _to_float(wellness_context['skin_temperature_whoop_1d'])
-        wellness_context['skin_temperature_whoop_1d'] = val * 9/5 + 32 if val is not None else wellness_context['skin_temperature_whoop_1d']
-    if 'skin_temperature_whoop_7d' in wellness_context and wellness_context['skin_temperature_whoop_7d'] is not None:
-        val = _to_float(wellness_context['skin_temperature_whoop_7d'])
-        wellness_context['skin_temperature_whoop_7d'] = val * 9/5 + 32 if val is not None else wellness_context['skin_temperature_whoop_7d']
+    # Skin temperature unit conversion is handled in metric_specs below via the unit_conv lambda.
+    # Do NOT convert skin_temperature_whoop values here; otherwise, values will be doubly converted.
+    # If the metric_specs entry for skin_temperature_whoop specifies °F and a conversion, the raw value
+    # from the cache/export (in °C or °F as appropriate) will be converted at display time only.
 
     # Format block
     def _fmt(val, unit, *, convert_s_to_h=False, convert_s_to_min=False):
@@ -454,7 +443,7 @@ def main():
     def _delta_str(today_val, prev_val, unit_conv=None, cap_pct=300, min_baseline=1e-2):
         try:
             if today_val is None or prev_val is None or prev_val == '' or today_val == '':
-                return "n/a"
+                return "--"
             t, p = today_val, prev_val
             if isinstance(t, str):
                 t = float(t)
@@ -466,11 +455,13 @@ def main():
             if abs(p) < min_baseline:
                 return "--"
             delta = 100 * (t - p) / abs(p)
+            if np.isnan(delta):
+                return "--"
             if abs(delta) > cap_pct:
                 return f"{cap_pct:+.0f}%+" if delta > 0 else f"-{cap_pct:.0f}%+"
             return f"{delta:+.1f}%"
         except Exception:
-            return "n/a"
+            return "--"
 
     # For each metric, add daily and weekly delta if possible
     metric_specs = [
@@ -480,38 +471,48 @@ def main():
         ("recovery_score_whoop", "Recovery Score (Whoop)", "%", None),
         ("sleep_score_whoop", "Sleep Score (Whoop)", "%", None),
         ("body_battery_garmin", "Body Battery (Garmin)", "%", None),
+        ("total_sleep_whoop", "Total Sleep (Whoop)", "h", lambda x: x/3600),
+        ("strain_whoop", "Strain (Whoop)", "", None),
+        ("respiratory_rate_whoop", "Respiratory Rate (Whoop)", "rpm", None),
+        ("skin_temperature_whoop", "Skin Temp (Whoop)", "°F", lambda x: x*9/5+32),
+        ("vo₂_max_garmin", "VO2max (Garmin)", "ml/kg/min", None),
+        ("total_activity_garmin", "Total Activity (Garmin)", "min", lambda x: x/60),
+        # Add any additional canonical metrics present in your cache/export as needed
     ]
-    if wellness_context:
-        run_date = df.index[0].date() if hasattr(df.index[0], 'date') else pd.to_datetime(df.index[0]).date()
-        summary_lines.append("\n--- Pre-Run Wellness Context (Data for {}) ---".format(run_date))
+    summary_lines.append("\n--- Pre-Run Wellness Context (Data for {}) ---".format(run_date))
+    # Patch: dynamically compute 1d and 7d deltas for each metric if not present
+    if wellness_df is not None and not wellness_df.empty:
+        # Index is already datetime
+        wellness_df_sorted = wellness_df.sort_index()
+        if hasattr(run_date, 'date'):
+            run_date_dt = run_date
+        else:
+            run_date_dt = pd.to_datetime(run_date).date()
+        # Find the row for the current run date
+        current_idx = None
+        for idx, v in enumerate(wellness_df_sorted.index):
+            idx_date = v.date() if hasattr(v, 'date') else pd.to_datetime(v).date()
+            if idx_date == run_date_dt:
+                current_idx = idx
+                break
         for key, label, unit, unit_conv in metric_specs:
             today_val = wellness_context.get(key)
-            # Daily delta
+            base_key = key
             prev_val = None
             week_val = None
-            if key.endswith('_prev_day'):
-                # Only daily delta makes sense
-                prev_val = None
-                week_val = None
-            else:
-                try:
-                    prev_val = wellness_df.loc[run_date - timedelta(days=1)].get(key, None)
-                except Exception:
-                    prev_val = None
-                try:
-                    week_val = wellness_df.loc[run_date - timedelta(days=7)].get(key, None)
-                except Exception:
-                    week_val = None
-            delta_1d = _delta_str(today_val, prev_val, unit_conv)
-            delta_7d = _delta_str(today_val, week_val, unit_conv)
-            # Format value
-            disp_val = _fmt(today_val, unit, convert_s_to_h=(key=="sleep_total_whoop"), convert_s_to_min=(key=="total_activity_garmin"))
-            if delta_1d != "n/a" or delta_7d != "n/a":
-                summary_lines.append(f"  {label}: {disp_val} (Δ1d: {delta_1d}, Δ7d: {delta_7d})")
-            else:
-                summary_lines.append(f"  {label}: {disp_val}")
-            # Insert separator ONLY after vo2max_garmin
-            if key == "vo₂_max_garmin":
+            # Only compute if current_idx is found
+            if current_idx is not None and base_key in wellness_df_sorted.columns:
+                # 1d delta
+                if current_idx > 0:
+                    prev_val = wellness_df_sorted.iloc[current_idx - 1][base_key]
+                # 7d rolling mean (excluding today)
+                if current_idx >= 7:
+                    week_val = wellness_df_sorted.iloc[current_idx - 7:current_idx][base_key].mean()
+            summary_lines.append(f"  {label}: {_fmt(today_val, unit, convert_s_to_h=(unit=='h'), convert_s_to_min=(unit=='min'))}")
+            # Only show 1d/7d delta for base metrics (not for delta keys themselves)
+            if key.endswith('_whoop') or key.endswith('_garmin'):
+                summary_lines.append(f"  {label} 1d Δ: {_delta_str(today_val, prev_val, unit_conv)}")
+                summary_lines.append(f"  {label} 7d Δ: {_delta_str(today_val, week_val, unit_conv)}")
                 summary_lines.append("  ---")
     else:
         summary_lines.append("\n--- Pre-Run Wellness Context: n/a ---")

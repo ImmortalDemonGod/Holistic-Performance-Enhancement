@@ -24,12 +24,34 @@ BACKUP_DIR = "cultivation/data/cache_backups"
 # 1. Load export (long format, canonical columns)
 export_df = pd.read_csv(EXPORT_CSV)
 
-# Always create canonical metric column name
-export_df['metric_col'] = export_df['name'].str.strip().str.lower().str.replace(' ', '_').str.replace('/', '_per_') + '_' + export_df['source'].str.strip().str.lower()
+# Map export metric names to canonical names where necessary
+metric_name_map = {
+    'strain score': 'strain',
+    'sleep respiratory rate': 'respiratory_rate',
+    # Add more mappings as needed
+}
+
+def canonical_metric_name(row):
+    raw_name = row['name'].strip().lower()
+    canonical = metric_name_map.get(raw_name, raw_name.replace(' ', '_').replace('/', '_per_'))
+    return f"{canonical}_{row['source'].strip().lower()}"
+
+export_df['metric_col'] = export_df.apply(canonical_metric_name, axis=1)
 
 # Pivot to wide format: index=date, columns=metric_col, values=value
 wide_export = export_df.pivot_table(index='date', columns='metric_col', values='value', aggfunc='first').reset_index()
-wide_export['date'] = pd.to_datetime(wide_export['date'])
+# Robust date parsing
+wide_export['date'] = pd.to_datetime(wide_export['date'], errors='raise')
+if wide_export['date'].isna().any():
+    raise ValueError("Some dates in the export could not be parsed. Check export file for malformed dates.")
+# Diagnostic: print unique dates after pivot
+print('Unique dates after pivot:', wide_export['date'].unique())
+print('Is 2025-05-27 present?', pd.Timestamp('2025-05-27') in wide_export['date'].unique())
+# Remove rows with 1970-01-01 or NaT (parsing failures)
+wide_export = wide_export[~wide_export['date'].isin([pd.Timestamp('1970-01-01'), pd.NaT])]
+# Set date as index for downstream reliability
+wide_export = wide_export.set_index('date')
+
 
 # 2. Load or initialize cache
 def load_cache(path):
@@ -64,15 +86,11 @@ if os.path.exists(CACHE_PARQUET):
     print(f"Backup of cache created at {BACKUP_DIR}/daily_wellness_{ts}.parquet")
 
 # 4. Merge export into cache (on 'date')
-if 'date' not in wide_export.columns:
-    raise ValueError("Export file must contain a 'date' column.")
+# After pivot and set_index above, 'date' is the index, not a column.
+if wide_export.index.name != 'date':
+    raise ValueError("Export DataFrame must have 'date' as index after pivot.")
 
-export_df['date'] = pd.to_datetime(export_df['date'])
-if not cache_df.empty:
-    cache_df['date'] = pd.to_datetime(cache_df['date'])
-
-# Use 'date' as the unique key (add 'user' if multi-user)
-merge_keys = ['date']
+# No need to parse or check 'date' as a column anymore. All merges will be on index.
 
 # Ensure all columns from both wide_export and cache exist in both DataFrames
 all_cols = set(wide_export.columns) | set(cache_df.columns)
@@ -85,15 +103,13 @@ for df in [wide_export, cache_df]:
 if cache_df.empty:
     merged = wide_export.copy()
 else:
-    merged = pd.merge(cache_df, wide_export, on=merge_keys, how='outer', suffixes=('_old', ''))
-    # For each export column, prefer the export value if present
-    for col in wide_export.columns:
-        if col not in merge_keys:
-            col_old = f"{col}_old"
-            if col_old in merged.columns:
-                merged[col] = merged[col].combine_first(merged[col_old])
-                merged.drop(columns=[col_old], inplace=True)
-            # If col_old doesn't exist, merged[col] is already correct
+    # Ensure cache uses date as index for merge
+    if 'date' in cache_df.columns:
+        cache_df['date'] = pd.to_datetime(cache_df['date'], errors='coerce')
+        cache_df = cache_df.set_index('date')
+    merged = pd.concat([cache_df, wide_export])
+    merged = merged[~merged.index.duplicated(keep='last')]
+    merged = merged.sort_index()
 
 # 5. Ensure all export columns are present
 for col in wide_export.columns:
@@ -101,6 +117,8 @@ for col in wide_export.columns:
         merged[col] = pd.NA
 
 # 6. Write back to Parquet
-merged = merged.sort_values('date').reset_index(drop=True)
-merged.to_parquet(CACHE_PARQUET, index=False)
+# Remove any remaining bad index values
+merged = merged[~merged.index.isin([pd.Timestamp('1970-01-01'), pd.NaT])]
+merged.to_parquet(CACHE_PARQUET)
 print(f"Cache updated: all export data imported into {CACHE_PARQUET}")
+
