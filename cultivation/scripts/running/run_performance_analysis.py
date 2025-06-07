@@ -471,7 +471,7 @@ def main():
         ("recovery_score_whoop", "Recovery Score (Whoop)", "%", None),
         ("sleep_score_whoop", "Sleep Score (Whoop)", "%", None),
         ("body_battery_garmin", "Body Battery (Garmin)", "%", None),
-        ("total_sleep_whoop", "Total Sleep (Whoop)", "h", lambda x: x/3600),
+        ("total_sleep_whoop", "Total Sleep (Whoop)", "h", None),
         ("strain_whoop", "Strain (Whoop)", "", None),
         ("respiratory_rate_whoop", "Respiratory Rate (Whoop)", "rpm", None),
         ("skin_temperature_whoop", "Skin Temp (Whoop)", "°F", lambda x: x*9/5+32),
@@ -508,7 +508,8 @@ def main():
                 # 7d rolling mean (excluding today)
                 if current_idx >= 7:
                     week_val = wellness_df_sorted.iloc[current_idx - 7:current_idx][base_key].mean()
-            summary_lines.append(f"  {label}: {_fmt(today_val, unit, convert_s_to_h=(unit=='h'), convert_s_to_min=(unit=='min'))}")
+            convert_s_to_h = (unit == 'h') and key != 'total_sleep_whoop'
+            summary_lines.append(f"  {label}: {_fmt(today_val, unit, convert_s_to_h=convert_s_to_h, convert_s_to_min=(unit=='min'))}")
             # Only show 1d/7d delta for base metrics (not for delta keys themselves)
             if key.endswith('_whoop') or key.endswith('_garmin'):
                 summary_lines.append(f"  {label} 1d Δ: {_delta_str(today_val, prev_val, unit_conv)}")
