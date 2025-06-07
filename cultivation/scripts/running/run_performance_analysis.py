@@ -1,27 +1,20 @@
 import pandas as pd  # type: ignore
 import numpy as np  # type: ignore
 import matplotlib.pyplot as plt
-import argparse
-import os
 import sys
 from datetime import timedelta
 import json
 import datetime
+import argparse
+import os
 
 # Add the script directory to the path for direct script execution
 script_dir = os.path.dirname(os.path.abspath(__file__))
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 
-# Import the required modules
-try:
-    # First try direct imports (for script execution)
-    from weather_utils import fetch_weather_open_meteo, get_weather_description  # type: ignore
-    from metrics import load_personal_zones, compute_training_zones, run_metrics, lower_z2_bpm  # type: ignore
-except ImportError:
-    # Fall back to full module path (for module imports)
-    from cultivation.scripts.running.weather_utils import fetch_weather_open_meteo, get_weather_description  # type: ignore
-    from cultivation.scripts.running.metrics import load_personal_zones, compute_training_zones, run_metrics, lower_z2_bpm  # type: ignore
+from utilities.analyze_habitdash_export_vs_cache import fetch_weather_open_meteo, get_weather_description  # type: ignore
+from metrics import load_personal_zones, compute_training_zones, run_metrics, lower_z2_bpm  # type: ignore
 
 def time_in_zone(df, zone_col='zone_hr'):
     """Calculate time spent in each zone.
@@ -487,6 +480,7 @@ def main():
         ("recovery_score_whoop", "Recovery Score (Whoop)", "%", None),
         ("sleep_score_whoop", "Sleep Score (Whoop)", "%", None),
         ("body_battery_garmin", "Body Battery (Garmin)", "%", None),
+    ]
     if wellness_context:
         run_date = df.index[0].date() if hasattr(df.index[0], 'date') else pd.to_datetime(df.index[0]).date()
         summary_lines.append("\n--- Pre-Run Wellness Context (Data for {}) ---".format(run_date))

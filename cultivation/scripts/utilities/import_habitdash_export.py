@@ -21,19 +21,14 @@ EXPORT_CSV = "cultivation/data/raw/habitdash_export_2025-06-06/2025-06-06 Habit 
 CACHE_PARQUET = "cultivation/data/daily_wellness.parquet"
 BACKUP_DIR = "cultivation/data/cache_backups"
 
-# 1. Load export (long format)
+# 1. Load export (long format, canonical columns)
 export_df = pd.read_csv(EXPORT_CSV)
 
-# Pivot export to wide format: index=date, columns=canonical metric name, values=value
-# Determine the canonical column name (prefer 'cache_col' if present, else compose from name+source)
-if 'cache_col' in export_df.columns:
-    export_df['metric_col'] = export_df['cache_col']
-else:
-    # Fallback: create a canonical column name from name+source
-    export_df['metric_col'] = export_df['name'].str.strip().str.lower().str.replace(' ', '_').str.replace('/', '_per_') + '_' + export_df['source'].str.strip().str.lower()
+# Always create canonical metric column name
+export_df['metric_col'] = export_df['name'].str.strip().str.lower().str.replace(' ', '_').str.replace('/', '_per_') + '_' + export_df['source'].str.strip().str.lower()
 
+# Pivot to wide format: index=date, columns=metric_col, values=value
 wide_export = export_df.pivot_table(index='date', columns='metric_col', values='value', aggfunc='first').reset_index()
-# Try to preserve date as datetime
 wide_export['date'] = pd.to_datetime(wide_export['date'])
 
 # 2. Load or initialize cache
@@ -44,10 +39,13 @@ def load_cache(path):
         return pd.DataFrame()
 
 cache_df = load_cache(CACHE_PARQUET)
-# If the date is the index, reset it to a column
+
+# Ensure 'date' is a column in cache_df (handle legacy index case)
 if not cache_df.empty and 'date' not in cache_df.columns:
-    if cache_df.index.name and 'date' in str(cache_df.index.name).lower():
-        cache_df = cache_df.reset_index().rename(columns={cache_df.index.name: 'date'})
+    # If the index is date-like, reset and rename
+    idx_name = cache_df.index.name
+    if idx_name and 'date' in str(idx_name).lower():
+        cache_df = cache_df.reset_index().rename(columns={idx_name: 'date'})
     elif isinstance(cache_df.index, pd.DatetimeIndex):
         cache_df = cache_df.reset_index().rename(columns={'index': 'date'})
     else:
@@ -65,8 +63,8 @@ if os.path.exists(CACHE_PARQUET):
     shutil.copy2(CACHE_PARQUET, os.path.join(BACKUP_DIR, f"daily_wellness_{ts}.parquet"))
     print(f"Backup of cache created at {BACKUP_DIR}/daily_wellness_{ts}.parquet")
 
-# 4. Merge export into cache (on 'date', add user if relevant)
-if 'date' not in export_df.columns:
+# 4. Merge export into cache (on 'date')
+if 'date' not in wide_export.columns:
     raise ValueError("Export file must contain a 'date' column.")
 
 export_df['date'] = pd.to_datetime(export_df['date'])
