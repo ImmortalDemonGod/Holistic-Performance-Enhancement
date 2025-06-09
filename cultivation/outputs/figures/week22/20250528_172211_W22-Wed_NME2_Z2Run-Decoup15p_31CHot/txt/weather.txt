@@ -1,0 +1,2 @@
+Temperature: 30.8 °C, Apparent: None °C
+Description: Thunderstorm
