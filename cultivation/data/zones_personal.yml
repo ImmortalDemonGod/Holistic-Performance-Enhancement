@@ -4,33 +4,38 @@ Z1 (Recovery):
   - 0
   - 145
   pace_min_per_km:
-  - 7.0
+  # Updated: Pace faster than ~6:45/km is no longer Z1 (2025-06-08, W21-23 analysis)
+  - 6.75
   - 999
 Z2 (Aerobic):
   bpm:
   - 145
   - 160
   pace_min_per_km:
-  - 6.85
-  - 8.70
+  # Updated: Based on 20250604 run (5:53/km @ 156bpm in heat). Cool weather Z2 pace estimated 5.75-6.75/km (2025-06-08, W21-23 analysis)
+  - 5.75
+  - 6.75
 Z3 (Tempo):
   bpm:
   - 161
   - 175
   pace_min_per_km:
-  - 5.2
-  - 6.85
+  # Updated: The "grey zone" between new Z2 and validated Z4 (2025-06-08, W21-23 analysis)
+  - 5.15
+  - 5.75
 Z4 (Threshold):
   bpm:
   - 176
   - 186
   pace_min_per_km:
-  - 4.8
-  - 5.2
+  # Updated: Validated by 20250531 Long Threshold run (5:08/km @ 177.5bpm). Tightened range (2025-06-08, W21-23 analysis)
+  - 4.80
+  - 5.15
 Z5 (VO2max):
   bpm:
   - 187
   - 201
   pace_min_per_km:
+  # Updated: Starts where new Z4 ends. Validated by 6:57 mile (~4:19/km) during 20250605 intervals (2025-06-08, W21-23 analysis)
   - 0.0
-  - 4.8
+  - 4.80
