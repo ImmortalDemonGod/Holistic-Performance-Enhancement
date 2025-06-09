@@ -59,7 +59,7 @@ Verify that all defined tasks in the Taskfile.yml execute correctly across platf
 ### Details:
 
 
-## 9. Update project README with Task Runner instructions [pending]
+## 9. Update project README with Task Runner instructions [done]
 ### Dependencies: 14.8
 ### Description: Refactor the main `README.md` to guide developers to use the new task runner for setup and daily operations.
 ### Details:

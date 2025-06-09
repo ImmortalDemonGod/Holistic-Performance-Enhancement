@@ -1400,7 +1400,7 @@
           "id": 9,
           "title": "Update project README with Task Runner instructions",
           "description": "Refactor the main `README.md` to guide developers to use the new task runner for setup and daily operations.",
-          "status": "pending",
+          "status": "done",
           "dependencies": [
             8
           ],
