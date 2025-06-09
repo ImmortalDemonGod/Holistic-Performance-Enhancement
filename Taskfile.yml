@@ -1,0 +1,102 @@
+# Project Taskfile for Holistic-Performance-Enhancement
+# Usage: Install Go Task (https://taskfile.dev) and run `task` commands for all dev/ops tasks.
+description: Standardized project task runner for Holistic-Performance-Enhancement
+version: '3'
+
+vars:
+  PYTHON_VENV: .venv
+  PYTHON_INTERPRETER: "{{.PYTHON_VENV}}/bin/python"
+  CULTIVATION_ROOT: ./cultivation
+  DOCS_DIR: "{{.CULTIVATION_ROOT}}/docs"
+
+tasks:
+  default:
+    cmds:
+      - task --list-all
+    silent: true
+
+  setup:
+    desc: "Sets up the Python virtual environment and installs all dependencies."
+    cmds:
+      - echo "Creating Python virtual environment at {{.PYTHON_VENV}}..."
+      - python3 -m venv {{.PYTHON_VENV}}
+      - "{{.PYTHON_INTERPRETER}} -m pip install --upgrade pip"
+      - "{{.PYTHON_INTERPRETER}} -m pip install -r requirements.txt"
+      - echo "Setup complete. Activate with 'source {{.PYTHON_VENV}}/bin/activate'"
+    silent: true
+
+  lint:
+    desc: "Runs all linters (Python, Markdown)."
+    cmds:
+      - task: lint:py
+      - task: lint:md
+
+  lint:py:
+    desc: "Runs the Ruff linter on all Python files."
+    cmds:
+      - "{{.PYTHON_INTERPRETER}} -m ruff check ."
+
+  lint:md:
+    desc: "Runs pymarkdownlint on the cultivation docs."
+    cmds:
+      - "{{.PYTHON_VENV}}/bin/pymarkdown scan {{.DOCS_DIR}} --recurse"
+
+  test:
+    desc: "Runs the full Python test suite with pytest."
+    deps: [setup]
+    cmds:
+      - "{{.PYTHON_INTERPRETER}} -m pytest --cov={{.CULTIVATION_ROOT}} --cov=tests -v"
+
+  docs:
+    desc: "Serves the documentation site locally for development."
+    cmds:
+      - "{{.PYTHON_INTERPRETER}} -m mkdocs serve"
+
+  docs:build:
+    desc: "Builds the static documentation site."
+    cmds:
+      - "{{.PYTHON_INTERPRETER}} -m mkdocs build --clean"
+
+  docs:deploy:
+    desc: "Builds and deploys the documentation to GitHub Pages."
+    cmds:
+      - "{{.PYTHON_INTERPRETER}} -m mkdocs gh-deploy"
+
+  run:
+    desc: "Lists available runnable application scripts."
+    cmds:
+      - task --list-all | grep '^run:'
+    silent: true
+
+  run:dev-reflect:
+    desc: "Runs the daily software development reflection pipeline."
+    cmds:
+      - bash {{.CULTIVATION_ROOT}}/scripts/software/dev_daily_reflect/test_dev_daily_reflect.sh
+
+  run:sync-wellness:
+    desc: "Syncs the latest wellness data from HabitDash."
+    cmds:
+      - "{{.PYTHON_INTERPRETER}} {{.CULTIVATION_ROOT}}/scripts/utilities/sync_habitdash.py --days 7"
+
+  run:process-runs:
+    desc: "Processes all new raw running files to generate metrics."
+    cmds:
+      - "{{.PYTHON_INTERPRETER}} {{.CULTIVATION_ROOT}}/scripts/running/process_all_runs.py"
+
+  data:strength:
+    desc: "Rebuilds strength data from raw logs."
+    cmds:
+      - "{{.PYTHON_INTERPRETER}} {{.CULTIVATION_ROOT}}/scripts/strength/ingest_yaml_log.py"
+
+  data:flashcore-ingest:
+    desc: "Ingests all flashcard YAML files into the database."
+    cmds:
+      # TODO: Implement flashcore ingest CLI
+      # - echo "Flashcore CLI not yet implemented. Placeholder for: tm-fc ingest"
+
+  clean:
+    desc: "Removes temporary build files, caches, and logs."
+    cmds:
+      - find . -type f -name '*.pyc' -delete
+      - find . -type d -name '__pycache__' -delete
+      - rm -rf ./.pytest_cache ./.ruff_cache ./site
