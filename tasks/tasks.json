@@ -1386,7 +1386,7 @@
           "id": 8,
           "title": "Document all commands in Taskfile.yml",
           "description": "Ensure every task and namespace in the Taskfile has a clear `desc:` field explaining its purpose and usage.",
-          "status": "pending",
+          "status": "done",
           "dependencies": [
             3,
             4,

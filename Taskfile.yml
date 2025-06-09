@@ -11,6 +11,7 @@ vars:
 
 tasks:
   default:
+    desc: "Lists all available tasks. This is the default when running 'task' with no arguments."
     cmds:
       - task --list-all
     silent: true
@@ -112,7 +113,7 @@ tasks:
       - "{{.PYTHON_INTERPRETER}} -m mkdocs gh-deploy"
 
   run:
-    desc: "Lists available runnable application scripts."
+    desc: "Lists all runnable project pipelines and scripts. Use 'task run:<script>' to execute a specific pipeline."
     cmds:
       - task --list-all | grep '^run:'
     silent: true
@@ -150,7 +151,7 @@ tasks:
       - "{{.PYTHON_INTERPRETER}} {{.CULTIVATION_ROOT}}/scripts/strength/ingest_yaml_log.py"
 
   data:flashcore-ingest:
-    desc: "Ingests all flashcard YAML files into the database."
+    desc: "[Placeholder] Not yet implemented. Intended to ingest all flashcard YAML files into the database."
     cmds:
       # TODO: Implement flashcore ingest CLI
       # - echo "Flashcore CLI not yet implemented. Placeholder for: tm-fc ingest"
