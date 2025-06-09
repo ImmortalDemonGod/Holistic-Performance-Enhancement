@@ -70,7 +70,7 @@ list_pull_requests() {
   gh pr list \
     --repo "$repo" \
     --state all \
-    --json number,title,author,state,createdAt,updatedAt,closedAt,mergedAt,url,body,labels,assignees,reviewDecision,comments,additions,deletions,changedFiles \
+    --json number,title,author,state,createdAt,updatedAt,closedAt,mergedAt,url,body,labels,assignees,reviewDecision,comments,additions,deletions,changedFiles,headRefName,baseRefName \
     --limit 100 | jq . > "$output_file"
   echo "Pull requests saved to $output_file"
 }
@@ -219,8 +219,11 @@ fi
 # Create output directory and subdirectories
 mkdir -p "$OUTPUT_DIR/pull_requests"
 mkdir -p "$OUTPUT_DIR/issues"
-mkdir -p "$OUTPUT_DIR/diffs"
-mkdir -p "$OUTPUT_DIR/logs"
+# Only create directories that are actually used
+mkdir -p "$OUTPUT_DIR/pull_requests"
+mkdir -p "$OUTPUT_DIR/issues"
+mkdir -p "$OUTPUT_DIR/pr_diffs"
+mkdir -p "$OUTPUT_DIR/pr_logs"
 
 # Define output files
 PR_OUTPUT="$OUTPUT_DIR/pull_requests/pull_requests_full_pretty.json"
@@ -230,26 +233,64 @@ ISSUE_OUTPUT="$OUTPUT_DIR/issues/all_issues_pretty.json"  # renamed from 'issues
 list_pull_requests "$REPO" "$PR_OUTPUT"
 list_issues "$REPO" "$ISSUE_OUTPUT"
 
-# Fetch all local branches with the specified prefix
-echo "Fetching local branches with prefix '$BRANCH_PREFIX'"
-BRANCHES=$(git for-each-ref --format='%(refname:short)' refs/heads/ | grep "^$BRANCH_PREFIX" || true)
+# Branch-based diffs/logs removed to avoid duplication and ensure PR-centric audit trail.
+# If you want to warn about local branches with no matching PR, uncomment the following:
+# echo "Checking for local branches with prefix '$BRANCH_PREFIX' that have no matching PR..."
+# BRANCHES=$(git for-each-ref --format='%(refname:short)' refs/heads/ | grep "^$BRANCH_PREFIX" || true)
+# if [[ -n "$BRANCHES" ]]; then
+#   for BRANCH in $BRANCHES; do
+#     if ! jq -e --arg branch "$BRANCH" '.[] | select(.headRefName == $branch)' "$PR_OUTPUT" > /dev/null; then
+#       echo "Warning: Local branch '$BRANCH' has no corresponding PR. No diff/log will be generated."
+#     fi
+#   done
+# fi
 
-if [[ -z "$BRANCHES" ]]; then
-  echo "No branches found with prefix '$BRANCH_PREFIX'."
-else
-  echo "Found branches:"
-  echo "$BRANCHES"
+# ---
+# New: Generate diffs and logs for ALL PRs
+# ---
 
-  for BRANCH in $BRANCHES; do
-    # Define output files for each branch
-    DIFF_OUTPUT="$OUTPUT_DIR/diffs/${BRANCH//\//-}.diff"
-    LOG_OUTPUT="$OUTPUT_DIR/logs/${BRANCH//\//-}.log"
+PR_JSON_FILE="$PR_OUTPUT"
+if [[ -f "$PR_JSON_FILE" ]]; then
+  echo "Generating diffs and logs for all pull requests..."
+  PR_COUNT=$(jq length "$PR_JSON_FILE")
+  for ((i=0; i<PR_COUNT; i++)); do
+    PR_NUMBER=$(jq -r ".[$i].number" "$PR_JSON_FILE")
+    SOURCE_BRANCH=$(jq -r ".[$i].headRefName // .[$i].headRef?.name // .[$i].headRef // .[$i].headRefName" "$PR_JSON_FILE")
+    BASE_BRANCH_PR=$(jq -r ".[$i].baseRefName // .[$i].baseRef?.name // .[$i].baseRef // .[$i].baseRefName" "$PR_JSON_FILE")
+    TITLE=$(jq -r ".[$i].title" "$PR_JSON_FILE" | tr -d '\n' | tr -d '[:space:]')
+    # Sanitize for filenames
+    SAFE_SOURCE=$(echo "$SOURCE_BRANCH" | tr '/' '-' | tr -cd '[:alnum:]-_')
+    SAFE_BASE=$(echo "$BASE_BRANCH_PR" | tr '/' '-' | tr -cd '[:alnum:]-_')
+    SAFE_TITLE=$(echo "$TITLE" | tr ' ' '_' | tr -cd '[:alnum:]-_')
+    DIFF_FILE="$OUTPUT_DIR/pr_diffs/pr${PR_NUMBER}_${SAFE_SOURCE}_vs_${SAFE_BASE}.diff"
+    LOG_FILE="$OUTPUT_DIR/pr_logs/pr${PR_NUMBER}_${SAFE_SOURCE}_vs_${SAFE_BASE}.log"
 
+    # Check if source branch exists locally; if not, try to fetch
+    if ! git show-ref --verify --quiet refs/heads/"$SOURCE_BRANCH"; then
+      echo "Source branch '$SOURCE_BRANCH' for PR #$PR_NUMBER not found locally. Attempting to fetch from origin..."
+      git fetch origin "$SOURCE_BRANCH:$SOURCE_BRANCH" 2>/dev/null || {
+        echo "Warning: Could not fetch source branch '$SOURCE_BRANCH' for PR #$PR_NUMBER. Skipping diff/log generation for this PR.";
+        continue
+      }
+    fi
+    # Check if base branch exists locally; if not, try to fetch
+    if ! git show-ref --verify --quiet refs/heads/"$BASE_BRANCH_PR"; then
+      echo "Base branch '$BASE_BRANCH_PR' for PR #$PR_NUMBER not found locally. Attempting to fetch from origin..."
+      git fetch origin "$BASE_BRANCH_PR:$BASE_BRANCH_PR" 2>/dev/null || {
+        echo "Warning: Could not fetch base branch '$BASE_BRANCH_PR' for PR #$PR_NUMBER. Skipping diff/log generation for this PR.";
+        continue
+      }
+    fi
     # Generate diff
-    generate_diff "$BASE_BRANCH" "$BRANCH" "$DIFF_OUTPUT"
-    # Generate robust log
-    robust_generate_log "$BASE_BRANCH" "$BRANCH" "$LOG_OUTPUT"
+    echo "Generating diff for PR #$PR_NUMBER: $SOURCE_BRANCH vs $BASE_BRANCH_PR"
+    git diff "$BASE_BRANCH_PR".."$SOURCE_BRANCH" > "$DIFF_FILE" || echo "Warning: Diff failed for PR #$PR_NUMBER."
+    # Generate robust log (full branch history for audit completeness)
+    echo "Generating log for PR #$PR_NUMBER: $SOURCE_BRANCH (full branch history)"
+    git log "$SOURCE_BRANCH" --oneline --decorate --graph --stat > "$LOG_FILE" || echo "Warning: Log failed for PR #$PR_NUMBER."
   done
+  echo "All PR-based diffs and logs generated."
+else
+  echo "Warning: PR JSON file not found, skipping PR-based diff/log generation."
 fi
 
 echo "All operations completed successfully."
