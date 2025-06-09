@@ -1,4 +1,4 @@
-Right, the moment of truth! You've completed the Week 21 RPE 10 re-test (`20250520_163216_lunch_run`), and now it's time to systematically analyze the data, compare it against the Week 17 baseline and my "Official Prediction," and critically evaluate both my forecast and your hypothesis about "blowing it out of the water."
+Right, the moment of truth! You've completed the Week 21 RPE 10 re-test (`20250520_163216_RPE10_ReTest_P4m43s_EF192_34CHot_LowSleep`), and now it's time to systematically analyze the data, compare it against the Week 17 baseline and my "Official Prediction," and critically evaluate both my forecast and your hypothesis about "blowing it out of the water."
 
 This analysis will be thorough, leveraging all provided data files and incorporating an "experienced developer's eye" to not just look at the numbers, but also how they are presented and any potential pipeline insights.
 
@@ -8,7 +8,7 @@ Let's first examine the conditions under which this re-test was performed, as th
 
 ### 1.1. Wellness Analysis
 
-Data from `cultivation/outputs/figures/week21/20250520_163216_lunch_run/txt/run_summary.txt`:
+Data from `cultivation/outputs/figures/week21/20250520_163216_RPE10_ReTest_P4m43s_EF192_34CHot_LowSleep/txt/run_summary.txt`:
 
 *   **HRV (Whoop): 90.5 ms (Δ1d: -8.4%, Δ7d: -21.3%)**
     *   Value: 90.5ms is a decent HRV, but the daily and weekly downward trends are noteworthy.
@@ -40,7 +40,7 @@ My prediction was contingent on a **"Green Light" state of readiness**. The actu
 
 ### 1.2. Environmental Conditions
 
-Data from `cultivation/outputs/figures/week21/20250520_163216_lunch_run/txt/weather.txt`:
+Data from `cultivation/outputs/figures/week21/20250520_163216_RPE10_ReTest_P4m43s_EF192_34CHot_LowSleep/txt/weather.txt`:
 
 *   **Temperature:** **34.1 °C**
 *   **Description:** Clear sky

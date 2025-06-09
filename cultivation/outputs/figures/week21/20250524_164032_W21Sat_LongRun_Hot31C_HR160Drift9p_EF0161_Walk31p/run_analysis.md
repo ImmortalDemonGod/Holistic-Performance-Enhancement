@@ -2,11 +2,11 @@
 
 INPUT METADATA
 --------------
-RUN_LABEL: "20250524_164032_longrun"
+RUN_LABEL: "20250524_164032_W21Sat_LongRun_Hot31C_HR160Drift9p_EF0161_Walk31p"
 BLOCK_SPEC_PATH: "cultivation/outputs/training_plans/baseox_daily_plans/week21/week21_assessment_training_plan.md" (Context: Week 21 is an assessment week. While a specific Z2 run was planned for Saturday, this was executed as a general "long run".)
 ZONE_YAML_PATH:  "cultivation/data/zones_personal.yml"
 ZONE_DOC_PATH:   "cultivation/outputs/training_plans/pace-zones.md"
-RUN_DIR:         "cultivation/outputs/figures/week21/20250524_164032_longrun/"
+RUN_DIR:         "cultivation/outputs/figures/week21/20250524_164032_W21Sat_LongRun_Hot31C_HR160Drift9p_EF0161_Walk31p/"
 RAW_FILE_MAP:
 ```
 txt/
@@ -43,14 +43,14 @@ TASK
 
 ANALYSIS SCOPE
 --------------
-For this session, all files in `cultivation/outputs/figures/week21/20250524_164032_longrun/txt/` will be systematically analyzed.
+For this session, all files in `cultivation/outputs/figures/week21/20250524_164032_W21Sat_LongRun_Hot31C_HR160Drift9p_EF0161_Walk31p/txt/` will be systematically analyzed.
 
 **0 · TL;DR**
 The Week 21 long run was a challenging ~89-minute effort in very hot conditions (31.5°C), showing moderate aerobic efficiency (EF 0.01611) and significant HR drift (8.69%). While cadence was good (158 spm), the overall performance reflects the environmental stress and possibly accumulated fatigue from an assessment week, differing significantly from the planned shorter Z2 controlled run. Compared to the Week 19 long run, this session was hotter, had higher average HR, slightly better EF, much higher decoupling, and slightly better cadence, but covered less distance in a shorter run-only duration.
 
 **1 · Pre-Run Wellness Context Analysis (W21 Long Run: 2025-05-24)**
 
-Data from `cultivation/outputs/figures/week21/20250524_164032_longrun/txt/run_summary.txt`:
+Data from `cultivation/outputs/figures/week21/20250524_164032_W21Sat_LongRun_Hot31C_HR160Drift9p_EF0161_Walk31p/txt/run_summary.txt`:
 --- Pre-Run Wellness Context (Data for 2025-05-24) ---
   HRV (Whoop): 111.7 ms (Δ1d: +26.5%, Δ7d: -0.2%)
     *   **Value & Trend:** Excellent HRV value, showing a significant positive jump from the previous day (+26.5%) and stable over 7 days. This is a strong indicator of good autonomic nervous system recovery.
@@ -122,7 +122,7 @@ Data from `cultivation/outputs/figures/week21/20250524_164032_longrun/txt/run_su
 **Overall Wellness Summary for W21 Long Run:**
 While many metrics (HRV, RHR, Recovery Score, Body Battery) pointed to excellent physiological readiness, there were conflicting signals: very poor sleep consistency, a potential flag on skin temperature, and very high activity levels (steps, total activity minutes) *before* the run. This suggests that despite good "Green" recovery numbers, the athlete might not have been optimally rested due to inconsistent sleep patterns and significant prior activity on the day of the run.
 
-**2 · KPI Dashboard (W21 Long Run: `20250524_164032_longrun`)**
+**2 · KPI Dashboard (W21 Long Run: `20250524_164032_W21Sat_LongRun_Hot31C_HR160Drift9p_EF0161_Walk31p`)**
 
 | Metric                     | Actual (Run-Only)         | Target (General Long Run) | Status | Notes                                                                 |
 | :------------------------- | :------------------------ | :------------------------ | :----- | :-------------------------------------------------------------------- |
@@ -138,7 +138,7 @@ While many metrics (HRV, RHR, Recovery Score, Body Battery) pointed to excellent
 | **Fatigue Flags**          | High HR Drift, Low EF     | Minimal                   | ❌     | Significant flags present.                                            |
 
 **3 · Root-Cause / Consistency Notes (W21 Long Run)**
-*   **Planned vs. Actual Discrepancy:** The W21 Assessment plan for Saturday was a "Controlled Zone 2 HR Run" of 25-35 minutes with strict HR (145-155bpm) and cadence (165-170spm) targets. The executed run (`20250524_164032_longrun`) was an 89-minute run-only effort with avg HR 159.6bpm and avg cadence 158.3spm. This was a significantly different session.
+*   **Planned vs. Actual Discrepancy:** The W21 Assessment plan for Saturday was a "Controlled Zone 2 HR Run" of 25-35 minutes with strict HR (145-155bpm) and cadence (165-170spm) targets. The executed run (`20250524_164032_W21Sat_LongRun_Hot31C_HR160Drift9p_EF0161_Walk31p`) was an 89-minute run-only effort with avg HR 159.6bpm and avg cadence 158.3spm. This was a significantly different session.
 *   **Zone Definitions:**
     *   `cultivation/data/zones_personal.yml`: Uses HRmax 201. Z2: 145-160 bpm.
     *   `cultivation/outputs/training_plans/pace-zones.md`: Aligns with YAML for HR zones.
@@ -232,11 +232,11 @@ The W21 long run was performed in much hotter conditions than the W19 long run. 
 
 | Action                                   | Impacted Files/Workflows                                                                 |
 | :--------------------------------------- | :--------------------------------------------------------------------------------------- |
-| Log W21 Sat. session deviation         | Session notes for `20250524_164032_longrun`, Weekly Review docs.                        |
+| Log W21 Sat. session deviation         | Session notes for `20250524_164032_W21Sat_LongRun_Hot31C_HR160Drift9p_EF0161_Walk31p`, Weekly Review docs.                        |
 | Enhance heat impact considerations       | `running_analysis_template.md`, Future run planning.                                   |
 | Track sleep consistency as key metric    | `daily_wellness.parquet` interpretation, `run_report.md` generation.                   |
 | Monitor pre-workout activity load      | `daily_wellness.parquet` interpretation, `run_report.md` generation.                   |
-| Debug power data for `20250524_164032_longrun` | Garmin Connect export, `parse_run_files.py`.                                             |
+| Debug power data for `20250524_164032_W21Sat_LongRun_Hot31C_HR160Drift9p_EF0161_Walk31p` | Garmin Connect export, `parse_run_files.py`.                                             |
 | Refine LR strategy for extreme heat      | `long-distance_running.md`, Future training plan generation.                             |
 
 **8 · Appendices**
@@ -270,7 +270,7 @@ pace:
 </details>
 
 <details>
-<summary>Key File Data Points - W21 Long Run (`20250524_164032_longrun`)</summary>
+<summary>Key File Data Points - W21 Long Run (`20250524_164032_W21Sat_LongRun_Hot31C_HR160Drift9p_EF0161_Walk31p`)</summary>
 
 *   `advanced_metrics.txt`: `distance_km: 13.73, duration_min: 89.0, avg_pace_min_per_km: 6.48, avg_hr: 159.6, efficiency_factor: 0.01611, decoupling_%: 8.69, hrTSS: 114.1`
 *   `cadence_distribution.txt`: `mean: 158.27, std: 4.86, 25%: 156.0, 50%: 158.0, 75%: 160.0`

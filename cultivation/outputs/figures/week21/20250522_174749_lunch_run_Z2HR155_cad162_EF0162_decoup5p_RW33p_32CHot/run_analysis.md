@@ -2,11 +2,11 @@
 
 INPUT METADATA
 --------------
-RUN_LABEL: "W21_Thu_Z2_Test_LunchRun"
+RUN_LABEL: "20250522_174749_lunch_run_Z2HR155_cad162_EF0162_decoup5p_RW33p_32CHot"
 BLOCK_SPEC_PATH: cultivation/outputs/training_plans/baseox_daily_plans/week21/week21_assessment_training_plan.md
 ZONE_YAML_PATH:  cultivation/data/zones_personal.yml
 ZONE_DOC_PATH:   cultivation/docs/3_design/pace-zones.md
-RUN_DIR:         cultivation/outputs/figures/week21/20250522_174749_lunch_run/
+RUN_DIR:         cultivation/outputs/figures/week21/20250522_174749_lunch_run_Z2HR155_cad162_EF0162_decoup5p_RW33p_32CHot/
 RAW_FILE_MAP:
 txt/
 ├── advanced_metrics.txt
@@ -118,7 +118,7 @@ As described above in step 4—strict layout, human-readable, CI-ready.
 
 🏃‍♂️:
 
-**Systematic Analysis of Run: W21_Thu_Z2_Test_LunchRun (`20250522_174749_lunch_run`)**
+**Systematic Analysis of Run: 20250522_174749_lunch_run_Z2HR155_cad162_EF0162_decoup5p_RW33p_32CHot (`20250522_174749_lunch_run_Z2HR155_cad162_EF0162_decoup5p_RW33p_32CHot`)**
 
 **0 · TL;DR**
 This Zone 2 test run, executed in very hot conditions (31.5°C), showed good adherence to Z2 HR for a significant portion of the "run-only" segments, but overall efficiency (EF 0.01621) remained below the 0.018 target, likely impacted by the heat and a high walk ratio. Cadence was within an acceptable range but below the NME-focused target. The pre-run wellness indicators were exceptionally strong, suggesting good readiness, but the heat proved to be a dominant factor.

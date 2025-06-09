@@ -1,7 +1,7 @@
 ---
 title: Heart-Rate & Pace Zones – Reference
-status: v1 · 2025-05-01
-authors: tomriddle1, openai-o3
+status: v2 · 2025-06-08
+authors: ImmortalDemonGod, gemni-2.5-pro
 ---
 
 > **Why this doc?**  
@@ -58,6 +58,15 @@ You’ll switch to the threshold-anchored table only when the calendar enters Te
 
 ## 2 · Choosing the Right Model
 
+### Rationale for v2.0 Zone Recalibration (Post-Week 23 Analysis)
+
+The comprehensive historical analysis of Weeks 17-23 revealed a fundamental phase shift in fitness, rendering the original pace zones obsolete. Key performances necessitated this update:
+*   **New Threshold Pace:** The Long Threshold run on `2025-05-31` demonstrated the ability to hold a **~5:08/km** pace at a Z4 heart rate for 84 minutes with minimal decoupling.
+*   **New Z2 Pace:** The autoregulated Z2 run on `2025-06-04` showed a pace of **~5:53/km** at the top of Z2 *in 32°C heat*, indicating a much faster cool-weather Z2 capability.
+*   **New VO2max Pace:** The interval session on `2025-06-05` included a **~4:19/km (6:57) mile**, confirming top-end speed is well below the old 4:48/km floor for Zone 5.
+
+The AeT-anchored HR model remains in use, but the associated pace bands have been updated to reflect this new, higher level of performance.
+
 | Question | AeT-anchored (Base-Ox) | Threshold-anchored (later) |
 |----------|-----------------------|----------------------------|
 | Main energy system trained | Oxidative, fat-max | Lactate clearance & buffering |
@@ -107,4 +116,5 @@ When the objective shifts to “push LT/VO₂”, swap to the threshold table.*
 
 | Date | Author | Note |
 |------|--------|------|
+| 2025-06-08 | tomriddle1 / o3 | **v2.0**: Major update to pace zones based on W21-23 performance analysis. |
 | 2025-05-01 | tomriddle1 / o3 | Initial commit – dual-model spec |
