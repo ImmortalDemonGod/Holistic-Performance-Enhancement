@@ -3,7 +3,7 @@
 **Flat file analyzed:** cultivation/data/raw/habitdash_export_2025-06-06/2025-06-06 Habit Dash - Integrations (flat file).csv
 
 **Current cache:** cultivation/data/daily_wellness.parquet
-
+**Useful Guide** https://wearipedia.readthedocs.io/en/latest/notebooks/whoop_strap_4.html
 **Total canonical fields:** 89
 **Fields with data (non-null):** 89
 **Most complete fields:** ['heart_rate_variability_whoop', 'recovery_score_whoop', 'resting_heart_rate_whoop', 'deep_sleep_percent_whoop', 'deep_sleep_whoop']
