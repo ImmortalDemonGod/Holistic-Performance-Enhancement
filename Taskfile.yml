@@ -156,8 +156,9 @@ tasks:
       # - echo "Flashcore CLI not yet implemented. Placeholder for: tm-fc ingest"
 
   clean:
-    desc: "Removes temporary build files, caches, and logs."
+    desc: "Removes temporary build files, caches, logs, mypy cache, coverage reports, and temp files (*.tmp)."
     cmds:
       - find . -type f -name '*.pyc' -delete
       - find . -type d -name '__pycache__' -delete
-      - rm -rf ./.pytest_cache ./.ruff_cache ./site
+      - find . -type f -name '*.tmp' -delete
+      - rm -rf ./.pytest_cache ./.ruff_cache ./site ./htmlcov ./.mypy_cache

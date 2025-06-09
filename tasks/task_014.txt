@@ -47,7 +47,7 @@ Verify that all defined tasks in the Taskfile.yml execute correctly across platf
 ### Details:
 
 
-## 7. Implement 'Utility' tasks [pending]
+## 7. Implement 'Utility' tasks [done]
 ### Dependencies: 14.2
 ### Description: Create utility tasks like `clean` to remove temporary files and caches.
 ### Details:

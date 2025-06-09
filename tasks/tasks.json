@@ -1376,7 +1376,7 @@
           "id": 7,
           "title": "Implement 'Utility' tasks",
           "description": "Create utility tasks like `clean` to remove temporary files and caches.",
-          "status": "pending",
+          "status": "done",
           "dependencies": [
             2
           ],
