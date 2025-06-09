@@ -17,9 +17,9 @@ DEFAULT_BASE_BRANCH="master"
 DEFAULT_BRANCH_PREFIX="feature/"
 
 # ----------------------------------------------
-# CHANGED THIS PART to always use $(pwd):
+# Set output directory relative to script location:
 # ----------------------------------------------
-DEFAULT_OUTPUT_DIR="$(pwd)/github_automation_output"
+DEFAULT_OUTPUT_DIR="$(cd "$(dirname "$0")" && pwd)/github_automation_output"
 # ----------------------------------------------
 
 # ----------------------------
