@@ -1356,7 +1356,7 @@
           "id": 5,
           "title": "Implement 'Documentation' tasks",
           "description": "Create tasks for building (`task docs:build`), serving locally (`task docs:serve`), and deploying the MkDocs site (`task docs:deploy`).",
-          "status": "pending",
+          "status": "done",
           "dependencies": [
             2
           ],

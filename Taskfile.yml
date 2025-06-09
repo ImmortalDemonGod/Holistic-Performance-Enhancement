@@ -100,8 +100,14 @@ tasks:
     cmds:
       - "{{.PYTHON_INTERPRETER}} -m mkdocs build --clean"
 
+  docs:gen-nav:
+    desc: "Auto-generate MkDocs navigation YAML using scripts/generate_nav.py. Run before building or deploying docs."
+    cmds:
+      - "{{.PYTHON_INTERPRETER}} scripts/generate_nav.py"
+
   docs:deploy:
     desc: "Builds and deploys the documentation to GitHub Pages."
+    deps: [docs:gen-nav]
     cmds:
       - "{{.PYTHON_INTERPRETER}} -m mkdocs gh-deploy"
 

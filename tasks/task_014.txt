@@ -35,7 +35,7 @@ Verify that all defined tasks in the Taskfile.yml execute correctly across platf
 ### Details:
 
 
-## 5. Implement 'Documentation' tasks [pending]
+## 5. Implement 'Documentation' tasks [done]
 ### Dependencies: 14.2
 ### Description: Create tasks for building (`task docs:build`), serving locally (`task docs:serve`), and deploying the MkDocs site (`task docs:deploy`).
 ### Details:
