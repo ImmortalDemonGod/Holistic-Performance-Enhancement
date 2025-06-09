@@ -5,6 +5,7 @@ This section houses the foundational vision, philosophy, and high-level strategi
 - **Canonical Vision & Philosophy**
   - [`The_Dao_of_Cultivation_A_Founding_Vision.md`](The_Dao_of_Cultivation_A_Founding_Vision.md): The primary philosophical and motivational document, articulating the project's deep "why," core values, and the unity of knowledge and action.
   - [`project_philosophy_and_core_concepts.md`](project_philosophy_and_core_concepts.md): Defines the project's mission, ultimate goals, and the principle that "if a benefit isn’t measured, it effectively isn’t real." Details the initial domains (Running, Biological Knowledge, Software Engineering), the holistic, data-driven approach, and the operationalization of synergy and potential.
+  - [`creator_psychological_profile_v2.0.md`](creator_psychological_profile_v2.0.md): A deep psychological analysis of the project's creator, providing crucial context on the motivations, cognitive style, and personal dynamics that shape the entire system and its strategic direction.
 
 - **Strategic Initiatives**
   - [`strategic_initiatives/CULTIVATION_SVEP_MASTER_V1_0.md`](strategic_initiatives/CULTIVATION_SVEP_MASTER_V1_0.md): The Systematic Visibility & Engagement Plan (SVEP) — a comprehensive strategy for increasing project visibility, fostering engagement, and integrating outreach with core development workflows.
