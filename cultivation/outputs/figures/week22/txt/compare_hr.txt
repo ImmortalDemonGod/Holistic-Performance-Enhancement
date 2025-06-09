@@ -1,0 +1,3 @@
+Heart Rate Comparison (Week 22):
+20250531_155252_W22Sat_LongThreshold_AvgHR178_Decoup2p_OnLowSleep_Hot32C_EF0183_Cad167: mean=177.5, max=195
+20250528_172211_W22-Wed_NME2_Z2Run-Decoup15p_31CHot: mean=149.3, max=165
