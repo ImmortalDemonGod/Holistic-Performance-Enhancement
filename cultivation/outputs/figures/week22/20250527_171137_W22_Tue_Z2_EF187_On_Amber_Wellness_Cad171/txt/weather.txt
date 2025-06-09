@@ -1,0 +1,2 @@
+Temperature: 24.3 °C, Apparent: None °C
+Description: Clear sky

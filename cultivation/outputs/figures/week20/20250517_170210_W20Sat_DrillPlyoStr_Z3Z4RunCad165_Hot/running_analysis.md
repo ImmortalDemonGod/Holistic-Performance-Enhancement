@@ -2,7 +2,7 @@
 
 INPUT METADATA
 --------------
-RUN_LABEL: "20250517_170210_lunch_run"
+RUN_LABEL: "20250517_170210_W20Sat_DrillPlyoStr_Z3Z4RunCad165_Hot"
 BLOCK_SPEC_PATH: `cultivation/outputs/training_plans/baseox_daily_plans/week20/Week20_Sat_2025-05-17_ECONOMY_DEV_2.md` (primary for session plan), with overarching goals from `cultivation/outputs/training_plans/baseox_daily_plans/week20/GOAL.md`.
 ZONE_YAML_PATH:  `cultivation/data/zones_personal.yml` (inferred)
 ZONE_DOC_PATH:   `cultivation/outputs/training_plans/pace-zones.md`

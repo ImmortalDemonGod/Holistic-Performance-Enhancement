@@ -1,0 +1,3 @@
+Pace Comparison (Week 23):
+20250605_180818_W23-Thu_Intervals_Pace4m59s_EF0185_Decoup20p_Hot32C: mean=5.28, min=2.75
+20250604_164918_Autoregulated_Z2_EF0181_Decoup1p_Cad163_32CHot: mean=6.03, min=2.20

@@ -1,0 +1,3 @@
+Heart Rate Comparison (Week 21):
+20250524_164032_W21Sat_LongRun_Hot31C_HR160Drift9p_EF0161_Walk31p: mean=159.6, max=193
+20250522_174749_lunch_run_Z2HR155_cad162_EF0162_decoup5p_RW33p_32CHot: mean=155.5, max=185

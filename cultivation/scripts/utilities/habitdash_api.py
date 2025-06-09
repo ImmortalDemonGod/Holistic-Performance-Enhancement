@@ -19,24 +19,41 @@ REQUEST_DELAY_SECONDS = 0.6 # To stay under 2 requests/sec limit
 FIELD_IDS = {
     "whoop": {
         "hrv": 86,  # Heart Rate Variability
+        "heart_rate_variability_whoop": 86,
         "rhr": 87,  # Resting Heart Rate
+        "resting_heart_rate_whoop": 87,
         "recovery_score": 88,  # Recovery Score
+        "recovery_score_whoop": 88,
         "sleep_score": 107,  # Sleep Score
+        "sleep_score_whoop": 107,
         "sleep_total": 101,  # Total Sleep (seconds)
+        "total_sleep_whoop": 101,
         "sleep_disturbances_per_hour": 93,  # Sleep Disturbances / Hour
+        "sleep_disturbances__per__hour_whoop": 93,
         "sleep_consistency": 106,  # Sleep Consistency
+        "sleep_consistency_whoop": 106,
         "strain_score": 112,  # Strain Score
+        "strain_score_whoop": 112,
         "skin_temp": 340,  # Skin Temperature (Celsius)
+        "skin_temperature_whoop": 340,
         "resp_rate": 105,  # Sleep Respiratory Rate (bpm)
+        "sleep_respiratory_rate_whoop": 105,
     },
     "garmin": {
         "rhr": 162,  # Resting Heart Rate
+        "resting_heart_rate_garmin": 162,
         "body_battery": 188,  # Body Battery
+        "body_battery_garmin": 188,
         "steps": 170,  # Steps
+        "steps_garmin": 170,
         "total_activity": 173,  # Active Time (seconds)
+        "total_activity_garmin": 173,
         "avg_stress": 176,  # Avg Stress Level
+        "avg_stress_level_garmin": 176,
         "resp_rate": 191,  # Sleep Respiratory Rate (bpm)
+        "sleep_respiratory_rate_garmin": 191,
         "vo2max": 187,  # VO2 Max
+        "vo₂_max_garmin": 187,
     },
     # Extend with Withings and others as needed
 }

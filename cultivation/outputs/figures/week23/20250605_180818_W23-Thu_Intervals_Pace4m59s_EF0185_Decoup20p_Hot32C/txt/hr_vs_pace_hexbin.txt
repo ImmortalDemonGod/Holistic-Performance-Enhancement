@@ -1,0 +1,2 @@
+Correlation between Heart Rate and Pace (min/km):
+Correlation coefficient: -0.525

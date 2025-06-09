@@ -4,6 +4,7 @@ from pathlib import Path
 import subprocess
 import pandas as pd
 import sys
+from datetime import date
 # (imports removed – handled inside called scripts)
 
 # Use sys.executable for subprocesses
@@ -11,10 +12,11 @@ PYTHON_EXEC = os.environ.get('VENV_PYTHON', sys.executable)
 # Set PROJECT_ROOT to the top-level project directory (not cultivation)
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SCRIPTS_DIR = PROJECT_ROOT / 'cultivation' / 'scripts' / 'running'
+UTILITIES_DIR = PROJECT_ROOT / 'cultivation' / 'scripts' / 'utilities'
 
 # --- Step 0.5: Ensure wellness data is up to date before processing runs ---
 WELLNESS_PARQUET = PROJECT_ROOT / 'cultivation' / 'data' / 'daily_wellness.parquet'
-SYNC_SCRIPT = PROJECT_ROOT / 'cultivation' / 'scripts' / 'sync_habitdash.py'
+SYNC_SCRIPT = UTILITIES_DIR / 'sync_habitdash.py'
 
 def ensure_wellness_uptodate():
     today = date.today()
@@ -23,10 +25,20 @@ def ensure_wellness_uptodate():
         df.index = pd.to_datetime(df.index).date
         if today not in df.index:
             print("[INFO] Today's wellness data missing, syncing Habit Dash...")
-            subprocess.run([PYTHON_EXEC, str(SYNC_SCRIPT)], cwd=str(PROJECT_ROOT), check=True)
+            subprocess.run(
+    [PYTHON_EXEC, str(SYNC_SCRIPT)],
+    cwd=str(PROJECT_ROOT),
+    check=True,
+    env={**os.environ, 'PYTHONPATH': str(PROJECT_ROOT / 'cultivation' / 'scripts')}
+)
     except FileNotFoundError:
         print("[INFO] Wellness file not found, syncing Habit Dash...")
-        subprocess.run([PYTHON_EXEC, str(SYNC_SCRIPT)], cwd=str(PROJECT_ROOT), check=True)
+        subprocess.run(
+    [PYTHON_EXEC, str(SYNC_SCRIPT)],
+    cwd=str(PROJECT_ROOT),
+    check=True,
+    env={**os.environ, 'PYTHONPATH': str(PROJECT_ROOT / 'cultivation' / 'scripts')}
+)
 
 
 def get_run_files(raw_dir):
@@ -54,7 +66,7 @@ def main():
     subprocess.run([
         PYTHON_EXEC, str(SCRIPTS_DIR / 'auto_rename_raw_files.py'),
         '--raw_dir', args.raw_dir
-    ], cwd=str(PROJECT_ROOT), check=True)
+    ], cwd=str(PROJECT_ROOT), check=True, env={**os.environ, 'PYTHONPATH': str(PROJECT_ROOT / 'cultivation' / 'scripts')})
 
     # Step 0.5: Ensure wellness data is up to date BEFORE processing runs
     ensure_wellness_uptodate()
@@ -121,7 +133,7 @@ def main():
             '--planning_id', pid,
             '--figures_dir', str(args.figures_dir),
             '--prefix', base
-        ], cwd=str(PROJECT_ROOT), check=True)
+        ], cwd=str(PROJECT_ROOT), check=True, env={**os.environ, 'PYTHONPATH': str(PROJECT_ROOT / 'cultivation' / 'scripts')})
 
         # If GPX, also extract metrics using new module (now integrated into summary CSV)
         # No need to write separate JSON; metrics are included in summary CSV by parse_run_files.py
@@ -130,14 +142,14 @@ def main():
             '--input', str(csv_out),
             '--figures_dir', args.figures_dir,
             '--prefix', base
-        ], cwd=str(PROJECT_ROOT), check=True)
+        ], cwd=str(PROJECT_ROOT), check=True, env={**os.environ, 'PYTHONPATH': str(PROJECT_ROOT / 'cultivation' / 'scripts')})
         # 3. Run advanced analysis
         subprocess.run([
             PYTHON_EXEC, str(SCRIPTS_DIR / 'run_performance_analysis.py'),
             '--input', str(csv_out),
             '--figures_dir', args.figures_dir,
             '--prefix', base
-        ], cwd=str(PROJECT_ROOT), check=True)
+        ], cwd=str(PROJECT_ROOT), check=True, env={**os.environ, 'PYTHONPATH': str(PROJECT_ROOT / 'cultivation' / 'scripts')})
 
     # === NEW: Weekly Comparison Step ===
     # Find all processed CSVs, group by ISO week, and if any week has 2+ runs, compare the two most recent
@@ -161,7 +173,7 @@ def main():
                 '--run1', str(run1),
                 '--run2', str(run2),
                 '--figures_dir', args.figures_dir
-            ], cwd=str(PROJECT_ROOT), check=True)
+            ], cwd=str(PROJECT_ROOT), check=True, env={**os.environ, 'PYTHONPATH': str(PROJECT_ROOT / 'cultivation' / 'scripts')})
 
 if __name__ == '__main__':
     from datetime import date

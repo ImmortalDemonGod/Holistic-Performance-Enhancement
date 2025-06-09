@@ -1,0 +1,4 @@
+zone_fatigue_kpi	seconds	percent
+Aerobic (Z2)	914.0	27.865853658536587
+Recovery (< Z2)	1549.0	47.22560975609756
+Threshold (Z3)	817.0	24.908536585365855

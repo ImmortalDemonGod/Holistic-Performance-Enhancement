@@ -153,7 +153,8 @@ def summarize_run(df, label):
             elev_col = candidate
             break
     if elev_col:
-        summary['elevation_gain_m'] = df[elev_col].diff().clip(lower=0).sum()
+        elev_gain = df[elev_col].diff().clip(lower=0).sum()
+        summary['elevation_gain_m'] = int(round(elev_gain)) if not pd.isnull(elev_gain) else 'N/A'
     else:
         summary['elevation_gain_m'] = 'N/A'
     # --- Integrate metrics if GPX ---
@@ -197,6 +198,18 @@ def main():
         if VERBOSE: print(f'Parsing GPX file: {input_path}')
         gpx_df = parse_gpx(input_path)
         if gpx_df is not None:
+            # --- DEBUG: Check elevation column presence and values ---
+            elev_col = None
+            for candidate in ['elevation', 'ele']:
+                if candidate in gpx_df.columns:
+                    elev_col = candidate
+                    break
+            print(f"[DEBUG] gpx_df columns: {list(gpx_df.columns)}")
+            if elev_col:
+                print(f"[DEBUG] First 5 elevation values:\n{gpx_df[elev_col].head()}")
+                print(f"[DEBUG] Elevation non-NaN count: {gpx_df[elev_col].notna().sum()}")
+            else:
+                print("[DEBUG] No elevation column found in gpx_df!")
             gpx_df = add_distance_and_speed(gpx_df)
             if 'hr' in gpx_df.columns and 'heart_rate' not in gpx_df.columns:
                 gpx_df['heart_rate'] = gpx_df['hr']
@@ -230,7 +243,13 @@ def main():
             # --- ENFORCE: Always build absolute walk summary path under figures_dir/weekXX/prefix/txt/ ---
             if hasattr(args, 'figures_dir') and hasattr(args, 'prefix') and args.figures_dir and args.prefix:
                 week = pd.to_datetime(walk_df.index[0]).isocalendar().week if not walk_df.empty else 'unknownweek'
-                run_dir = Path(args.figures_dir) / f"week{week}" / args.prefix
+                # Prevent duplicated weekXX/weekXX in output path
+                figures_dir_path = Path(args.figures_dir)
+                week_dir_name = f"week{week}"
+                if figures_dir_path.name == week_dir_name:
+                    run_dir = figures_dir_path / args.prefix
+                else:
+                    run_dir = figures_dir_path / week_dir_name / args.prefix
                 txt_dir = run_dir / 'txt'
                 txt_dir.mkdir(parents=True, exist_ok=True)
                 # --- Use concise, generic names for summary files ---
@@ -244,17 +263,27 @@ def main():
             print(f"[DIAG] CWD: {os.getcwd()}")
             print(f"[DIAG] walk_df shape before writing: {walk_df.shape}")
             print(f"[DIAG] ARGS: figures_dir={getattr(args, 'figures_dir', None)} prefix={getattr(args, 'prefix', None)} input={getattr(args, 'input', None)} output={getattr(args, 'output', None)} planning_id={getattr(args, 'planning_id', None)}")
+            # --- DEBUG: Print elevation_gain_m in session_summary and run_only_summary ---
+            print(f"[DEBUG] session_summary['elevation_gain_m']: {session_summary.get('elevation_gain_m')}")
+            run_only_summary = summarize_run(core_df, label='run_only')
+            print(f"[DEBUG] run_only_summary['elevation_gain_m']: {run_only_summary.get('elevation_gain_m')}")
             # --- Write session-level summary (Strava-like, all data) ---
             with open(session_summary_txt, 'w') as f:
                 f.write("Run Session Summary (Strava-like):\n")
                 for k, v in session_summary.items():
-                    f.write(f"  {k}: {v}\n")
+                    if k == 'elevation_gain_m':
+                        f.write(f"  Elevation gain (m): {v}\n")
+                    else:
+                        f.write(f"  {k}: {v}\n")
             # --- Write run-only summary (filtered, steady-state) ---
             run_only_summary = summarize_run(core_df, label='run_only')
             with open(run_only_summary_txt, 'w') as f:
                 f.write("Run Summary (Run-Only, Filtered):\n")
                 for k, v in run_only_summary.items():
-                    f.write(f"  {k}: {v}\n")
+                    if k == 'elevation_gain_m':
+                        f.write(f"  Elevation gain (m): {v}\n")
+                    else:
+                        f.write(f"  {k}: {v}\n")
             if walk_df.empty:
                 print(f"[WARN] walk_df is empty, not writing walk segments.")
             else:
@@ -358,12 +387,19 @@ def main():
                     max_hr_str = 'nan'
                 else:
                     max_hr_str = f"{max_hr:.1f}"
+                # Convert avg_pace (float, min/km) to MM:SS format
+                if not math.isnan(avg_pace) and avg_pace > 0:
+                    pace_minutes = int(avg_pace)
+                    pace_seconds = int(round((avg_pace - pace_minutes) * 60))
+                    avg_pace_str = f"{pace_minutes}:{pace_seconds:02d}"
+                else:
+                    avg_pace_str = "nan"
                 summary_lines = [
                     "Walk Summary:",
                     f"  Segments detected: {len(summary['valid_segments'])}",
                     f"  Total walk time: {mins} min {secs:02d} s  ({walk_pct:.1f} % of session)",
                     f"  Total walk distance (km): {total_walk_dist:.2f}",
-                    f"  Avg walk pace (min/km): {avg_pace:.1f}",
+                    f"  Avg walk pace (min/km): {avg_pace_str}",
                     f"  Avg walk HR (bpm): {avg_hr:.1f}",
                     f"  Max walk HR (bpm): {max_hr_str}",
                     f"  Avg walk cadence (spm): {avg_cad:.0f}",

@@ -259,6 +259,10 @@ yarn-debug.log*
 yarn-error.log*
 dev-debug.log
 # MkDocs build output
+
+# Habit Dash wellness cache backups
+cultivation/data/cache_backups
+
 site/
 # Mac system files
 **/.DS_Store
