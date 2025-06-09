@@ -65,7 +65,7 @@ Verify that all defined tasks in the Taskfile.yml execute correctly across platf
 ### Details:
 
 
-## 10. Refactor one CI workflow to use Task Runner [pending]
+## 10. Refactor one CI workflow to use Task Runner [done]
 ### Dependencies: 14.8
 ### Description: As a proof of concept, refactor one existing GitHub Actions workflow (e.g., `markdown-lint.yml`) to call a `task` command instead of the raw script call.
 ### Details:

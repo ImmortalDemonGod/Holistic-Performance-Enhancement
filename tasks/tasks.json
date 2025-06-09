@@ -1410,7 +1410,7 @@
           "id": 10,
           "title": "Refactor one CI workflow to use Task Runner",
           "description": "As a proof of concept, refactor one existing GitHub Actions workflow (e.g., `markdown-lint.yml`) to call a `task` command instead of the raw script call.",
-          "status": "pending",
+          "status": "done",
           "dependencies": [
             8
           ],
