@@ -1,0 +1,3 @@
+Heart Rate Comparison (Week 17):
+20250425_201748_afternoon_run_calibration_pre-baseox_RPE_10: mean=183.6, max=199
+20250421_000013_evening_run_calibration_pre-baseox_RPE_7: mean=179.0, max=201
