@@ -1346,7 +1346,7 @@
           "id": 4,
           "title": "Implement 'Development' tasks",
           "description": "Create namespaced or grouped tasks for `lint` (Python, Markdown) and `test` (pytest suite).",
-          "status": "pending",
+          "status": "done",
           "dependencies": [
             2
           ],

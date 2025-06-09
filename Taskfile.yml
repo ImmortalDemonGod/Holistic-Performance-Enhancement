@@ -65,14 +65,14 @@ tasks:
       file: ""
 
   codescene:check-changed:
-    desc: "Run CodeScene check only on changed Python files (vs origin/main)."
+    desc: "Run CodeScene check only on changed Python files (vs origin/master)."
     cmds:
-      - 'git diff --name-only origin/main...HEAD | grep "\\.py$" | xargs -r cs check'
+      - 'git diff --name-only origin/master...HEAD | grep "\\.py$" | xargs -r cs check'
 
   codescene:review-changed:
-    desc: "Run CodeScene review (JSON) only on changed Python files (vs origin/main)."
+    desc: "Run CodeScene review (JSON) only on changed Python files (vs origin/master)."
     cmds:
-      - 'git diff --name-only origin/main...HEAD | grep "\\.py$" | xargs -r cs review --output-format json'
+      - 'git diff --name-only origin/master...HEAD | grep "\\.py$" | xargs -r cs review --output-format json'
 
   codescene:check-staged:
     desc: "Run CodeScene check only on staged Python files. Useful for pre-commit hooks."
