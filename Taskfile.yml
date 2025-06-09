@@ -122,10 +122,22 @@ tasks:
     cmds:
       - bash {{.CULTIVATION_ROOT}}/scripts/software/dev_daily_reflect/test_dev_daily_reflect.sh
 
+  run:github-automation:
+    desc: "Automates GitHub/Git operations and generates logs/diffs for PRs."
+    cmds:
+      - bash {{.CULTIVATION_ROOT}}/scripts/software/github_automation.sh
+
+  run:pr-markdown-summaries:
+    desc: "Generates Markdown summaries for each pull request from PR JSON."
+    cmds:
+      - "{{.PYTHON_INTERPRETER}} {{.CULTIVATION_ROOT}}/scripts/software/generate_pr_markdown_summaries.py"
+
   run:sync-wellness:
     desc: "Syncs the latest wellness data from HabitDash."
     cmds:
       - "{{.PYTHON_INTERPRETER}} {{.CULTIVATION_ROOT}}/scripts/utilities/sync_habitdash.py --days 7"
+    env:
+      PYTHONPATH: "{{.CULTIVATION_ROOT}}/scripts"
 
   run:process-runs:
     desc: "Processes all new raw running files to generate metrics."
