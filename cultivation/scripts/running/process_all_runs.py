@@ -66,7 +66,7 @@ def main():
     subprocess.run([
         PYTHON_EXEC, str(SCRIPTS_DIR / 'auto_rename_raw_files.py'),
         '--raw_dir', args.raw_dir
-    ], cwd=str(PROJECT_ROOT), check=True)
+    ], cwd=str(PROJECT_ROOT), check=True, env={**os.environ, 'PYTHONPATH': str(PROJECT_ROOT / 'cultivation' / 'scripts')})
 
     # Step 0.5: Ensure wellness data is up to date BEFORE processing runs
     ensure_wellness_uptodate()
@@ -133,7 +133,7 @@ def main():
             '--planning_id', pid,
             '--figures_dir', str(args.figures_dir),
             '--prefix', base
-        ], cwd=str(PROJECT_ROOT), check=True)
+        ], cwd=str(PROJECT_ROOT), check=True, env={**os.environ, 'PYTHONPATH': str(PROJECT_ROOT / 'cultivation' / 'scripts')})
 
         # If GPX, also extract metrics using new module (now integrated into summary CSV)
         # No need to write separate JSON; metrics are included in summary CSV by parse_run_files.py
@@ -142,7 +142,7 @@ def main():
             '--input', str(csv_out),
             '--figures_dir', args.figures_dir,
             '--prefix', base
-        ], cwd=str(PROJECT_ROOT), check=True)
+        ], cwd=str(PROJECT_ROOT), check=True, env={**os.environ, 'PYTHONPATH': str(PROJECT_ROOT / 'cultivation' / 'scripts')})
         # 3. Run advanced analysis
         subprocess.run([
             PYTHON_EXEC, str(SCRIPTS_DIR / 'run_performance_analysis.py'),
@@ -173,7 +173,7 @@ def main():
                 '--run1', str(run1),
                 '--run2', str(run2),
                 '--figures_dir', args.figures_dir
-            ], cwd=str(PROJECT_ROOT), check=True)
+            ], cwd=str(PROJECT_ROOT), check=True, env={**os.environ, 'PYTHONPATH': str(PROJECT_ROOT / 'cultivation' / 'scripts')})
 
 if __name__ == '__main__':
     from datetime import date

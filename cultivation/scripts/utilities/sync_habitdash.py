@@ -74,11 +74,10 @@ def sync_data(days_to_sync=7, specific_dates=None):
                                         col_name = f"{metric}_{source}"
                                         all_data.append({'date': item.get('date'), col_name: item.get('value')})
                                     break
-                                else:
-                                    logging.warning(f"No data returned for {source} - {metric} on {sync_date}")
-                                    break
+                                logging.warning(f"No data returned for {source} - {metric} on {sync_date}")
+                                break
                             except Exception as e:
-                                if hasattr(e, 'response') and getattr(e.response, 'status_code', None) == 429:
+                                if hasattr(e, 'response') and hasattr(e.response, 'status_code') and e.response.status_code == 429:
                                     if attempt < MAX_RETRIES:
                                         logging.warning(f"429 Too Many Requests for {source}-{metric} on {sync_date}, retrying in {RETRY_WAIT_SECONDS}s (attempt {attempt}/{MAX_RETRIES})")
                                         time.sleep(RETRY_WAIT_SECONDS)
@@ -113,11 +112,10 @@ def sync_data(days_to_sync=7, specific_dates=None):
                                     col_name = f"{metric}_{source}"
                                     all_data.append({'date': item.get('date'), col_name: item.get('value')})
                                 break
-                            else:
-                                logging.warning(f"No data returned for {source} - {metric}")
-                                break
+                            logging.warning(f"No data returned for {source} - {metric}")
+                            break
                         except Exception as e:
-                            if hasattr(e, 'response') and getattr(e.response, 'status_code', None) == 429:
+                            if hasattr(e, 'response') and hasattr(e.response, 'status_code') and e.response.status_code == 429:
                                 if attempt < MAX_RETRIES:
                                     logging.warning(f"429 Too Many Requests for {source}-{metric}, retrying in {RETRY_WAIT_SECONDS}s (attempt {attempt}/{MAX_RETRIES})")
                                     time.sleep(RETRY_WAIT_SECONDS)
@@ -207,11 +205,10 @@ if __name__ == "__main__":
                                 col_name = f"{metric}_{source}"
                                 all_data.append({'date': item.get('date'), col_name: item.get('value')})
                             break
-                        else:
-                            logging.warning(f"No data returned for {source} - {metric} on {sync_date}")
-                            break
+                        logging.warning(f"No data returned for {source} - {metric} on {sync_date}")
+                        break
                     except Exception as e:
-                        if hasattr(e, 'response') and getattr(e.response, 'status_code', None) == 429:
+                        if hasattr(e, 'response') and hasattr(e.response, 'status_code') and e.response.status_code == 429:
                             if attempt < MAX_RETRIES:
                                 logging.warning(f"429 Too Many Requests for {source}-{metric} on {sync_date}, retrying in {RETRY_WAIT_SECONDS}s (attempt {attempt}/{MAX_RETRIES})")
                                 time.sleep(RETRY_WAIT_SECONDS)

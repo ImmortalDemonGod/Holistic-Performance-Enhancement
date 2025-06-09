@@ -5,8 +5,19 @@ CACHE_PARQUET = "cultivation/data/daily_wellness.parquet"
 REPORT_MD = "cultivation/docs/4_analysis_results_and_audits/repository_audits/habitdash_export_vs_cache_report.md"
 
 # 1. Load export and cache
-export_df = pd.read_csv(EXPORT_CSV)
-cache_df = pd.read_parquet(CACHE_PARQUET)
+try:
+    export_df = pd.read_csv(EXPORT_CSV)
+    print(f"Loaded export data: {len(export_df)} rows")
+except Exception as e:
+    print(f"Error loading export CSV {EXPORT_CSV}: {e}")
+    raise
+
+try:
+    cache_df = pd.read_parquet(CACHE_PARQUET)
+    print(f"Loaded cache data: {len(cache_df)} rows, {len(cache_df.columns)} columns")
+except Exception as e:
+    print(f"Error loading cache parquet {CACHE_PARQUET}: {e}")
+    raise
 
 # 2. All analysis uses canonical export field names (e.g., sleep_score_whoop)
 def make_cache_colname(row):
@@ -101,10 +112,14 @@ with open(REPORT_MD, 'w') as f:
     f.write("\n")
 
     # --- Fields in export only (should be empty) ---
-    f.write("## Fields in Export Only (not in cache; ❌ need to backfill)\n\n")
-    for col in not_in_cache:
-        field = export_fields[export_fields['cache_col'] == col].iloc[0]
-        f.write(f"- {col} | {field['source']} | {field['category']} | {field['name']} | {field['units']}\n")
+    if not_in_cache:
+        f.write("## Fields in Export Only (not in cache; ❌ need to backfill)\n\n")
+        for col in not_in_cache:
+            field = export_fields[export_fields['cache_col'] == col].iloc[0]
+            f.write(f"- {col} | {field['source']} | {field['category']} | {field['name']} | {field['units']}\n")
+    else:
+        f.write("## Fields in Export Only (not in cache; ❌ need to backfill)\n\n")
+        f.write("_No missing fields_\n\n")
 
     # --- Fields in cache only (should be empty/legacy) ---
     f.write("\n## Fields in Cache Only (legacy/orphaned; ⚠️ should be migrated/removed)\n\n")

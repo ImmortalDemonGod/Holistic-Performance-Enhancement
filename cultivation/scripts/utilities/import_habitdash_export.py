@@ -75,8 +75,8 @@ if not cache_df.empty and 'date' not in cache_df.columns:
         try:
             pd.to_datetime(cache_df.index)
             cache_df = cache_df.reset_index().rename(columns={'index': 'date'})
-        except Exception:
-            raise ValueError("Cache file index is not date-like and no 'date' column found.")
+        except (ValueError, TypeError) as e:
+            raise ValueError("Cache file index is not date-like and no 'date' column found.") from e
 
 # 3. Backup cache
 os.makedirs(BACKUP_DIR, exist_ok=True)
