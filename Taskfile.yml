@@ -41,6 +41,49 @@ tasks:
     cmds:
       - "{{.PYTHON_VENV}}/bin/pymarkdown scan {{.DOCS_DIR}} --recurse"
 
+  # --- CodeScene Integration Tasks ---
+  codescene:check:
+    desc: "Run CodeScene lint-style check on all Python files (excluding .venv)."
+    cmds:
+      - 'find . -type f -name "*.py" -not -path "./.venv/*" -exec cs check {} \;'
+
+  codescene:review:
+    desc: "Run CodeScene review (JSON) on all Python files (excluding .venv)."
+    cmds:
+      - 'find . -type f -name "*.py" -not -path "./.venv/*" -exec cs review --output-format json {} \;'
+
+  codescene:delta:
+    desc: "Run CodeScene delta analysis on the current git repository."
+    cmds:
+      - 'cs delta'
+
+  codescene:file:
+    desc: "Run CodeScene check on a specific file. Usage: task codescene:file -- file=path/to/file.py"
+    cmds:
+      - 'cs check {{.file}}'
+    vars:
+      file: ""
+
+  codescene:check-changed:
+    desc: "Run CodeScene check only on changed Python files (vs origin/main)."
+    cmds:
+      - 'git diff --name-only origin/main...HEAD | grep "\\.py$" | xargs -r cs check'
+
+  codescene:review-changed:
+    desc: "Run CodeScene review (JSON) only on changed Python files (vs origin/main)."
+    cmds:
+      - 'git diff --name-only origin/main...HEAD | grep "\\.py$" | xargs -r cs review --output-format json'
+
+  codescene:check-staged:
+    desc: "Run CodeScene check only on staged Python files. Useful for pre-commit hooks."
+    cmds:
+      - 'git diff --name-only --cached --diff-filter=ACMRTUXB HEAD | grep "\\.py$" | xargs -r cs check'
+
+  codescene:review-staged:
+    desc: "Run CodeScene review (JSON) only on staged Python files. Useful for pre-commit hooks."
+    cmds:
+      - 'git diff --name-only --cached --diff-filter=ACMRTUXB HEAD | grep "\\.py$" | xargs -r cs review --output-format json'
+
   test:
     desc: "Runs the full Python test suite with pytest."
     deps: [setup]

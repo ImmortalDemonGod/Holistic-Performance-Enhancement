@@ -4,6 +4,41 @@ Welcome to the **Holistic Performance Enhancement** project repository! This ini
 
 ![Cultivation Banner](path_to_your_banner_image)
 
+## 🚀 Development Setup & Task Runner
+
+This project uses [Go Task](https://taskfile.dev) as a standardized task runner for all common development operations.
+
+1. **Install Task:** Follow the [official installation instructions](https://taskfile.dev/installation/).
+2. **Set up Environment & Install Dependencies:**
+   ```bash
+   task setup
+   ```
+3. **Activate Environment:**
+   ```bash
+   source .venv/bin/activate
+   ```
+
+### ⚠️ Task Master AI Integration: Environment Variable Requirement
+
+Before running any Task Master AI-powered commands (such as `add-task` with a prompt, `analyze-complexity`, or any command using Claude or Perplexity), you **must** load your API keys from `.env` into your shell session:
+
+```bash
+export $(grep -v '^#' .env | xargs)
+```
+- Ensure your `.env` file does **not** have inline comments after values (only one `KEY="value"` per line).
+- Run this command in every new terminal session before using AI-driven Task Master features.
+- You can verify the variables are loaded with `echo $ANTHROPIC_API_KEY`.
+
+### Common Commands
+
+- `task --list-all`: See all available commands.
+- `task test`: Run the complete Python test suite.
+- `task lint`: Check all code and documentation for linting errors.
+- `task docs`: Serve the documentation website locally at `http://127.0.0.1:8000`.
+- `task run:dev-reflect`: Generate the daily software development report.
+
+_See `Taskfile.yml` for a full list of available developer and data operations._
+
 ## 🚀 Quick Start: Automated Running Data Analysis
 
 You can now analyze your running data with a fully automated, one-click workflow:
