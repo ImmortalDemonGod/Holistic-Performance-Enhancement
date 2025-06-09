@@ -41,7 +41,7 @@ Verify that all defined tasks in the Taskfile.yml execute correctly across platf
 ### Details:
 
 
-## 6. Implement 'Operational' tasks for key pipelines [pending]
+## 6. Implement 'Operational' tasks for key pipelines [done]
 ### Dependencies: 14.2
 ### Description: Create wrapper tasks for running key project pipelines, such as `task run:dev-reflect`, `task run:sync-wellness`, and `task run:process-runs`.
 ### Details:

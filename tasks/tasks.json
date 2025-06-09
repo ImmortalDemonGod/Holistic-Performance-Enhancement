@@ -1366,7 +1366,7 @@
           "id": 6,
           "title": "Implement 'Operational' tasks for key pipelines",
           "description": "Create wrapper tasks for running key project pipelines, such as `task run:dev-reflect`, `task run:sync-wellness`, and `task run:process-runs`.",
-          "status": "pending",
+          "status": "done",
           "dependencies": [
             2
           ],
