@@ -1265,6 +1265,17 @@
         "activity:software_development",
         "effort_tshirt:XL"
       ]
+    },
+    {
+      "id": 14,
+      "title": "Mastery: RNA Monomer Biophysics",
+      "description": "Systematic learning of the RNA monomer document using the pre-testing workflow.",
+      "details": "",
+      "testStrategy": "",
+      "status": "in-progress",
+      "dependencies": [],
+      "priority": "medium",
+      "subtasks": []
     }
   ],
   "metadata": {
