@@ -1,0 +1,1086 @@
+[
+  {
+    "task_id_candidate": "DW_ARC_SETUP_001",
+    "tentative_title": "Establish ARC Prize 2025 Development Environment & Baseline for `simplest_arc_agi`",
+    "source_reference": [
+      {"file": "Kaggle ARC Prize 2025 Overview", "section": "Code Requirements, Timeline"},
+      {"file": "simplest_arc_agi/README.md", "section": "Installation, Usage"},
+      {"file": "Strategic_Integration_of_ARC_Prize_2025_into_the_Cultivation_Project_via_simplest_arc_agi_v1.0.md", "section": "VII. The \"No Stone Unturned\" Protocol - IA Layer Full Adoption"}
+    ],
+    "description_objective": "Set up the complete development environment for the ARC Prize 2025 sprint using the `simplest_arc_agi` repository. This involves: 1. Creating a dedicated feature branch (e.g., `feature/arc_prize_2025`) within the `simplest_arc_agi` repository. 2. Ensuring all Python dependencies from `requirements.txt` are installed in a fresh virtual environment. 3. Integrating `simplest_arc_agi` with Cultivation's IA Layer standards: configure Taskfile.yml targets for ARC-specific builds, tests, and runs; set up pre-commit hooks (Ruff, Black, etc.); apply standardized logging. 4. Establish a performance baseline by running `simplest_arc_agi/run_training.py` (modular arithmetic task) to confirm core model and trainer functionality. 5. Set up Kaggle API access, download the ARC Prize 2025 dataset, and perform an initial exploration of the data format.",
+    "primary_type": "System Setup & Tooling Integration",
+    "initial_scale_estimate": "Medium (1-2 days)",
+    "potential_deliverables_outcomes": [
+      "Dedicated Git branch for ARC Prize work within `simplest_arc_agi`.",
+      "Validated Python virtual environment with all dependencies.",
+      "Taskfile.yml updated with ARC-specific targets.",
+      "`simplest_arc_agi` successfully passes Cultivation's pre-commit checks.",
+      "Successful baseline run of `run_training.py` with logged results.",
+      "ARC Prize 2025 dataset downloaded and basic structure understood."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_SETUP_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To prepare a fully configured, IA-compliant, and baselined development environment for the ARC Prize 2025 sprint.",
+      "estimated_effort_tshirt": "M",
+      "estimated_effort_hours_raw": "1-2 days",
+      "estimated_effort_hours_min": 6,
+      "estimated_effort_hours_max": 12,
+      "completion_criteria_summary": "All setup steps completed; baseline run successful; ARC dataset accessible.",
+      "activity_type": "environment_setup_tooling_integration",
+      "recommended_block": "focused_dev_block",
+      "deliverables": [
+        "ARC Prize Git branch.",
+        "Functional virtual environment.",
+        "Updated Taskfile.yml.",
+        "Baseline training run report.",
+        "ARC dataset successfully downloaded and initial parsing confirmed."
+      ]
+    },
+    "hpe_scheduling_meta": {
+      "curriculum_part_title": "ARC Sprint: Environment Setup",
+      "csm_tags": ["arc_prize", "simplest_agi", "setup", "ia_layer_integration"]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Essential first step. Ensures development starts on a solid, standardized foundation. Adherence to Cultivation's IA layer from the outset is key for future integration."
+  },
+  {
+    "task_id_candidate": "DW_ARC_DATA_001",
+    "tentative_title": "Implement ARC Task Data Loader, Grid Representation & Basic Feature Extractor",
+    "source_reference": [
+      {"file": "Kaggle ARC Prize 2025 Overview", "section": "Dataset format (ARC-AGI-2)"},
+      {"file": "simplest_arc_agi/docs/arc_evaluation.md", "section": "Task Format"},
+      {"file": "simplest_arc_agi/docs/components/data_generation.md", "section": "Grid/Patch Manipulations"}
+    ],
+    "description_objective": "Develop Python modules within `simplest_arc_agi/src/data_generation/` to robustly load, parse, validate, and represent official ARC Prize tasks. This includes: 1. Parsing ARC task JSON files (train/test pairs of input/output grids). 2. Implementing a `Grid` class (e.g., NumPy-based) with methods for manipulation, visualization (matplotlib/text-based), and property extraction (dimensions, colors, objects). 3. Developing a basic feature extractor that, for each grid, identifies fundamental properties like object counts, shapes, sizes, positions, and colors, to serve as initial input for LLM analysis or primitive circuit training. 4. Creating utilities to iterate through tasks and examples from the ARC dataset.",
+    "primary_type": "System Development (Data Pipeline & Feature Engineering)",
+    "initial_scale_estimate": "Medium (3-4 days)",
+    "potential_deliverables_outcomes": [
+      "Python module (`arc_dataset_loader.py`) with `ArcTask` data class and `load_arc_dataset(filepath)` function.",
+      "`Grid` class with core functionalities (`grid_utils.py`).",
+      "Basic ARC grid feature extractor (`arc_feature_extractor.py`).",
+      "Grid visualization utilities (`arc_visualizer.py`).",
+      "Unit tests for parsing, grid operations, and feature extraction.",
+      "Documentation for data handling modules."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_DATA_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To create reliable tools for ingesting, representing, visualizing, and extracting basic features from ARC task data.",
+      "estimated_effort_tshirt": "M",
+      "estimated_effort_hours_raw": "3-4 days",
+      "estimated_effort_hours_min": 18,
+      "estimated_effort_hours_max": 24,
+      "completion_criteria_summary": "ARC tasks can be loaded and parsed. Grids can be visualized. Basic features are extracted.",
+      "activity_type": "data_pipeline_feature_engineering",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "`arc_dataset_loader.py` module.",
+        "`grid_utils.py` (Grid class).",
+        "`arc_feature_extractor.py` module.",
+        "`arc_visualizer.py` utilities.",
+        "Comprehensive unit tests."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Foundational for all subsequent ARC-specific development. Feature extractor should be extensible."
+  },
+  {
+    "task_id_candidate": "DW_ARC_PRIORS_001",
+    "tentative_title": "Define, Train Models for & Extract Core Knowledge Primitive Circuits (Set 1)",
+    "source_reference": [
+      {"file": "simplest_arc_agi/docs/arc_evaluation.md", "section": "Addressing the \"Priors\" Problem"},
+      {"file": "Strategic_Integration_of_ARC_Prize_2025_into_the_Cultivation_Project_via_simplest_arc_agi_v1.0.md", "section": "III.4. Operationalizing \"Core Knowledge\" Priors"}
+    ],
+    "description_objective": "Initiate the development of 'Core Knowledge Primitive' circuits. Phase 1: 1. Research and define an initial operational set of ~5-7 fundamental primitives relevant to ARC (e.g., object identification, specific color filtering, basic counting, simple line/shape detection). 2. For each, design and implement a specialized data generator that creates numerous simple, focused grid examples. 3. Train `SimpleTransformer` models on these primitive datasets until strong generalization. 4. Apply an MVP of circuit extraction (from `DW_ARC_EXTRACT_001_MVP`) to these models. 5. Store successfully extracted and validated primitive circuits in the `CircuitDatabase` (`DW_ARC_DB_001`), tagged as 'Core_Knowledge_Primitive' and with detailed interface definitions.",
+    "primary_type": "Research & Model Development & Circuit Extraction",
+    "initial_scale_estimate": "Large (5-8 days for this first set)",
+    "potential_deliverables_outcomes": [
+      "Documented list of initial Core Knowledge Primitives and their task definitions.",
+      "Data generation scripts for these primitive tasks.",
+      "Trained `SimpleTransformer` model checkpoints for each primitive.",
+      "At least 2-3 validated primitive circuits extracted and stored in `CircuitDatabase` with tags and interface specs.",
+      "Report on learnability, extraction success, and characteristics of these initial primitives."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_PRIORS_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To establish a foundational library of learned, extractable Core Knowledge Primitive circuits for ARC.",
+      "estimated_effort_tshirt": "L",
+      "estimated_effort_hours_raw": "5-8 days",
+      "estimated_effort_hours_min": 30,
+      "estimated_effort_hours_max": 48,
+      "completion_criteria_summary": "Defined primitives, data generators, trained models. Min. 2-3 circuits extracted, validated, and stored.",
+      "activity_type": "research_model_development_circuit_extraction",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Core Knowledge Primitives definition document (Set 1).",
+        "Data generation scripts for primitives.",
+        "Trained model checkpoints for primitives.",
+        "2-3+ validated circuits in `CircuitDatabase`."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Crucial for the compositional strategy. Success depends on models learning generalizable primitives and `DW_ARC_EXTRACT_001_MVP` being functional. Iterative with `DW_ARC_EXTRACT_001`."
+  },
+  {
+    "task_id_candidate": "DW_ARC_EXTRACT_001",
+    "tentative_title": "Implement & Validate Circuit Extraction Framework (CLT-based)",
+    "source_reference": [
+      {"file": "simplest_arc_agi/docs/components/explanation.md", "section": "Cross-Layer Transcoders (CLTs)"},
+      {"file": "Strategic_Integration_of_ARC_Prize_2025_into_the_Cultivation_Project_via_simplest_arc_agi_v1.0.md", "section": "I. Knowledge & Understanding Gains - Modularity"}
+    ],
+    "description_objective": "Develop and validate the primary circuit extraction mechanism (CLT-based sparse autoencoders). This is an EPIC broken into sub-phases for the sprint. Sprint Focus: 1. Implement `ActivationCollector` to gather hidden states from `SimpleTransformer`. 2. Implement `CLTTrainer` for training sparse autoencoders (SAEs) on these activations. 3. Train and evaluate SAEs on activations from models solving Core Knowledge Primitive tasks (`DW_ARC_PRIORS_001`). 4. Develop initial methods for representing SAE features/dictionary elements as 'circuits' (e.g., top activating inputs, feature vector). 5. Integrate with `DW_ARC_DB_001` for storing these proto-circuits.",
+    "primary_type": "Algorithm Development & AI/ML Implementation (Interpretability)",
+    "initial_scale_estimate": "Epic (Sprint MVP: 2-3 weeks; Full: 1-2 months)",
+    "potential_deliverables_outcomes": [
+      "Functional `ActivationCollector` and `CLTTrainer` modules.",
+      "Trained SAEs for activations from several primitive-task models.",
+      "Initial 'circuits' (SAE features) stored in `CircuitDatabase`.",
+      "Report on SAE training stability, feature sparsity, reconstruction error, and initial interpretability.",
+      "Documentation of the CLT pipeline."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_EXTRACT_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To build and validate a functional CLT-based framework for extracting interpretable features/circuits from trained transformers.",
+      "estimated_effort_tshirt": "XL",
+      "estimated_effort_hours_raw": "2-3 weeks (Sprint MVP)",
+      "estimated_effort_hours_min": 60, // 10 days * 6h
+      "estimated_effort_hours_max": 90, // 15 days * 6h
+      "completion_criteria_summary": "CLT pipeline operational. SAE features extracted for primitive tasks. Initial circuits in DB.",
+      "activity_type": "algorithm_development_interpretability_research",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "`ActivationCollector.py`, `CLTTrainer.py`.",
+        "Trained SAE models.",
+        "Report on feature characteristics.",
+        "Documentation."
+      ]
+    },
+    "implicit_reasoning_confidence": "Medium (Core R&D, success hinges on empirical results)",
+    "notes_questions_dependencies": "Highly iterative. This is the *core* of the 'meaningful circuit extraction' promise. Further breakdown into smaller tasks (SAE architecture search, sparsity tuning, validation metrics) is required for detailed sprint planning."
+  },
+  {
+    "task_id_candidate": "DW_ARC_EXTRACT_002",
+    "tentative_title": "Implement Attribution Graph Construction for Circuit Refinement (MVP)",
+    "source_reference": [
+      {"file": "simplest_arc_agi/docs/components/explanation.md", "section": "Attribution Graph Construction"}
+    ],
+    "description_objective": "Develop MVP methods for constructing attribution graphs to analyze circuits from `DW_ARC_EXTRACT_001`. Sprint Focus: 1. Implement at least one attribution technique (e.g., integrated gradients or simple activation patching) to trace influence from inputs to CLT features or circuit outputs. 2. Develop basic graph construction from attribution scores. 3. Implement initial pruning/visualization for these graphs. Apply to a few well-understood primitive circuits to validate the method.",
+    "primary_type": "Algorithm Development & AI/ML Implementation (Interpretability)",
+    "initial_scale_estimate": "Epic (Sprint MVP: 1-2 weeks; Full: 1-2 months)",
+    "potential_deliverables_outcomes": [
+      "Python modules for basic attribution calculation and graph generation.",
+      "Attribution graphs for 2-3 selected primitive circuits.",
+      "Initial visualization scripts for these graphs.",
+      "Report on the utility of attribution for refining/understanding CLT-derived circuits."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_EXTRACT_002",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To provide causal explanations for extracted circuits by tracing influential pathways within the original model.",
+      "estimated_effort_tshirt": "L",
+      "estimated_effort_hours_raw": "1-2 weeks (Sprint MVP)",
+      "estimated_effort_hours_min": 30, // 5 days * 6h
+      "estimated_effort_hours_max": 60, // 10 days * 6h
+      "completion_criteria_summary": "MVP attribution method implemented. Graphs generated for selected circuits.",
+      "activity_type": "algorithm_development_interpretability_research",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Attribution calculation module.",
+        "Graph generation/visualization scripts.",
+        "Report on attribution case studies."
+      ]
+    },
+    "implicit_reasoning_confidence": "Medium (R&D, complements CLT extraction)",
+    "notes_questions_dependencies": "Depends on `DW_ARC_EXTRACT_001`. This task aims to add causal depth to circuit understanding. The 'Full' version is a longer-term R&D effort."
+  },
+  {
+    "task_id_candidate": "DW_ARC_DB_001",
+    "tentative_title": "Finalize `CircuitDatabase` for ARC: Schema, Interfaces, Queries, Population",
+    "source_reference": [
+      {"file": "simplest_arc_agi/src/database/circuit_database.py"},
+      {"file": "simplest_arc_agi/docs/components/circuit_database.md"},
+      {"file": "simplest_arc_agi/docs/components/modular_composition.md", "section": "Standardized Interfaces"}
+    ],
+    "description_objective": "Audit, refine, and thoroughly test `CircuitDatabase`. Key objectives: 1. Finalize SQLite schema to store all metadata from `DW_ARC_EXTRACT_001/002` outputs (task, model arch, training details, circuit structure representation, interpretation, activation examples, fidelity). 2. Define and implement a rigorous JSON schema for `CircuitInterface` (input/output tensor shapes, data types, activation statistics from sample data, semantic meaning). 3. Ensure circuits are stored with their interface definitions. 4. Implement robust querying by interface properties, task, tags ('Core_Knowledge_Primitive', complexity, generality). 5. Scripts to populate DB.",
+    "primary_type": "System Refinement & Core Engineering (Database)",
+    "initial_scale_estimate": "Medium (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "Enhanced `circuit_database.py` module with finalized schema.",
+      "Documented JSON schema for `CircuitInterface` metadata.",
+      "Scripts to validate and populate `CircuitDatabase` from extraction outputs.",
+      "`CircuitDatabase` populated with initial Core Knowledge Primitive circuits and their interfaces.",
+      "High test coverage for all DB operations."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_DB_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To create a robust, queryable database of extracted neural circuits with standardized interfaces, enabling modular composition.",
+      "estimated_effort_tshirt": "M",
+      "estimated_effort_hours_raw": "3-5 days",
+      "estimated_effort_hours_min": 18,
+      "estimated_effort_hours_max": 30,
+      "completion_criteria_summary": "DB schema finalized. Interface schema documented. Circuits stored with interfaces. Querying functional.",
+      "activity_type": "database_design_software_engineering",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Updated `circuit_database.py`.",
+        "`CircuitInterface` JSON schema document.",
+        "DB population scripts.",
+        "Sample queries and populated DB."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "The `CircuitInterface` is critical for `DW_ARC_COMPOSE_001`. Must align with outputs of `DW_ARC_EXTRACT_001/002`."
+  },
+  {
+    "task_id_candidate": "DW_ARC_COMPOSE_001",
+    "tentative_title": "Implement Core `CircuitComposer` Engine (Execution of Plans)",
+    "source_reference": [
+      {"file": "simplest_arc_agi/docs/components/modular_composition.md", "section": "Composition Engine"}
+    ],
+    "description_objective": "Develop the `CircuitComposer` Python framework in `simplest_arc_agi/src/composition/`. This engine executes predefined composition plans. Sprint Focus: 1. Retrieve circuits by ID from `CircuitDatabase`. 2. Manage data flow for sequential and parallel compositions. 3. Implement basic interface adaptation (tensor reshaping, normalization based on `CircuitInterface` stats). 4. Execute composed forward passes. 5. Log execution traces.",
+    "primary_type": "System Development (AI Engine)",
+    "initial_scale_estimate": "Epic (Sprint MVP: 1.5-2.5 weeks; Full: 1-2 months)",
+    "potential_deliverables_outcomes": [
+      "`CircuitComposer.py` module with methods to execute composition plans.",
+      "Support for sequential and parallel execution.",
+      "Basic interface adaptation for tensor shapes/stats.",
+      "Unit tests for simple 2-3 circuit compositions.",
+      "Documentation for composition plan schema and execution."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_COMPOSE_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To build the execution machinery for running programs composed of neural circuits.",
+      "estimated_effort_tshirt": "L",
+      "estimated_effort_hours_raw": "1.5-2.5 weeks (Sprint MVP)",
+      "estimated_effort_hours_min": 45, // 7.5 days * 6h
+      "estimated_effort_hours_max": 75, // 12.5 days * 6h
+      "completion_criteria_summary": "Composer can execute simple sequential/parallel plans. Basic adaptation works.",
+      "activity_type": "ai_framework_development_software_engineering",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "`CircuitComposer.py` module.",
+        "Adapter utilities.",
+        "Unit tests.",
+        "Documentation."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Depends on `DW_ARC_DB_001`. This task builds the 'CPU' for circuit programs; `DW_ARC_COMPOSE_002` is the 'programmer'."
+  },
+  {
+    "task_id_candidate": "DW_ARC_COMPOSE_002",
+    "tentative_title": "Develop LLM-Assisted Composition Planner & Rule Inference Engine (Offline)",
+    "source_reference": [
+      {"file": "simplest_arc_agi/docs/components/modular_composition.md", "section": "LLM-Assisted Composition"},
+      {"file": "simplest_arc_agi/docs/arc_evaluation.md", "section": "Rule Inference Mechanism"}
+    ],
+    "description_objective": "Implement the LLM-driven component for ARC rule inference and composition planning, targeting offline Kaggle L4x4 GPU deployment. Sprint Focus: 1. Select/Set up an open-source LLM (e.g., quantized Llama 3/Mistral) for offline inference. 2. Develop initial prompting strategies for analyzing ARC examples (using features from `DW_ARC_DATA_001`), hypothesizing rules, querying `CircuitDatabase` (tool use), and generating composition plans (code-like representation). 3. Implement basic feedback loop for plan verification against examples using `DW_ARC_COMPOSE_001`.",
+    "primary_type": "AI/ML Development (LLM Orchestration)",
+    "initial_scale_estimate": "Epic (Sprint MVP: 2-4 weeks; Full: 1-3 months)",
+    "potential_deliverables_outcomes": [
+      "Locally runnable offline LLM setup.",
+      "Initial Python modules for LLM interaction (prompting, tool use for DB query, plan parsing).",
+      "MVP feedback loop for plan verification.",
+      "Demonstration on simple ARC tasks or Core Knowledge compositions.",
+      "Report on offline LLM performance and prompt effectiveness."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_COMPOSE_002",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To create an LLM-driven system capable of inferring ARC task rules and planning circuit compositions for offline execution.",
+      "estimated_effort_tshirt": "XL",
+      "estimated_effort_hours_raw": "2-4 weeks (Sprint MVP)",
+      "estimated_effort_hours_min": 60,  // 10 days * 6h
+      "estimated_effort_hours_max": 120, // 20 days * 6h
+      "completion_criteria_summary": "Offline LLM operational. Basic rule inference and planning loop functional for simple cases.",
+      "activity_type": "llm_integration_prompt_engineering_ai_reasoning",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Offline LLM setup scripts/docs.",
+        "LLM interaction module.",
+        "Prompt library (v1).",
+        "Demonstration on test cases."
+      ]
+    },
+    "implicit_reasoning_confidence": "Medium (High R&D, offline LLM is a risk)",
+    "notes_questions_dependencies": "Core AI reasoning. Depends on `DW_ARC_DATA_001`, `DW_ARC_DB_001`, `DW_ARC_COMPOSE_001`. Significant iteration expected. Offline LLM performance on Kaggle hardware is a key uncertainty."
+  },
+  {
+    "task_id_candidate": "DW_ARC_SOLVER_001",
+    "tentative_title": "Implement End-to-End ARC Task Solver (`solve_arc_task` interface)",
+    "source_reference": [
+      {"file": "simplest_arc_agi/docs/arc_evaluation.md", "section": "Standardized Solver Interface"}
+    ],
+    "description_objective": "Integrate all preceding ARC components into a single, callable function: `solve_arc_task(example_pairs, test_inputs) -> predictions`. This orchestrates: ARC example analysis (feature extraction), LLM-assisted composition planning (`DW_ARC_COMPOSE_002`) to infer rule and generate circuit composition, verification against examples, and application of the validated composition to `test_inputs`. Implement logic for the ARC Prize's '2 attempts per test output' rule.",
+    "primary_type": "System Integration & Orchestration",
+    "initial_scale_estimate": "Large (4-7 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `solve_arc_task.py` module and main solver function.",
+      "End-to-end execution on sample ARC tasks (using mock/simple circuits initially).",
+      "Robust error handling and comprehensive logging of the solving process.",
+      "Strategy for '2 attempts' rule (e.g., LLM refines plan, or fallback composition)."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_SOLVER_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To create a fully integrated solver capable of tackling ARC tasks from examples to test predictions using the compositional circuit approach.",
+      "estimated_effort_tshirt": "L",
+      "estimated_effort_hours_raw": "4-7 days",
+      "estimated_effort_hours_min": 24,
+      "estimated_effort_hours_max": 42,
+      "completion_criteria_summary": "Solver function complete and tested on sample ARC tasks. '2 attempts' logic implemented.",
+      "activity_type": "system_integration_software_engineering",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "`solve_arc_task.py` module.",
+        "Integration tests.",
+        "Solver process logs."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Ties all ARC development together. Success depends on all prerequisites."
+  },
+  {
+    "task_id_candidate": "DW_ARC_EVAL_001",
+    "tentative_title": "Develop ARC Private Evaluation Harness & `submission.json` Generator",
+    "source_reference": [
+      {"file": "simplest_arc_agi/docs/arc_evaluation.md"},
+      {"file": "Kaggle ARC Prize 2025 Overview", "section": "Submission File"}
+    ],
+    "description_objective": "Implement the evaluation protocol from `simplest_arc_agi/docs/arc_evaluation.md`. This includes: 1. Curating/creating a private ARC task set for internal testing. 2. Scripting `DW_ARC_SOLVER_001` execution over this set. 3. Implementing ARC accuracy calculation and other metrics (few-shot curve). 4. Developing a utility to format predictions into the Kaggle `submission.json` (2 attempts per output).",
+    "primary_type": "Tooling & Evaluation Framework",
+    "initial_scale_estimate": "Medium (2-3 days)",
+    "potential_deliverables_outcomes": [
+      "Private ARC evaluation task set (JSON files).",
+      "`evaluate_arc_solver.py` script.",
+      "`generate_submission_json.py` utility.",
+      "Internal performance benchmarks.",
+      "Documentation for evaluation harness."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_EVAL_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To create a robust internal evaluation framework for the ARC solver and the capability to generate competition submission files.",
+      "estimated_effort_tshirt": "M",
+      "estimated_effort_hours_raw": "2-3 days",
+      "estimated_effort_hours_min": 12,
+      "estimated_effort_hours_max": 18,
+      "completion_criteria_summary": "Evaluation harness functional. Submission generator produces valid JSON.",
+      "activity_type": "testing_framework_tool_development",
+      "recommended_block": "focused_dev_block",
+      "deliverables": [
+        "Private ARC task set.",
+        "Evaluation scripts.",
+        "Submission generator script."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Depends on `DW_ARC_SOLVER_001`. Private task set quality is key for reliable internal assessment."
+  },
+  {
+    "task_id_candidate": "DW_ARC_KAGGLE_001",
+    "tentative_title": "Package & Optimize ARC Solver for Kaggle Notebook Environment (Offline L4x4)",
+    "source_reference": [
+      {"file": "Kaggle ARC Prize 2025 Overview", "section": "Code Requirements, Upgraded Accelerators"}
+    ],
+    "description_objective": "Adapt, optimize, and package the entire `simplest_arc_agi` solver for Kaggle's offline notebook environment. This involves: 1. Packaging all Python code and dependencies. 2. Bundling the offline LLM (from `DW_ARC_COMPOSE_002`) and `CircuitDatabase` (from `DW_ARC_DB_001`) as Kaggle datasets. 3. Writing the master Kaggle notebook to load assets, run `solve_arc_task`, and generate `submission.json`. 4. Optimizing for 12-hour runtime and L4x4 GPU memory. Rigorous testing in simulated offline Kaggle environment.",
+    "primary_type": "Deployment Engineering & Optimization",
+    "initial_scale_estimate": "Epic (1-3 weeks iterative refinement)",
+    "potential_deliverables_outcomes": [
+      "Kaggle dataset(s) with offline LLM and `CircuitDatabase`.",
+      "Functional master Kaggle notebook (`submission.ipynb`).",
+      "Performance benchmarks (runtime, memory) meeting Kaggle constraints.",
+      "Documentation of Kaggle packaging and deployment process."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_KAGGLE_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To create a fully compliant and performant Kaggle submission notebook for the ARC Prize.",
+      "estimated_effort_tshirt": "XL",
+      "estimated_effort_hours_raw": "1-3 weeks",
+      "estimated_effort_hours_min": 30,  // 5 days * 6h
+      "estimated_effort_hours_max": 90, // 15 days * 6h
+      "completion_criteria_summary": "Kaggle notebook runs end-to-end offline and produces valid submission.json within limits.",
+      "activity_type": "deployment_optimization_engineering",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Kaggle dataset(s).",
+        "Kaggle notebook.",
+        "Performance report.",
+        "Deployment guide."
+      ]
+    },
+    "implicit_reasoning_confidence": "High (Critical for competition entry)",
+    "notes_questions_dependencies": "Crucial final step. Offline LLM performance and resource management are key challenges. Highly iterative."
+  },
+  {
+    "task_id_candidate": "DW_ARC_PAPER_001",
+    "tentative_title": "Draft ARC Prize Paper Award Submission Documenting `simplest_arc_agi` Approach",
+    "source_reference": [
+      {"file": "Kaggle ARC Prize 2025 Overview", "section": "Paper Award"},
+      {"file": "Strategic_Integration_of_ARC_Prize_2025_into_the_Cultivation_Project_via_simplest_arc_agi_v1.0.md", "section": "VII.4. Formal Post-ARC Prize Review"}
+    ],
+    "description_objective": "Prepare a high-quality scientific paper for the ARC Prize Paper Award. This paper will comprehensively document the `simplest_arc_agi` conceptual approach, system architecture, circuit extraction and composition methodologies, LLM integration strategy, experimental results on ARC tasks, and theoretical insights. The paper must address all six evaluation criteria: Accuracy, Universality, Progress, Theory, Completeness, and Novelty. Synthesize all R&D from the ARC sprint into a compelling narrative.",
+    "primary_type": "Content Creation (Scientific Communication & Writing)",
+    "initial_scale_estimate": "Large (5-8 days for initial full draft)",
+    "potential_deliverables_outcomes": [
+      "A complete draft of the ARC Prize Paper Award submission (target format: PDF, potentially via Overleaf/LaTeX).",
+      "All necessary figures, tables, and visualizations supporting the paper's claims.",
+      "Clear articulation of the system's novelty, theoretical underpinnings, limitations, and potential for broader impact in AGI research.",
+      "Appendices detailing circuit examples, LLM prompts, or extensive experimental results as needed."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_PAPER_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To produce a compelling, high-quality scientific paper detailing the `simplest_arc_agi` approach and results for the ARC Prize Paper Award.",
+      "estimated_effort_tshirt": "L",
+      "estimated_effort_hours_raw": "5-8 days",
+      "estimated_effort_hours_min": 30,
+      "estimated_effort_hours_max": 48,
+      "completion_criteria_summary": "Full paper draft submitted for internal review, addressing all Paper Award criteria.",
+      "activity_type": "research_writing_scientific_communication",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Paper draft (PDF).",
+        "Supporting figures/tables.",
+        "List of contributions and novelty claims."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "To be done towards the end of the competition (Oct-Nov 2025), based on final results and methodology. Iterative writing alongside development is highly recommended. Strong SVEP deliverable."
+  },
+  {
+    "task_id_candidate": "DW_ARC_HARVEST_KCV_001",
+    "tentative_title": "Integrate ARC Circuit Library, Composer & Insights into Cultivation KCV Layer",
+    "source_reference": [
+      {"file": "Strategic_Integration_of_ARC_Prize_2025_into_the_Cultivation_Project_via_simplest_arc_agi_v1.0.md", "section": "V.1. KCV Layer Materialization, VII.4. Formal Post-ARC Prize Review"},
+      {"file": "cultivation/outputs/deep_work_candidates/task_plans/hil_kcv_plan.json", "task_id_candidate": ["DW_KCV_001", "DW_KCV_002", "DW_KCV_004"]}
+    ],
+    "description_objective": "Systematically transfer and integrate the knowledge, `CircuitDatabase`, `CircuitComposer` engine, and composition methodologies developed during the ARC sprint into the Cultivation project's Knowledge Creation & Validation (KCV) layer. This involves: 1. Finalizing the ARC `CircuitDatabase` schema and content, ensuring it can serve as a core component or a direct input to the KCV Knowledge Graph (`DW_KCV_001`). 2. Generalizing the LLM-assisted composition planner and `CircuitComposer` engine to be reusable for broader KCV hypothesis formalization (`DW_KCV_002`) and potentially for analogical reasoning (`DW_KCV_004`) by abstracting away ARC-specifics where possible. 3. Documenting lessons learned about modular AI, interpretability, and LLM-orchestrated reasoning as part of the KCV 'Think Tank's knowledge base.",
+    "primary_type": "System Integration & Knowledge Transfer (Strategic)",
+    "initial_scale_estimate": "Large (3-5 days, post-competition)",
+    "potential_deliverables_outcomes": [
+      "A KCV Knowledge Graph instance (or dedicated section) populated with ARC-derived circuits and metadata.",
+      "Refactored and generalized `CircuitComposer` tools suitable for broader KCV application.",
+      "A Cultivation KCV design document updated with ARC sprint findings, architectural patterns, and validated methodologies.",
+      "Flashcore cards summarizing key insights on modular AI and LLM reasoning for long-term retention."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_HARVEST_KCV_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To ensure all valuable assets and insights from the ARC Prize sprint are systematically integrated into the Cultivation KCV layer, fulfilling the 'no throwaway work' principle.",
+      "estimated_effort_tshirt": "L",
+      "estimated_effort_hours_raw": "3-5 days",
+      "estimated_effort_hours_min": 18,
+      "estimated_effort_hours_max": 30,
+      "completion_criteria_summary": "ARC Circuit DB integrated with/mapped to KCV KG. Composer generalized. KCV docs updated.",
+      "activity_type": "knowledge_transfer_system_integration_strategic_planning",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Updated KCV KG/Circuit DB.",
+        "Generalized composer modules.",
+        "Updated KCV design documents.",
+        "Integration report."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "This is the primary 'benefit harvesting' task for KCV. Occurs after ARC Prize submission deadline. Depends on the outputs of all preceding `DW_ARC_...` tasks."
+  },
+  {
+    "task_id_candidate": "DW_ARC_HARVEST_APTITUDE_001",
+    "tentative_title": "Develop & Integrate ARC Performance Metrics into Cultivation Π Engine Aptitude (A) Domain",
+    "source_reference": [
+      {"file": "Strategic_Integration_of_ARC_Prize_2025_into_the_Cultivation_Project_via_simplest_arc_agi_v1.0.md", "section": "V.2. Activating the \"Aptitude (A)\" Dimension"},
+      {"file": "cultivation/outputs/deep_work_candidates/task_plans/hil_kcv_plan.json", "task_id_candidate": "DW_HIL_CORE_002"}
+    ],
+    "description_objective": "Define and implement metrics derived from the ARC solver's performance to quantify the 'Aptitude (A)' dimension of the Cultivation project's Global Potential (Π) engine. This involves: 1. Identifying key ARC performance indicators (e.g., overall accuracy on private eval set, few-shot learning efficiency score, complexity of problems solved, diversity of Core Knowledge Primitives successfully used). 2. Developing an ETL script to extract these metrics from ARC evaluation logs (outputs of `DW_ARC_EVAL_001`). 3. Integrating these metrics into the `potential_engine.py` (`DW_HIL_CORE_002`) to provide a concrete, data-driven measure for the Aptitude domain, moving it beyond a zero-padded placeholder.",
+    "primary_type": "System Integration & Data Engineering (HPE)",
+    "initial_scale_estimate": "Medium (2-3 days, post-competition)",
+    "potential_deliverables_outcomes": [
+      "Defined schema and ETL script for `aptitude_metrics.parquet` (or similar structure).",
+      "Updated `potential_engine.py` to incorporate Aptitude domain metrics from ARC performance.",
+      "Demonstrated Π calculation including a non-zero, ARC-derived Aptitude score.",
+      "Documentation of the Aptitude metrics, their derivation, and their contribution to Π."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_HARVEST_APTITUDE_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To make the 'Aptitude' domain of the Cultivation Global Potential Engine operational and data-driven, using ARC performance as the first concrete input.",
+      "estimated_effort_tshirt": "M",
+      "estimated_effort_hours_raw": "2-3 days",
+      "estimated_effort_hours_min": 12,
+      "estimated_effort_hours_max": 18,
+      "completion_criteria_summary": "Aptitude metrics ETL functional. Π engine incorporates Aptitude score. Process documented.",
+      "activity_type": "data_engineering_hpe_integration",
+      "recommended_block": "focused_dev_block",
+      "deliverables": [
+        "`aptitude_metrics.parquet` schema and ETL script.",
+        "Updated `potential_engine.py`.",
+        "Demonstration of Π with Aptitude score.",
+        "Aptitude metrics documentation."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Crucial 'benefit harvesting' task for the Π engine. Depends on outputs from `DW_ARC_EVAL_001` and a stable `potential_engine.py` from `DW_HIL_CORE_002`."
+  }
+]
+===========
+[
+  {
+    "task_id_candidate": "DW_ARC_JR_INTEGRATE_001",
+    "tentative_title": "Integrate `jarc_reactor` Codebase & Establish ARC Sprint Environment",
+    "source_reference": [
+      {"file": "User Provided: `jarc_reactor` directory structure and file snippets"},
+      {"file": "cultivation/docs/3_design_and_architecture/roadmap_Cultivation_Integrated_v1.0.md", "comment": "ARC Sprint Initiation"},
+      {"file": "Strategic_Integration_of_ARC_Prize_2025_vCurrent.md", "section": "VII. The \"No Stone Unturned\" Protocol - IA Layer Full Adoption"}
+    ],
+    "description_objective": "Integrate the existing `jarc_reactor` codebase into the Cultivation project's development workflow for the ARC Prize 2025 sprint. This includes: 1. Forking or copying `jarc_reactor` into a designated development area. 2. Setting up its Python environment and ensuring all original dependencies are met. 3. Adapting `jarc_reactor` to adhere to Cultivation's IA Layer standards (Taskfile.yml targets for build/test/run, pre-commit hooks, standardized logging). 4. Understanding its configuration system (`jarc_reactor/config.py`) and its existing training, evaluation, and Kaggle submission pipelines. 5. Downloading the official ARC Prize 2025 dataset.",
+    "primary_type": "System Integration & Environment Setup",
+    "initial_scale_estimate": "Medium (3-5 days)",
+    "potential_deliverables_outcomes": [
+      "A functional, IA-compliant development environment for `jarc_reactor` within the Cultivation project structure.",
+      "Taskfile.yml targets for running `jarc_reactor`'s training, HPO, evaluation, and Kaggle packaging.",
+      "`jarc_reactor` codebase passing Cultivation's pre-commit checks.",
+      "ARC Prize 2025 dataset downloaded and accessible.",
+      "Documentation outlining how to run and manage `jarc_reactor` components."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_JR_INTEGRATE_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To establish a robust, standardized, and well-understood development environment for `jarc_reactor` as the foundation for the ARC Prize sprint.",
+      "estimated_effort_tshirt": "M",
+      "estimated_effort_hours_raw": "3-5 days",
+      "estimated_effort_hours_min": 18,
+      "estimated_effort_hours_max": 30,
+      "completion_criteria_summary": "`jarc_reactor` environment set up, IA standards applied, core original functionalities verified.",
+      "activity_type": "system_integration_environment_setup",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Configured `jarc_reactor` dev environment.",
+        "Updated Taskfile.yml.",
+        "Documentation for `jarc_reactor` within Cultivation."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Highest priority. Leverages existing mature codebase to de-risk and accelerate the sprint. All subsequent tasks build on this."
+  },
+  {
+    "task_id_candidate": "DW_ARC_JR_BASELINE_001",
+    "tentative_title": "Establish ARC Performance Baseline with `jarc_reactor` & Initial Kaggle Submission",
+    "source_reference": [
+      {"file": "jarc_reactor/run_model.py"},
+      {"file": "jarc_reactor/evaluate.py"},
+      {"file": "jarc_reactor/kaggle/kaggle_submission.py"},
+      {"file": "Kaggle ARC Prize 2025 Overview"}
+    ],
+    "description_objective": "Utilize the existing `jarc_reactor` framework to train its `transformer_model` on the ARC Prize training dataset (or a significant subset). Employ its Optuna HPO suite (`optimization/`) to find reasonable hyperparameters. Evaluate the trained model on a private ARC validation set using `evaluation/`. Package this baseline model and its inference logic (using `kaggle/kaggle_submission.py`) into a Kaggle notebook and make an initial submission. The goal is to validate the end-to-end Kaggle pipeline early and establish a performance baseline for the `jarc_reactor` model *before* circuit extraction/composition layers are added.",
+    "primary_type": "Model Training & Evaluation & Deployment",
+    "initial_scale_estimate": "Large (5-7 days)",
+    "potential_deliverables_outcomes": [
+      "A trained baseline `jarc_reactor.models.transformer_model` checkpoint for ARC tasks.",
+      "HPO report from Optuna for the baseline model.",
+      "Performance metrics (accuracy) on a private ARC validation set.",
+      "A functional Kaggle notebook making an initial submission with the baseline `jarc_reactor` model.",
+      "Documented baseline performance and Kaggle submission process."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_JR_BASELINE_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To quickly establish a performance baseline on the ARC Prize using the existing `jarc_reactor` model and validate the Kaggle submission pipeline.",
+      "estimated_effort_tshirt": "L",
+      "estimated_effort_hours_raw": "5-7 days",
+      "estimated_effort_hours_min": 30,
+      "estimated_effort_hours_max": 42,
+      "completion_criteria_summary": "Baseline model trained and evaluated. Initial Kaggle submission made. Performance documented.",
+      "activity_type": "model_training_benchmarking_deployment",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Trained baseline model checkpoint.",
+        "HPO report.",
+        "Private validation set performance report.",
+        "Initial Kaggle submission notebook & score."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Depends on `DW_ARC_JR_INTEGRATE_001`. This de-risks Kaggle submission and provides a target for the compositional solver to beat."
+  },
+  {
+    "task_id_candidate": "DW_ARC_PRIORS_001",
+    "tentative_title": "Define & Train Models for Core Knowledge Primitive Circuits (using `jarc_reactor`)",
+    "source_reference": [
+      {"file": "simplest_arc_agi/docs/arc_evaluation.md", "section": "Addressing the \"Priors\" Problem"},
+      {"file": "Strategic_Integration_of_ARC_Prize_2025_vCurrent.md", "section": "III.4. Operationalizing \"Core Knowledge\" Priors"}
+    ],
+    "description_objective": "Identify ~5-7 fundamental 'Core Knowledge Primitives' for ARC (e.g., object identification, counting, basic geometry). Design simplified grid-based training tasks for each. *Adapt `jarc_reactor`'s data pipeline and training framework* (`jarc_reactor/data/data_preparation.py`, `jarc_reactor/utils/train.py`) to train its `transformer_model` instances on these primitive tasks. Goal is to produce specialized models whose learned functions can be later extracted as circuits.",
+    "primary_type": "Research & Model Development",
+    "initial_scale_estimate": "Medium (3-5 days for adapting `jarc_reactor` and training initial primitives)",
+    "potential_deliverables_outcomes": [
+      "Documented list of initial Core Knowledge Primitives and their task definitions.",
+      "Adapted `jarc_reactor` data generators/loaders for primitive tasks.",
+      "Trained `jarc_reactor.models.transformer_model` checkpoints for each primitive.",
+      "Performance metrics for these primitive-specific models."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_PRIORS_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To create a set of specialized models trained on fundamental ARC primitives using the `jarc_reactor` framework, serving as sources for circuit extraction.",
+      "estimated_effort_tshirt": "M",
+      "estimated_effort_hours_raw": "3-5 days",
+      "estimated_effort_hours_min": 18,
+      "estimated_effort_hours_max": 30,
+      "completion_criteria_summary": "Defined primitives. Data generators adapted. Models trained for primitives.",
+      "activity_type": "research_model_development_data_generation",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Core Knowledge Primitives definition document (Set 1).",
+        "Adapted data generators in `jarc_reactor`.",
+        "Trained model checkpoints for primitives."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Depends on `DW_ARC_JR_INTEGRATE_001`. These models are inputs for `DW_ARC_EXTRACT_001`."
+  },
+  {
+    "task_id_candidate": "DW_ARC_EXTRACT_001",
+    "tentative_title": "Implement & Validate Circuit Extraction (CLT-based, applied to `jarc_reactor` models)",
+    "source_reference": [
+      {"file": "simplest_arc_agi/docs/components/explanation.md", "section": "Cross-Layer Transcoders (CLTs)"}
+    ],
+    "description_objective": "Develop and validate the CLT-based sparse autoencoder framework for extracting interpretable features/circuits from `jarc_reactor.models.transformer_model` instances trained on Core Knowledge Primitive tasks (`DW_ARC_PRIORS_001`). This involves: 1. Implementing `ActivationCollector` for `jarc_reactor` models. 2. Implementing `CLTTrainer` for SAEs. 3. Training and evaluating SAEs on activations. 4. Developing methods to represent SAE features as 'circuits'. 5. Integrating with `DW_ARC_DB_001`.",
+    "primary_type": "Algorithm Development & AI/ML Implementation (Interpretability)",
+    "initial_scale_estimate": "Epic (Sprint MVP: 2-3 weeks working with one `jarc_reactor` primitive model)",
+    "potential_deliverables_outcomes": [
+      "Functional `ActivationCollector` for `jarc_reactor` models and `CLTTrainer` modules for SAEs.",
+      "Trained SAEs for activations from at least one primitive-task model.",
+      "Initial 'circuits' (SAE features) stored in `CircuitDatabase` from a `jarc_reactor` model.",
+      "Report on SAE training, feature characteristics, and initial interpretability for `jarc_reactor` circuits."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_EXTRACT_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To build and validate a functional CLT-based framework for extracting interpretable features/circuits from `jarc_reactor` trained transformers.",
+      "estimated_effort_tshirt": "XL",
+      "estimated_effort_hours_raw": "2-3 weeks (Sprint MVP)",
+      "estimated_effort_hours_min": 60,
+      "estimated_effort_hours_max": 90,
+      "completion_criteria_summary": "CLT pipeline operational for `jarc_reactor` models. SAE features extracted for at least one primitive task. Initial circuits in DB.",
+      "activity_type": "algorithm_development_interpretability_research",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Activation collector & CLT trainer adapted for `jarc_reactor`.",
+        "Trained SAE models for `jarc_reactor` activations.",
+        "Report on feature characteristics."
+      ]
+    },
+    "implicit_reasoning_confidence": "Medium (Core R&D, results are uncertain but approach is sound)",
+    "notes_questions_dependencies": "This is the core R&D for meaningful circuit extraction. Leverage `simplest_arc_agi` docs, but implement for `jarc_reactor` models. Further breakdown into sub-tasks (SAE architecture, sparsity tuning) needed for sprint planning."
+  },
+  {
+    "task_id_candidate": "DW_ARC_DB_001",
+    "tentative_title": "Finalize `CircuitDatabase` for ARC: Schema for `jarc_reactor` Circuits, Interfaces, Queries",
+    "source_reference": [
+      {"file": "simplest_arc_agi/src/database/circuit_database.py"},
+      {"file": "simplest_arc_agi/docs/components/circuit_database.md"}
+    ],
+    "description_objective": "Adapt and finalize `simplest_arc_agi`'s `CircuitDatabase` for storing circuits extracted from `jarc_reactor` models. Key objectives: 1. Ensure schema can store all relevant metadata from `DW_ARC_EXTRACT_001` (task, `jarc_reactor` model arch, training details, CLT circuit structure, interpretation, activation examples, fidelity). 2. Finalize and implement rigorous JSON schema for `CircuitInterface` (input/output shapes from `jarc_reactor` model layers, data types, activation stats). 3. Implement robust querying by interface, task, tags ('Core_Knowledge_Primitive'). 4. Scripts to populate from `DW_ARC_EXTRACT_001` outputs.",
+    "primary_type": "System Refinement & Core Engineering (Database)",
+    "initial_scale_estimate": "Medium (3-4 days)",
+    "potential_deliverables_outcomes": [
+      "Enhanced `circuit_database.py` module compatible with `jarc_reactor` circuit data.",
+      "Documented JSON schema for `CircuitInterface` tailored to `jarc_reactor` model layers.",
+      "Populated `CircuitDatabase` with initial primitive circuits from `jarc_reactor` models.",
+      "High test coverage for DB operations."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_DB_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To adapt and finalize the circuit database for storing and querying circuits extracted from `jarc_reactor` models, with robust interface definitions.",
+      "estimated_effort_tshirt": "M",
+      "estimated_effort_hours_raw": "3-4 days",
+      "estimated_effort_hours_min": 18,
+      "estimated_effort_hours_max": 24,
+      "completion_criteria_summary": "DB schema adapted. Interface schema documented. Circuits from `jarc_reactor` models stored. Querying functional.",
+      "activity_type": "database_design_software_engineering",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Updated `circuit_database.py`.",
+        "`CircuitInterface` JSON schema document for `jarc_reactor` layers.",
+        "DB population scripts."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Critical for `DW_ARC_COMPOSE_001`. Must align with `DW_ARC_EXTRACT_001` outputs from `jarc_reactor` models."
+  },
+  {
+    "task_id_candidate": "DW_ARC_COMPOSE_001",
+    "tentative_title": "Implement `CircuitComposer` Engine for `jarc_reactor`-derived Circuits (MVP)",
+    "source_reference": [
+      {"file": "simplest_arc_agi/docs/components/modular_composition.md", "section": "Composition Engine"}
+    ],
+    "description_objective": "Develop the `CircuitComposer` MVP in `simplest_arc_agi/src/composition/`. This engine executes composition plans using circuits extracted from `jarc_reactor` models. MVP Focus: 1. Retrieve circuits by ID from `DW_ARC_DB_001`. 2. Manage data flow for sequential execution of these circuits. 3. Implement basic interface adaptation (tensor reshaping, normalization based on `CircuitInterface` stats for `jarc_reactor` layer activations). 4. Execute composed forward passes and log traces.",
+    "primary_type": "System Development (AI Engine)",
+    "initial_scale_estimate": "Large (5-7 days for MVP)",
+    "potential_deliverables_outcomes": [
+      "`CircuitComposer.py` module for executing sequences of `jarc_reactor`-derived circuits.",
+      "Basic interface adaptation for `jarc_reactor` circuits.",
+      "Unit tests for simple compositions.",
+      "Documentation for composition plan schema (MVP)."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_COMPOSE_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To build the MVP execution machinery for running programs composed of circuits extracted from `jarc_reactor` models.",
+      "estimated_effort_tshirt": "L",
+      "estimated_effort_hours_raw": "5-7 days",
+      "estimated_effort_hours_min": 30,
+      "estimated_effort_hours_max": 42,
+      "completion_criteria_summary": "Composer MVP can execute sequential plans of `jarc_reactor` circuits. Basic adaptation works.",
+      "activity_type": "ai_framework_development_software_engineering",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "`CircuitComposer.py` MVP.",
+        "Adapter utilities MVP.",
+        "Unit tests for MVP."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Depends on `DW_ARC_DB_001`. This is the 'CPU'; `DW_ARC_COMPOSE_002` is the 'programmer'."
+  },
+  {
+    "task_id_candidate": "DW_ARC_COMPOSE_002",
+    "tentative_title": "Develop LLM-Assisted Composition Planner for ARC (Offline, `jarc_reactor` circuits)",
+    "source_reference": [
+      {"file": "simplest_arc_agi/docs/components/modular_composition.md", "section": "LLM-Assisted Composition"}
+    ],
+    "description_objective": "Implement the LLM-driven logic for ARC rule inference and planning compositions of `jarc_reactor`-derived circuits, for offline Kaggle deployment. Sprint Focus: 1. Select and set up an open-source LLM (e.g., quantized Llama 3/Mistral) for offline inference on L4x4s. 2. Develop initial prompting strategies for analyzing ARC examples (using features from `DW_ARC_DATA_001`), querying `CircuitDatabase` for `jarc_reactor` circuits, and generating composition plans. 3. Implement basic feedback loop for plan verification against examples using `DW_ARC_COMPOSE_001`.",
+    "primary_type": "AI/ML Development (LLM Orchestration)",
+    "initial_scale_estimate": "Epic (Sprint MVP: 2-3 weeks)",
+    "potential_deliverables_outcomes": [
+      "Locally runnable offline LLM setup.",
+      "Initial Python modules for LLM interaction with `jarc_reactor` circuit DB.",
+      "MVP feedback loop for plan verification.",
+      "Demonstration on simple ARC tasks using `jarc_reactor` circuits."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_COMPOSE_002",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To create an LLM-driven system for inferring ARC task rules and planning compositions of `jarc_reactor`-derived circuits, for offline execution.",
+      "estimated_effort_tshirt": "XL",
+      "estimated_effort_hours_raw": "2-3 weeks (Sprint MVP)",
+      "estimated_effort_hours_min": 60,
+      "estimated_effort_hours_max": 90,
+      "completion_criteria_summary": "Offline LLM operational. Basic rule inference and planning loop for `jarc_reactor` circuits functional.",
+      "activity_type": "llm_integration_prompt_engineering_ai_reasoning",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Offline LLM setup scripts.",
+        "LLM interaction module for `jarc_reactor` circuits.",
+        "Prompt library (v1).",
+        "Demonstration on test cases."
+      ]
+    },
+    "implicit_reasoning_confidence": "Medium (R&D, offline LLM is key risk)",
+    "notes_questions_dependencies": "Core AI reasoning. Depends on `DW_ARC_DATA_001`, `DW_ARC_DB_001` (with `jarc_reactor` circuits), `DW_ARC_COMPOSE_001`. Significant iteration."
+  },
+  {
+    "task_id_candidate": "DW_ARC_SOLVER_001",
+    "tentative_title": "Implement End-to-End ARC Task Solver (using `jarc_reactor` components)",
+    "source_reference": [
+      {"file": "simplest_arc_agi/docs/arc_evaluation.md", "section": "Standardized Solver Interface"}
+    ],
+    "description_objective": "Integrate all `jarc_reactor`-based ARC components into the `solve_arc_task(example_pairs, test_inputs) -> predictions` function. This orchestrates: ARC example analysis, LLM-assisted planning using `jarc_reactor`-derived circuits (`DW_ARC_COMPOSE_002`), verification, and application to test inputs. Implement '2 attempts' logic. Option to fallback to `DW_ARC_JR_BASELINE_001` model if composition fails.",
+    "primary_type": "System Integration & Orchestration",
+    "initial_scale_estimate": "Large (4-6 days)",
+    "potential_deliverables_outcomes": [
+      "Functional `solve_arc_task.py` module using `jarc_reactor` circuits and/or baseline model.",
+      "Clear orchestration logic with fallback strategies.",
+      "Robust error handling and logging.",
+      "Initial tests on private ARC eval set."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_SOLVER_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To create a fully integrated ARC solver leveraging `jarc_reactor`'s strengths, augmented by compositional circuit reasoning.",
+      "estimated_effort_tshirt": "L",
+      "estimated_effort_hours_raw": "4-6 days",
+      "estimated_effort_hours_min": 24,
+      "estimated_effort_hours_max": 36,
+      "completion_criteria_summary": "Solver function complete. Tested on sample ARC tasks. Fallback logic implemented.",
+      "activity_type": "system_integration_software_engineering",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "`solve_arc_task.py` module.",
+        "Integration tests.",
+        "Solver process logs."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Ties all ARC dev together. Depends on all prior `DW_ARC_...` tasks based on `jarc_reactor`."
+  },
+  {
+    "task_id_candidate": "DW_ARC_EVAL_001",
+    "tentative_title": "Implement Private ARC Evaluation Harness & `submission.json` Generator (for new solver)",
+    "source_reference": [
+      {"file": "simplest_arc_agi/docs/arc_evaluation.md"},
+      {"file": "Kaggle ARC Prize 2025 Overview", "section": "Submission File"}
+    ],
+    "description_objective": "Adapt `jarc_reactor/evaluation/` tools or build new ones to: 1. Create/curate a private ARC task set for internal testing. 2. Run the new `DW_ARC_SOLVER_001` over this set. 3. Calculate ARC accuracy and other metrics. 4. Generate `submission.json` from the new solver's predictions.",
+    "primary_type": "Tooling & Evaluation Framework",
+    "initial_scale_estimate": "Medium (2-3 days)",
+    "potential_deliverables_outcomes": [
+      "Private ARC evaluation task set.",
+      "Adapted/new evaluation script for the compositional solver.",
+      "`generate_submission_json.py` utility for new solver.",
+      "Internal performance benchmarks."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_EVAL_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To create an internal evaluation framework for the `simplest_arc_agi` compositional solver and generate Kaggle submission files.",
+      "estimated_effort_tshirt": "M",
+      "estimated_effort_hours_raw": "2-3 days",
+      "estimated_effort_hours_min": 12,
+      "estimated_effort_hours_max": 18,
+      "completion_criteria_summary": "Eval harness functional. Submission generator produces valid JSON for new solver.",
+      "activity_type": "testing_framework_tool_development",
+      "recommended_block": "focused_dev_block",
+      "deliverables": [
+        "Private ARC task set.",
+        "Evaluation scripts for new solver.",
+        "Submission generator for new solver."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Leverages `jarc_reactor`'s existing evaluation concepts but adapts for the compositional solver."
+  },
+  {
+    "task_id_candidate": "DW_ARC_KAGGLE_001",
+    "tentative_title": "Package & Optimize `jarc_reactor`-based Compositional Solver for Kaggle",
+    "source_reference": [
+      {"file": "Kaggle ARC Prize 2025 Overview", "section": "Code Requirements, Upgraded Accelerators"},
+      {"file": "jarc_reactor/kaggle/kaggle_submission.py", "comment": "Existing submission logic to adapt"}
+    ],
+    "description_objective": "Package the `simplest_arc_agi` compositional solver (built on `jarc_reactor` components) for Kaggle. This involves: 1. Integrating `simplest_arc_agi` code into `jarc_reactor/kaggle/` structure or creating new Kaggle notebook. 2. Packaging the offline LLM and `CircuitDatabase` (with `jarc_reactor`-derived circuits) as Kaggle datasets. 3. Optimizing for 12-hour runtime and L4x4 GPU memory. 4. Rigorous testing in simulated offline Kaggle environment.",
+    "primary_type": "Deployment Engineering & Optimization",
+    "initial_scale_estimate": "Large (5-7 days, iterative refinement leveraging `jarc_reactor`'s Kaggle setup)",
+    "potential_deliverables_outcomes": [
+      "Kaggle dataset(s) with offline LLM and `CircuitDatabase`.",
+      "Functional master Kaggle notebook for the compositional solver.",
+      "Performance benchmarks meeting Kaggle constraints.",
+      "Documentation of the updated Kaggle packaging process."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_KAGGLE_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To create a fully compliant and performant Kaggle submission notebook for the `simplest_arc_agi` compositional solver.",
+      "estimated_effort_tshirt": "L",
+      "estimated_effort_hours_raw": "5-7 days",
+      "estimated_effort_hours_min": 30,
+      "estimated_effort_hours_max": 42,
+      "completion_criteria_summary": "Kaggle notebook runs end-to-end offline with compositional solver, produces valid `submission.json` within limits.",
+      "activity_type": "deployment_optimization_engineering",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Kaggle dataset(s) for circuits/LLM.",
+        "Master Kaggle notebook.",
+        "Performance report.",
+        "Updated deployment guide."
+      ]
+    },
+    "implicit_reasoning_confidence": "High (Critical for competition entry)",
+    "notes_questions_dependencies": "Leverages `jarc_reactor`'s existing Kaggle scripts, but offline LLM and circuit DB access are new complexities. Iterative testing is key."
+  },
+  {
+    "task_id_candidate": "DW_ARC_PAPER_001",
+    "tentative_title": "Draft ARC Prize Paper Award Submission (Focus: `simplest_arc_agi` on `jarc_reactor`)",
+    "source_reference": [
+      {"file": "Kaggle ARC Prize 2025 Overview", "section": "Paper Award"}
+    ],
+    "description_objective": "Prepare a high-quality paper documenting the `simplest_arc_agi` compositional approach, as implemented using `jarc_reactor` components, for the ARC Prize Paper Award. Address all six evaluation criteria (Accuracy, Universality, Progress, Theory, Completeness, Novelty). Synthesize R&D into a coherent scientific narrative.",
+    "primary_type": "Content Creation (Scientific Writing)",
+    "initial_scale_estimate": "Large (5-8 days for initial full draft)",
+    "potential_deliverables_outcomes": [
+      "Complete draft of the Paper Award submission.",
+      "Supporting figures, tables, and visualizations.",
+      "Clear articulation of novelty, theory, and broader impact.",
+      "Appendices (circuit examples, LLM prompts, etc.)."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_PAPER_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To produce a compelling scientific paper detailing the `simplest_arc_agi` approach on `jarc_reactor` for the ARC Prize Paper Award.",
+      "estimated_effort_tshirt": "L",
+      "estimated_effort_hours_raw": "5-8 days",
+      "estimated_effort_hours_min": 30,
+      "estimated_effort_hours_max": 48,
+      "completion_criteria_summary": "Full paper draft addressing all award criteria, ready for internal review.",
+      "activity_type": "research_writing_scientific_communication",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Paper draft (PDF).",
+        "Supporting figures/tables.",
+        "Novelty/Theory contribution statements."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Done towards end of competition. Iterative writing is best."
+  },
+  {
+    "task_id_candidate": "DW_ARC_HARVEST_KCV_001",
+    "tentative_title": "Integrate `jarc_reactor`-derived Circuit Library & Insights into Cultivation KCV",
+    "source_reference": [
+      {"file": "Strategic_Integration_of_ARC_Prize_2025_vCurrent.md", "section": "V.1. KCV Layer Materialization"},
+      {"file": "cultivation/outputs/deep_work_candidates/task_plans/hil_kcv_plan.json", "task_id_candidate": ["DW_KCV_001", "DW_KCV_002", "DW_KCV_004"]}
+    ],
+    "description_objective": "Systematically transfer knowledge, the `CircuitDatabase` (populated with `jarc_reactor`-derived circuits), and composition methodologies from the ARC sprint into Cultivation's KCV layer. Involves: 1. Adapting ARC `CircuitDatabase` to serve as a core component of KCV Knowledge Graph (`DW_KCV_001`). 2. Generalizing the LLM planner and `CircuitComposer` for KCV Hypothesis Formalization (`DW_KCV_002`) and Analogical Reasoning (`DW_KCV_004`). 3. Documenting lessons for KCV 'Think Tank'.",
+    "primary_type": "System Integration & Knowledge Transfer (Strategic)",
+    "initial_scale_estimate": "Large (3-5 days, post-competition)",
+    "potential_deliverables_outcomes": [
+      "KCV KG instance populated with ARC-derived circuits.",
+      "Generalized composition tools for KCV.",
+      "Updated KCV design document with ARC findings.",
+      "Flashcore cards summarizing key insights."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_HARVEST_KCV_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To ensure ARC Prize assets and insights are systematically integrated into Cultivation KCV, fulfilling the 'no throwaway work' principle.",
+      "estimated_effort_tshirt": "L",
+      "estimated_effort_hours_raw": "3-5 days",
+      "estimated_effort_hours_min": 18,
+      "estimated_effort_hours_max": 30,
+      "completion_criteria_summary": "ARC Circuit DB integrated with KCV KG. Composer generalized. KCV docs updated.",
+      "activity_type": "knowledge_transfer_system_integration",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "Updated KCV KG/Circuit DB.",
+        "Generalized composer modules.",
+        "Updated KCV design documents."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Primary 'benefit harvesting' for KCV. Occurs post-ARC submission."
+  },
+  {
+    "task_id_candidate": "DW_ARC_HARVEST_APTITUDE_001",
+    "tentative_title": "Develop & Integrate ARC Performance Metrics into Cultivation Π Engine Aptitude (A) Domain",
+    "source_reference": [
+      {"file": "Strategic_Integration_of_ARC_Prize_2025_vCurrent.md", "section": "V.2. Activating the \"Aptitude (A)\" Dimension"},
+      {"file": "cultivation/outputs/deep_work_candidates/task_plans/hil_kcv_plan.json", "task_id_candidate": "DW_HIL_CORE_002"}
+    ],
+    "description_objective": "Define and implement metrics from the ARC solver's performance to quantify Cultivation's 'Aptitude (A)' dimension for the Global Potential (Π) engine. Involves: 1. Identifying key ARC performance indicators (accuracy on private eval set, few-shot efficiency, complexity of problems solved). 2. Developing ETL for these metrics from `DW_ARC_EVAL_001` outputs. 3. Integrating into `potential_engine.py` (`DW_HIL_CORE_002`) for a data-driven Aptitude score.",
+    "primary_type": "System Integration & Data Engineering (HPE)",
+    "initial_scale_estimate": "Medium (2-3 days, post-competition)",
+    "potential_deliverables_outcomes": [
+      "Defined schema and ETL for `aptitude_metrics.parquet`.",
+      "Updated `potential_engine.py` with Aptitude domain metrics.",
+      "Demonstrated Π calculation including ARC-derived Aptitude score.",
+      "Documentation of Aptitude metrics and Π integration."
+    ],
+    "hpe_csm_reference": {
+      "source_document": "arc_agi_plan.json",
+      "csm_id": "DW_ARC_HARVEST_APTITUDE_001",
+      "anchor_link": null
+    },
+    "hpe_learning_meta": {
+      "development_objective_summary": "To make Cultivation's 'Aptitude' domain data-driven using ARC performance as the first concrete input for the Π engine.",
+      "estimated_effort_tshirt": "M",
+      "estimated_effort_hours_raw": "2-3 days",
+      "estimated_effort_hours_min": 12,
+      "estimated_effort_hours_max": 18,
+      "completion_criteria_summary": "Aptitude metrics ETL functional. Π engine incorporates Aptitude score.",
+      "activity_type": "data_engineering_hpe_integration",
+      "recommended_block": "focused_dev_block",
+      "deliverables": [
+        "`aptitude_metrics.parquet` schema and ETL.",
+        "Updated `potential_engine.py`.",
+        "Demonstration of Π with Aptitude score."
+      ]
+    },
+    "implicit_reasoning_confidence": "High",
+    "notes_questions_dependencies": "Critical 'benefit harvesting' for Π engine. Depends on `DW_ARC_EVAL_001` outputs and stable `potential_engine.py`."
+  }
+]
