@@ -4,6 +4,83 @@ Welcome to the **Holistic Performance Enhancement** project repository! This ini
 
 ![Cultivation Banner](path_to_your_banner_image)
 
+## 🚦 Project Task Runner: Go Task
+
+This project uses [Go Task](https://taskfile.dev) for all development, testing, and operational automation.
+
+### 🛠️ Install Go Task
+- Follow the [official installation guide](https://taskfile.dev/installation/).
+- On macOS:
+  ```sh
+  brew install go-task/tap/go-task
+  ```
+- On Linux/WSL:
+  ```sh
+  sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
+  ```
+
+### 🚀 Basic Usage
+- **List all available tasks:**
+  ```sh
+  task --list-all
+  ```
+- **Run a specific task:**
+  ```sh
+  task <taskname>
+  ```
+  Example:
+  ```sh
+  task test
+  task lint
+  task run:dev-reflect
+  task clean
+  ```
+
+### ⭐ Recommended Tasks
+- `task setup` — Set up Python virtualenv and install dependencies.
+- `task test` — Run the full test suite.
+- `task lint` — Lint Python and Markdown files.
+- `task docs` — Serve documentation locally.
+- `task docs:build` — Build static docs.
+- `task clean` — Remove all caches and temp files.
+- `task run:dev-reflect` — Generate daily dev reflection report.
+- `task run:process-runs` — Batch process all new running data.
+- `task run:github-automation` — Automate GitHub log/diff collection.
+
+### 🔍 Discover More Tasks
+- See all available commands:
+  ```sh
+  task --list-all
+  ```
+- Or read the `Taskfile.yml` for advanced options and descriptions.
+
+### ⚠️ OS-Specific Notes
+- The `clean` task and some scripts use `find` and `rm -rf` (macOS/Linux only).
+- For Windows, use WSL or adapt commands accordingly.
+
+### 🧠 Troubleshooting & Tips
+- Always activate the Python virtual environment:
+  ```sh
+  source .venv/bin/activate
+  ```
+- If you see “command not found: task”, ensure Go Task is installed and in your PATH.
+- For Task Master AI features, load your `.env` as described below.
+
+### 🤖 Task Master AI Integration: Environment Variable Requirement
+
+Before running any Task Master AI-powered commands (such as `add-task` with a prompt, `analyze-complexity`, or any command using Claude or Perplexity), you **must** load your API keys from `.env` into your shell session:
+
+```bash
+export $(grep -v '^#' .env | xargs)
+```
+- Ensure your `.env` file does **not** have inline comments after values (only one `KEY="value"` per line).
+- Run this command in every new terminal session before using AI-driven Task Master features.
+- You can verify the variables are loaded with `echo $ANTHROPIC_API_KEY`.
+
+---
+
+See `Taskfile.yml` for a full list of available developer and data operations. For any issues, consult the Troubleshooting section or open an issue on GitHub.
+
 ## 🚀 Quick Start: Automated Running Data Analysis
 
 You can now analyze your running data with a fully automated, one-click workflow:

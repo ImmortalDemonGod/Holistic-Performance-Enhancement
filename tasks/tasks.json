@@ -1268,6 +1268,158 @@
     },
     {
       "id": 14,
+      "title": "Implement Standardized Project Task Runner (Taskfile)",
+      "description": "Evaluate, select, and implement a project-wide command-line task runner using Go Task with Taskfile.yml to standardize commands for all common development and operational tasks.",
+      "status": "done",
+      "dependencies": [],
+      "priority": "high",
+      "details": "Implement a standardized task runner using Go Task to provide consistent commands for development, operational, and utility tasks, enhancing developer experience and automation.",
+      "testStrategy": "Verify that all defined tasks in the Taskfile.yml execute correctly across platforms (Linux, macOS, Windows/WSL), that documentation is clear and validated by a peer, that error handling is robust, and that no significant performance overhead is introduced. A verification checklist must be completed before marking this task as done.",
+      "hpe_csm_reference": {
+        "source_document": "cultivation/outputs/deep_work_candidates/task_plans/ia_layer_plan.json",
+        "csm_id": "DW_IA_TOOLING_001",
+        "anchor_link": null
+      },
+      "hpe_learning_meta": {
+        "task_objective_summary": "To implement a project-wide command-line task runner (Go Task with Taskfile.yml) to provide standardized, discoverable, and easily memorable commands for all common development, build, test, and operational tasks.",
+        "estimated_effort_tshirt": "M",
+        "estimated_effort_hours_raw": "1-2 days",
+        "estimated_effort_hours_min": 6,
+        "estimated_effort_hours_max": 12,
+        "mastery_criteria_summary": "A functional Taskfile.yml is committed to the project root, covering all key task categories. Developer documentation is updated with new setup and usage instructions. At least one CI workflow is refactored to use the task runner.",
+        "activity_type": "devops_tooling_implementation",
+        "recommended_block": "deep_work",
+        "deliverables": [
+          "A well-documented Taskfile.yml at the project root.",
+          "Standardized commands for at least 7-10 key development lifecycle operations.",
+          "Updated developer setup documentation in README.md or DEVELOPMENT.md.",
+          "At least one CI workflow refactored to use the new task commands."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": null,
+        "curriculum_part_title": "P0: Infrastructure & Automation Layer",
+        "csm_tags": [
+          "p0_foundations",
+          "ia_layer",
+          "tooling",
+          "dx"
+        ]
+      },
+      "labels": [
+        "domain:ia_layer",
+        "pillar:tooling",
+        "type:devops",
+        "block:deep_work",
+        "effort_tshirt:M"
+      ],
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Install and configure Go Task",
+          "description": "Install Go Task locally and ensure it's available in the development environment. This may involve updating PATH or installing via a package manager.",
+          "status": "done",
+          "dependencies": [],
+          "parentTaskId": 14
+        },
+        {
+          "id": 2,
+          "title": "Create root Taskfile.yml with basic structure",
+          "description": "Initialize the `Taskfile.yml` at the project root with the version declaration and a `vars` section for common paths like the Python venv and cultivation root.",
+          "status": "done",
+          "dependencies": [
+            1
+          ],
+          "parentTaskId": 14
+        },
+        {
+          "id": 3,
+          "title": "Implement 'Setup' tasks",
+          "description": "Create tasks for initial environment setup, including Python virtual environment creation and dependency installation (`task setup`).",
+          "status": "done",
+          "dependencies": [
+            2
+          ],
+          "parentTaskId": 14
+        },
+        {
+          "id": 4,
+          "title": "Implement 'Development' tasks",
+          "description": "Create namespaced or grouped tasks for `lint` (Python, Markdown) and `test` (pytest suite).",
+          "status": "done",
+          "dependencies": [
+            2
+          ],
+          "parentTaskId": 14
+        },
+        {
+          "id": 5,
+          "title": "Implement 'Documentation' tasks",
+          "description": "Create tasks for building (`task docs:build`), serving locally (`task docs:serve`), and deploying the MkDocs site (`task docs:deploy`).",
+          "status": "done",
+          "dependencies": [
+            2
+          ],
+          "parentTaskId": 14
+        },
+        {
+          "id": 6,
+          "title": "Implement 'Operational' tasks for key pipelines",
+          "description": "Create wrapper tasks for running key project pipelines, such as `task run:dev-reflect`, `task run:sync-wellness`, and `task run:process-runs`.",
+          "status": "done",
+          "dependencies": [
+            2
+          ],
+          "parentTaskId": 14
+        },
+        {
+          "id": 7,
+          "title": "Implement 'Utility' tasks",
+          "description": "Create utility tasks like `clean` to remove temporary files and caches.",
+          "status": "done",
+          "dependencies": [
+            2
+          ],
+          "parentTaskId": 14
+        },
+        {
+          "id": 8,
+          "title": "Document all commands in Taskfile.yml",
+          "description": "Ensure every task and namespace in the Taskfile has a clear `desc:` field explaining its purpose and usage.",
+          "status": "done",
+          "dependencies": [
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "parentTaskId": 14
+        },
+        {
+          "id": 9,
+          "title": "Update project README with Task Runner instructions",
+          "description": "Refactor the main `README.md` to guide developers to use the new task runner for setup and daily operations.",
+          "status": "done",
+          "dependencies": [
+            8
+          ],
+          "parentTaskId": 14
+        },
+        {
+          "id": 10,
+          "title": "Refactor one CI workflow to use Task Runner",
+          "description": "As a proof of concept, refactor one existing GitHub Actions workflow (e.g., `markdown-lint.yml`) to call a `task` command instead of the raw script call.",
+          "status": "done",
+          "dependencies": [
+            8
+          ],
+          "parentTaskId": 14
+        }
+      ]
+    },
+    {
+      "id": 15,
       "title": "Mastery: RNA Monomer Biophysics",
       "description": "Systematic learning of the RNA monomer document using the pre-testing workflow.",
       "details": "",
