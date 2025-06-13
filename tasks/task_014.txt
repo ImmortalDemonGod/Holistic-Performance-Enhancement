@@ -1,0 +1,73 @@
+# Task ID: 14
+# Title: Implement Standardized Project Task Runner (Taskfile)
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Evaluate, select, and implement a project-wide command-line task runner using Go Task with Taskfile.yml to standardize commands for all common development and operational tasks.
+# Details:
+Implement a standardized task runner using Go Task to provide consistent commands for development, operational, and utility tasks, enhancing developer experience and automation.
+
+# Test Strategy:
+Verify that all defined tasks in the Taskfile.yml execute correctly across platforms (Linux, macOS, Windows/WSL), that documentation is clear and validated by a peer, that error handling is robust, and that no significant performance overhead is introduced. A verification checklist must be completed before marking this task as done.
+
+# Subtasks:
+## 1. Install and configure Go Task [done]
+### Dependencies: None
+### Description: Install Go Task locally and ensure it's available in the development environment. This may involve updating PATH or installing via a package manager.
+### Details:
+
+
+## 2. Create root Taskfile.yml with basic structure [done]
+### Dependencies: 14.1
+### Description: Initialize the `Taskfile.yml` at the project root with the version declaration and a `vars` section for common paths like the Python venv and cultivation root.
+### Details:
+
+
+## 3. Implement 'Setup' tasks [done]
+### Dependencies: 14.2
+### Description: Create tasks for initial environment setup, including Python virtual environment creation and dependency installation (`task setup`).
+### Details:
+
+
+## 4. Implement 'Development' tasks [done]
+### Dependencies: 14.2
+### Description: Create namespaced or grouped tasks for `lint` (Python, Markdown) and `test` (pytest suite).
+### Details:
+
+
+## 5. Implement 'Documentation' tasks [done]
+### Dependencies: 14.2
+### Description: Create tasks for building (`task docs:build`), serving locally (`task docs:serve`), and deploying the MkDocs site (`task docs:deploy`).
+### Details:
+
+
+## 6. Implement 'Operational' tasks for key pipelines [done]
+### Dependencies: 14.2
+### Description: Create wrapper tasks for running key project pipelines, such as `task run:dev-reflect`, `task run:sync-wellness`, and `task run:process-runs`.
+### Details:
+
+
+## 7. Implement 'Utility' tasks [done]
+### Dependencies: 14.2
+### Description: Create utility tasks like `clean` to remove temporary files and caches.
+### Details:
+
+
+## 8. Document all commands in Taskfile.yml [done]
+### Dependencies: 14.3, 14.4, 14.5, 14.6, 14.7
+### Description: Ensure every task and namespace in the Taskfile has a clear `desc:` field explaining its purpose and usage.
+### Details:
+
+
+## 9. Update project README with Task Runner instructions [done]
+### Dependencies: 14.8
+### Description: Refactor the main `README.md` to guide developers to use the new task runner for setup and daily operations.
+### Details:
+
+
+## 10. Refactor one CI workflow to use Task Runner [done]
+### Dependencies: 14.8
+### Description: As a proof of concept, refactor one existing GitHub Actions workflow (e.g., `markdown-lint.yml`) to call a `task` command instead of the raw script call.
+### Details:
+
+

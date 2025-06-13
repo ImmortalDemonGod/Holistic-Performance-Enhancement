@@ -10,6 +10,7 @@ Below is a hierarchical overview of all documentation sections, subfolders, and 
 - **📁 0 Vision And Strategy**
   - [📄 Readme](0_vision_and_strategy/README.md)
   - [📄 The Dao Of Cultivation A Founding Vision](0_vision_and_strategy/The_Dao_of_Cultivation_A_Founding_Vision.md)
+  - [📄 Creator Psychological Profile V2.0](0_vision_and_strategy/creator_psychological_profile_v2.0.md)
   - [📄 Project Philosophy And Core Concepts](0_vision_and_strategy/project_philosophy_and_core_concepts.md)
   - 📁 Archive
     - [📄 Readme](0_vision_and_strategy/archive/README.md)
@@ -22,6 +23,7 @@ Below is a hierarchical overview of all documentation sections, subfolders, and 
     - [📄 Ultimate Goals](0_vision_and_strategy/archive/ultimate_goals.md)
   - 📁 Strategic Initiatives
     - [📄 Cultivation Svep Master V1 0](0_vision_and_strategy/strategic_initiatives/CULTIVATION_SVEP_MASTER_V1_0.md)
+    - [📄 Strategic Integration Of Arc Prize 2025 Into The Cultivation Project Via Simplest Arc Agi V1.0](0_vision_and_strategy/strategic_initiatives/Strategic_Integration_of_ARC_Prize_2025_into_the_Cultivation_Project_via_simplest_arc_agi_v1.0.md)
 - **📁 1 Background And Theory**
   - [📄 Readme](1_background_and_theory/README.md)
   - [📄 Domains Scope](1_background_and_theory/domains_scope.md)
@@ -73,8 +75,11 @@ Below is a hierarchical overview of all documentation sections, subfolders, and 
   - [📄 Readme](4_analysis_results_and_audits/README.md)
   - [📄 Analysis Overview](4_analysis_results_and_audits/analysis_overview.md)
   - [📄 Week21 Rpe10 Benchmark Analysis](4_analysis_results_and_audits/week21_rpe10_benchmark_analysis.md)
+  - 📁 Physiological Audits
+    - [📄 W17-W23 Physiological Progression Audit V1](4_analysis_results_and_audits/physiological_audits/w17-w23_physiological_progression_audit_v1.md)
   - 📁 Repository Audits
     - [📄 Architectural Review And Task Consolidation 2025-05-29](4_analysis_results_and_audits/repository_audits/architectural_review_and_task_consolidation_2025-05-29.md)
+    - [📄 Habitdash Export Vs Cache Report](4_analysis_results_and_audits/repository_audits/habitdash_export_vs_cache_report.md)
     - [📄 System Readiness Audit 2025-04-18](4_analysis_results_and_audits/repository_audits/system_readiness_audit_2025-04-18.md)
   - 📁 Run Reports
     - [📄 2025 04 27 Run Report](4_analysis_results_and_audits/run_reports/2025_04_27_run_report.md)
@@ -82,6 +87,8 @@ Below is a hierarchical overview of all documentation sections, subfolders, and 
     - [📄 2025 05 11 Run Report](4_analysis_results_and_audits/run_reports/2025_05_11_run_report.md)
     - [📄 2025 05 17 Run Report](4_analysis_results_and_audits/run_reports/2025_05_17_run_report.md)
     - [📄 2025 05 24 Run Report](4_analysis_results_and_audits/run_reports/2025_05_24_run_report.md)
+    - [📄 2025 05 31 Run Report](4_analysis_results_and_audits/run_reports/2025_05_31_run_report.md)
+    - [📄 2025 06 08 Run Report](4_analysis_results_and_audits/run_reports/2025_06_08_run_report.md)
 - **📁 5 Domain Knowledge And Curricula**
   - [📄 Readme](5_domain_knowledge_and_curricula/README.md)
   - 📁 Biology
@@ -151,7 +158,13 @@ Below is a hierarchical overview of all documentation sections, subfolders, and 
   - [📄 Readme](meta/README.md)
   - [📄 Repository Progress Audit 2025-05-31](meta/repository_progress_audit_2025-05-31.md)
   - 📁 Templates
+    - [📄 General Analysis Report Template](meta/templates/general_analysis_report_template.md)
     - [📄 Knowledge Base Subsection Template](meta/templates/knowledge_base_subsection_template.md)
     - [📄 Quiz Subsection Template](meta/templates/quiz_subsection_template.md)
     - [📄 Running Analysis Template](meta/templates/running_analysis_template.md)
+    - [📄 Self Assessment Test Template](meta/templates/self_assessment_test_template.md)
+    - [📄 Strategic Initiative Plan Template](meta/templates/strategic_initiative_plan_template.md)
+    - [📄 Strategic Project Overview Template](meta/templates/strategic_project_overview_template.md)
+    - [📄 Strength Training Block Template](meta/templates/strength_training_block_template.md)
+    - [📄 Weekly Learning Plan Template](meta/templates/weekly_learning_plan_template.md)
 <!-- AUTO-TOC-END -->

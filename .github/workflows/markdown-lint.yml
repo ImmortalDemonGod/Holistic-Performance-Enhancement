@@ -19,8 +19,9 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
 
-      - name: Install PyMarkdown Lint
-        run: pip install pymarkdownlnt
+      - name: Install Go Task
+        run: |
+          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
 
-      - name: Lint Markdown
-        run: pymarkdown scan cultivation/docs/
+      - name: Lint Markdown (via Task Runner)
+        run: task lint:md
