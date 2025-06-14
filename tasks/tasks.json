@@ -1428,6 +1428,103 @@
       "dependencies": [],
       "priority": "medium",
       "subtasks": []
+    },
+    {
+      "id": 16,
+      "title": "Integrate jarc_reactor Codebase & Establish ARC Sprint Environment",
+      "description": "Epic foundational task for Track A of the ARC Prize sprint: transform jarc-reactor from an external asset into a fully integrated, quality-assured, and testable component of the Cultivation project, establishing the baseline for all future ARC Prize work.",
+      "details": "This task is the cornerstone of the ARC Prize sprint, activating the baseline, enforcing Cultivation's Infrastructure & Automation (IA) Layer standards, and providing the testbed for all future ARC experimentation.\n\nStrategic Purpose:\n- De-risk the sprint by establishing a robust, operational baseline.\n- Enforce code quality and prevent technical debt from day one.\n- Provide a stable, standardized platform for all future R&D.\n\nDependency Graph (see mermaid diagram in project docs):\n16.1 → 16.2 → 16.3 → (16.4 & 16.6) → 16.5 → 16.7\n\nSee subtasks for detailed risk analysis, mitigation strategies, and workflow guidance.",
+      "testStrategy": "Definition of Done (Checklist):\n1. jarc_reactor integrated using git subtree with full history.\n2. All internal import paths refactored for Cultivation structure or PYTHONPATH bridging in place.\n3. Dependencies harmonized in root requirements.txt, validated with pip check.\n4. Both Cultivation and jarc_reactor test suites pass in unified environment.\n5. IA Layer compliance: all pre-commit hooks pass, logging refactored, Taskfile targets present.\n6. ARC dataset configured and at least a dozen tasks parsed successfully.\n7. Documentation (README.md) in place and up to date.\n8. CI workflow (arc-reactor-ci.yml) triggers on arc_reactor changes and passes.\n9. \"First Light\" integration test: end-to-end training run completes and saves a checkpoint; validation report generated.",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Clone and Structure jarc_reactor Repository in Cultivation Project",
+          "description": "Use git subtree to merge jarc_reactor into cultivation/systems/arc_reactor/ with full commit history. Update all internal Python import paths to be absolute from the cultivation root. If impractical, temporarily bridge with PYTHONPATH in Taskfile targets.",
+          "risks": "Refactoring all import paths is time-consuming and error-prone.",
+          "mitigation": "Use IDE-assisted project-wide refactor. Consider a bridging step with PYTHONPATH for initial integration.",
+          "dependencies": []
+        },
+        {
+          "id": 2,
+          "title": "Harmonize Dependencies",
+          "description": "Analyze jarc-reactor/requirements.txt and merge into root requirements.txt. Default to newer versions, but validate both Cultivation and jarc_reactor test suites after merging. Use pip check to confirm environment integrity.",
+          "risks": "Newer dependency versions may break jarc_reactor functionality.",
+          "mitigation": "Run both test suites immediately after merge; be prepared to pin/patch versions if needed.",
+          "dependencies": [1]
+        },
+        {
+          "id": 3,
+          "title": "Implement IA Layer Compliance",
+          "description": "Run pre-commit run --all-files and fix all black, ruff, isort issues in arc_reactor. Refactor all logging to use cultivation.utils.logger_setup. Add arc:lint and arc:test targets to Taskfile.yml.",
+          "clarification": "IA stands for Infrastructure & Automation in Cultivation context.",
+          "dependencies": [2]
+        },
+        {
+          "id": 4,
+          "title": "Configure ARC Dataset Environment",
+          "description": "Download ARC dataset to cultivation/data/raw/arc_prize_2025/. Create override config to point jarc_reactor to this path. Audit/adapt data loaders to parse official ARC JSON format; verify parsing of at least a dozen tasks.",
+          "risks": "Format mismatch between ARC JSON and jarc_reactor expectations.",
+          "mitigation": "Debug and refactor data_preparation.py as needed.",
+          "dependencies": [3]
+        },
+        {
+          "id": 5,
+          "title": "Document Integrated System",
+          "description": "Create and maintain README.md in cultivation/systems/arc_reactor/ as a living document. Update as Taskfile targets and other features are finalized.",
+          "dependencies": [4,6]
+        },
+        {
+          "id": 6,
+          "title": "Create CI Workflow",
+          "description": "Implement arc-reactor-ci.yml GitHub Actions workflow to run arc:lint and arc:test. Trigger only on changes to arc_reactor and related files for efficiency.",
+          "refinement": "Use on.<push/pull_request>.paths to limit scope.",
+          "dependencies": [3]
+        },
+        {
+          "id": 7,
+          "title": "Perform First Light Integration Test",
+          "description": "Run an end-to-end training cycle on a small ARC data subset. Generate a validation report (Markdown) with loss/accuracy and link to CI logs. Success = run completes and checkpoint is saved.",
+          "dependencies": [5]
+        }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/WORK_IN_PROGRESS/arc_agi_plan.json",
+        "csm_id": "DW_ARC_JR_INTEGRATE_001",
+        "anchor_link": null
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": "To establish a robust, standardized, and well-understood development environment for jarc-reactor as the foundation for the ARC Prize sprint.",
+        "estimated_effort_tshirt": "L",
+        "estimated_effort_hours_raw": "3-5 days",
+        "estimated_effort_hours_min": 18,
+        "estimated_effort_hours_max": 30,
+        "mastery_criteria_summary": "jarc_reactor environment is fully set up, IA standards are applied, and a baseline training run on ARC data completes successfully.",
+        "activity_type": "systems_integration_devops_setup",
+        "recommended_block": "deep_work",
+        "deliverables": [
+          "Configured jarc-reactor dev environment within Cultivation.",
+          "Updated Taskfile.yml with arc:* targets.",
+          "Functional arc-reactor-ci.yml GitHub Actions workflow.",
+          "Documentation for the integrated system (README.md).",
+          "A final validation report from the 'First Light' integration test."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": null,
+        "curriculum_part_title": "ARC Sprint: P0 - Foundational Integration",
+        "csm_tags": ["arc_sprint", "jarc_reactor", "setup", "ia_layer", "track_a", "epic"]
+      },
+      "labels": [
+        "domain:arc_sprint",
+        "component:ia_layer",
+        "activity:systems_integration",
+        "block:deep_work",
+        "effort_tshirt:L",
+        "track:A"
+      ]
     }
   ],
   "metadata": {
