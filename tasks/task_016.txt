@@ -1,0 +1,150 @@
+# Task ID: 16
+# Title: Integrate jarc_reactor Codebase & Establish ARC Sprint Environment
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Perform the initial integration of the jarc-reactor repository into the Cultivation project, including dependency harmonization, IA layer compliance, and configuration for the ARC dataset.
+# Details:
+This task involves merging the jarc_reactor codebase into the Cultivation project while maintaining proper version control history, ensuring dependency compatibility, enforcing code standards, and setting up the environment for working with the ARC (Abstraction and Reasoning Corpus) dataset.
+
+# Test Strategy:
+Verification checklist for completion:
+1. Confirm jarc_reactor has been properly integrated using git subtree with full history preserved
+2. Verify all dependencies are harmonized in the root requirements.txt with no conflicts
+3. Validate IA Layer compliance through pre-commit hooks and code standards
+4. Ensure ARC dataset is properly configured and accessible
+5. Check that documentation is complete and accurate
+6. Verify CI workflow is implemented and functioning
+7. Confirm successful end-to-end training cycle on ARC data
+
+# Subtasks:
+## 1. Clone and Structure jarc_reactor Repository in Cultivation Project [pending]
+### Dependencies: None
+### Description: Set up the initial repository structure by cloning the jarc_reactor codebase and establishing the proper directory organization within the Cultivation project.
+### Details:
+Implementation steps:
+1. Use `git subtree` to merge the `jarc_reactor` repository into `cultivation/systems/arc_reactor/`, preserving its entire commit history
+2. Update all internal Python import paths to be absolute from the `cultivation` root
+3. Ensure proper directory structure within the Cultivation project
+4. Add appropriate README documentation explaining the integration
+5. Ensure .gitignore is updated to handle any new patterns
+
+Testing approach:
+- Verify the repository structure is correct
+- Ensure all files are properly integrated with history preserved
+- Check that import paths are correctly updated to use absolute paths
+- Confirm documentation is clear and accurate
+
+## 2. Harmonize Dependencies Between jarc_reactor and Cultivation [pending]
+### Dependencies: 16.1
+### Description: Resolve dependency conflicts and ensure all required packages are properly specified with compatible versions between the two codebases.
+### Details:
+Implementation steps:
+1. Analyze `jarc-reactor`'s `requirements.txt` file
+2. Merge its dependencies into the root `requirements.txt` file
+3. Resolve any version conflicts, defaulting to the newer version
+4. Validate the new unified environment with `pip check`
+5. Document any significant version changes or dependency decisions
+6. Create a unified dependency management approach for the integrated codebase
+
+Testing approach:
+- Create a fresh virtual environment and install all dependencies
+- Verify no conflicts arise during installation using `pip check`
+- Run basic imports of key modules to ensure they load correctly
+- Document any dependency-related issues encountered and their resolutions
+
+## 3. Implement IA Layer Compliance for jarc_reactor Components [pending]
+### Dependencies: 16.1, 16.2
+### Description: Adapt the jarc_reactor code to comply with the Cultivation project's IA (Interface Abstraction) layer requirements.
+### Details:
+Implementation steps:
+1. Run `pre-commit run --all-files` and fix all `black`, `ruff`, and `isort` issues in the new `arc_reactor` directory
+2. Refactor all `logging` calls to use the Cultivation project's standard logger
+3. Add `arc:lint` and `arc:test` targets to the root `Taskfile.yml`
+4. Review the Cultivation project's IA layer specifications and requirements
+5. Identify all jarc_reactor components that need IA layer compliance
+6. Create adapter classes or modify existing code to implement required interfaces
+7. Ensure proper abstraction between components according to IA guidelines
+
+Testing approach:
+- Create unit tests for each adapted component
+- Verify that all components properly implement required interfaces
+- Test interaction between components through the IA layer
+- Conduct code review to ensure compliance with architectural standards
+- Verify that pre-commit hooks pass on all files
+
+## 4. Configure ARC Dataset Environment and Processing Pipeline [pending]
+### Dependencies: 16.2, 16.3
+### Description: Set up the environment and data processing pipeline for working with the ARC (Abstraction and Reasoning Corpus) dataset within the integrated codebase.
+### Details:
+Implementation steps:
+1. Download the official ARC dataset to `cultivation/data/raw/arc_prize_2025/`
+2. Create a new override config file that points `jarc-reactor` to this data path
+3. Audit and adapt `jarc_reactor`'s data loaders to ensure they can parse the official ARC JSON format
+4. Set up preprocessing pipelines for ARC tasks
+5. Configure environment variables needed for the ARC sprint
+6. Create documentation for dataset usage and configuration
+
+Testing approach:
+- Verify dataset loading functions correctly retrieve ARC examples
+- Test preprocessing pipeline with sample ARC tasks
+- Ensure configuration can be easily modified for different environments
+- Validate that all necessary ARC task formats are supported
+
+## 5. Document Integrated System [pending]
+### Dependencies: 16.3, 16.4
+### Description: Create comprehensive documentation for the integrated system to ensure easy onboarding and usage.
+### Details:
+Implementation steps:
+1. Create `cultivation/systems/arc_reactor/README.md` explaining the new setup
+2. Document how to use the Taskfile targets
+3. Include information about the ARC dataset and how it's structured
+4. Document any configuration options and environment variables
+5. Provide examples of common usage patterns
+6. Include troubleshooting information for common issues
+
+Testing approach:
+- Have a team member review the documentation for clarity and completeness
+- Verify all instructions can be followed without prior knowledge of the system
+- Ensure all configuration options are properly documented
+- Check that the documentation addresses all major use cases
+
+## 6. Create CI Workflow [pending]
+### Dependencies: 16.3
+### Description: Implement a new GitHub Actions workflow for continuous integration of the arc_reactor system.
+### Details:
+Implementation steps:
+1. Create a new GitHub Actions workflow file (`arc-reactor-ci.yml`)
+2. Configure the workflow to run the new `arc:lint` and `arc:test` targets on relevant PRs
+3. Set up appropriate triggers for the workflow
+4. Configure proper caching of dependencies to speed up CI runs
+5. Ensure the workflow provides clear feedback on failures
+6. Test the workflow with both passing and failing scenarios
+
+Testing approach:
+- Create test PRs to verify the workflow triggers correctly
+- Introduce deliberate linting errors to verify detection
+- Introduce test failures to verify proper reporting
+- Check that the workflow completes in a reasonable time
+- Verify caching is working as expected
+
+## 7. Perform "First Light" Integration Test [pending]
+### Dependencies: 16.4, 16.5, 16.6
+### Description: Execute a complete end-to-end test of the integrated system to validate its functionality.
+### Details:
+Implementation steps:
+1. Run a short, end-to-end training cycle on a small subset of ARC data
+2. Confirm the entire integrated system functions without errors
+3. Verify that the system successfully saves a model checkpoint
+4. Analyze logs for any warnings or potential issues
+5. Document the test process and results
+6. Create a validation report with performance metrics
+
+Testing approach:
+- Select a representative subset of ARC tasks for the test
+- Monitor system resource usage during the test
+- Validate that checkpoints are properly saved and can be loaded
+- Check that all components interact correctly through the IA layer
+- Document any issues discovered and their resolutions
+- Create a final integration report documenting the system's readiness
+
