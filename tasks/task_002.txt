@@ -97,3 +97,51 @@ Implementation steps:
 6. Compile final materials into a cohesive package with table of contents and consistent formatting
 7. Test final materials by having someone learn RNA nucleotide structure using only these materials
 
+
+
+# Subtask Details:
+
+## Subtask 2.1: Create detailed diagram of a generic RNA nucleotide structure
+Description: Draw and label a comprehensive diagram of a generic RNA nucleotide showing all key components with proper labeling and highlighting of distinctive features.
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 2.2: Develop detailed structures of the four RNA bases
+Description: Create chemically accurate diagrams of the four standard RNA bases (Adenine, Guanine, Cytosine, Uracil) with proper classification and labeling.
+Dependencies: [1]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 2.3: Write explanatory notes on nucleotide chemistry and properties
+Description: Create comprehensive notes explaining the chemical properties of RNA nucleotide components and the distinction between nucleosides and nucleotides.
+Dependencies: [1, 2]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 2.4: Create educational flashcards for RNA nucleotide structures
+Description: Develop a comprehensive set of educational flashcards covering key terms, chemical structures, and important distinctions related to RNA nucleotides.
+Dependencies: [1, 2, 3]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 2.5: Review and finalize all RNA nucleotide structure materials
+Description: Conduct a comprehensive review of all created materials for accuracy, clarity, consistency, and educational effectiveness.
+Dependencies: [1, 2, 3, 4]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified

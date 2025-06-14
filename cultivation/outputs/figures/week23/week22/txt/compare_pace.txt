@@ -1,3 +1,0 @@
-Pace Comparison (Week 22):
-20250531_155252_W22Sat_LongThreshold_AvgHR178_Decoup2p_OnLowSleep_Hot32C_EF0183_Cad167: mean=5.25, min=2.19
-20250528_172211_W22-Wed_NME2_Z2Run-Decoup15p_31CHot: mean=6.73, min=2.39

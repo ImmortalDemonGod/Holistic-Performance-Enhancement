@@ -71,3 +71,96 @@ Verify that all defined tasks in the Taskfile.yml execute correctly across platf
 ### Details:
 
 
+
+
+# Subtask Details:
+
+## Subtask 14.1: Install and configure Go Task
+Description: Install Go Task locally and ensure it's available in the development environment. This may involve updating PATH or installing via a package manager.
+Dependencies: None
+Status: done
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 14.2: Create root Taskfile.yml with basic structure
+Description: Initialize the `Taskfile.yml` at the project root with the version declaration and a `vars` section for common paths like the Python venv and cultivation root.
+Dependencies: [1]
+Status: done
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 14.3: Implement 'Setup' tasks
+Description: Create tasks for initial environment setup, including Python virtual environment creation and dependency installation (`task setup`).
+Dependencies: [2]
+Status: done
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 14.4: Implement 'Development' tasks
+Description: Create namespaced or grouped tasks for `lint` (Python, Markdown) and `test` (pytest suite).
+Dependencies: [2]
+Status: done
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 14.5: Implement 'Documentation' tasks
+Description: Create tasks for building (`task docs:build`), serving locally (`task docs:serve`), and deploying the MkDocs site (`task docs:deploy`).
+Dependencies: [2]
+Status: done
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 14.6: Implement 'Operational' tasks for key pipelines
+Description: Create wrapper tasks for running key project pipelines, such as `task run:dev-reflect`, `task run:sync-wellness`, and `task run:process-runs`.
+Dependencies: [2]
+Status: done
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 14.7: Implement 'Utility' tasks
+Description: Create utility tasks like `clean` to remove temporary files and caches.
+Dependencies: [2]
+Status: done
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 14.8: Document all commands in Taskfile.yml
+Description: Ensure every task and namespace in the Taskfile has a clear `desc:` field explaining its purpose and usage.
+Dependencies: [3, 4, 5, 6, 7]
+Status: done
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 14.9: Update project README with Task Runner instructions
+Description: Refactor the main `README.md` to guide developers to use the new task runner for setup and daily operations.
+Dependencies: [8]
+Status: done
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 14.10: Refactor one CI workflow to use Task Runner
+Description: As a proof of concept, refactor one existing GitHub Actions workflow (e.g., `markdown-lint.yml`) to call a `task` command instead of the raw script call.
+Dependencies: [8]
+Status: done
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified

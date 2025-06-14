@@ -91,3 +91,51 @@ Review the loop penalties and electrostatic effects documentation for accuracy. 
 8. Test the integrated materials with both experts and students
 9. Make final revisions based on testing feedback
 
+
+
+# Subtask Details:
+
+## Subtask 7.1: Document Loop Penalties in RNA Secondary Structures
+Description: Create comprehensive documentation explaining loop penalties as entropic costs in RNA secondary structures, covering different loop types and their size-dependent effects.
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 7.2: Analyze Entropic Unfavorability of Hairpin Loops
+Description: Develop a detailed explanation of why forming hairpin loops is entropically unfavorable, with examples and factors that influence this entropic cost.
+Dependencies: [1]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 7.3: Document Electrostatic Repulsion and Counterion Effects
+Description: Create documentation on electrostatic repulsion in RNA structures due to the negatively charged phosphate backbone and explain how counterions mitigate this effect.
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 7.4: Create Educational Flashcards on RNA Stability Factors
+Description: Develop a set of educational flashcards covering loop penalties, electrostatic repulsion, and counterion effects on RNA stability for learning and teaching purposes.
+Dependencies: [1, 2, 3]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 7.5: Review and Integrate RNA Stability Documentation
+Description: Review all materials for accuracy, consistency, and completeness, then integrate them into a cohesive educational resource on RNA stability factors.
+Dependencies: [1, 2, 3, 4]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified

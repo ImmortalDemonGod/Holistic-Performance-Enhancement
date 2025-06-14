@@ -89,3 +89,51 @@ Implementation steps:
 5. Include simple diagrams where helpful
 6. Test flashcards with students or researchers to ensure clarity and educational value
 
+
+
+# Subtask Details:
+
+## Subtask 6.1: Document Base Stacking Mechanisms and Energetics in RNA
+Description: Create comprehensive documentation explaining the mechanisms, energetic contributions, and sequence dependence of base stacking in RNA structures.
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 6.2: Document Hydrogen Bonding Patterns in RNA Base Pairs
+Description: Create detailed documentation of hydrogen bonding patterns in canonical and non-canonical RNA base pairs, including bond numbers and geometric arrangements.
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 6.3: Write Comparative Analysis of Base Stacking vs. Hydrogen Bonding
+Description: Develop a detailed 2-3 paragraph analysis contrasting the roles and relative energetic contributions of base stacking versus hydrogen bonding in stabilizing RNA helices.
+Dependencies: [1, 2]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 6.4: Develop Thought Experiment on Hairpin Stability
+Description: Create a thought experiment comparing the stability of two RNA hairpins: one with 5 G-C pairs versus one with 5 A-U pairs, with thermodynamic justification for stability predictions.
+Dependencies: [1, 2, 3]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 6.5: Create Educational Flashcards on RNA Stabilizing Forces
+Description: Develop a set of educational flashcards covering key concepts related to base stacking and hydrogen bonding in RNA structures.
+Dependencies: [1, 2, 3, 4]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified

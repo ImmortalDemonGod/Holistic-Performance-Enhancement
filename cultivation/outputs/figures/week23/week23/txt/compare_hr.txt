@@ -1,3 +1,0 @@
-Heart Rate Comparison (Week 23):
-20250605_180818_W23-Thu_Intervals_Pace4m59s_EF0185_Decoup20p_Hot32C: mean=180.4, max=204
-20250604_164918_Autoregulated_Z2_EF0181_Decoup1p_Cad163_32CHot: mean=156.5, max=189

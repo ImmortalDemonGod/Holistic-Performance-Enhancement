@@ -101,3 +101,51 @@ Verify the dinucleotide drawing shows correct linkage between nucleotides with p
 7. Finalize materials in multiple formats (print-ready PDF, web-based interactive version, presentation slides)
 8. Create a brief instructor guide with suggestions for using the materials
 
+
+
+# Subtask Details:
+
+## Subtask 3.1: Create Detailed Illustration of RNA Dinucleotide
+Description: Produce a clear, labeled illustration of an A-U dinucleotide showing the phosphodiester bond and directional elements
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 3.2: Document Phosphodiester Backbone Formation and Properties
+Description: Create comprehensive documentation on the formation, structure, and properties of the RNA phosphodiester backbone
+Dependencies: [1]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 3.3: Explain RNA 5'-to-3' Directionality Significance
+Description: Develop a clear explanation of why RNA's directional structure matters functionally and structurally
+Dependencies: [1, 2]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 3.4: Develop Educational Flashcards on RNA Structure
+Description: Create a comprehensive set of flashcards covering phosphodiester bonds and RNA directionality concepts
+Dependencies: [1, 2, 3]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 3.5: Compile and Review Complete RNA Structure Documentation
+Description: Assemble all materials into a cohesive educational package and conduct comprehensive review
+Dependencies: [1, 2, 3, 4]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified

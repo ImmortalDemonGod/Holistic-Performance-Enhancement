@@ -1,0 +1,123 @@
+{
+  "meta": {
+    "generatedAt": "2025-06-13T23:57:19.413Z",
+    "tasksAnalyzed": 14,
+    "thresholdScore": 5,
+    "projectName": "Your Project Name",
+    "usedResearch": true
+  },
+  "complexityAnalysis": [
+    {
+      "taskId": 13,
+      "taskTitle": "P1.W1.Day1 Passive: Intro to Nucleotides (Reading & Initial Notes)",
+      "complexityScore": 3,
+      "recommendedSubtasks": 3,
+      "expansionPrompt": "Break down reading and note-taking into: identifying key nucleotide components, summarizing definitions, and creating initial flashcards for each component.",
+      "reasoning": "The task primarily involves reading and summarizing, which is straightforward with minimal technical challenge. Complexity comes from ensuring comprehensive coverage and creating effective notes/flashcards."
+    },
+    {
+      "taskId": 2,
+      "taskTitle": "Develop RNA Nucleotide Structure Materials",
+      "complexityScore": 6,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Divide into: drawing and labeling generic nucleotide diagrams, illustrating base chemical structures, writing explanatory notes on nucleosides/nucleotides, and designing flashcards for definitions and distinctions.",
+      "reasoning": "This combines accurate diagram creation, chemical structure illustration, and clear explanatory content. Ensuring scientific accuracy and visual clarity increases complexity."
+    },
+    {
+      "taskId": 3,
+      "taskTitle": "Document RNA Polymer Structure and Backbone",
+      "complexityScore": 5,
+      "recommendedSubtasks": 3,
+      "expansionPrompt": "Split into: drawing and labeling an RNA dinucleotide, writing detailed notes on backbone formation and directionality, and creating flashcards for backbone and directionality concepts.",
+      "reasoning": "Requires accurate illustration and explanation of complex biochemical concepts, but is limited in scope to a specific aspect of RNA."
+    },
+    {
+      "taskId": 4,
+      "taskTitle": "Develop RNA vs. DNA Comparison Materials",
+      "complexityScore": 7,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Break into: sugar and base differences with structural implications, strandedness and functional comparison, stability/reactivity discussion, and (optional) sugar pucker illustration.",
+      "reasoning": "Involves synthesizing and comparing multiple structural and functional aspects, requiring nuanced understanding and clear presentation."
+    },
+    {
+      "taskId": 5,
+      "taskTitle": "Develop Thermodynamic Principles Materials",
+      "complexityScore": 8,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Organize into: defining thermodynamic terms, explaining Gibbs Free Energy in RNA folding, describing chemical equilibrium and MFE, writing an in-depth explanation, and creating flashcards for all concepts.",
+      "reasoning": "Requires deep understanding of thermodynamics, clear explanation of advanced concepts, and linking theory to RNA structure and stability."
+    },
+    {
+      "taskId": 6,
+      "taskTitle": "Document Base Stacking and Hydrogen Bonding in RNA",
+      "complexityScore": 7,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Divide into: explaining base stacking interactions, detailing hydrogen bonding in base pairs, writing comparative analysis of stacking vs. hydrogen bonding, and creating conceptual flashcards.",
+      "reasoning": "Demands both detailed biochemical explanation and comparative analysis, with careful attention to energetic contributions and sequence dependence."
+    },
+    {
+      "taskId": 7,
+      "taskTitle": "Document Loop Penalties and Electrostatic Effects in RNA",
+      "complexityScore": 7,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Structure as: explanation of loop penalties and entropy, documentation of electrostatic effects and counterions, detailed discussion of hairpin formation energetics, and flashcard creation.",
+      "reasoning": "Involves both entropic and electrostatic analysis, with a need to connect abstract thermodynamic concepts to biological structures."
+    },
+    {
+      "taskId": 8,
+      "taskTitle": "Document Environmental Influences on RNA Stability",
+      "complexityScore": 5,
+      "recommendedSubtasks": 3,
+      "expansionPrompt": "Break into: temperature effects on RNA stability, salt and pH effects, and summary/flashcard creation for environmental influences.",
+      "reasoning": "Covers several external factors but each is conceptually straightforward; challenge is in concise explanation and synthesis."
+    },
+    {
+      "taskId": 9,
+      "taskTitle": "Develop Comprehensive Self-Assessment Materials",
+      "complexityScore": 6,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Divide into: quiz question creation, practical assessment design, grading rubric development, and template for self-review and targeted improvement.",
+      "reasoning": "Requires pedagogical planning, diverse question types, and a clear assessment strategy to ensure comprehensive coverage and effective self-evaluation."
+    },
+    {
+      "taskId": 10,
+      "taskTitle": "Week 1 Learning Reflection, Flashcard Finalization & HPE Logging",
+      "complexityScore": 4,
+      "recommendedSubtasks": 3,
+      "expansionPrompt": "Separate into: composing learning reflection, finalizing and organizing flashcards, and logging all study activities/deliverables in Task Master.",
+      "reasoning": "Primarily organizational and reflective, with low technical complexity but some process management required for thoroughness."
+    },
+    {
+      "taskId": 11,
+      "taskTitle": "Complete Week 1 Self-Assessments (Quiz & Practical)",
+      "complexityScore": 4,
+      "recommendedSubtasks": 3,
+      "expansionPrompt": "Breakdown into: completing the quiz, carrying out the practical drawing/explanation task, and self-grading using provided rubrics.",
+      "reasoning": "Execution-focused, involving applying existing materials and self-evaluation; low conceptual complexity but requires careful review."
+    },
+    {
+      "taskId": 12,
+      "taskTitle": "Create Learning Reflection and Progress Tracking System",
+      "complexityScore": 6,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Divide into: developing reflection template, designing progress tracking system, integrating with Task Master/HPE, and setting up flashcard organization with spaced repetition.",
+      "reasoning": "Involves systems design and integration, requiring both structural planning and technical implementation for effective tracking and retention."
+    },
+    {
+      "taskId": 15,
+      "taskTitle": "Mastery: RNA Monomer Biophysics",
+      "complexityScore": 5,
+      "recommendedSubtasks": 3,
+      "expansionPrompt": "Split into: systematic review of RNA monomer document, application of pre-testing workflow, and self-assessment of biophysical understanding.",
+      "reasoning": "Focused learning task with moderate complexity, mainly process-driven but requiring structured review and mastery checks."
+    },
+    {
+      "taskId": 16,
+      "taskTitle": "Integrate jarc_reactor Codebase & Establish ARC Sprint Environment",
+      "complexityScore": 9,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Breakdown into: codebase integration, dependency harmonization, IA layer compliance checks, ARC dataset environment configuration, and validation/testing of integrated system.",
+      "reasoning": "High technical complexity due to system integration, environment setup, dependency management, and ensuring compliance with architectural and data standards."
+    }
+  ]
+}

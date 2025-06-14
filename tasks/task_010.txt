@@ -47,3 +47,33 @@ Written reflection completed. Flashcards finalized. All progress logged.
 8. Generate Week 1 summary report if Task Master has this feature
 9. Test by reviewing all entries to ensure nothing is missing
 
+
+
+# Subtask Details:
+
+## Subtask 10.1: Draft structured Week 1 learning reflection
+Description: Create a comprehensive reflection document analyzing Week 1 learning experiences, key insights, and areas for improvement
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 10.2: Review and organize Week 1 flashcards
+Description: Systematically review all Week 1 flashcards, tag them by topic, and organize them into a spaced repetition system for ongoing study
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 10.3: Log Week 1 study activities in Task Master
+Description: Document all Week 1 study time, activities, and deliverables in Task Master according to tracking guidelines
+Dependencies: [1, 2]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified

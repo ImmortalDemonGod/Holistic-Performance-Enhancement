@@ -82,3 +82,51 @@ Implementation steps:
 
 Testing approach: Test flashcards with students in spaced repetition sessions to measure retention of concepts. Revise cards with low retention rates for clarity and effectiveness.
 
+
+
+# Subtask Details:
+
+## Subtask 5.1: Create Explanatory Content for ΔG, ΔH, ΔS, and Their Relationship
+Description: Develop clear explanations of Gibbs Free Energy (ΔG), enthalpy (ΔH), entropy (ΔS), and their mathematical relationship (ΔG = ΔH - TΔS) in the context of RNA folding.
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 5.2: Develop Content on Spontaneity and Negative ΔG in RNA Folding
+Description: Create explanatory material on why negative ΔG values are favorable for spontaneous processes, with specific examples related to RNA folding and stability.
+Dependencies: [1]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 5.3: Develop Materials on Chemical Equilibrium and MFE in RNA
+Description: Create content explaining chemical equilibrium concepts and how they relate to Minimum Free Energy (MFE) structures in RNA folding.
+Dependencies: [1, 2]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 5.4: Write Comprehensive Explanation of ΔG and RNA Stability
+Description: Develop a 2-3 paragraph explanation that synthesizes the relationship between Gibbs Free Energy and RNA structural stability, suitable for inclusion in course materials.
+Dependencies: [1, 2, 3]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 5.5: Create Thermodynamics Flashcards for RNA Folding Concepts
+Description: Design a comprehensive set of flashcards covering key thermodynamic concepts related to RNA folding, including definitions, relationships, and applications.
+Dependencies: [1, 2, 3, 4]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified

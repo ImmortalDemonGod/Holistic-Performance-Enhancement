@@ -1,3 +1,0 @@
-Pace Comparison (Week 18):
-20250503_174110_baseox_wk1_sat_day6_proglong_30_40min_145_160bpm_11-14minmi_Z2_durability_rpe_4_anklepain_2: mean=7.06, min=3.08
-20250501_164245_baseox_wk1_day4_thu_z2steady_25min_postflood_cameron_loop_hr147_155_cadence82_84_rpe_3: mean=7.71, min=5.17
