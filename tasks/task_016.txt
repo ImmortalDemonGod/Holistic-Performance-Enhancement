@@ -3,148 +3,190 @@
 # Status: pending
 # Dependencies: None
 # Priority: high
-# Description: Perform the initial integration of the jarc-reactor repository into the Cultivation project, including dependency harmonization, IA layer compliance, and configuration for the ARC dataset.
+# Description: Epic foundational task for Track A of the ARC Prize sprint: transform jarc-reactor from an external asset into a fully integrated, quality-assured, and testable component of the Cultivation project, establishing the baseline for all future ARC Prize work.
 # Details:
-This task involves merging the jarc_reactor codebase into the Cultivation project while maintaining proper version control history, ensuring dependency compatibility, enforcing code standards, and setting up the environment for working with the ARC (Abstraction and Reasoning Corpus) dataset.
+This task is the cornerstone of the ARC Prize sprint, activating the baseline, enforcing Cultivation's Infrastructure & Automation (IA) Layer standards, and providing the testbed for all future ARC experimentation.
+
+Strategic Purpose:
+- De-risk the sprint by establishing a robust, operational baseline.
+- Enforce code quality and prevent technical debt from day one.
+- Provide a stable, standardized platform for all future R&D.
+
+Dependency Graph (see mermaid diagram in project docs):
+16.1 → 16.2 → 16.3 → (16.4 & 16.6) → 16.5 → 16.7
+
+See subtasks for detailed risk analysis, mitigation strategies, and workflow guidance.
 
 # Test Strategy:
-Verification checklist for completion:
-1. Confirm jarc_reactor has been properly integrated using git subtree with full history preserved
-2. Verify all dependencies are harmonized in the root requirements.txt with no conflicts
-3. Validate IA Layer compliance through pre-commit hooks and code standards
-4. Ensure ARC dataset is properly configured and accessible
-5. Check that documentation is complete and accurate
-6. Verify CI workflow is implemented and functioning
-7. Confirm successful end-to-end training cycle on ARC data
+Definition of Done (Checklist):
+1. Confirm jarc_reactor has been properly integrated using git subtree with full history preserved.
+2. Verify all dependencies are harmonized in the root requirements.txt with no conflicts.
+3. Validate IA Layer compliance through pre-commit hooks and code standards.
+4. Ensure ARC dataset is properly configured and accessible.
+5. Check that documentation is complete and accurate.
+6. Verify CI workflow is implemented and functioning.
+7. Confirm successful end-to-end training cycle on ARC data.
 
 # Subtasks:
-## 1. Clone and Structure jarc_reactor Repository in Cultivation Project [pending]
+## 1. Structure Repo: `git subtree` & Import Path Refactoring [pending]
 ### Dependencies: None
-### Description: Set up the initial repository structure by cloning the jarc_reactor codebase and establishing the proper directory organization within the Cultivation project.
+### Description: Use `git subtree` to merge jarc_reactor into `cultivation/systems/arc_reactor/` with full history. Then, refactor all internal Python import paths to be absolute from the `cultivation` root, or bridge temporarily with PYTHONPATH in Taskfile targets.
 ### Details:
-Implementation steps:
-1. Use `git subtree` to merge the `jarc_reactor` repository into `cultivation/systems/arc_reactor/`, preserving its entire commit history
-2. Update all internal Python import paths to be absolute from the `cultivation` root
-3. Ensure proper directory structure within the Cultivation project
-4. Add appropriate README documentation explaining the integration
-5. Ensure .gitignore is updated to handle any new patterns
 
-Testing approach:
-- Verify the repository structure is correct
-- Ensure all files are properly integrated with history preserved
-- Check that import paths are correctly updated to use absolute paths
-- Confirm documentation is clear and accurate
 
-## 2. Harmonize Dependencies Between jarc_reactor and Cultivation [pending]
+## 2. Harmonize Dependencies [pending]
 ### Dependencies: 16.1
-### Description: Resolve dependency conflicts and ensure all required packages are properly specified with compatible versions between the two codebases.
+### Description: Analyze `jarc-reactor/requirements.txt`, merge dependencies into the root `requirements.txt`. Resolve version conflicts by defaulting to the newer version, then validate the unified environment using `pip check` and by running both projects' test suites.
 ### Details:
-Implementation steps:
-1. Analyze `jarc-reactor`'s `requirements.txt` file
-2. Merge its dependencies into the root `requirements.txt` file
-3. Resolve any version conflicts, defaulting to the newer version
-4. Validate the new unified environment with `pip check`
-5. Document any significant version changes or dependency decisions
-6. Create a unified dependency management approach for the integrated codebase
 
-Testing approach:
-- Create a fresh virtual environment and install all dependencies
-- Verify no conflicts arise during installation using `pip check`
-- Run basic imports of key modules to ensure they load correctly
-- Document any dependency-related issues encountered and their resolutions
 
-## 3. Implement IA Layer Compliance for jarc_reactor Components [pending]
-### Dependencies: 16.1, 16.2
-### Description: Adapt the jarc_reactor code to comply with the Cultivation project's IA (Interface Abstraction) layer requirements.
+## 3. Implement IA Layer Compliance [pending]
+### Dependencies: 16.2
+### Description: Run `pre-commit run --all-files` and fix all `black`, `ruff`, and `isort` issues. Refactor all `logging` calls to use the Cultivation project's standard logger. Add `arc:lint` and `arc:test` targets to the root `Taskfile.yml`.
 ### Details:
-Implementation steps:
-1. Run `pre-commit run --all-files` and fix all `black`, `ruff`, and `isort` issues in the new `arc_reactor` directory
-2. Refactor all `logging` calls to use the Cultivation project's standard logger
-3. Add `arc:lint` and `arc:test` targets to the root `Taskfile.yml`
-4. Review the Cultivation project's IA layer specifications and requirements
-5. Identify all jarc_reactor components that need IA layer compliance
-6. Create adapter classes or modify existing code to implement required interfaces
-7. Ensure proper abstraction between components according to IA guidelines
 
-Testing approach:
-- Create unit tests for each adapted component
-- Verify that all components properly implement required interfaces
-- Test interaction between components through the IA layer
-- Conduct code review to ensure compliance with architectural standards
-- Verify that pre-commit hooks pass on all files
 
-## 4. Configure ARC Dataset Environment and Processing Pipeline [pending]
-### Dependencies: 16.2, 16.3
-### Description: Set up the environment and data processing pipeline for working with the ARC (Abstraction and Reasoning Corpus) dataset within the integrated codebase.
-### Details:
-Implementation steps:
-1. Download the official ARC dataset to `cultivation/data/raw/arc_prize_2025/`
-2. Create a new override config file that points `jarc-reactor` to this data path
-3. Audit and adapt `jarc_reactor`'s data loaders to ensure they can parse the official ARC JSON format
-4. Set up preprocessing pipelines for ARC tasks
-5. Configure environment variables needed for the ARC sprint
-6. Create documentation for dataset usage and configuration
-
-Testing approach:
-- Verify dataset loading functions correctly retrieve ARC examples
-- Test preprocessing pipeline with sample ARC tasks
-- Ensure configuration can be easily modified for different environments
-- Validate that all necessary ARC task formats are supported
-
-## 5. Document Integrated System [pending]
-### Dependencies: 16.3, 16.4
-### Description: Create comprehensive documentation for the integrated system to ensure easy onboarding and usage.
-### Details:
-Implementation steps:
-1. Create `cultivation/systems/arc_reactor/README.md` explaining the new setup
-2. Document how to use the Taskfile targets
-3. Include information about the ARC dataset and how it's structured
-4. Document any configuration options and environment variables
-5. Provide examples of common usage patterns
-6. Include troubleshooting information for common issues
-
-Testing approach:
-- Have a team member review the documentation for clarity and completeness
-- Verify all instructions can be followed without prior knowledge of the system
-- Ensure all configuration options are properly documented
-- Check that the documentation addresses all major use cases
-
-## 6. Create CI Workflow [pending]
+## 4. Configure ARC Dataset Environment [pending]
 ### Dependencies: 16.3
-### Description: Implement a new GitHub Actions workflow for continuous integration of the arc_reactor system.
+### Description: Download the official ARC dataset to `cultivation/data/raw/arc_prize_2025/`. Create an override config file for `jarc-reactor` pointing to this path. Audit and adapt `jarc-reactor`'s data loaders to parse the official ARC JSON format.
 ### Details:
-Implementation steps:
-1. Create a new GitHub Actions workflow file (`arc-reactor-ci.yml`)
-2. Configure the workflow to run the new `arc:lint` and `arc:test` targets on relevant PRs
-3. Set up appropriate triggers for the workflow
-4. Configure proper caching of dependencies to speed up CI runs
-5. Ensure the workflow provides clear feedback on failures
-6. Test the workflow with both passing and failing scenarios
 
-Testing approach:
-- Create test PRs to verify the workflow triggers correctly
-- Introduce deliberate linting errors to verify detection
-- Introduce test failures to verify proper reporting
-- Check that the workflow completes in a reasonable time
-- Verify caching is working as expected
+
+## 5. Create CI Workflow [pending]
+### Dependencies: 16.3
+### Description: Implement `arc-reactor-ci.yml` GitHub Actions workflow. Configure it to run `arc:lint` and `arc:test` targets. Trigger workflow only on changes to relevant paths (e.g., `cultivation/systems/arc_reactor/**`) for efficiency.
+### Details:
+
+
+## 6. Document Integrated System [pending]
+### Dependencies: 16.4, 16.5
+### Description: Create `cultivation/systems/arc_reactor/README.md`. As a living document, it should explain the integrated setup, how to use the new Taskfile targets, and the ARC dataset configuration.
+### Details:
+
 
 ## 7. Perform "First Light" Integration Test [pending]
-### Dependencies: 16.4, 16.5, 16.6
-### Description: Execute a complete end-to-end test of the integrated system to validate its functionality.
+### Dependencies: 16.6
+### Description: Execute a complete, short, end-to-end training cycle on a small subset of ARC data using the `task arc:run-baseline` target. Success is defined as the run completing without errors and saving a model checkpoint. Document the process and results in a concise validation report.
 ### Details:
-Implementation steps:
-1. Run a short, end-to-end training cycle on a small subset of ARC data
-2. Confirm the entire integrated system functions without errors
-3. Verify that the system successfully saves a model checkpoint
-4. Analyze logs for any warnings or potential issues
-5. Document the test process and results
-6. Create a validation report with performance metrics
 
-Testing approach:
-- Select a representative subset of ARC tasks for the test
-- Monitor system resource usage during the test
-- Validate that checkpoints are properly saved and can be loaded
-- Check that all components interact correctly through the IA layer
-- Document any issues discovered and their resolutions
-- Create a final integration report documenting the system's readiness
 
+
+
+# Subtask Details:
+
+## Subtask 16.1: Structure Repo: `git subtree` & Import Path Refactoring
+Description: Use `git subtree` to merge jarc_reactor into `cultivation/systems/arc_reactor/` with full history. Then, refactor all internal Python import paths to be absolute from the `cultivation` root, or bridge temporarily with PYTHONPATH in Taskfile targets.
+Dependencies: None
+Status: pending
+Risks: Refactoring all import paths is time-consuming and error-prone. A single missed import can break the entire system.
+Mitigation: Use an IDE with project-wide refactoring tools. Create a specific test commit after refactoring and run all tests. Consider the PYTHONPATH bridge as a temporary measure to unblock other subtasks if refactoring proves too complex initially.
+HPE Learning Meta:
+    Estimated effort hours min: 2.5
+    Estimated effort hours max: 5.0
+    Recommended block: deep_work
+Implementation Steps:
+  - Use `git subtree` to merge the `jarc_reactor` repository into `cultivation/systems/arc_reactor/`, preserving its entire commit history
+  - Update all internal Python import paths to be absolute from the `cultivation` root
+  - Ensure proper directory structure within the Cultivation project
+  - Add appropriate README documentation explaining the integration
+  - Ensure .gitignore is updated to handle any new patterns
+Testing Approach:
+  - Verify the repository structure is correct
+  - Ensure all files are properly integrated with history preserved
+  - Check that import paths are correctly updated to use absolute paths
+  - Confirm documentation is clear and accurate
+
+## Subtask 16.2: Harmonize Dependencies
+Description: Analyze `jarc-reactor/requirements.txt`, merge dependencies into the root `requirements.txt`. Resolve version conflicts by defaulting to the newer version, then validate the unified environment using `pip check` and by running both projects' test suites.
+Dependencies: [1]
+Status: pending
+Risks: A newer dependency version required by Cultivation breaks a critical function in jarc-reactor, leading to extensive debugging ('dependency hell').
+Mitigation: Immediately run both test suites after merging requirements. If major breaks occur, use `pipdeptree` to analyze the conflict and be prepared to pin a specific dependency to an older, compatible version as a short-term fix, creating a follow-up tech debt task.
+HPE Learning Meta:
+    Estimated effort hours min: 1.0
+    Estimated effort hours max: 4.0
+    Recommended block: deep_work
+
+## Subtask 16.3: Implement IA Layer Compliance
+Description: Run `pre-commit run --all-files` and fix all `black`, `ruff`, and `isort` issues. Refactor all `logging` calls to use the Cultivation project's standard logger. Add `arc:lint` and `arc:test` targets to the root `Taskfile.yml`.
+Dependencies: [2]
+Status: pending
+Risks: The initial pre-commit run may generate thousands of changes, making the commit noisy and hard to review.
+Mitigation: Perform the automated formatting in a single, isolated commit with a clear message (e.g., 'style: Apply pre-commit formatting to arc_reactor'). Then, perform the manual logging refactor in a separate commit.
+HPE Learning Meta:
+    Estimated effort hours min: 1.5
+    Estimated effort hours max: 3.0
+    Recommended block: focused_dev_block
+Clarification: IA stands for Infrastructure & Automation in the Cultivation context.
+
+## Subtask 16.4: Configure ARC Dataset Environment
+Description: Download the official ARC dataset to `cultivation/data/raw/arc_prize_2025/`. Create an override config file for `jarc-reactor` pointing to this path. Audit and adapt `jarc-reactor`'s data loaders to parse the official ARC JSON format.
+Dependencies: [3]
+Status: pending
+Risks: The official ARC dataset structure has subtle differences from what `jarc-reactor`'s data loaders expect, requiring significant refactoring of `data_preparation.py`.
+Mitigation: Start by writing a small, standalone script to parse just one ARC task file. Once that works, integrate the logic into the main data loader. Test with a diverse sample of at least 10-15 ARC tasks.
+HPE Learning Meta:
+    Estimated effort hours min: 2.0
+    Estimated effort hours max: 5.0
+    Recommended block: deep_work
+
+## Subtask 16.5: Create CI Workflow
+Description: Implement `arc-reactor-ci.yml` GitHub Actions workflow. Configure it to run `arc:lint` and `arc:test` targets. Trigger workflow only on changes to relevant paths (e.g., `cultivation/systems/arc_reactor/**`) for efficiency.
+Dependencies: [3]
+Status: pending
+Risks: CI environment has pathing or caching issues not present locally.
+Mitigation: Use `act` to test workflow locally if possible. Add extensive logging and debug steps to the CI file during initial setup.
+HPE Learning Meta:
+    Estimated effort hours min: 1.0
+    Estimated effort hours max: 2.5
+    Recommended block: focused_dev_block
+Implementation Steps:
+  - Create a new GitHub Actions workflow file (`arc-reactor-ci.yml`)
+  - Configure the workflow to run the new `arc:lint` and `arc:test` targets on relevant PRs
+  - Set up appropriate triggers for the workflow
+  - Configure proper caching of dependencies to speed up CI runs
+  - Ensure the workflow provides clear feedback on failures
+  - Test the workflow with both passing and failing scenarios
+Testing Approach:
+  - Create test PRs to verify the workflow triggers correctly
+  - Introduce deliberate linting errors to verify detection
+  - Introduce test failures to verify proper reporting
+  - Check that the workflow completes in a reasonable time
+  - Verify caching is working as expected
+Refinement: Use `on.<push/pull_request>.paths` in the workflow file to limit triggers.
+
+## Subtask 16.6: Document Integrated System
+Description: Create `cultivation/systems/arc_reactor/README.md`. As a living document, it should explain the integrated setup, how to use the new Taskfile targets, and the ARC dataset configuration.
+Dependencies: [4, 5]
+Status: pending
+Risks: Documentation becomes outdated as other subtasks are completed.
+Mitigation: Draft the README early, but perform a final pass to update it as the very last step before the 'First Light' test.
+HPE Learning Meta:
+    Estimated effort hours min: 0.5
+    Estimated effort hours max: 1.5
+    Recommended block: flex-slot
+
+## Subtask 16.7: Perform "First Light" Integration Test
+Description: Execute a complete, short, end-to-end training cycle on a small subset of ARC data using the `task arc:run-baseline` target. Success is defined as the run completing without errors and saving a model checkpoint. Document the process and results in a concise validation report.
+Dependencies: [6]
+Status: pending
+Risks: An unforeseen integration error emerges only when all components run together.
+Mitigation: Run with a debugger attached. Analyze logs from the full run to trace the error. Be prepared to revisit and patch previous subtasks.
+HPE Learning Meta:
+    Estimated effort hours min: 1.0
+    Estimated effort hours max: 4.0
+    Recommended block: deep_work
+Implementation Steps:
+  - Run a short, end-to-end training cycle on a small subset of ARC data
+  - Confirm the entire integrated system functions without errors
+  - Verify that the system successfully saves a model checkpoint
+  - Analyze logs for any warnings or potential issues
+  - Document the test process and results
+  - Create a validation report with performance metrics
+Testing Approach:
+  - Select a representative subset of ARC tasks for the test
+  - Monitor system resource usage during the test
+  - Validate that checkpoints are properly saved and can be loaded
+  - Check that all components interact correctly through the IA layer
+  - Document any issues discovered and their resolutions
+  - Create a final integration report documenting the system's readiness

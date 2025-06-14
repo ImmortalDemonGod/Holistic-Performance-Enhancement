@@ -63,3 +63,33 @@ Implementation steps:
 
 Testing approach: Ensure the improvement plan addresses all identified weaknesses and includes concrete, actionable steps with specific resources and timelines.
 
+
+
+# Subtask Details:
+
+## Subtask 11.1: Complete and Score Self-Created Week 1 RNA Quiz
+Description: Take the previously created Week 1 RNA foundations quiz (from Task 9.1), record your answers, and calculate your initial score.
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 11.2: Complete and Document Practical RNA Drawing/Explanation Task
+Description: Perform the practical assessment created in Task 9.2 that involves drawing RNA structures and explaining key RNA concepts.
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 11.3: Self-Grade Assessments and Create Improvement Plan
+Description: Using the rubrics from Task 9.3, evaluate your quiz and practical assessment performance, record results, and develop a targeted improvement plan.
+Dependencies: [1, 2]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified

@@ -95,3 +95,69 @@ Review the environmental influences documentation for accuracy and completeness.
 6. Make necessary revisions based on feedback.
 7. Test the materials with a small group from the target audience and collect feedback on clarity and usefulness.
 
+
+
+# Subtask Details:
+
+## Subtask 8.1: Explain Temperature Effects on RNA Stability Through Gibbs Free Energy
+Description: Create a detailed explanation of how temperature affects RNA stability through the TΔS term in the Gibbs Free Energy equation, and why higher temperatures favor RNA unfolding.
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 8.2: Document Salt Concentration Effects on RNA Stability
+Description: Develop materials explaining how salt concentration, particularly cations like Mg²⁺, shields phosphate charges and stabilizes RNA helices and compact folds.
+Dependencies: [1]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 8.3: Explain pH Effects on RNA Base Protonation and Hydrogen Bonding
+Description: Create a concise explanation of how extreme pH values alter protonation states of RNA bases and disrupt hydrogen bonding patterns.
+Dependencies: [1]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 8.4: Create Comparative Summary Table of Environmental Factors
+Description: Develop a comprehensive table comparing the effects of temperature, salt concentration, and pH on RNA stability with specific examples and mechanisms.
+Dependencies: [1, 2, 3]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 8.5: Summarize Relevance to RNA Structure Prediction Tools
+Description: Create a summary explaining how temperature, salt concentration, and pH considerations are incorporated into RNA structure prediction tools.
+Dependencies: [1, 2, 3, 4]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 8.6: Develop Flashcards on Environmental Influences on RNA Stability
+Description: Create a set of educational flashcards covering the effects of temperature, salt concentration, and pH on RNA stability.
+Dependencies: [1, 2, 3, 4, 5]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
+
+## Subtask 8.7: Review and Finalize All Educational Materials
+Description: Conduct a comprehensive review of all created materials for accuracy, completeness, clarity, and educational effectiveness.
+Dependencies: [1, 2, 3, 4, 5, 6]
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+HPE Learning Meta:
+  Not specified
