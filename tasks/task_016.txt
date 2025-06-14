@@ -27,6 +27,12 @@ Definition of Done (Checklist):
 6. Verify CI workflow is implemented and functioning.
 7. Confirm successful end-to-end training cycle on ARC data.
 
+# Actionable Advice for Execution:
+1.  **Commit Atomically:** As you complete each subtask, create a separate, atomic Git commit. This will make your work easy to review and, if necessary, revert. E.g., `feat(arc): [16.1] Integrate jarc-reactor via git subtree`, `refactor(arc): [16.1] Refactor internal import paths`.
+2.  **Follow the Dependency Chain:** Execute the subtasks in the defined order, taking advantage of the parallelization opportunity for 16.4 and 16.5.
+3.  **Use Taskmaster to Track Progress:** As you start and finish each subtask, update its status using `task-master set-status --id <subtask_id> --status <done|in-progress>`. This maintains a live record of your progress through this epic.
+4.  **Embrace the `PYTHONPATH` Bridge (Temporarily):** Do not get bogged down for days on subtask 16.1's import refactoring. If it proves difficult, implement the `PYTHONPATH` workaround in your `Taskfile.yml`, document it as tech debt, and move on to subtasks 16.2 and 16.3 to maintain momentum. You can circle back to the full refactor later.
+
 # Subtasks:
 ## 1. Structure Repo: `git subtree` & Import Path Refactoring [pending]
 ### Dependencies: None
