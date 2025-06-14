@@ -5,6 +5,11 @@ TASKS_JSON_PATH = os.path.join(os.getcwd(), 'tasks', 'tasks.json')
 TASKS_DIR = os.path.join(os.getcwd(), 'tasks')
 
 def format_hpe_learning_meta(meta):
+    """
+    Formats HPE learning metadata as a structured multiline string.
+    
+    If the input is not a dictionary or is missing, returns "  Not specified\n". Each key-value pair is displayed on a new line, with keys capitalized and underscores replaced by spaces.
+    """
     if not meta or not isinstance(meta, dict):
         return "  Not specified\n"
     formatted_meta = ""
@@ -13,6 +18,11 @@ def format_hpe_learning_meta(meta):
     return formatted_meta
 
 def enhance_task_files():
+    """
+    Enhances task text files with detailed subtask information from a JSON source.
+    
+    Reads tasks and their subtasks from a JSON file, then updates or appends structured subtask details to corresponding task text files. Handles missing files, malformed JSON, and unexpected data structures gracefully, providing informative messages for each case.
+    """
     print(f"Reading tasks from: {TASKS_JSON_PATH}")
     try:
         with open(TASKS_JSON_PATH, 'r') as f:
