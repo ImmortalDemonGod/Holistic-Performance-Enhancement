@@ -1,4 +1,5 @@
-[
+{
+  "simplest_arc_agi": [
   {
     "task_id_candidate": "DW_ARC_SETUP_001",
     "tentative_title": "Establish ARC Prize 2025 Development Environment & Baseline for `simplest_arc_agi`",
@@ -569,7 +570,9 @@
     },
     "implicit_reasoning_confidence": "High",
     "notes_questions_dependencies": "Crucial 'benefit harvesting' task for the Π engine. Depends on outputs from `DW_ARC_EVAL_001` and a stable `potential_engine.py` from `DW_HIL_CORE_002`."
-  },
+  }
+  ],
+  "jarc_reactor": [
   {
     "task_id_candidate": "DW_ARC_JR_INTEGRATE_001",
     "tentative_title": "Integrate `jarc_reactor` Codebase & Establish ARC Sprint Environment",
@@ -1081,3 +1084,4 @@
     "notes_questions_dependencies": "Critical 'benefit harvesting' for Π engine. Depends on `DW_ARC_EVAL_001` outputs and stable `potential_engine.py`."
   }
 ]
+}
