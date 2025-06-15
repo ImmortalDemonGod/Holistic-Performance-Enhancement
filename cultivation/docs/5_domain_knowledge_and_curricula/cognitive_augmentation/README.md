@@ -6,11 +6,9 @@
 
 ## 1. Mission & Vision
 
-This section of the "Cultivation" project is dedicated to the **Cognitive Augmentation Domain**. Its mission is to develop and implement a systematic, measurable, and evidence-based training framework for enhancing core human cognitive faculties.
+The **Mentat Cognitive Augmentation Domain** represents a systematic approach to developing hybrid human-AI cognitive capabilities through structured training protocols. This domain focuses on measurable enhancement of core cognitive functions including working memory, logical reasoning, pattern recognition, somatic awareness, and social cognition.
 
-The cornerstone of this domain is the **Mentat-OS (Hybrid Cognitive Operating System)**, a comprehensive architecture designed to create a synergistic human-AI partnership. The goal is not to replace human cognition with machine-like processes, but to augment innate human strengths—such as contextual understanding, creative synthesis, and ethical judgment—with trained, computer-like skills in logic, memory, and analysis.
-
-This domain provides the structured curriculum and practical drills required to transform the user from a standard information processor into a sophisticated "Mentat" operator, capable of leveraging both their own enhanced mind and their AI partner to achieve a superior level of performance in complex cognitive tasks.
+The Mentat-OS framework provides a comprehensive system for cognitive training that integrates seamlessly with the broader Holistic Performance Enhancement (HPE) ecosystem, contributing valuable data to both the Potential Engine (Π) and Synergy Engine components.
 
 ---
 
@@ -60,13 +58,6 @@ This domain is a core component of the "Cultivation" project and integrates deep
 ## 5. Current Status
 
 This domain is currently in the **Pilot Planning & Implementation Phase**. The core documents are being created, and the 4-Week MVP Pilot Plan outlines the immediate next steps for baseline testing and initial training.
-
-
-The **Mentat Cognitive Augmentation Domain** represents a systematic approach to developing hybrid human-AI cognitive capabilities through structured training protocols. This domain focuses on measurable enhancement of core cognitive functions including working memory, logical reasoning, pattern recognition, somatic awareness, and social cognition.
-
-The Mentat-OS framework provides a comprehensive system for cognitive training that integrates seamlessly with the broader Holistic Performance Enhancement (HPE) ecosystem, contributing valuable data to both the Potential Engine (Π) and Synergy Engine components.
-
-## 📚 Table of Contents
 
 ### Core Documentation
 

@@ -46,10 +46,12 @@ This schema defines the structure for the aggregated weekly data file, which is 
 | **kpi_wm_span_max** | Integer | `23` | The maximum score achieved for the `WM-Span` KPI this week. |
 | **kpi_logic_acc_avg** | Float (0.0-1.0)| `0.92` | The average accuracy score for logic-based drills. (Placeholder for when a logic drill is added). |
 | **kpi_math_sps_avg** | Float | `52.5` | The average score (ops/min) for the `Math-SPS` KPI across all `D5` drill sessions this week. |
-| **kpi_parity_ec_avg** | Float (0.0-1.0)| `0.88` | The average error-catch rate for the `Parity-EC` KPI across all parity drills this week. |
+| **kpi_parity_ec_rate_avg** | Float (0.0-1.0)| `0.85` | The average error catch rate from D4/parity drills. |
+| **kpi_parity_ec_avg** | Float (0.0-1.0)| `0.88` | The average error-catch rate for the `Parity-EC` KPI across all parity drills this week. (General or to be reviewed) |
 | **kpi_fermi_rmse_avg** | Float | `1.85` | The average root-mean-square error ratio for the `Fermi-RMSE` KPI across all `D6` drills this week. |
 | **kpi_analogy_quality_avg** | Float (1.0-5.0)| `4.2` | The average self-rated score for the `Analogy-Quality-Score` KPI across all `D2` drills this week. |
-| **kpi_somatic_insight_rate_avg**| Float (0.0-1.0)| `0.67` | The average success rate for the `Somatic-Insight-Rate` KPI across all `D6` drills this week. |
+| **kpi_interoceptive_label_accuracy_avg** | Float (0.0-1.0) | `0.75` | Average accuracy in labeling interoceptive states from D6 drills. (Simpler MVP metric) |
+| **kpi_somatic_insight_rate_avg**| Float (0.0-1.0)| `0.67` | The average success rate for the `Somatic-Insight-Rate` KPI across all `D6` drills this week. (Advanced KPI, potentially downstream synergy metric) |
 
 **Notes on the Processed Schema:**
 *   This is an initial schema. New `kpi_*_avg` columns will be added as new measurable drills are introduced.
