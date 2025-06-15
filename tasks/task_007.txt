@@ -3,18 +3,31 @@
 # Status: pending
 # Dependencies: 6
 # Priority: medium
-# Description: Create materials explaining loop penalties, electrostatic repulsion, and their effects on RNA stability.
+
+# Description:
+Create materials explaining loop penalties, electrostatic repulsion, and their effects on RNA stability.
+
 # Details:
 Document loop penalties as an entropic cost associated with the conformational restriction of forming hairpin loops, internal loops, bulges, and multi-loops. Explain how loop penalties depend on loop type and size. Document electrostatic repulsion from the negatively charged phosphate backbone and the mitigating role of counterions (e.g., Mg²⁺). Write a detailed explanation of why forming a hairpin loop is entropically unfavorable and what factors influence this unfavorable contribution. Create flashcards for loop penalties, electrostatic repulsion, and the role of counterions in RNA stability.
 
 # Test Strategy:
 Review the loop penalties and electrostatic effects documentation for accuracy. Verify that the explanation of entropic costs for loop formation is clear and correct. Ensure the role of counterions in mitigating electrostatic repulsion is properly explained.
 
-# Subtasks:
-## 1. Document Loop Penalties in RNA Secondary Structures [pending]
-### Dependencies: None
-### Description: Create comprehensive documentation explaining loop penalties as entropic costs in RNA secondary structures, covering different loop types and their size-dependent effects.
-### Details:
+# HPE Learning Meta (Main Task):
+    Learning objective summary: Explain loop penalties as an entropic cost in RNA folding and the role of electrostatic repulsion from the phosphate backbone, including mitigation by counterions.
+    Estimated effort tshirt: S
+    Estimated effort hours raw: 1-1.5 hours
+    Estimated effort hours min: 1
+    Estimated effort hours max: 1.5
+    Mastery criteria summary: Clear explanation of why forming a hairpin loop is entropically unfavorable (Task 2.3 PRD). Notes on electrostatic repulsion and counterions. Flashcards created.
+    Activity type: focused_reading_explanation_writing_flashcard_creation
+    Recommended block: active_learning
+    Deliverables: ['Written explanation of why forming a hairpin loop is entropically unfavorable and factors influencing this contribution (Task 2.3 PRD for Day 5).', 'Notes on electrostatic repulsion from the phosphate backbone and the mitigating role of counterions.', 'Flashcards for loop penalties, electrostatic repulsion, and counterions.']
+# Subtask Details:
+
+## Subtask 7.1: Document Loop Penalties in RNA Secondary Structures
+Description: Create comprehensive documentation explaining loop penalties as entropic costs in RNA secondary structures, covering different loop types and their size-dependent effects.
+Subtask Details:
 1. Research and compile information on entropy costs in RNA folding
 2. Define and explain loop penalties in RNA structures
 3. Document the four main loop types: hairpin loops, internal loops, bulges, and multi-loops
@@ -24,10 +37,14 @@ Review the loop penalties and electrostatic effects documentation for accuracy. 
 7. Reference primary literature sources for loop penalty parameters
 8. Test by having colleagues review for technical accuracy
 
-## 2. Analyze Entropic Unfavorability of Hairpin Loops [pending]
-### Dependencies: 7.1
-### Description: Develop a detailed explanation of why forming hairpin loops is entropically unfavorable, with examples and factors that influence this entropic cost.
-### Details:
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 7.2: Analyze Entropic Unfavorability of Hairpin Loops
+Description: Develop a detailed explanation of why forming hairpin loops is entropically unfavorable, with examples and factors that influence this entropic cost.
+Subtask Details:
 1. Build on the general loop penalty documentation from subtask 1
 2. Explain conformational restriction in hairpin formation
 3. Discuss the reduction in degrees of freedom when nucleotides form a loop
@@ -38,10 +55,14 @@ Review the loop penalties and electrostatic effects documentation for accuracy. 
 8. Compare entropy costs between different hairpin sizes
 9. Test by creating a small simulation demonstrating entropy changes
 
-## 3. Document Electrostatic Repulsion and Counterion Effects [pending]
-### Dependencies: None
-### Description: Create documentation on electrostatic repulsion in RNA structures due to the negatively charged phosphate backbone and explain how counterions mitigate this effect.
-### Details:
+Dependencies: 1
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 7.3: Document Electrostatic Repulsion and Counterion Effects
+Description: Create documentation on electrostatic repulsion in RNA structures due to the negatively charged phosphate backbone and explain how counterions mitigate this effect.
+Subtask Details:
 1. Explain the chemical basis for negative charges in the RNA backbone
 2. Document how phosphate groups create electrostatic repulsion
 3. Calculate typical repulsion forces at various ionic strengths
@@ -52,10 +73,14 @@ Review the loop penalties and electrostatic effects documentation for accuracy. 
 8. Create diagrams showing counterion condensation around RNA
 9. Test by reviewing with a biophysicist for accuracy
 
-## 4. Create Educational Flashcards on RNA Stability Factors [pending]
-### Dependencies: 7.1, 7.2, 7.3
-### Description: Develop a set of educational flashcards covering loop penalties, electrostatic repulsion, and counterion effects on RNA stability for learning and teaching purposes.
-### Details:
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 7.4: Create Educational Flashcards on RNA Stability Factors
+Description: Develop a set of educational flashcards covering loop penalties, electrostatic repulsion, and counterion effects on RNA stability for learning and teaching purposes.
+Subtask Details:
 1. Create 5-7 flashcards on loop penalties covering:
    - Definition of loop penalties
    - Different loop types
@@ -74,10 +99,14 @@ Review the loop penalties and electrostatic effects documentation for accuracy. 
 6. Test flashcards with students or colleagues for clarity
 7. Implement feedback and revise cards as needed
 
-## 5. Review and Integrate RNA Stability Documentation [pending]
-### Dependencies: 7.1, 7.2, 7.3, 7.4
-### Description: Review all materials for accuracy, consistency, and completeness, then integrate them into a cohesive educational resource on RNA stability factors.
-### Details:
+Dependencies: 1, 2, 3
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 7.5: Review and Integrate RNA Stability Documentation
+Description: Review all materials for accuracy, consistency, and completeness, then integrate them into a cohesive educational resource on RNA stability factors.
+Subtask Details:
 1. Review all documents for scientific accuracy
 2. Check for consistency in terminology across all materials
 3. Ensure all materials use the same notation and units
@@ -91,51 +120,7 @@ Review the loop penalties and electrostatic effects documentation for accuracy. 
 8. Test the integrated materials with both experts and students
 9. Make final revisions based on testing feedback
 
-
-
-# Subtask Details:
-
-## Subtask 7.1: Document Loop Penalties in RNA Secondary Structures
-Description: Create comprehensive documentation explaining loop penalties as entropic costs in RNA secondary structures, covering different loop types and their size-dependent effects.
-Dependencies: None
+Dependencies: 1, 2, 3, 4
 Status: pending
 Risks: Not specified
 Mitigation: Not specified
-HPE Learning Meta:
-  Not specified
-
-## Subtask 7.2: Analyze Entropic Unfavorability of Hairpin Loops
-Description: Develop a detailed explanation of why forming hairpin loops is entropically unfavorable, with examples and factors that influence this entropic cost.
-Dependencies: [1]
-Status: pending
-Risks: Not specified
-Mitigation: Not specified
-HPE Learning Meta:
-  Not specified
-
-## Subtask 7.3: Document Electrostatic Repulsion and Counterion Effects
-Description: Create documentation on electrostatic repulsion in RNA structures due to the negatively charged phosphate backbone and explain how counterions mitigate this effect.
-Dependencies: None
-Status: pending
-Risks: Not specified
-Mitigation: Not specified
-HPE Learning Meta:
-  Not specified
-
-## Subtask 7.4: Create Educational Flashcards on RNA Stability Factors
-Description: Develop a set of educational flashcards covering loop penalties, electrostatic repulsion, and counterion effects on RNA stability for learning and teaching purposes.
-Dependencies: [1, 2, 3]
-Status: pending
-Risks: Not specified
-Mitigation: Not specified
-HPE Learning Meta:
-  Not specified
-
-## Subtask 7.5: Review and Integrate RNA Stability Documentation
-Description: Review all materials for accuracy, consistency, and completeness, then integrate them into a cohesive educational resource on RNA stability factors.
-Dependencies: [1, 2, 3, 4]
-Status: pending
-Risks: Not specified
-Mitigation: Not specified
-HPE Learning Meta:
-  Not specified
