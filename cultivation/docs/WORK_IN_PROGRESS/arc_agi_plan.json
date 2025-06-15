@@ -158,8 +158,8 @@
       "development_objective_summary": "To build and validate a functional CLT-based framework for extracting interpretable features/circuits from trained transformers.",
       "estimated_effort_tshirt": "XL",
       "estimated_effort_hours_raw": "2-3 weeks (Sprint MVP)",
-      "estimated_effort_hours_min": 60, // 10 days * 6h
-      "estimated_effort_hours_max": 90, // 15 days * 6h
+      "estimated_effort_hours_min": 60,
+      "estimated_effort_hours_max": 90,
       "completion_criteria_summary": "CLT pipeline operational. SAE features extracted for primitive tasks. Initial circuits in DB.",
       "activity_type": "algorithm_development_interpretability_research",
       "recommended_block": "deep_work",
@@ -197,8 +197,8 @@
       "development_objective_summary": "To provide causal explanations for extracted circuits by tracing influential pathways within the original model.",
       "estimated_effort_tshirt": "L",
       "estimated_effort_hours_raw": "1-2 weeks (Sprint MVP)",
-      "estimated_effort_hours_min": 30, // 5 days * 6h
-      "estimated_effort_hours_max": 60, // 10 days * 6h
+      "estimated_effort_hours_min": 30,
+      "estimated_effort_hours_max": 60,
       "completion_criteria_summary": "MVP attribution method implemented. Graphs generated for selected circuits.",
       "activity_type": "algorithm_development_interpretability_research",
       "recommended_block": "deep_work",
@@ -278,8 +278,8 @@
       "development_objective_summary": "To build the execution machinery for running programs composed of neural circuits.",
       "estimated_effort_tshirt": "L",
       "estimated_effort_hours_raw": "1.5-2.5 weeks (Sprint MVP)",
-      "estimated_effort_hours_min": 45, // 7.5 days * 6h
-      "estimated_effort_hours_max": 75, // 12.5 days * 6h
+      "estimated_effort_hours_min": 45,
+      "estimated_effort_hours_max": 75,
       "completion_criteria_summary": "Composer can execute simple sequential/parallel plans. Basic adaptation works.",
       "activity_type": "ai_framework_development_software_engineering",
       "recommended_block": "deep_work",
@@ -319,8 +319,8 @@
       "development_objective_summary": "To create an LLM-driven system capable of inferring ARC task rules and planning circuit compositions for offline execution.",
       "estimated_effort_tshirt": "XL",
       "estimated_effort_hours_raw": "2-4 weeks (Sprint MVP)",
-      "estimated_effort_hours_min": 60,  // 10 days * 6h
-      "estimated_effort_hours_max": 120, // 20 days * 6h
+      "estimated_effort_hours_min": 60,
+      "estimated_effort_hours_max": 120,
       "completion_criteria_summary": "Offline LLM operational. Basic rule inference and planning loop functional for simple cases.",
       "activity_type": "llm_integration_prompt_engineering_ai_reasoning",
       "recommended_block": "deep_work",
@@ -436,8 +436,8 @@
       "development_objective_summary": "To create a fully compliant and performant Kaggle submission notebook for the ARC Prize.",
       "estimated_effort_tshirt": "XL",
       "estimated_effort_hours_raw": "1-3 weeks",
-      "estimated_effort_hours_min": 30,  // 5 days * 6h
-      "estimated_effort_hours_max": 90, // 15 days * 6h
+      "estimated_effort_hours_min": 30,
+      "estimated_effort_hours_max": 90,
       "completion_criteria_summary": "Kaggle notebook runs end-to-end offline and produces valid submission.json within limits.",
       "activity_type": "deployment_optimization_engineering",
       "recommended_block": "deep_work",
@@ -569,10 +569,7 @@
     },
     "implicit_reasoning_confidence": "High",
     "notes_questions_dependencies": "Crucial 'benefit harvesting' task for the Π engine. Depends on outputs from `DW_ARC_EVAL_001` and a stable `potential_engine.py` from `DW_HIL_CORE_002`."
-  }
-]
-===========
-[
+  },
   {
     "task_id_candidate": "DW_ARC_JR_INTEGRATE_001",
     "tentative_title": "Integrate `jarc_reactor` Codebase & Establish ARC Sprint Environment",
