@@ -67,6 +67,7 @@ local_settings.py
 
 # Ignore all pdfjs static assets except README.txt
 cultivation/systems/knowledge/reader_app/static/pdfjs/*
+!cultivation/systems/knowledge/reader_app/static/pdfjs/
 !cultivation/systems/knowledge/reader_app/static/pdfjs/README.txt
 cultivation/systems/knowledge/reader_app/static/*
 db.sqlite3
