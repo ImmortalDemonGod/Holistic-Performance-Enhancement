@@ -3,18 +3,31 @@
 # Status: pending
 # Dependencies: 8
 # Priority: medium
-# Description: Create a comprehensive quiz and practical assessment tasks to evaluate mastery of RNA biochemistry and thermodynamics concepts.
+
+# Description:
+Create a comprehensive quiz and practical assessment tasks to evaluate mastery of RNA biochemistry and thermodynamics concepts.
+
 # Details:
 Create a comprehensive quiz of 15-20 questions covering all learning objectives, including multiple-choice, true/false, short answer, and fill-in-the-blank questions. Design a practical assessment task requiring drawing a detailed, labeled RNA nucleotide and writing a clear explanation of the key energetic contributions to RNA secondary structure stability. Create a grading rubric for both the quiz and practical assessment, with ≥85% accuracy as the target for demonstrating mastery. Include a template for identifying weak areas and planning targeted review.
 
 # Test Strategy:
 Review the self-assessment materials for comprehensive coverage of all learning objectives. Verify that the quiz includes a good mix of question types and difficulty levels. Ensure the practical assessment effectively tests the ability to apply knowledge of RNA structure and thermodynamics.
 
-# Subtasks:
-## 1. Develop a Comprehensive Quiz with Mixed Question Formats [pending]
-### Dependencies: None
-### Description: Create a 15-20 question quiz covering all RNA biochemistry and thermodynamics learning objectives with varied question formats and difficulty levels.
-### Details:
+# HPE Learning Meta (Main Task):
+    Learning objective summary: Create a comprehensive self-quiz (15-20 questions) and design a practical assessment task (drawing/explanation) covering Week 1's RNA biochemistry and thermodynamics. Develop associated grading rubrics.
+    Estimated effort tshirt: M
+    Estimated effort hours raw: 1.5-2 hours
+    Estimated effort hours min: 1.5
+    Estimated effort hours max: 2
+    Mastery criteria summary: Comprehensive 15-20 question quiz created with answer key. Practical assessment task designed with clear instructions. Detailed grading rubrics for both developed, targeting >=85% for mastery.
+    Activity type: assessment_design_quiz_creation_rubric_development
+    Recommended block: active_learning
+    Deliverables: ['Self-created comprehensive quiz (15-20 questions) with answer key (maps to PRD Task 3.1).', 'Design for practical assessment task (drawing a nucleotide & explaining energetic contributions) (maps to PRD Task 3.3 design part).', 'Grading rubrics for both the quiz and the practical assessment.']
+# Subtask Details:
+
+## Subtask 9.1: Develop a Comprehensive Quiz with Mixed Question Formats
+Description: Create a 15-20 question quiz covering all RNA biochemistry and thermodynamics learning objectives with varied question formats and difficulty levels.
+Subtask Details:
 Implementation steps:
 1. Review all learning objectives to ensure comprehensive coverage
 2. Create 5-7 multiple-choice questions with 4 answer options each
@@ -27,10 +40,14 @@ Implementation steps:
 
 Testing approach: Have subject matter experts review for accuracy, clarity, and alignment with learning objectives. Verify that questions accurately assess understanding rather than just memorization.
 
-## 2. Design Practical Assessment Task for RNA Structure [pending]
-### Dependencies: None
-### Description: Create a practical assessment requiring students to draw a detailed RNA nucleotide and explain energetic contributions to RNA secondary structure stability.
-### Details:
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 9.2: Design Practical Assessment Task for RNA Structure
+Description: Create a practical assessment requiring students to draw a detailed RNA nucleotide and explain energetic contributions to RNA secondary structure stability.
+Subtask Details:
 Implementation steps:
 1. Develop clear instructions for the nucleotide drawing portion, specifying required labels (e.g., 5' and 3' ends, phosphate groups, ribose sugar, nitrogenous base, hydrogen bonds)
 2. Create a template or workspace for the drawing portion
@@ -45,10 +62,14 @@ Implementation steps:
 
 Testing approach: Create a sample response to ensure the task can be completed within reasonable time constraints. Verify that instructions are unambiguous and that the task effectively tests conceptual understanding.
 
-## 3. Create Comprehensive Grading Rubrics [pending]
-### Dependencies: 9.1, 9.2
-### Description: Develop detailed grading rubrics for both the quiz and practical assessment, defining mastery as ≥85% accuracy.
-### Details:
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 9.3: Create Comprehensive Grading Rubrics
+Description: Develop detailed grading rubrics for both the quiz and practical assessment, defining mastery as ≥85% accuracy.
+Subtask Details:
 Implementation steps:
 1. For the quiz:
    - Assign point values to each question type (e.g., 1 point for T/F, 2 points for multiple choice, 3-5 points for short answer)
@@ -66,10 +87,14 @@ Implementation steps:
 
 Testing approach: Apply rubrics to sample student work to verify clarity and fairness. Ensure rubrics align with learning objectives and properly weight the most important concepts.
 
-## 4. Develop Personalized Review Template [pending]
-### Dependencies: 9.1, 9.2, 9.3
-### Description: Create a template to help students identify weak areas and plan targeted review based on assessment results.
-### Details:
+Dependencies: 1, 2
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 9.4: Develop Personalized Review Template
+Description: Create a template to help students identify weak areas and plan targeted review based on assessment results.
+Subtask Details:
 Implementation steps:
 1. Design a self-reflection section prompting students to analyze their performance
 2. Create a structured format for categorizing quiz and practical assessment results by topic area (e.g., RNA structure, thermodynamic principles, biochemical properties)
@@ -85,10 +110,14 @@ Implementation steps:
 
 Testing approach: Have students test the template with sample assessment results to ensure it effectively guides them to identify knowledge gaps and create actionable review plans.
 
-## 5. Review and Validate Assessment Materials [pending]
-### Dependencies: 9.1, 9.2, 9.3, 9.4
-### Description: Conduct comprehensive review of all assessment materials for coverage, clarity, and alignment with learning objectives.
-### Details:
+Dependencies: 1, 2, 3
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 9.5: Review and Validate Assessment Materials
+Description: Conduct comprehensive review of all assessment materials for coverage, clarity, and alignment with learning objectives.
+Subtask Details:
 Implementation steps:
 1. Create a mapping document linking each assessment item to specific learning objectives
 2. Verify all learning objectives are adequately covered across assessment materials
@@ -103,51 +132,7 @@ Implementation steps:
 
 Testing approach: Conduct pilot testing with a small group of students and instructors to gather feedback on clarity, difficulty level, and effectiveness. Make final adjustments based on this feedback before full implementation.
 
-
-
-# Subtask Details:
-
-## Subtask 9.1: Develop a Comprehensive Quiz with Mixed Question Formats
-Description: Create a 15-20 question quiz covering all RNA biochemistry and thermodynamics learning objectives with varied question formats and difficulty levels.
-Dependencies: None
+Dependencies: 1, 2, 3, 4
 Status: pending
 Risks: Not specified
 Mitigation: Not specified
-HPE Learning Meta:
-  Not specified
-
-## Subtask 9.2: Design Practical Assessment Task for RNA Structure
-Description: Create a practical assessment requiring students to draw a detailed RNA nucleotide and explain energetic contributions to RNA secondary structure stability.
-Dependencies: None
-Status: pending
-Risks: Not specified
-Mitigation: Not specified
-HPE Learning Meta:
-  Not specified
-
-## Subtask 9.3: Create Comprehensive Grading Rubrics
-Description: Develop detailed grading rubrics for both the quiz and practical assessment, defining mastery as ≥85% accuracy.
-Dependencies: [1, 2]
-Status: pending
-Risks: Not specified
-Mitigation: Not specified
-HPE Learning Meta:
-  Not specified
-
-## Subtask 9.4: Develop Personalized Review Template
-Description: Create a template to help students identify weak areas and plan targeted review based on assessment results.
-Dependencies: [1, 2, 3]
-Status: pending
-Risks: Not specified
-Mitigation: Not specified
-HPE Learning Meta:
-  Not specified
-
-## Subtask 9.5: Review and Validate Assessment Materials
-Description: Conduct comprehensive review of all assessment materials for coverage, clarity, and alignment with learning objectives.
-Dependencies: [1, 2, 3, 4]
-Status: pending
-Risks: Not specified
-Mitigation: Not specified
-HPE Learning Meta:
-  Not specified

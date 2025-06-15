@@ -3,18 +3,31 @@
 # Status: pending
 # Dependencies: 1
 # Priority: high
-# Description: Create comprehensive materials on RNA nucleotide structure, including diagrams of nucleotide components and base structures.
+
+# Description:
+Create comprehensive materials on RNA nucleotide structure, including diagrams of nucleotide components and base structures.
+
 # Details:
 Draw and label a generic RNA nucleotide showing the phosphate group, ribose sugar (with numbered carbons 1'-5'), and placeholder for the base. Highlight the critical 2'-hydroxyl group. Create detailed chemical structures of the four standard RNA bases (Adenine, Guanine, Cytosine, Uracil) and identify them as purines or pyrimidines. Include notes on nucleosides vs. nucleotides and the chemical properties of each component. Create flashcards for key terms, chemical structures, and important distinctions.
 
 # Test Strategy:
 Review drawings for accuracy and completeness. Verify all components are correctly labeled and the 2'-OH group is explicitly highlighted. Confirm that the base structures are chemically accurate and properly classified as purines or pyrimidines.
 
-# Subtasks:
-## 1. Create detailed diagram of a generic RNA nucleotide structure [pending]
-### Dependencies: None
-### Description: Draw and label a comprehensive diagram of a generic RNA nucleotide showing all key components with proper labeling and highlighting of distinctive features.
-### Details:
+# HPE Learning Meta (Main Task):
+    Learning objective summary: Master the chemical composition of RNA nucleotides, accurately draw generic nucleotide and base structures, and create related explanatory notes and flashcards.
+    Estimated effort tshirt: M
+    Estimated effort hours raw: 1.5-2 hours
+    Estimated effort hours min: 1.5
+    Estimated effort hours max: 2
+    Mastery criteria summary: Accurate drawings of generic RNA nucleotide and the four standard RNA bases. Comprehensive notes covering components, properties, and nucleoside/nucleotide distinction. Initial flashcards for structures and terms created.
+    Activity type: drawing_diagramming_notetaking_flashcard_creation
+    Recommended block: active_learning
+    Deliverables: ['Completed drawing of a generic RNA nucleotide (Task 1.1 from PRD).', 'Completed detailed chemical structures of Adenine, Guanine, Cytosine, and Uracil (Task 1.2 from PRD).', 'Notes on nucleosides vs. nucleotides and chemical properties of components.', 'Initial batch of flashcards for nucleotide structures and related terms.']
+# Subtask Details:
+
+## Subtask 2.1: Create detailed diagram of a generic RNA nucleotide structure
+Description: Draw and label a comprehensive diagram of a generic RNA nucleotide showing all key components with proper labeling and highlighting of distinctive features.
+Subtask Details:
 Implementation steps:
 1. Create a clear, chemically accurate drawing of a generic RNA nucleotide with:
    - Phosphate group (labeled with P)
@@ -27,10 +40,14 @@ Implementation steps:
 4. Include a title and brief caption explaining the diagram
 5. Test by having someone with biochemistry knowledge verify accuracy and completeness of the structure
 
-## 2. Develop detailed structures of the four RNA bases [pending]
-### Dependencies: 2.1
-### Description: Create chemically accurate diagrams of the four standard RNA bases (Adenine, Guanine, Cytosine, Uracil) with proper classification and labeling.
-### Details:
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 2.2: Develop detailed structures of the four RNA bases
+Description: Create chemically accurate diagrams of the four standard RNA bases (Adenine, Guanine, Cytosine, Uracil) with proper classification and labeling.
+Subtask Details:
 Implementation steps:
 1. Draw detailed chemical structures for each of the four RNA bases:
    - Adenine (A) - with proper purine ring structure
@@ -43,10 +60,14 @@ Implementation steps:
 5. Include hydrogen bond donor and acceptor sites important for base pairing
 6. Test by comparing to standard biochemistry references and having an expert verify accuracy
 
-## 3. Write explanatory notes on nucleotide chemistry and properties [pending]
-### Dependencies: 2.1, 2.2
-### Description: Create comprehensive notes explaining the chemical properties of RNA nucleotide components and the distinction between nucleosides and nucleotides.
-### Details:
+Dependencies: 1
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 2.3: Write explanatory notes on nucleotide chemistry and properties
+Description: Create comprehensive notes explaining the chemical properties of RNA nucleotide components and the distinction between nucleosides and nucleotides.
+Subtask Details:
 Implementation steps:
 1. Write clear explanations of:
    - The difference between nucleosides (base + sugar) and nucleotides (base + sugar + phosphate)
@@ -60,10 +81,14 @@ Implementation steps:
 5. Include a section on modified RNA bases found in nature
 6. Test by having a biochemistry student review for clarity and accuracy
 
-## 4. Create educational flashcards for RNA nucleotide structures [pending]
-### Dependencies: 2.1, 2.2, 2.3
-### Description: Develop a comprehensive set of educational flashcards covering key terms, chemical structures, and important distinctions related to RNA nucleotides.
-### Details:
+Dependencies: 1, 2
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 2.4: Create educational flashcards for RNA nucleotide structures
+Description: Develop a comprehensive set of educational flashcards covering key terms, chemical structures, and important distinctions related to RNA nucleotides.
+Subtask Details:
 Implementation steps:
 1. Design a template for flashcards with clear front/back format
 2. Create flashcards for the following categories:
@@ -76,10 +101,14 @@ Implementation steps:
 5. Format flashcards for both digital use and printing
 6. Test by having students use the flashcards and provide feedback on clarity and usefulness
 
-## 5. Review and finalize all RNA nucleotide structure materials [pending]
-### Dependencies: 2.1, 2.2, 2.3, 2.4
-### Description: Conduct a comprehensive review of all created materials for accuracy, clarity, consistency, and educational effectiveness.
-### Details:
+Dependencies: 1, 2, 3
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 2.5: Review and finalize all RNA nucleotide structure materials
+Description: Conduct a comprehensive review of all created materials for accuracy, clarity, consistency, and educational effectiveness.
+Subtask Details:
 Implementation steps:
 1. Systematically review all diagrams for:
    - Chemical accuracy (bond angles, atom positions, functional groups)
@@ -97,51 +126,7 @@ Implementation steps:
 6. Compile final materials into a cohesive package with table of contents and consistent formatting
 7. Test final materials by having someone learn RNA nucleotide structure using only these materials
 
-
-
-# Subtask Details:
-
-## Subtask 2.1: Create detailed diagram of a generic RNA nucleotide structure
-Description: Draw and label a comprehensive diagram of a generic RNA nucleotide showing all key components with proper labeling and highlighting of distinctive features.
-Dependencies: None
+Dependencies: 1, 2, 3, 4
 Status: pending
 Risks: Not specified
 Mitigation: Not specified
-HPE Learning Meta:
-  Not specified
-
-## Subtask 2.2: Develop detailed structures of the four RNA bases
-Description: Create chemically accurate diagrams of the four standard RNA bases (Adenine, Guanine, Cytosine, Uracil) with proper classification and labeling.
-Dependencies: [1]
-Status: pending
-Risks: Not specified
-Mitigation: Not specified
-HPE Learning Meta:
-  Not specified
-
-## Subtask 2.3: Write explanatory notes on nucleotide chemistry and properties
-Description: Create comprehensive notes explaining the chemical properties of RNA nucleotide components and the distinction between nucleosides and nucleotides.
-Dependencies: [1, 2]
-Status: pending
-Risks: Not specified
-Mitigation: Not specified
-HPE Learning Meta:
-  Not specified
-
-## Subtask 2.4: Create educational flashcards for RNA nucleotide structures
-Description: Develop a comprehensive set of educational flashcards covering key terms, chemical structures, and important distinctions related to RNA nucleotides.
-Dependencies: [1, 2, 3]
-Status: pending
-Risks: Not specified
-Mitigation: Not specified
-HPE Learning Meta:
-  Not specified
-
-## Subtask 2.5: Review and finalize all RNA nucleotide structure materials
-Description: Conduct a comprehensive review of all created materials for accuracy, clarity, consistency, and educational effectiveness.
-Dependencies: [1, 2, 3, 4]
-Status: pending
-Risks: Not specified
-Mitigation: Not specified
-HPE Learning Meta:
-  Not specified
