@@ -7,7 +7,7 @@ This section contains comprehensive knowledge bases and training curricula for e
 - **Mentat-OS Framework**: Systematic cognitive enhancement through structured training
 - **Hybrid Human-AI Workflows**: Integration of human intuition with AI capabilities
 - **Five-Layer Architecture**: Intuition Engine, Cognitive Core, Somatic Interface, Social Engine, Ethical Governor
-- **Measurable KPIs**: Working memory, pattern recognition, logical reasoning, social cognition
+- **Measurable KPIs**: Working memory, pattern recognition, logical reasoning, social cognition, somatic awareness
 
 ## 🧬 Biology & Life Sciences
 **[biology/](./biology/)**
