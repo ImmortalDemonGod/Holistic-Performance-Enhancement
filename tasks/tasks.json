@@ -1422,8 +1422,8 @@
       "id": 15,
       "title": "Mastery: RNA Monomer Biophysics",
       "description": "Systematic learning of the RNA monomer document using the pre-testing workflow.",
-      "details": "",
-      "testStrategy": "",
+      "details": "This task involves a deep dive into the biophysical properties of RNA monomers. Key activities include:\n1.  Thoroughly reading and understanding the designated RNA monomer document.\n2.  Utilizing the pre-testing workflow to identify knowledge gaps.\n3.  Creating flashcards, notes, or other learning aids for key concepts.\n4.  Focusing on aspects like chemical structure, charge distribution, conformational flexibility, and interactions relevant to RNA folding and function.",
+      "testStrategy": "Mastery will be assessed through:\n1.  Successful completion of a post-learning assessment (e.g., a quiz or self-test) with a target score (e.g., >90%).\n2.  Ability to explain key concepts from the document without referring to notes.\n3.  Demonstrating understanding by applying learned concepts to simple hypothetical scenarios or problem-solving exercises related to RNA monomer biophysics.\n4.  Confirmation that all identified knowledge gaps from the pre-testing phase have been addressed.",
       "status": "in-progress",
       "dependencies": [],
       "priority": "medium",
@@ -1582,7 +1582,8 @@
       "Functional `arc-reactor-ci.yml` GitHub Actions workflow.",
       "Documentation for the integrated system (`README.md`).",
       "A final validation report from the 'First Light' integration test."
-    ]
+    ],
+    "actionable_advice_for_execution": "1.  **Commit Atomically:** As you complete each subtask, create a separate, atomic Git commit. This will make your work easy to review and, if necessary, revert. E.g., `feat(arc): [16.1] Integrate jarc-reactor via git subtree`, `refactor(arc): [16.1] Refactor internal import paths`.\n2.  **Follow the Dependency Chain:** Execute the subtasks in the defined order, taking advantage of the parallelization opportunity for 16.4 and 16.5.\n3.  **Use Taskmaster to Track Progress:** As you start and finish each subtask, update its status using `task-master set-status --id <subtask_id> --status <done|in-progress>`. This maintains a live record of your progress through this epic.\n4.  **Embrace the `PYTHONPATH` Bridge (Temporarily):** Do not get bogged down for days on subtask 16.1's import refactoring. If it proves difficult, implement the `PYTHONPATH` workaround in your `Taskfile.yml`, document it as tech debt, and move on to subtasks 16.2 and 16.3 to maintain momentum. You can circle back to the full refactor later."
   },
   "hpe_scheduling_meta": {
     "curriculum_part_title": "ARC Sprint: P0 - Foundational Integration",
