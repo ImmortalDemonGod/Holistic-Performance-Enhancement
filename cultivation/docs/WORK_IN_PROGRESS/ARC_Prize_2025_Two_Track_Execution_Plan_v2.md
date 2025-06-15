@@ -5,7 +5,7 @@
 **Status:** Canonical Tactical Plan
 **Point of Contact:** The Architect (You) & The `george` Creator
 
-### I. Executive Summary
+## I. Executive Summary
 
 This document is the official, tactical execution plan for the five-month ARC Prize 2025 sprint. It details the phased milestones, team structure, specific goals, and risk mitigation strategies for the two-track development approach.
 
