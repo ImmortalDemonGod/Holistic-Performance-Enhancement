@@ -658,7 +658,7 @@
     "notes_questions_dependencies": "Depends on `DW_ARC_JR_INTEGRATE_001`. This de-risks Kaggle submission and provides a target for the compositional solver to beat."
   },
   {
-    "task_id_candidate": "DW_ARC_PRIORS_001",
+    "task_id_candidate": "JR_DW_ARC_PRIORS_001",
     "tentative_title": "Define & Train Models for Core Knowledge Primitive Circuits (using `jarc_reactor`)",
     "source_reference": [
       {"file": "simplest_arc_agi/docs/arc_evaluation.md", "section": "Addressing the \"Priors\" Problem"},
@@ -675,7 +675,7 @@
     ],
     "hpe_csm_reference": {
       "source_document": "arc_agi_plan.json",
-      "csm_id": "DW_ARC_PRIORS_001",
+      "csm_id": "JR_DW_ARC_PRIORS_001",
       "anchor_link": null
     },
     "hpe_learning_meta": {
@@ -697,7 +697,7 @@
     "notes_questions_dependencies": "Depends on `DW_ARC_JR_INTEGRATE_001`. These models are inputs for `DW_ARC_EXTRACT_001`."
   },
   {
-    "task_id_candidate": "DW_ARC_EXTRACT_001",
+    "task_id_candidate": "JR_DW_ARC_EXTRACT_001",
     "tentative_title": "Implement & Validate Circuit Extraction (CLT-based, applied to `jarc_reactor` models)",
     "source_reference": [
       {"file": "simplest_arc_agi/docs/components/explanation.md", "section": "Cross-Layer Transcoders (CLTs)"}
@@ -713,7 +713,7 @@
     ],
     "hpe_csm_reference": {
       "source_document": "arc_agi_plan.json",
-      "csm_id": "DW_ARC_EXTRACT_001",
+      "csm_id": "JR_DW_ARC_EXTRACT_001",
       "anchor_link": null
     },
     "hpe_learning_meta": {
@@ -735,7 +735,7 @@
     "notes_questions_dependencies": "This is the core R&D for meaningful circuit extraction. Leverage `simplest_arc_agi` docs, but implement for `jarc_reactor` models. Further breakdown into sub-tasks (SAE architecture, sparsity tuning) needed for sprint planning."
   },
   {
-    "task_id_candidate": "DW_ARC_DB_001",
+    "task_id_candidate": "JR_DW_ARC_DB_001",
     "tentative_title": "Finalize `CircuitDatabase` for ARC: Schema for `jarc_reactor` Circuits, Interfaces, Queries",
     "source_reference": [
       {"file": "simplest_arc_agi/src/database/circuit_database.py"},
@@ -752,7 +752,7 @@
     ],
     "hpe_csm_reference": {
       "source_document": "arc_agi_plan.json",
-      "csm_id": "DW_ARC_DB_001",
+      "csm_id": "JR_DW_ARC_DB_001",
       "anchor_link": null
     },
     "hpe_learning_meta": {
@@ -774,7 +774,7 @@
     "notes_questions_dependencies": "Critical for `DW_ARC_COMPOSE_001`. Must align with `DW_ARC_EXTRACT_001` outputs from `jarc_reactor` models."
   },
   {
-    "task_id_candidate": "DW_ARC_COMPOSE_001",
+    "task_id_candidate": "JR_DW_ARC_COMPOSE_001",
     "tentative_title": "Implement `CircuitComposer` Engine for `jarc_reactor`-derived Circuits (MVP)",
     "source_reference": [
       {"file": "simplest_arc_agi/docs/components/modular_composition.md", "section": "Composition Engine"}
@@ -790,7 +790,7 @@
     ],
     "hpe_csm_reference": {
       "source_document": "arc_agi_plan.json",
-      "csm_id": "DW_ARC_COMPOSE_001",
+      "csm_id": "JR_DW_ARC_COMPOSE_001",
       "anchor_link": null
     },
     "hpe_learning_meta": {
@@ -812,7 +812,7 @@
     "notes_questions_dependencies": "Depends on `DW_ARC_DB_001`. This is the 'CPU'; `DW_ARC_COMPOSE_002` is the 'programmer'."
   },
   {
-    "task_id_candidate": "DW_ARC_COMPOSE_002",
+    "task_id_candidate": "JR_DW_ARC_COMPOSE_002",
     "tentative_title": "Develop LLM-Assisted Composition Planner for ARC (Offline, `jarc_reactor` circuits)",
     "source_reference": [
       {"file": "simplest_arc_agi/docs/components/modular_composition.md", "section": "LLM-Assisted Composition"}
@@ -828,7 +828,7 @@
     ],
     "hpe_csm_reference": {
       "source_document": "arc_agi_plan.json",
-      "csm_id": "DW_ARC_COMPOSE_002",
+      "csm_id": "JR_DW_ARC_COMPOSE_002",
       "anchor_link": null
     },
     "hpe_learning_meta": {
@@ -851,7 +851,7 @@
     "notes_questions_dependencies": "Core AI reasoning. Depends on `DW_ARC_DATA_001`, `DW_ARC_DB_001` (with `jarc_reactor` circuits), `DW_ARC_COMPOSE_001`. Significant iteration."
   },
   {
-    "task_id_candidate": "DW_ARC_SOLVER_001",
+    "task_id_candidate": "JR_DW_ARC_SOLVER_001",
     "tentative_title": "Implement End-to-End ARC Task Solver (using `jarc_reactor` components)",
     "source_reference": [
       {"file": "simplest_arc_agi/docs/arc_evaluation.md", "section": "Standardized Solver Interface"}
@@ -867,7 +867,7 @@
     ],
     "hpe_csm_reference": {
       "source_document": "arc_agi_plan.json",
-      "csm_id": "DW_ARC_SOLVER_001",
+      "csm_id": "JR_DW_ARC_SOLVER_001",
       "anchor_link": null
     },
     "hpe_learning_meta": {
@@ -889,7 +889,7 @@
     "notes_questions_dependencies": "Ties all ARC dev together. Depends on all prior `DW_ARC_...` tasks based on `jarc_reactor`."
   },
   {
-    "task_id_candidate": "DW_ARC_EVAL_001",
+    "task_id_candidate": "JR_DW_ARC_EVAL_001",
     "tentative_title": "Implement Private ARC Evaluation Harness & `submission.json` Generator (for new solver)",
     "source_reference": [
       {"file": "simplest_arc_agi/docs/arc_evaluation.md"},
@@ -906,7 +906,7 @@
     ],
     "hpe_csm_reference": {
       "source_document": "arc_agi_plan.json",
-      "csm_id": "DW_ARC_EVAL_001",
+      "csm_id": "JR_DW_ARC_EVAL_001",
       "anchor_link": null
     },
     "hpe_learning_meta": {
@@ -928,7 +928,7 @@
     "notes_questions_dependencies": "Leverages `jarc_reactor`'s existing evaluation concepts but adapts for the compositional solver."
   },
   {
-    "task_id_candidate": "DW_ARC_KAGGLE_001",
+    "task_id_candidate": "JR_DW_ARC_KAGGLE_001",
     "tentative_title": "Package & Optimize `jarc_reactor`-based Compositional Solver for Kaggle",
     "source_reference": [
       {"file": "Kaggle ARC Prize 2025 Overview", "section": "Code Requirements, Upgraded Accelerators"},
@@ -945,7 +945,7 @@
     ],
     "hpe_csm_reference": {
       "source_document": "arc_agi_plan.json",
-      "csm_id": "DW_ARC_KAGGLE_001",
+      "csm_id": "JR_DW_ARC_KAGGLE_001",
       "anchor_link": null
     },
     "hpe_learning_meta": {
@@ -968,7 +968,7 @@
     "notes_questions_dependencies": "Leverages `jarc_reactor`'s existing Kaggle scripts, but offline LLM and circuit DB access are new complexities. Iterative testing is key."
   },
   {
-    "task_id_candidate": "DW_ARC_PAPER_001",
+    "task_id_candidate": "JR_DW_ARC_PAPER_001",
     "tentative_title": "Draft ARC Prize Paper Award Submission (Focus: `simplest_arc_agi` on `jarc_reactor`)",
     "source_reference": [
       {"file": "Kaggle ARC Prize 2025 Overview", "section": "Paper Award"}
@@ -984,7 +984,7 @@
     ],
     "hpe_csm_reference": {
       "source_document": "arc_agi_plan.json",
-      "csm_id": "DW_ARC_PAPER_001",
+      "csm_id": "JR_DW_ARC_PAPER_001",
       "anchor_link": null
     },
     "hpe_learning_meta": {
@@ -1006,7 +1006,7 @@
     "notes_questions_dependencies": "Done towards end of competition. Iterative writing is best."
   },
   {
-    "task_id_candidate": "DW_ARC_HARVEST_KCV_001",
+    "task_id_candidate": "JR_DW_ARC_HARVEST_KCV_001",
     "tentative_title": "Integrate `jarc_reactor`-derived Circuit Library & Insights into Cultivation KCV",
     "source_reference": [
       {"file": "Strategic_Integration_of_ARC_Prize_2025_vCurrent.md", "section": "V.1. KCV Layer Materialization"},
@@ -1023,7 +1023,7 @@
     ],
     "hpe_csm_reference": {
       "source_document": "arc_agi_plan.json",
-      "csm_id": "DW_ARC_HARVEST_KCV_001",
+      "csm_id": "JR_DW_ARC_HARVEST_KCV_001",
       "anchor_link": null
     },
     "hpe_learning_meta": {
@@ -1045,7 +1045,7 @@
     "notes_questions_dependencies": "Primary 'benefit harvesting' for KCV. Occurs post-ARC submission."
   },
   {
-    "task_id_candidate": "DW_ARC_HARVEST_APTITUDE_001",
+    "task_id_candidate": "JR_DW_ARC_HARVEST_APTITUDE_001",
     "tentative_title": "Develop & Integrate ARC Performance Metrics into Cultivation Π Engine Aptitude (A) Domain",
     "source_reference": [
       {"file": "Strategic_Integration_of_ARC_Prize_2025_vCurrent.md", "section": "V.2. Activating the \"Aptitude (A)\" Dimension"},
@@ -1062,7 +1062,7 @@
     ],
     "hpe_csm_reference": {
       "source_document": "arc_agi_plan.json",
-      "csm_id": "DW_ARC_HARVEST_APTITUDE_001",
+      "csm_id": "JR_DW_ARC_HARVEST_APTITUDE_001",
       "anchor_link": null
     },
     "hpe_learning_meta": {

@@ -104,7 +104,7 @@ HPE Learning Meta:
 
 ## Subtask 16.5: Create CI Workflow
 Description: Implement `arc-reactor-ci.yml` GitHub Actions workflow. Configure it to run `arc:lint` and `arc:test` targets. Trigger workflow only on changes to relevant paths (e.g., `cultivation/systems/arc_reactor/**`) for efficiency.
-Dependencies: 3
+Dependencies: 4, 6
 Status: pending
 Risks: CI environment has pathing or caching issues not present locally.
 Mitigation: Use `act` to test workflow locally if possible. Add extensive logging and debug steps to the CI file during initial setup.
@@ -129,7 +129,7 @@ Refinement: Use `on.<push/pull_request>.paths` in the workflow file to limit tri
 
 ## Subtask 16.6: Document Integrated System
 Description: Create `cultivation/systems/arc_reactor/README.md`. As a living document, it should explain the integrated setup, how to use the new Taskfile targets, and the ARC dataset configuration.
-Dependencies: 4, 5
+Dependencies: 3
 Status: pending
 Risks: Documentation becomes outdated as other subtasks are completed.
 Mitigation: Draft the README early, but perform a final pass to update it as the very last step before the 'First Light' test.
