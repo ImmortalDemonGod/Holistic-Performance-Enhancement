@@ -1,3 +1,0 @@
-Heart Rate Comparison (Week 19):
-20250511_173201_recovery_walk: mean=93.2, max=95
-20250510_203716_saturday_evening_longrun_runwalk21p_frag_stride1x_HR154Z2_cad156_EF0157_decoup0p_negSplit_24Cclear: mean=153.6, max=181

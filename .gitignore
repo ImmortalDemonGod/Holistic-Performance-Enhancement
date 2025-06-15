@@ -58,6 +58,18 @@ cover/
 # Django stuff:
 *.log
 local_settings.py
+
+# Ignore all logs/ directories at any depth
+**/logs/
+
+# Ignore all reader.db files at any depth
+**/reader.db
+
+# Ignore all pdfjs static assets except README.txt
+cultivation/systems/knowledge/reader_app/static/pdfjs/*
+!cultivation/systems/knowledge/reader_app/static/pdfjs/
+!cultivation/systems/knowledge/reader_app/static/pdfjs/README.txt
+cultivation/systems/knowledge/reader_app/static/*
 db.sqlite3
 db.sqlite3-journal
 

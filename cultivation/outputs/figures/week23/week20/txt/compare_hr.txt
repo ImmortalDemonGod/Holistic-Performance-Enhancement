@@ -1,3 +1,0 @@
-Heart Rate Comparison (Week 20):
-20250517_170210_W20Sat_DrillPlyoStr_Z3Z4RunCad165_Hot: mean=170.7, max=190
-20250515_142115_morning_10_20_30attempt_Z3Z5_high_decoup21p_heavy_walk_warm26C: mean=172.7, max=197

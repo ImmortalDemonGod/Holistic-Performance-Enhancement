@@ -1,3 +1,0 @@
-Pace Comparison (Week 17):
-20250425_201748_afternoon_run_calibration_pre-baseox_RPE_10: mean=5.10, min=0.87
-20250421_000013_evening_run_calibration_pre-baseox_RPE_7: mean=4.66, min=2.29

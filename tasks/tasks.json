@@ -1417,7 +1417,187 @@
           "parentTaskId": 14
         }
       ]
+    },
+    {
+      "id": 15,
+      "title": "Mastery: RNA Monomer Biophysics",
+      "description": "Systematic learning of the RNA monomer document using the pre-testing workflow.",
+      "details": "This task involves a deep dive into the biophysical properties of RNA monomers. Key activities include:\n1.  Thoroughly reading and understanding the designated RNA monomer document.\n2.  Utilizing the pre-testing workflow to identify knowledge gaps.\n3.  Creating flashcards, notes, or other learning aids for key concepts.\n4.  Focusing on aspects like chemical structure, charge distribution, conformational flexibility, and interactions relevant to RNA folding and function.",
+      "testStrategy": "Mastery will be assessed through:\n1.  Successful completion of a post-learning assessment (e.g., a quiz or self-test) with a target score (e.g., >90%).\n2.  Ability to explain key concepts from the document without referring to notes.\n3.  Demonstrating understanding by applying learned concepts to simple hypothetical scenarios or problem-solving exercises related to RNA monomer biophysics.\n4.  Confirmation that all identified knowledge gaps from the pre-testing phase have been addressed.",
+      "status": "in-progress",
+      "dependencies": [],
+      "priority": "medium",
+      "subtasks": []
+    },
+{
+  "id": 16,
+  "title": "Integrate jarc_reactor Codebase & Establish ARC Sprint Environment",
+  "description": "Epic foundational task for Track A of the ARC Prize sprint: transform jarc-reactor from an external asset into a fully integrated, quality-assured, and testable component of the Cultivation project, establishing the baseline for all future ARC Prize work.",
+  "details": "This task is the cornerstone of the ARC Prize sprint, activating the baseline, enforcing Cultivation's Infrastructure & Automation (IA) Layer standards, and providing the testbed for all future ARC experimentation.\n\nStrategic Purpose:\n- De-risk the sprint by establishing a robust, operational baseline.\n- Enforce code quality and prevent technical debt from day one.\n- Provide a stable, standardized platform for all future R&D.\n\nDependency Graph (see mermaid diagram in project docs):\n16.1 → 16.2 → 16.3 → (16.4 & 16.6) → 16.5 → 16.7\n\nSee subtasks for detailed risk analysis, mitigation strategies, and workflow guidance.",
+  "testStrategy": "Definition of Done (Checklist):\n1. Confirm jarc_reactor has been properly integrated using git subtree with full history preserved.\n2. Verify all dependencies are harmonized in the root requirements.txt with no conflicts.\n3. Validate IA Layer compliance through pre-commit hooks and code standards.\n4. Ensure ARC dataset is properly configured and accessible.\n5. Check that documentation is complete and accurate.\n6. Verify CI workflow is implemented and functioning.\n7. Confirm successful end-to-end training cycle on ARC data.",
+  "status": "pending",
+  "dependencies": [],
+  "priority": "high",
+  "subtasks": [
+    {
+      "id": 1,
+      "title": "Structure Repo: `git subtree` & Import Path Refactoring",
+      "description": "Use `git subtree` to merge jarc_reactor into `cultivation/systems/arc_reactor/` with full history. Then, refactor all internal Python import paths to be absolute from the `cultivation` root, or bridge temporarily with PYTHONPATH in Taskfile targets.",
+      "dependencies": [],
+      "status": "pending",
+      "hpe_learning_meta": { "estimated_effort_hours_min": 2.5, "estimated_effort_hours_max": 5.0, "recommended_block": "deep_work" },
+      "risks": "Refactoring all import paths is time-consuming and error-prone. A single missed import can break the entire system.",
+      "mitigation": "Use an IDE with project-wide refactoring tools. Create a specific test commit after refactoring and run all tests. Consider the PYTHONPATH bridge as a temporary measure to unblock other subtasks if refactoring proves too complex initially.",
+      "implementation_details": {
+        "steps": [
+          "Use `git subtree` to merge the `jarc_reactor` repository into `cultivation/systems/arc_reactor/`, preserving its entire commit history",
+          "Update all internal Python import paths to be absolute from the `cultivation` root",
+          "Ensure proper directory structure within the Cultivation project",
+          "Add appropriate README documentation explaining the integration",
+          "Ensure .gitignore is updated to handle any new patterns"
+        ],
+        "testing": [
+          "Verify the repository structure is correct",
+          "Ensure all files are properly integrated with history preserved",
+          "Check that import paths are correctly updated to use absolute paths",
+          "Confirm documentation is clear and accurate"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Harmonize Dependencies",
+      "description": "Analyze `jarc-reactor/requirements.txt`, merge dependencies into the root `requirements.txt`. Resolve version conflicts by defaulting to the newer version, then validate the unified environment using `pip check` and by running both projects' test suites.",
+      "dependencies": [1],
+      "status": "pending",
+      "hpe_learning_meta": { "estimated_effort_hours_min": 1.0, "estimated_effort_hours_max": 4.0, "recommended_block": "deep_work" },
+      "risks": "A newer dependency version required by Cultivation breaks a critical function in jarc-reactor, leading to extensive debugging ('dependency hell').",
+      "mitigation": "Immediately run both test suites after merging requirements. If major breaks occur, use `pipdeptree` to analyze the conflict and be prepared to pin a specific dependency to an older, compatible version as a short-term fix, creating a follow-up tech debt task."
+    },
+    {
+      "id": 3,
+      "title": "Implement IA Layer Compliance",
+      "description": "Run `pre-commit run --all-files` and fix all `black`, `ruff`, and `isort` issues. Refactor all `logging` calls to use the Cultivation project's standard logger. Add `arc:lint` and `arc:test` targets to the root `Taskfile.yml`.",
+      "dependencies": [2],
+      "status": "pending",
+      "hpe_learning_meta": { "estimated_effort_hours_min": 1.5, "estimated_effort_hours_max": 3.0, "recommended_block": "focused_dev_block" },
+      "clarification": "IA stands for Infrastructure & Automation in the Cultivation context.",
+      "risks": "The initial pre-commit run may generate thousands of changes, making the commit noisy and hard to review.",
+      "mitigation": "Perform the automated formatting in a single, isolated commit with a clear message (e.g., 'style: Apply pre-commit formatting to arc_reactor'). Then, perform the manual logging refactor in a separate commit."
+    },
+    {
+      "id": 4,
+      "title": "Configure ARC Dataset Environment",
+      "description": "Download the official ARC dataset to `cultivation/data/raw/arc_prize_2025/`. Create an override config file for `jarc-reactor` pointing to this path. Audit and adapt `jarc-reactor`'s data loaders to parse the official ARC JSON format.",
+      "dependencies": [3],
+      "status": "pending",
+      "hpe_learning_meta": { "estimated_effort_hours_min": 2.0, "estimated_effort_hours_max": 5.0, "recommended_block": "deep_work" },
+      "risks": "The official ARC dataset structure has subtle differences from what `jarc-reactor`'s data loaders expect, requiring significant refactoring of `data_preparation.py`.",
+      "mitigation": "Start by writing a small, standalone script to parse just one ARC task file. Once that works, integrate the logic into the main data loader. Test with a diverse sample of at least 10-15 ARC tasks."
+    },
+    {
+      "id": 5,
+      "title": "Create CI Workflow",
+      "description": "Implement `arc-reactor-ci.yml` GitHub Actions workflow. Configure it to run `arc:lint` and `arc:test` targets. Trigger workflow only on changes to relevant paths (e.g., `cultivation/systems/arc_reactor/**`) for efficiency.",
+      "dependencies": [4, 6],
+      "status": "pending",
+      "hpe_learning_meta": { "estimated_effort_hours_min": 1.0, "estimated_effort_hours_max": 2.5, "recommended_block": "focused_dev_block" },
+      "refinement": "Use `on.<push/pull_request>.paths` in the workflow file to limit triggers.",
+      "risks": "CI environment has pathing or caching issues not present locally.",
+      "mitigation": "Use `act` to test workflow locally if possible. Add extensive logging and debug steps to the CI file during initial setup.",
+      "implementation_details": {
+        "steps": [
+          "Create a new GitHub Actions workflow file (`arc-reactor-ci.yml`)",
+          "Configure the workflow to run the new `arc:lint` and `arc:test` targets on relevant PRs",
+          "Set up appropriate triggers for the workflow",
+          "Configure proper caching of dependencies to speed up CI runs",
+          "Ensure the workflow provides clear feedback on failures",
+          "Test the workflow with both passing and failing scenarios"
+        ],
+        "testing": [
+          "Create test PRs to verify the workflow triggers correctly",
+          "Introduce deliberate linting errors to verify detection",
+          "Introduce test failures to verify proper reporting",
+          "Check that the workflow completes in a reasonable time",
+          "Verify caching is working as expected"
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "title": "Document Integrated System",
+      "description": "Create `cultivation/systems/arc_reactor/README.md`. As a living document, it should explain the integrated setup, how to use the new Taskfile targets, and the ARC dataset configuration.",
+      "dependencies": [3],
+      "status": "pending",
+      "hpe_learning_meta": { "estimated_effort_hours_min": 0.5, "estimated_effort_hours_max": 1.5, "recommended_block": "flex-slot" },
+      "risks": "Documentation becomes outdated as other subtasks are completed.",
+      "mitigation": "Draft the README early, but perform a final pass to update it as the very last step before the 'First Light' test."
+    },
+    {
+      "id": 7,
+      "title": "Perform \"First Light\" Integration Test",
+      "description": "Execute a complete, short, end-to-end training cycle on a small subset of ARC data using the `task arc:run-baseline` target. Success is defined as the run completing without errors and saving a model checkpoint. Document the process and results in a concise validation report.",
+      "dependencies": [6],
+      "status": "pending",
+      "hpe_learning_meta": { "estimated_effort_hours_min": 1.0, "estimated_effort_hours_max": 4.0, "recommended_block": "deep_work" },
+      "risks": "An unforeseen integration error emerges only when all components run together.",
+      "mitigation": "Run with a debugger attached. Analyze logs from the full run to trace the error. Be prepared to revisit and patch previous subtasks.",
+      "implementation_details": {
+        "steps": [
+          "Run a short, end-to-end training cycle on a small subset of ARC data",
+          "Confirm the entire integrated system functions without errors",
+          "Verify that the system successfully saves a model checkpoint",
+          "Analyze logs for any warnings or potential issues",
+          "Document the test process and results",
+          "Create a validation report with performance metrics"
+        ],
+        "testing": [
+          "Select a representative subset of ARC tasks for the test",
+          "Monitor system resource usage during the test",
+          "Validate that checkpoints are properly saved and can be loaded",
+          "Check that all components interact correctly through the IA layer",
+          "Document any issues discovered and their resolutions",
+          "Create a final integration report documenting the system's readiness"
+        ]
+      }
     }
+  ],
+  "hpe_csm_reference": {
+    "source_document": "cultivation/docs/WORK_IN_PROGRESS/arc_agi_plan.json",
+    "csm_id": "DW_ARC_JR_INTEGRATE_001",
+    "anchor_link": null
+  },
+  "hpe_learning_meta": {
+    "learning_objective_summary": "To establish a robust, standardized, and well-understood development environment for `jarc-reactor` as the foundation for the ARC Prize sprint.",
+    "estimated_effort_tshirt": "L",
+    "estimated_effort_hours_raw": "3-5 days",
+    "estimated_effort_hours_min": 15.0,
+    "estimated_effort_hours_max": 25.0,
+    "mastery_criteria_summary": "jarc-reactor environment is fully set up, IA standards are applied, and a baseline training run on ARC data completes successfully.",
+    "activity_type": "systems_integration_devops_setup",
+    "recommended_block": "deep_work",
+    "deliverables": [
+      "Configured `jarc-reactor` dev environment within Cultivation.",
+      "Updated `Taskfile.yml` with `arc:*` targets.",
+      "Functional `arc-reactor-ci.yml` GitHub Actions workflow.",
+      "Documentation for the integrated system (`README.md`).",
+      "A final validation report from the 'First Light' integration test."
+    ],
+    "actionable_advice_for_execution": "1.  **Commit Atomically:** As you complete each subtask, create a separate, atomic Git commit. This will make your work easy to review and, if necessary, revert. E.g., `feat(arc): [16.1] Integrate jarc-reactor via git subtree`, `refactor(arc): [16.1] Refactor internal import paths`.\n2.  **Follow the Dependency Chain:** Execute the subtasks in the defined order, taking advantage of the parallelization opportunity for 16.4 and 16.5.\n3.  **Use Taskmaster to Track Progress:** As you start and finish each subtask, update its status using `task-master set-status --id <subtask_id> --status <done|in-progress>`. This maintains a live record of your progress through this epic.\n4.  **Embrace the `PYTHONPATH` Bridge (Temporarily):** Do not get bogged down for days on subtask 16.1's import refactoring. If it proves difficult, implement the `PYTHONPATH` workaround in your `Taskfile.yml`, document it as tech debt, and move on to subtasks 16.2 and 16.3 to maintain momentum. You can circle back to the full refactor later."
+  },
+  "hpe_scheduling_meta": {
+    "curriculum_part_title": "ARC Sprint: P0 - Foundational Integration",
+    "csm_tags": ["arc_sprint", "jarc_reactor", "setup", "ia_layer", "track_a", "epic"]
+  },
+  "labels": [
+    "domain:arc_sprint",
+    "component:ia_layer",
+    "activity:systems_integration",
+    "block:deep_work",
+    "effort_tshirt:L",
+    "track:A"
+  ]
+}
   ],
   "metadata": {
     "projectName": "RNA Modeling Foundations Learning Plan",
