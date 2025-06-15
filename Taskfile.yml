@@ -150,6 +150,17 @@ tasks:
     cmds:
       - "{{.PYTHON_INTERPRETER}} {{.CULTIVATION_ROOT}}/scripts/strength/ingest_yaml_log.py"
 
+  github:pr-summaries:generate:
+    desc: "Generates PR markdown summaries (two-step: fetch data, then generate markdown)."
+    cmds:
+      - 'echo "INFO: Starting PR summary generation..."'
+      - 'echo "Step 1/2: Fetching PR data and generating raw logs/diffs..."'
+      - cmd: './cultivation/scripts/software/github_automation.sh'
+        dir: 'cultivation/scripts/software'
+      - 'echo "Step 2/2: Generating markdown summaries from fetched data..."'
+      - 'python3 cultivation/scripts/software/generate_pr_markdown_summaries.py'
+      - 'echo "SUCCESS: PR Markdown summaries generated in cultivation/outputs/software/pr_markdown_summaries/"'
+
   data:flashcore-ingest:
     desc: "[Placeholder] Not yet implemented. Intended to ingest all flashcard YAML files into the database."
     cmds:
