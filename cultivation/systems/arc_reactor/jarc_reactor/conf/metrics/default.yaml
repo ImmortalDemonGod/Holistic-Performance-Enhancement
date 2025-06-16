@@ -1,0 +1,3 @@
+# Default metrics configuration
+
+confidence_threshold: 0.5

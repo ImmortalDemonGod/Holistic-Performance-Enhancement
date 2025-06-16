@@ -1,0 +1,18 @@
+# @package _group_
+
+ddefaults:
+  - model: default
+  - training: default
+  - optuna: default
+  - logging: default
+  - finetuning: default
+  - metrics: default
+  - scheduler: default
+  - evaluation: default
+  - _self_
+
+# Global settings (can be overridden by group configs or command line)
+use_best_params: false
+
+# CUDA Optimizations (handled by a script, but can be toggled here if needed)
+enable_cuda_optimizations: true

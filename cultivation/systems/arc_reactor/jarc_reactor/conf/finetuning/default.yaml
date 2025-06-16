@@ -1,0 +1,10 @@
+# Default fine-tuning configuration
+
+mode: "all"  # Options: "all" or "random"
+num_random_tasks: 1 # Only used if mode is "random"
+
+save_dir: "finetuning_results"
+
+max_epochs: 100
+learning_rate: 0.00001 # 1e-5
+patience: 5 # For early stopping

@@ -1,0 +1,17 @@
+# Default logging configuration
+
+level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+debug_mode: false
+log_dir: "jarc_reactor/logs"
+
+# Configuration for the centralized logging utility (cultivation/utils/logging_config.py)
+# These can be used by the application to set up the logger upon initialization.
+file_logging:
+  enable: true # Whether to enable logging to a file
+  log_file_name: "jarc_reactor_app.log" # Name of the log file
+  # log_dir will be used from the main logging config above.
+  max_bytes: 10485760 # 10MB
+  backup_count: 5 # Number of backup files
+
+console_logging:
+  enable: true # Whether to enable logging to console
