@@ -6,7 +6,9 @@ from datetime import datetime
 from pathlib import Path
 import torch
 from tqdm import tqdm
-from cultivation.systems.arc_reactor.jarc_reactor.config import Config
+import hydra # Added for Hydra
+from omegaconf import DictConfig, OmegaConf # Added for Hydra
+# from cultivation.systems.arc_reactor.jarc_reactor.config import Config # Removed old config
 from cultivation.systems.arc_reactor.jarc_reactor.utils.model_factory import create_transformer_trainer
 from cultivation.systems.arc_reactor.jarc_reactor.data.data_preparation import prepare_data as prepare_training_data
 from cultivation.systems.arc_reactor.jarc_reactor.data.eval_data_prep import prepare_data as prepare_eval_data
@@ -21,8 +23,8 @@ from cultivation.systems.arc_reactor.jarc_reactor.evaluation.logger import Evalu
 
 
 class EvaluationManager:
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, cfg: DictConfig):
+        self.cfg = cfg
         self.setup_logging()
         
         # Initialize result storage
@@ -35,8 +37,8 @@ class EvaluationManager:
             'metadata': {
                 'timestamp': datetime.now().isoformat(),
                 'config': {
-                    'model': vars(config.model),
-                    'training': vars(config.training)
+                    'model': OmegaConf.to_container(cfg.model, resolve=True),
+                    'training': OmegaConf.to_container(cfg.training, resolve=True)
                 }
             }
         }
@@ -46,7 +48,7 @@ class EvaluationManager:
         self.model = self.model.to(self.device)
         self.model.eval()
         
-        self.eval_dir = self.config.evaluation.data_dir
+        self.eval_dir = self.cfg.evaluation.data_dir
         if not os.path.exists(self.eval_dir):
             self.logger.error(f"Evaluation directory not found: {self.eval_dir}")
             raise FileNotFoundError(f"Evaluation directory not found: {self.eval_dir}")
@@ -61,7 +63,7 @@ class EvaluationManager:
         }
         
         # Initialize TaskMapper
-        self.task_mapper = TaskMapper(self.logger, self.config)
+        self.task_mapper = TaskMapper(self.logger, self.cfg)
 
         # Initialize MetricsCalculator
         self.metrics_calculator = MetricsCalculator(logger=self.logger)
@@ -72,7 +74,7 @@ class EvaluationManager:
             device=self.device,
             logger=self.logger,
             metrics_calculator=self.metrics_calculator,
-            config=self.config  # Pass the config instance
+            config=self.cfg  # Pass the config instance
         )
 
     def setup_logging(self):
@@ -82,14 +84,14 @@ class EvaluationManager:
     def _load_model(self):
         """Load model with error handling and logging"""
         try:
-            checkpoint_path = self.config.model.checkpoint_path
+            checkpoint_path = self.cfg.model.checkpoint_path
             self.logger.debug(f"Attempting to load model from: {checkpoint_path}")
             
             if not os.path.isfile(checkpoint_path):
                 raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
                 
             model = create_transformer_trainer(
-                config=self.config,
+                config=self.cfg, # Pass the full Hydra DictConfig
                 checkpoint_path=checkpoint_path
             )
             self.logger.info("Model loaded successfully")
@@ -119,8 +121,8 @@ class EvaluationManager:
                     'timestamp': datetime.now().isoformat(),
                     'mode': mode,
                     'config': {
-                        'model': vars(self.config.model),
-                        'training': vars(self.config.training)
+                        'model': OmegaConf.to_container(self.cfg.model, resolve=True),
+                        'training': OmegaConf.to_container(self.cfg.training, resolve=True)
                     }
                 }
             }
@@ -266,13 +268,16 @@ class EvaluationManager:
             if self.task_mapper.has_training_data:
                 self.logger.info("\nPreparing training data...")
                 try:
-                    train_dataset, val_dataset = prepare_training_data(return_datasets=True)
+                    train_dataset, val_dataset = prepare_training_data(
+                        cfg=self.cfg, 
+                        return_datasets=True
+                    )
                     
                     train_loader = torch.utils.data.DataLoader(
-                        train_dataset, batch_size=1, shuffle=False
+                        train_dataset, batch_size=self.cfg.training.batch_size, shuffle=False
                     )
                     val_loader = torch.utils.data.DataLoader(
-                        val_dataset, batch_size=1, shuffle=False
+                        val_dataset, batch_size=self.cfg.training.batch_size, shuffle=False
                     )
                     
                     self.evaluate_loader(
@@ -298,7 +303,10 @@ class EvaluationManager:
             if self.task_mapper.has_eval_data:
                 self.logger.info("\nPreparing evaluation data...")
                 try:
-                    _, eval_dataset = prepare_eval_data(return_datasets=True)
+                    _, eval_dataset = prepare_eval_data(
+                        cfg=self.cfg, 
+                        return_datasets=True
+                    )
                     eval_loader = torch.utils.data.DataLoader(
                         eval_dataset, batch_size=1, shuffle=False
                     )
@@ -319,7 +327,7 @@ class EvaluationManager:
                 summary_file = self.generate_summary(all_results)
                 self.logger.info(f"Evaluation summary saved to {summary_file}")
             
-            if self.config.evaluation.create_submission:
+            if self.cfg.evaluation.create_submission:
                 self.create_submission()
         except Exception:
             self.logger.error("Evaluation failed:", exc_info=True)
@@ -426,16 +434,18 @@ class EvaluationManager:
             raise
 
 
-def main():
-    """Main entry point with error handling"""
+@hydra.main(config_path="../conf", config_name="config", version_base=None)
+def launch_evaluation(cfg: DictConfig):
+    """Main entry point for evaluation, configured by Hydra."""
     try:
-        cfg = Config()
-        evaluator = EvaluationManager(cfg)
-        evaluator.run_evaluation()
-        
-    except Exception:
-        logging.error("Evaluation failed:", exc_info=True)
+        manager = EvaluationManager(cfg)
+        manager.run_evaluation()
+    except Exception as e:
+        # Use the EvaluationManager's logger if available, otherwise global logging
+        eval_logger = getattr(manager, 'logger', logging.getLogger(__name__))
+        eval_logger.error(f"Evaluation script failed: {str(e)}")
+        eval_logger.error("Stack trace:", exc_info=True)
         raise
 
 if __name__ == "__main__":
-    main()
+    launch_evaluation()
