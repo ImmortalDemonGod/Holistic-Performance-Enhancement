@@ -24,6 +24,27 @@ def test_create_transformer_trainer_returns_trainer():
             "model": {
                 "name": "bert-base-uncased", # From original mock
                 "dropout_rate": 0.1,        # From original mock
+                "input_dim": 768,           # Typical for bert-base
+                "seq_len": 512,             # Typical for bert-base
+                "d_model": 768,             # Typical for bert-base (same as input_dim)
+                "encoder_layers": 12,       # Typical for bert-base
+                "decoder_layers": 0,        # For encoder-only models like BERT
+                "heads": 12,                # Typical for bert-base
+                "d_ff": 3072,               # Typical for bert-base (4*d_model)
+                "output_dim": 2,            # Should match training.num_labels
+                "context_encoder": {
+                    "d_model": 768,         # Typical for bert-base
+                    "path": "bert-base-uncased", # Placeholder path
+                    "heads": 12,            # Match main model
+                    "dropout_rate": 0.1
+                },
+                "encoder_dropout_rate": 0.1,
+                "decoder_dropout_rate": 0.1,
+                "checkpoint_path": None,      # Or "" for no checkpoint
+                "lora": {
+                    "use_lora": False,
+                    "rank": 0
+                }
                 # Add other fields TransformerTrainer's model setup might need from model_config
             },
             "training": {
@@ -43,6 +64,10 @@ def test_create_transformer_trainer_returns_trainer():
         }
         mock_config = OmegaConf.create(mock_config_dict)
 
+        # Ensure the log directory exists before trainer instantiation
+        import pathlib
+        pathlib.Path("test_logs/").mkdir(parents=True, exist_ok=True)
+    
         trainer_instance = create_transformer_trainer(config=mock_config)
         assert isinstance(trainer_instance, TransformerTrainer)
     except Exception as e:
