@@ -22,7 +22,6 @@ def main():
         logger.info(f"PyTorch version: {torch.__version__}")
         logger.info(f"CUDA available: {torch.cuda.is_available()}")
         
-        import kagglehub
         logger.info("kagglehub imported successfully")
         
         # Print Kaggle environment info if available
