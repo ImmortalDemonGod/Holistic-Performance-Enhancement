@@ -3,18 +3,31 @@
 # Status: pending
 # Dependencies: 4
 # Priority: medium
-# Description: Create comprehensive materials explaining fundamental thermodynamic principles relevant to RNA folding.
+
+# Description:
+Create comprehensive materials explaining fundamental thermodynamic principles relevant to RNA folding.
+
 # Details:
 Document the concept of Gibbs Free Energy (ΔG) and its relationship to enthalpy (ΔH), entropy (ΔS), and temperature (T) in the context of molecular stability (ΔG = ΔH - TΔS). Explain why a negative ΔG is favorable for spontaneous processes like RNA folding into stable structures. Define chemical equilibrium and relate it to the concept of a Minimum Free Energy (MFE) structure for RNA. Write a 2-3 paragraph explanation of what Gibbs Free Energy represents and why structures with more negative ΔG are considered more stable for RNA molecules. Create flashcards for ΔG, ΔH, ΔS definitions and their relationship, MFE, and thermodynamic concepts related to spontaneity.
 
 # Test Strategy:
 Review the thermodynamic principles documentation for accuracy and clarity. Verify that the explanation of Gibbs Free Energy correctly relates to RNA stability. Ensure the relationship between ΔG, ΔH, and TΔS is properly explained in the context of RNA folding.
 
-# Subtasks:
-## 1. Create Explanatory Content for ΔG, ΔH, ΔS, and Their Relationship [pending]
-### Dependencies: None
-### Description: Develop clear explanations of Gibbs Free Energy (ΔG), enthalpy (ΔH), entropy (ΔS), and their mathematical relationship (ΔG = ΔH - TΔS) in the context of RNA folding.
-### Details:
+# HPE Learning Meta (Main Task):
+    Learning objective summary: Explain thermodynamic principles relevant to RNA folding, including Gibbs Free Energy, spontaneity, and Minimum Free Energy structures.
+    Estimated effort tshirt: M
+    Estimated effort hours raw: 2-3 hours
+    Estimated effort hours min: 2
+    Estimated effort hours max: 3
+    Mastery criteria summary: Clear explanations of ΔG, ΔH, ΔS, and their relationship. Accurate examples illustrating spontaneity and MFE concepts in RNA folding.
+    Activity type: explanatory_writing_flashcard_creation
+    Recommended block: active_learning
+    Deliverables: ['Comprehensive explanations of thermodynamic principles (ΔG, ΔH, ΔS, spontaneity, MFE).', 'Flashcards covering key thermodynamic concepts for RNA folding.']
+# Subtask Details:
+
+## Subtask 5.1: Create Explanatory Content for ΔG, ΔH, ΔS, and Their Relationship
+Description: Develop clear explanations of Gibbs Free Energy (ΔG), enthalpy (ΔH), entropy (ΔS), and their mathematical relationship (ΔG = ΔH - TΔS) in the context of RNA folding.
+Subtask Details:
 Implementation steps:
 1. Research and compile precise definitions for ΔG, ΔH, and ΔS from authoritative sources in biochemistry and thermodynamics
 2. Write clear explanations of each term using language accessible to biology students
@@ -25,10 +38,14 @@ Implementation steps:
 
 Testing approach: Have 2-3 subject matter experts review the explanations for accuracy and comprehensibility. Test with a small group of students to ensure the material is understandable to the target audience.
 
-## 2. Develop Content on Spontaneity and Negative ΔG in RNA Folding [pending]
-### Dependencies: 5.1
-### Description: Create explanatory material on why negative ΔG values are favorable for spontaneous processes, with specific examples related to RNA folding and stability.
-### Details:
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 5.2: Develop Content on Spontaneity and Negative ΔG in RNA Folding
+Description: Create explanatory material on why negative ΔG values are favorable for spontaneous processes, with specific examples related to RNA folding and stability.
+Subtask Details:
 Implementation steps:
 1. Explain the concept of spontaneity in thermodynamic processes
 2. Clarify why negative ΔG indicates a spontaneous process
@@ -39,10 +56,14 @@ Implementation steps:
 
 Testing approach: Test explanations with students who have limited prior knowledge of thermodynamics to ensure concepts are clearly conveyed. Verify examples with RNA folding simulation tools to confirm accuracy.
 
-## 3. Develop Materials on Chemical Equilibrium and MFE in RNA [pending]
-### Dependencies: 5.1, 5.2
-### Description: Create content explaining chemical equilibrium concepts and how they relate to Minimum Free Energy (MFE) structures in RNA folding.
-### Details:
+Dependencies: 1
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 5.3: Develop Materials on Chemical Equilibrium and MFE in RNA
+Description: Create content explaining chemical equilibrium concepts and how they relate to Minimum Free Energy (MFE) structures in RNA folding.
+Subtask Details:
 Implementation steps:
 1. Define chemical equilibrium in the context of molecular folding
 2. Explain how equilibrium relates to energy minimization in biological systems
@@ -53,10 +74,14 @@ Implementation steps:
 
 Testing approach: Validate explanations by comparing with current RNA folding algorithms and their documentation. Test with students to ensure they can correctly predict relative stability of simple RNA structures after studying the material.
 
-## 4. Write Comprehensive Explanation of ΔG and RNA Stability [pending]
-### Dependencies: 5.1, 5.2, 5.3
-### Description: Develop a 2-3 paragraph explanation that synthesizes the relationship between Gibbs Free Energy and RNA structural stability, suitable for inclusion in course materials.
-### Details:
+Dependencies: 1, 2
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 5.4: Write Comprehensive Explanation of ΔG and RNA Stability
+Description: Develop a 2-3 paragraph explanation that synthesizes the relationship between Gibbs Free Energy and RNA structural stability, suitable for inclusion in course materials.
+Subtask Details:
 Implementation steps:
 1. Draft an introductory paragraph establishing the fundamental relationship between ΔG and molecular stability
 2. Write a second paragraph explaining how specific molecular interactions in RNA contribute to overall ΔG
@@ -67,10 +92,14 @@ Implementation steps:
 
 Testing approach: Have colleagues review the paragraphs for scientific accuracy. Test comprehension by asking students to paraphrase the key points after reading the explanation.
 
-## 5. Create Thermodynamics Flashcards for RNA Folding Concepts [pending]
-### Dependencies: 5.1, 5.2, 5.3, 5.4
-### Description: Design a comprehensive set of flashcards covering key thermodynamic concepts related to RNA folding, including definitions, relationships, and applications.
-### Details:
+Dependencies: 1, 2, 3
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 5.5: Create Thermodynamics Flashcards for RNA Folding Concepts
+Description: Design a comprehensive set of flashcards covering key thermodynamic concepts related to RNA folding, including definitions, relationships, and applications.
+Subtask Details:
 Implementation steps:
 1. Create definition flashcards for ΔG, ΔH, ΔS with concise explanations on one side and terms on the other
 2. Develop flashcards showing the mathematical relationship between ΔG, ΔH, ΔS, and T
@@ -82,3 +111,7 @@ Implementation steps:
 
 Testing approach: Test flashcards with students in spaced repetition sessions to measure retention of concepts. Revise cards with low retention rates for clarity and effectiveness.
 
+Dependencies: 1, 2, 3, 4
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
