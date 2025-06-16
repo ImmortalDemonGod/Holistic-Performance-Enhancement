@@ -2,13 +2,13 @@
 import os
 import orjson
 import json
-from tqdm import tqdm
 import logging
+from pathlib import Path
+from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import torch
 import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
-
 from cultivation.utils.logging_config import setup_logging
 from cultivation.systems.arc_reactor.jarc_reactor.config import config
 from cultivation.systems.arc_reactor.jarc_reactor.data.context_data import ContextPair
@@ -154,15 +154,9 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 test_outputs.append(output_tensor)
                 test_task_ids.append(task_id)
                 test_context_pairs.append(context_pair)
-        
-from pathlib import Path
 
 def prepare_data(directory=None, batch_size=None, return_datasets=False):
     """Prepare evaluation data with configurable directory"""
-    from jarc_reactor.config import config
-    import logging
-    from pathlib import Path
-
     logger = logging.getLogger(__name__)
 
     # Set directory path - use training data directory by default
