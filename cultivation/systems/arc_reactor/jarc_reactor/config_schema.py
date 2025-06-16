@@ -49,6 +49,7 @@ class TrainingConfigSchema:
     train_from_checkpoint: bool = False
     include_synthetic_training_data: bool = False
     training_data_dir: str = "jarc_reactor/data/training_data/training"
+    synthetic_data_dir: Optional[str] = "cultivation/systems/arc_reactor/jarc_reactor/data/synthetic_data/training" # Path for synthetic training data
 
 @dataclass
 class OptunaPruningConfig:
@@ -68,7 +69,7 @@ class OptunaConfigSchema:
         "encoder_layers": [1, 12],
         "decoder_layers": [1, 12],
         "d_ff": [64, 2048, 64],
-        "dropout": [0.01, 0.7],
+        "dropout_rate": [0.01, 0.7],
         "context_encoder_d_model": [32, 512, 32],
         "context_encoder_heads": [2, 4, 8],
         "batch_size": [8, 512],
