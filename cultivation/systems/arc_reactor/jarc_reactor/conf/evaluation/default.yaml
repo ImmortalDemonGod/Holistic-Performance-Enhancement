@@ -12,3 +12,7 @@ create_submission: true # Whether to create a submission file (e.g., for Kaggle)
 # The path here is relative to the cultivation root, assuming the application runs from there.
 # Or, it can be an absolute path.
 data_dir: "${oc.env:EVALUATION_DATA_DIR,cultivation/systems/arc_reactor/jarc_reactor/data/evaluation_data}"
+
+# Synthetic data settings for evaluation
+include_synthetic_data: false
+synthetic_data_dir: "cultivation/systems/arc_reactor/jarc_reactor/data/synthetic_data/evaluation"
