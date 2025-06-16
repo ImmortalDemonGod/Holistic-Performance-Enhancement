@@ -19,7 +19,7 @@ train_from_checkpoint: false
 
 include_synthetic_training_data: false
 
-training_data_dir: "jarc_reactor/data/training_data/training"
+training_data_dir: "cultivation/systems/arc_reactor/jarc_reactor/data/training_data/training"
 synthetic_data_dir: "cultivation/systems/arc_reactor/jarc_reactor/data/synthetic_data/training"
 
 # Related global settings from original config.py

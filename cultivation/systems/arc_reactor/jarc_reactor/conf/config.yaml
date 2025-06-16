@@ -1,6 +1,7 @@
-# @package _group_
 
-ddefaults:
+defaults:
+  - schema: jarc_app # Explicitly load the main app schema
+  - _self_          # Merge values from this file
   - model: default
   - training: default
   - optuna: default
@@ -9,7 +10,6 @@ ddefaults:
   - metrics: default
   - scheduler: default
   - evaluation: default
-  - _self_
 
 # Global settings (can be overridden by group configs or command line)
 use_best_params: false
