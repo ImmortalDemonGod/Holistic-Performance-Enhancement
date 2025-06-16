@@ -134,17 +134,17 @@ class JARCReactorConfigSchema:
     # Defaults list for Hydra to know which sub-configs to load by default
     # This is usually in the main config.yaml, but can also be structured here if preferred for programmatic access
     # For now, we assume the defaults in config.yaml are primary.
-    defaults: List[Any] = field(default_factory=lambda: [
-        {"model": "default"},
-        {"training": "default"},
-        {"optuna": "default"},
-        {"logging": "default"},
-        {"finetuning": "default"},
-        {"metrics": "default"},
-        {"scheduler": "default"},
-        {"evaluation": "default"},
-        "_self_"
-    ])
+    # defaults: List[Any] = field(default_factory=lambda: [
+    #     {"model": "default"},
+    #     {"training": "default"},
+    #     {"optuna": "default"},
+    #     {"logging": "default"},
+    #     {"finetuning": "default"},
+    #     {"metrics": "default"},
+    #     {"scheduler": "default"},
+    #     {"evaluation": "default"},
+    #     "_self_"
+    # ])
 
     model: ModelConfigSchema = field(default_factory=ModelConfigSchema)
     training: TrainingConfigSchema = field(default_factory=TrainingConfigSchema)
@@ -155,6 +155,6 @@ class JARCReactorConfigSchema:
     scheduler: SchedulerConfigSchema = field(default_factory=SchedulerConfigSchema)
     evaluation: EvaluationConfigSchema = field(default_factory=EvaluationConfigSchema)
 
-    # Global settings from the main config.yaml
+    # Global settings from config.yaml, merged via _self_
     use_best_params: bool = False
     enable_cuda_optimizations: bool = True
