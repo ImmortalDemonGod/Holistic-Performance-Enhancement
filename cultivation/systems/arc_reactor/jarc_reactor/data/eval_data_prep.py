@@ -174,10 +174,10 @@ def prepare_data(cfg: DictConfig, return_datasets: bool = False):
     logger.info(f"Starting data preparation with batch_size={batch_size} from directory {effective_data_dir}")
 
     # Validate directory
-    if not os.path.exists(directory):
-        raise FileNotFoundError(f"Data directory does not exist: {directory}")
-    if not os.path.isdir(directory):
-        raise NotADirectoryError(f"Path is not a directory: {directory}")
+    if not os.path.exists(effective_data_dir):
+        raise FileNotFoundError(f"Data directory does not exist: {effective_data_dir}")
+    if not os.path.isdir(effective_data_dir):
+        raise NotADirectoryError(f"Path is not a directory: {effective_data_dir}")
 
     # Initialize counters before using them
     total_files = 0
@@ -185,9 +185,9 @@ def prepare_data(cfg: DictConfig, return_datasets: bool = False):
     log_limit = 2
     
     # Get list of JSON files first
-    json_files = [f for f in os.listdir(directory) if f.endswith('.json')]
+    json_files = [f for f in os.listdir(effective_data_dir) if f.endswith('.json')]
     if not json_files:
-        raise ValueError(f"No JSON files found in {directory}")
+        raise ValueError(f"No JSON files found in {effective_data_dir}")
     
     # Inspect data structure for a limited number of files
     for filename in json_files:
