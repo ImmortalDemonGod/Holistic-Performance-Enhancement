@@ -8,9 +8,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import torch
 import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
+from omegaconf import DictConfig # Added for Hydra
 
 from cultivation.utils.logging_config import setup_logging
-from cultivation.systems.arc_reactor.jarc_reactor.config import config, include_synthetic_training_data, synthetic_dir
+# from cultivation.systems.arc_reactor.jarc_reactor.config import config, include_synthetic_training_data, synthetic_dir # Removed old config
 from cultivation.systems.arc_reactor.jarc_reactor.data.context_data import ContextPair
 from cultivation.systems.arc_reactor.jarc_reactor.utils.padding_utils import pad_to_fixed_size
 
@@ -18,9 +19,9 @@ from cultivation.systems.arc_reactor.jarc_reactor.utils.padding_utils import pad
 setup_logging()
 logger = logging.getLogger(__name__)
 
-def inspect_data_structure(filename, directory=None):
+def inspect_data_structure(cfg: DictConfig, filename: str, directory: str | None = None):
     if directory is None:
-        directory = config.evaluation.data_dir
+        directory = cfg.evaluation.data_dir
     """Debug helper to examine JSON structure"""
     filepath = os.path.join(directory, filename)
     try:
@@ -148,21 +149,29 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 test_task_ids.append(task_id)
                 test_context_pairs.append(context_pair)
 
-def prepare_data(batch_size=None, return_datasets=False, config=None):
-    """Prepare evaluation data with robust error handling."""
-    from jarc_reactor.config import Config
+def prepare_data(cfg: DictConfig, return_datasets: bool = False):
+    """Prepare evaluation data with robust error handling using Hydra config."""
+    # from jarc_reactor.config import Config # Old config system no longer needed
     
-    # Use passed config or create new one
-    if config is None:
-        config = Config()
-        
     logger = logging.getLogger(__name__)
 
-    if batch_size is None:
-        batch_size = config.training.batch_size
+    batch_size = cfg.training.batch_size # Assuming eval uses training batch size for now
+    data_dir = cfg.evaluation.data_dir
+    include_synthetic = cfg.evaluation.include_synthetic_data
+    synthetic_data_path = cfg.evaluation.synthetic_data_dir
 
-    directory = config.evaluation.data_dir
-    logger.info(f"Starting data preparation with batch_size={batch_size} from directory {directory}")
+    effective_data_dir = data_dir
+    is_synthetic_mode = False
+    if include_synthetic and synthetic_data_path:
+        logger.info(f"Including synthetic data for evaluation from: {synthetic_data_path}")
+        # This script seems to load EITHER normal OR synthetic, not merge.
+        # The old logic with global `include_synthetic_training_data` and `synthetic_dir` implied this.
+        # For now, let's assume if include_synthetic is true, we ONLY use synthetic_data_path for this eval prep.
+        # If merging is intended, this logic needs to be more complex.
+        effective_data_dir = synthetic_data_path
+        is_synthetic_mode = True 
+
+    logger.info(f"Starting data preparation with batch_size={batch_size} from directory {effective_data_dir}")
 
     # Validate directory
     if not os.path.exists(directory):
@@ -184,7 +193,7 @@ def prepare_data(batch_size=None, return_datasets=False, config=None):
     for filename in json_files:
         total_files += 1
         if successful_files < log_limit:
-            if inspect_data_structure(filename, directory):
+            if inspect_data_structure(cfg, filename, effective_data_dir): # Pass cfg and use effective_data_dir
                 successful_files += 1
 
     logger.info(f"Found {total_files} JSON files, successfully inspected {successful_files}")
@@ -198,16 +207,12 @@ def prepare_data(batch_size=None, return_datasets=False, config=None):
     train_context_pairs, test_context_pairs = [], [], 
 
     try:
-        # Load context pairs
-        logger.info("Loading context pairs...")
-        load_context_pairs(directory, context_map)
-        if not context_map:
-            raise ValueError("No context pairs loaded")
+        # Load context pairs first
+        load_context_pairs(effective_data_dir, context_map) # Use effective_data_dir
 
-        # Load main dataset
-        logger.info("Loading main dataset...")
+        # Load main data
         load_main_data_concurrently(
-            directory=directory,
+            directory=effective_data_dir, # Use effective_data_dir
             context_map=context_map,
             train_inputs=train_inputs,
             train_outputs=train_outputs,
@@ -216,7 +221,8 @@ def prepare_data(batch_size=None, return_datasets=False, config=None):
             test_inputs=test_inputs,
             test_outputs=test_outputs,
             test_task_ids=test_task_ids,
-            test_context_pairs=test_context_pairs
+            test_context_pairs=test_context_pairs,
+            is_synthetic=is_synthetic_mode # Use the flag derived from cfg
         )
 
         # Validate data was loaded
