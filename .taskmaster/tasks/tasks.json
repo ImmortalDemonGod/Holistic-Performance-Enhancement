@@ -1723,227 +1723,276 @@
         }
       },
       {
-    "id": 19,
-    "title": "[Flashcore] Integrate FSRS Library for Core Scheduling in `flashcore.scheduler`",
-    "description": "Implement the Free Spaced Repetition Scheduling (FSRS) algorithm by integrating a suitable library into the flashcore.scheduler module. This will compute updated stability, difficulty, and the next review date from a card’s review history and a new rating.",
-    "details": "1. Research and select a suitable, well-maintained Python FSRS library (e.g., open-spaced-repetition, fsrs-optimizer, pyFSRS). Evaluate based on features, ease of use, maintenance, and license.\n2. In `flashcore/scheduler.py`, define `FSRS_Scheduler` class. Implement a wrapper method `compute_next_state(history: List[Review], new_rating: int, review_ts: datetime) -> Dict` that calls the chosen library.\n3. Map `flashcore.card.Review` objects and ratings to the library's expected input format.\n4. Map the library's output (new stability, difficulty, next due date) back to the expected `Dict` structure.\n5. Use `flashcore/config.py` for any library-specific configurations or default FSRS parameters if not handled by the library.\n6. Include comprehensive type hints, docstrings, and DEBUG-level logging for the wrapper.",
-    "testStrategy": "• Unit tests in `tests/flashcore/test_scheduler.py` using pytest:\n  - Test the wrapper's translation of inputs/outputs to/from the selected FSRS library.\n  - Parameterize known input/output pairs from FSRS publications/examples, adapted for the library.\n  - Test edge cases: empty history, rating=0 (Again) resets stability, etc.\n  - Test invalid rating inputs raise `ValueError`.\n• Logging test using pytest’s `caplog` to confirm DEBUG messages.",
-    "status": "pending",
-    "dependencies": [],
-    "priority": "critical",
-    "subtasks": [
-        { "id": 1, "title": "Research and select a suitable Python FSRS library", "description": "Evaluate available Python FSRS libraries based on features, maintenance, license, and ease of integration. Document the choice and rationale.", "dependencies": [], "status": "pending" },
-        { "id": 2, "title": "Implement the FSRS_Scheduler class as a wrapper", "description": "Develop the `FSRS_Scheduler` class in `flashcore.scheduler` to wrap the chosen FSRS library, handling input/output translation and configuration.", "dependencies": [1], "status": "pending" },
-        { "id": 3, "title": "Write comprehensive unit tests for the FSRS wrapper", "description": "Create tests in `tests/flashcore/test_scheduler.py` for the wrapper, covering various scenarios, edge cases, and library interactions.", "dependencies": [2], "status": "pending" }
-    ],
-    "hpe_csm_reference": {
-        "source_document": "cultivation/outputs/deep_work_candidates/task_plans/flashcore_plan.json",
-        "csm_id": "DW_FC_SCHED_001",
-        "anchor_link": null
-    },
-    "hpe_learning_meta": {
-        "task_objective_summary": "Integrate a robust FSRS library to enable dynamic review interval calculation, mitigating risks of a from-scratch implementation.",
-        "estimated_effort_tshirt": "M",
-        "estimated_effort_hours_raw": "6-10h",
-        "estimated_effort_hours_min": 6,
-        "estimated_effort_hours_max": 10,
-        "completion_criteria_summary": "FSRS library wrapper correctly calculates stability, difficulty, and next review date based on test vectors; unit tests pass with high coverage.",
-        "activity_type": "algorithm_implementation_library_integration",
-        "recommended_block": "deep_work",
-        "deliverables": ["flashcore/scheduler.py", "flashcore/config.py", "tests/flashcore/test_scheduler.py"]
-    },
-    "hpe_scheduling_meta": {
-        "planned_day_of_week": null,
-        "curriculum_part_title": "Flashcore MVP - Scheduling",
-        "csm_tags": [
-          "flashcore",
-          "fsrs",
-          "scheduling",
-          "library_integration"
-        ]
-      },
-      "labels": [
-        "project_dev",
-        "component:flashcore",
-        "epic:mvp",
-        "type:library_integration",
-        "module:scheduler",
-        "priority:critical",
-        "block:deep_work",
-        "effort_tshirt:M"
-      ]
-    },
-    {
-      "id": 20,
-      "title": "[Flashcore] Implement `ReviewSessionManager` in flashcore/review_manager.py",
-      "description": "Develop the backend logic to manage a review session. This involves fetching due cards from the `FlashcardDatabase`, using the FSRS scheduler for updates, and saving review results.",
-      "details": "1. Define `ReviewSessionManager` class in `flashcore/review_manager.py`.\n2. Constructor `__init__(self, db: FlashcardDatabase)`.\n3. Method `start_session(self, limit: int = 20) -> None`: fetches due cards using `db.get_due_cards` and populates an internal queue.\n4. Method `get_next_card(self) -> Optional[Card]`: returns the next card from the queue or None.\n5. Method `submit_review(self, card_uuid: UUID, rating: int, resp_ms: Optional[int]) -> Review`: retrieves card history from `db`, calls the FSRS scheduler, constructs a new `Review` object, and saves it to the `db` via `db.add_review()`.\n6. Method `get_due_card_count(self) -> int`: returns the total number of cards currently due for review.",
-      "testStrategy": "• Unit tests in `tests/flashcore/test_review_manager.py` using pytest and mocks for `FlashcardDatabase` and `FSRS_Scheduler`.\n  - `start_session`: verify `db.get_due_cards` is called correctly.\n  - `submit_review`: mock scheduler return values, verify `db.add_review` is called with a correctly constructed `Review` object.\n• Integration test using an in-memory `FlashcardDatabase`.",
-      "status": "pending",
-      "dependencies": [19],
-      "priority": "high",
-      "subtasks": [
-        { "id": 1, "title": "Define ReviewSessionManager class structure", "description": "Create the `ReviewSessionManager` class with its constructor and internal state attributes.", "dependencies": [], "status": "pending" },
-        { "id": 2, "title": "Implement `start_session` and `get_next_card` methods", "description": "Develop the logic to fetch due cards and manage the session queue.", "dependencies": [1], "status": "pending" },
-        { "id": 3, "title": "Implement `submit_review` method", "description": "Develop the logic to update a card's state after a review, integrating with the FSRS scheduler and database.", "dependencies": [1], "status": "pending" },
-        { "id": 4, "title": "Implement `get_due_card_count` method", "description": "Develop the method to return the count of due cards.", "dependencies": [1], "status": "pending" },
-        { "id": 5, "title": "Write unit tests for ReviewSessionManager", "description": "Create tests in `tests/flashcore/test_review_manager.py` covering all methods and edge cases, using mocks.", "dependencies": [2,3,4], "status": "pending" }
-      ],
-      "hpe_csm_reference": { "source_document": "cultivation/outputs/deep_work_candidates/task_plans/flashcore_plan.json", "csm_id": "DW_FC_REVIEW_001", "anchor_link": "#dw_fc_review_001---implement-reviewsessionmanager" },
-      "hpe_learning_meta": { "task_objective_summary": "Develop the backend logic for managing flashcard review sessions, including fetching cards, processing reviews, and updating card states.", "estimated_effort_tshirt": "L", "estimated_effort_hours_raw": "8-12h", "estimated_effort_hours_min": 8, "estimated_effort_hours_max": 12, "completion_criteria_summary": "ReviewSessionManager correctly fetches due cards, processes reviews using FSRS, updates card data, and has comprehensive unit tests.", "activity_type": "application_logic_development", "recommended_block": "deep_work", "deliverables": ["flashcore/review_manager.py", "tests/flashcore/test_review_manager.py"] },
-      "hpe_scheduling_meta": { "planned_day_of_week": null, "curriculum_part_title": "Flashcore MVP - Review Logic", "csm_tags": ["flashcore", "backend", "review"] },
-      "labels": ["project_dev", "component:flashcore", "epic:mvp", "type:backend_logic", "module:review_manager", "priority:high", "block:deep_work", "effort_tshirt:L"]
-    },
-    {
-      "id": 21,
-      "title": "[Flashcore] Develop Review UI (CLI MVP) in `flashcore.cli.review_ui`",
-      "description": "Create a command-line interface (CLI) for users to review flashcards. This UI will interact with the `ReviewSessionManager` to fetch cards and submit review outcomes.",
-      "details": "1. In `flashcore/cli/review_ui.py`, define a function `start_review_flow(manager: ReviewSessionManager)`.\n2. Call `manager.start_session()` to load due cards.\n3. Loop while `manager.get_next_card()` returns a card:\n   a. Display card front content (e.g., `card.front`).\n   b. Prompt user to show answer (e.g., press Enter).\n   c. Display card back content (e.g., `card.back`).\n   d. Prompt user for rating (e.g., 1:Again, 2:Hard, 3:Good, 4:Easy). Validate input.\n   e. Record response time (optional, `resp_ms`).\n   f. Call `manager.submit_review(card.uuid, rating, resp_ms)`.\n   g. Display next review date or feedback.\n4. Handle cases: no due cards, session completion.\n5. Provide clear instructions and progress indicators (e.g., 'Card X of Y').",
-      "testStrategy": "• Manual testing: Run the CLI flow with a `ReviewSessionManager` connected to a test database.\n  - Verify card presentation, rating input, and session progression.\n  - Check behavior with no due cards and after completing all cards.\n• Unit tests in `tests/cli/test_review_ui.py` (using `pytest-mock` for `ReviewSessionManager`):\n  - Test card display and rating input loop.\n  - Test session start/completion messages.",
-      "status": "pending",
-      "dependencies": [20],
-      "priority": "high",
-      "subtasks": [
-        { "id": 1, "title": "Design basic CLI interaction flow for card review", "description": "Outline the sequence of prompts, card display, and user inputs for a single card review cycle.", "dependencies": [], "status": "pending" },
-        { "id": 2, "title": "Implement card display (front and back) in CLI", "description": "Write code to present the front content, wait for user action, then present the back content.", "dependencies": [1], "status": "pending" },
-        { "id": 3, "title": "Implement rating input and processing", "description": "Write code to prompt for a rating (1-4), validate it, and call `ReviewSessionManager.submit_review`.", "dependencies": [2], "status": "pending" },
-        { "id": 4, "title": "Implement session loop and progress display", "description": "Develop the main loop to iterate through cards fetched by `ReviewSessionManager`, showing progress.", "dependencies": [1], "status": "pending" },
-        { "id": 5, "title": "Add session start/end messages and error handling", "description": "Implement messages for session start, completion, and handling for scenarios like no due cards or interruptions.", "dependencies": [4], "status": "pending" }
-      ],
-      "hpe_csm_reference": {
-        "source_document": "cultivation/outputs/deep_work_candidates/task_plans/flashcore_plan.json",
-        "csm_id": "DW_FC_REVIEW_002",
-        "anchor_link": "#dw_fc_review_002---develop-review-ui-cli-mvp"
-      },
-      "hpe_learning_meta": {
-        "task_objective_summary": "Build an interactive CLI for users to review their flashcards, providing ratings and seeing session progress.",
-        "estimated_effort_tshirt": "M",
-        "estimated_effort_hours_raw": "6-10h",
-        "estimated_effort_hours_min": 6,
-        "estimated_effort_hours_max": 10,
-        "completion_criteria_summary": "CLI allows users to review a session of cards, input ratings, and see these persisted via ReviewSessionManager; basic progress and instructions are clear.",
-        "activity_type": "ui_development_cli",
-        "recommended_block": "deep_work",
-        "deliverables": ["flashcore/cli/review_ui.py", "tests/cli/test_review_ui.py"]
-      },
-      "hpe_scheduling_meta": {
-        "planned_day_of_week": null,
-        "curriculum_part_title": "Flashcore MVP - CLI Review UI",
-        "csm_tags": ["flashcore", "cli", "review"]
-      },
-      "labels": [
-        "project_dev",
-        "component:flashcore",
-        "epic:mvp",
-        "type:ui_dev_cli",
-        "module:review_ui",
-        "priority:high",
-        "block:deep_work",
-        "effort_tshirt:M"
-      ]
-    },
-    {
-      "id": 22,
-      "title": "[Flashcore] Finalize Flashcore CLI Tool (`tm-fc`) with Typer/Click",
-      "description": "Create a main entry point `tm-fc` (using Typer or Click) and wrap all completed MVP functionality (card ingest, review sessions, data export, stats) into a unified set of subcommands.",
-      "details": "1. In `flashcore/cli/main.py`, define the main `tm-fc` Typer application.\n2. Implement subcommand `tm-fc ingest`: This will wrap the logic from `ingest_flashcards.py`.\n3. Implement subcommand `tm-fc review`: This will call `flashcore.cli.review_ui.start_review_flow` and accept options like `--limit`.\n4. Implement subcommand `tm-fc export anki`: This will call the `AnkiExporter`.\n5. Implement subcommand `tm-fc export md`: This will call the `MarkdownExporter`.\n6. Implement subcommand `tm-fc stats`: Displays basic statistics like total cards and due cards.\n7. Ensure `--help` messages are clear for all commands and subcommands.\n8. Configure `pyproject.toml` to make `tm-fc` an installable script/entry point.",
-      "testStrategy": "• Manual testing of all subcommands and their options (e.g., `tm-fc --help`, `tm-fc review --limit 10`, `tm-fc export anki --output-path ...`).\n• Verify that each subcommand correctly invokes the underlying logic (review manager, exporters, ingest script) and produces the expected output or behavior.\n• Test error handling for invalid subcommands or options.\n• Verify `pyproject.toml` script installation.",
-      "status": "pending",
-      "dependencies": [21, 23],
-      "priority": "medium",
-      "subtasks": [
-        { "id": 1, "title": "Setup main CLI structure with Typer", "description": "Create `flashcore/cli/main.py` with the basic `tm-fc` app structure and `pyproject.toml` entry point.", "dependencies": [], "status": "pending" },
-        { "id": 2, "title": "Implement `ingest` and `stats` subcommands", "description": "Wrap the existing ingest script and use ReviewSessionManager for stats.", "dependencies": [1], "status": "pending" },
-        { "id": 3, "title": "Implement `review` subcommand", "description": "Integrate the review UI flow (from Task 21) into a subcommand, with options like `--limit`.", "dependencies": [1], "status": "pending" },
-        { "id": 4, "title": "Implement `export` subcommand group", "description": "Create the `export` group with `anki` and `md` sub-subcommands calling the completed exporters.", "dependencies": [1], "status": "pending" },
-        { "id": 5, "title": "Add comprehensive --help messages and conduct manual E2E testing", "description": "Ensure all commands and subcommands have clear help text and perform thorough manual testing of the full CLI.", "dependencies": [2,3,4], "status": "pending" }
-      ],
-      "hpe_csm_reference": {
-        "source_document": "cultivation/outputs/deep_work_candidates/task_plans/flashcore_plan.json",
-        "csm_id": "DW_FC_CLI_WRAP",
-        "anchor_link": "#dw_fc_cli_001---finalize-flashcore-cli-tool"
-      },
-      "hpe_learning_meta": {
-        "task_objective_summary": "To finalize the `tm-fc` CLI tool by integrating all core MVP functionalities (ingest, review, export, stats) into a single, cohesive interface.",
-        "estimated_effort_tshirt": "M",
-        "estimated_effort_hours_raw": "5-8h",
-        "estimated_effort_hours_min": 5,
-        "estimated_effort_hours_max": 8,
-        "completion_criteria_summary": "`tm-fc` command is installable and provides fully working subcommands for `ingest`, `review`, `export`, and `stats`. Help messages are functional.",
-        "activity_type": "cli_development_integration",
-        "recommended_block": "focused_dev_block"
-      },
-      "hpe_scheduling_meta": {
-        "planned_day_of_week": null,
-        "curriculum_part_title": "Flashcore MVP - CLI Finalization",
-        "csm_tags": ["flashcore", "cli", "integration", "typer"]
-      },
-      "labels": [
-        "project_dev",
-        "component:flashcore",
-        "epic:mvp",
-        "type:cli_dev_integration",
-        "module:main_cli",
-        "priority:medium",
-        "block:focused_dev_block",
-        "effort_tshirt:M"
-      ]
-    },
-    {
-      "id": 23,
-      "title": "[Flashcore] Implement Anki and Markdown Exporters",
-      "description": "Develop modules to export flashcard data to Anki (via .apkg or .txt for direct import) and plain Markdown formats.",
-      "details": "1. In `flashcore/exporters/anki_exporter.py`, implement `AnkiExporter` using the `genanki` library to create .apkg files. Include options for deck name and card templates. \n2. In `flashcore/exporters/markdown_exporter.py`, implement `MarkdownExporter` to convert cards to a user-friendly Markdown format (e.g., Q: Front / A: Back). \n3. Ensure both exporters can take a list of `Card` objects or fetch from `FlashcardDatabase`. \n4. Include comprehensive type hints, docstrings, and logging.",
-      "testStrategy": "• Unit tests in `tests/exporters/test_anki_exporter.py` and `test_markdown_exporter.py` using pytest. \n  - Test Anki export with `genanki` by creating a small package and verifying its structure (or mock `genanki` calls). \n  - Test Markdown export by verifying output string format for various card contents. \n• Manual testing: Export a small set of cards and verify Anki import and Markdown readability.",
-      "status": "pending",
-      "dependencies": [],
-      "priority": "medium",
-      "subtasks": [
-        { "id": 1, "title": "Implement AnkiExporter using genanki", "description": "Develop `flashcore.exporters.anki_exporter.AnkiExporter` to generate .apkg files from card data. Handle card model/template definition.", "dependencies": [], "status": "pending" },
-        { "id": 2, "title": "Implement MarkdownExporter", "description": "Develop `flashcore.exporters.markdown_exporter.MarkdownExporter` to convert cards to a clear and readable Markdown format.", "dependencies": [], "status": "pending" },
-        { "id": 3, "title": "Write unit tests for both exporters", "description": "Create comprehensive unit tests for Anki and Markdown exporters, covering output format and data integrity.", "dependencies": [1, 2], "status": "pending" }
-      ],
-      "hpe_csm_reference": {
-        "source_document": "cultivation/outputs/deep_work_candidates/task_plans/flashcore_plan.json",
-        "csm_id": "DW_FC_EXPORT_001_002",
-        "anchor_link": null
-      },
-      "hpe_learning_meta": {
-        "task_objective_summary": "Implement Anki and Markdown exporters for flashcard data to support data backup and interoperability.",
-        "estimated_effort_tshirt": "M",
-        "estimated_effort_hours_raw": "6-10h",
-        "estimated_effort_hours_min": 6,
-        "estimated_effort_hours_max": 10,
-        "completion_criteria_summary": "Exporters for Anki (.apkg) and Markdown are functional, produce valid output, and are unit tested.",
-        "activity_type": "feature_implementation_exporter",
-        "recommended_block": "focused_dev_block",
-        "deliverables": ["flashcore/exporters/anki_exporter.py", "flashcore/exporters/markdown_exporter.py", "tests/exporters/test_anki_exporter.py", "tests/exporters/test_markdown_exporter.py"]
-      },
-      "hpe_scheduling_meta": {
-        "planned_day_of_week": null,
-        "curriculum_part_title": "Flashcore MVP - Exporters",
-        "csm_tags": ["flashcore", "exporter", "anki", "markdown"]
-      },
-      "labels": [
-        "project_dev",
-        "component:flashcore",
-        "epic:mvp",
-        "type:feature_exporter",
-        "module:exporters",
-        "priority:medium",
-        "block:focused_dev_block",
-        "effort_tshirt:M"
-      ]
-    }
-    ],
-    "metadata": {
-      "projectName": "RNA Modeling Foundations Learning Plan",
-      "totalTasks": 10,
-      "sourceFile": "cultivation/docs/5_biology/RNA_MODELING/rna-modeling_p1-foundations_week1-7day.md",
-      "generatedAt": "2023-11-14",
-      "created": "2025-06-16T03:06:44.529Z",
-      "description": "Tasks for master context",
-      "updated": "2025-06-16T03:20:36.381Z"
-    }
+          "id": 19,
+          "title": "[Flashcore] Integrate FSRS Library for Core Scheduling in `flashcore.scheduler`",
+          "description": "Implement the Free Spaced Repetition Scheduling (FSRS) algorithm by integrating a suitable library into the flashcore.scheduler module. This will compute updated stability, difficulty, and the next review date from a card’s review history and a new rating.",
+          "details": "1. Research and select a suitable, well-maintained Python FSRS library (e.g., open-spaced-repetition, fsrs-optimizer, pyFSRS). Evaluate based on features, ease of use, maintenance, and license.\n2. In `flashcore/scheduler.py`, define `FSRS_Scheduler` class. Implement a wrapper method `compute_next_state(history: List[Review], new_rating: int, review_ts: datetime) -> Dict` that calls the chosen library.\n3. Map `flashcore.card.Review` objects and ratings to the library's expected input format.\n4. Map the library's output (new stability, difficulty, next due date) back to the expected `Dict` structure.\n5. Use `flashcore/config.py` for any library-specific configurations or default FSRS parameters if not handled by the library.\n6. Include comprehensive type hints, docstrings, and DEBUG-level logging for the wrapper.",
+          "testStrategy": "• Unit tests in `tests/flashcore/test_scheduler.py` using pytest:\n  - Test the wrapper's translation of inputs/outputs to/from the selected FSRS library.\n  - Parameterize known input/output pairs from FSRS publications/examples, adapted for the library.\n  - Test edge cases: empty history, rating=0 (Again) resets stability, etc.\n  - Test invalid rating inputs raise `ValueError`.\n• Logging test using pytest’s `caplog` to confirm DEBUG messages.",
+          "status": "pending",
+          "dependencies": [],
+          "priority": "critical",
+          "subtasks": [
+            {
+              "id": 1,
+              "title": "Research and select a suitable Python FSRS library",
+              "description": "Evaluate available Python FSRS libraries based on features, maintenance, license, and ease of integration. Document the choice and rationale.",
+              "dependencies": [],
+              "status": "pending",
+              "risks": "Analysis paralysis; spending excessive time on selection. Chosen library could be unmaintained or have a restrictive license.",
+              "mitigation": "Time-box research to 2-3 hours. Prioritize libraries with recent commit activity, good documentation, and a permissive license (MIT, Apache 2.0). Create a small ADR to document the final choice.",
+              "implementation_details": {
+                "steps": [
+                  "1. Identify candidate libraries: open-spaced-repetition, fsrs-optimizer, pyFSRS, etc.",
+                  "2. Compare licenses for compatibility with the project.",
+                  "3. Evaluate API clarity, documentation quality, and maintenance status (e.g., last commit date, open issues).",
+                  "4. Create a small proof-of-concept for the top 1-2 candidates to test ease of integration.",
+                  "5. Document the final choice and reasoning in a project note or ADR."
+                ],
+                "testing": [
+                  "N/A (This is a research subtask)."
+                ]
+              }
+            },
+            {
+              "id": 2,
+              "title": "Implement the FSRS_Scheduler class as a wrapper",
+              "description": "Develop the `FSRS_Scheduler` class in `flashcore.scheduler` to wrap the chosen FSRS library, handling input/output translation and configuration.",
+              "dependencies": [1],
+              "status": "pending",
+              "risks": "The chosen library's API may have subtle behaviors or require complex input data structures. An upstream library update could introduce breaking changes.",
+              "mitigation": "Pin the library's version in `requirements.txt`. Write clear data mapping functions to translate between `flashcore.card.Review` and the library's internal format. Add extensive logging.",
+              "implementation_details": {
+                "steps": [
+                  "1. Create `flashcore/config.py` and define default FSRS parameters.",
+                  "2. In `flashcore/scheduler.py`, create the `FSRS_Scheduler` class.",
+                  "3. Implement the `compute_next_state` method.",
+                  "4. Inside the method, write helper functions to convert `List[Review]` into the format required by the library (e.g., a sequence of ratings and intervals).",
+                  "5. Call the library's scheduling function.",
+                  "6. Map the library's output object back to a `Dict` that matches the `Review` model's fields."
+                ],
+                "testing": [
+                  "Unit tests will verify that the mapping functions handle various data types correctly (datetimes, integers, floats)."
+                ]
+              }
+            },
+            {
+              "id": 3,
+              "title": "Write comprehensive unit tests for the FSRS wrapper",
+              "description": "Create tests in `tests/flashcore/test_scheduler.py` for the wrapper, covering various scenarios, edge cases, and library interactions.",
+              "dependencies": [2],
+              "status": "pending",
+              "risks": "Tests become too coupled to the specific library's API, making it hard to switch libraries later. Lack of official test vectors for the library.",
+              "mitigation": "Abstract test cases to test the FSRS *concept* (e.g., 'a low rating should result in a shorter interval'). Use examples from FSRS research papers as a source for test vectors if the library lacks them.",
+              "implementation_details": {
+                "steps": [
+                  "1. Set up `tests/flashcore/test_scheduler.py` with pytest.",
+                  "2. Create a test case for the first review of a new card.",
+                  "3. Create test cases for subsequent reviews with all possible ratings.",
+                  "4. Create a test case for a lapsed card (a review long after its due date).",
+                  "5. Add a test to ensure invalid ratings (e.g., 5) raise an appropriate error."
+                ],
+                "testing": [
+                  "Run tests with `pytest --cov` to ensure high test coverage for the `scheduler.py` module."
+                ]
+              }
+            }
+          ],
+          "hpe_csm_reference": {
+            "source_document": "cultivation/outputs/deep_work_candidates/task_plans/flashcore_plan.json",
+            "csm_id": "DW_FC_SCHED_001",
+            "anchor_link": null
+          },
+          "hpe_learning_meta": {
+            "task_objective_summary": "Integrate a robust FSRS library to enable dynamic review interval calculation, mitigating risks of a from-scratch implementation.",
+            "estimated_effort_tshirt": "M",
+            "estimated_effort_hours_raw": "6-10h",
+            "estimated_effort_hours_min": 6,
+            "estimated_effort_hours_max": 10,
+            "completion_criteria_summary": "FSRS library wrapper correctly calculates stability, difficulty, and next review date based on test vectors; unit tests pass with high coverage.",
+            "activity_type": "algorithm_implementation_library_integration",
+            "recommended_block": "deep_work",
+            "deliverables": ["flashcore/scheduler.py", "flashcore/config.py", "tests/flashcore/test_scheduler.py"]
+          },
+          "hpe_scheduling_meta": {
+            "planned_day_of_week": null,
+            "curriculum_part_title": "Flashcore MVP - Scheduling",
+            "csm_tags": [
+              "flashcore",
+              "fsrs",
+              "scheduling",
+              "library_integration"
+            ]
+          },
+          "labels": [
+            "project_dev",
+            "component:flashcore",
+            "epic:mvp",
+            "type:library_integration",
+            "module:scheduler",
+            "priority:critical",
+            "block:deep_work",
+            "effort_tshirt:M"
+          ]
+        },
+        {
+          "id": 20,
+          "title": "[Flashcore] Implement `ReviewSessionManager` in flashcore/review_manager.py",
+          "description": "Develop the backend logic to manage a review session. This involves fetching due cards from the `FlashcardDatabase`, using the FSRS scheduler for updates, and saving review results.",
+          "details": "1. Define `ReviewSessionManager` class in `flashcore/review_manager.py`.\n2. Constructor `__init__(self, db: FlashcardDatabase)`.\n3. Method `start_session(self, limit: int = 20) -> None`: fetches due cards using `db.get_due_cards` and populates an internal queue.\n4. Method `get_next_card(self) -> Optional[Card]`: returns the next card from the queue or None.\n5. Method `submit_review(self, card_uuid: UUID, rating: int, resp_ms: Optional[int]) -> Review`: retrieves card history from `db`, calls the FSRS scheduler, constructs a new `Review` object, and saves it to the `db` via `db.add_review()`.\n6. Method `get_due_card_count(self) -> int`: returns the total number of cards currently due for review.",
+          "testStrategy": "• Unit tests in `tests/flashcore/test_review_manager.py` using pytest and mocks for `FlashcardDatabase` and `FSRS_Scheduler`.\n  - `start_session`: verify `db.get_due_cards` is called correctly.\n  - `submit_review`: mock scheduler return values, verify `db.add_review` is called with a correctly constructed `Review` object.\n• Integration test using an in-memory `FlashcardDatabase`.",
+          "status": "pending",
+          "dependencies": [19],
+          "priority": "high",
+          "subtasks": [
+            { "id": 1, "title": "Define ReviewSessionManager class structure", "description": "Create the `ReviewSessionManager` class with its constructor and internal state attributes (e.g., `self.db`, `self.scheduler`, `self.review_queue`).", "dependencies": [], "status": "pending" },
+            { "id": 2, "title": "Implement `start_session` and `get_next_card` methods", "description": "Develop the logic to fetch due cards and manage the session queue.", "dependencies": [1], "status": "pending", "risks": "The `db.get_due_cards` query might be slow for a very large database.", "mitigation": "Ensure the underlying database query is indexed and optimized. For now, accept the performance as-is for the MVP." },
+            { "id": 3, "title": "Implement `submit_review` method", "description": "Develop the core logic to update a card's state after a review, integrating with the FSRS scheduler and database.", "dependencies": [1], "status": "pending", "risks": "Incorrectly calculating `elapsed_days_at_review` passed to FSRS, leading to scheduling errors.", "mitigation": "Write a specific helper function for this calculation that handles both first-time reviews (delta from `card.added_at`) and subsequent reviews (delta from previous `review.ts`). Cover these cases in unit tests.", "implementation_details": { "steps": ["1. Fetch the card's full review history from the database.", "2. Calculate `elapsed_days_at_review` based on the history.", "3. Instantiate `FSRS_Scheduler` and call `compute_next_state`.", "4. Construct a new `Review` Pydantic model with all required fields from the card and scheduler output.", "5. Call `db.add_review` to persist the new review object." ] } },
+            { "id": 4, "title": "Implement `get_due_card_count` method", "description": "Develop the method to return the count of due cards.", "dependencies": [1], "status": "pending" },
+            { "id": 5, "title": "Write unit and integration tests for ReviewSessionManager", "description": "Create tests in `tests/flashcore/test_review_manager.py` covering all methods and edge cases, using mocks and an in-memory DB.", "dependencies": [2,3,4], "status": "pending", "risks": "Mocks for the database and scheduler become overly complex and brittle.", "mitigation": "Prioritize a full integration test using an in-memory DuckDB instance to validate the end-to-end flow, reducing reliance on complex mocks for the core `submit_review` logic." }
+          ],
+          "hpe_csm_reference": { "source_document": "cultivation/outputs/deep_work_candidates/task_plans/flashcore_plan.json", "csm_id": "DW_FC_REVIEW_001" },
+          "hpe_learning_meta": { "task_objective_summary": "Develop the backend logic for managing flashcard review sessions, including fetching cards, processing reviews, and updating card states.", "estimated_effort_tshirt": "L", "estimated_effort_hours_raw": "8-12h", "estimated_effort_hours_min": 8, "estimated_effort_hours_max": 12, "completion_criteria_summary": "ReviewSessionManager correctly fetches due cards, processes reviews using FSRS, updates card data, and has comprehensive unit tests.", "activity_type": "application_logic_development", "recommended_block": "deep_work", "deliverables": ["flashcore/review_manager.py", "tests/flashcore/test_review_manager.py"] },
+          "hpe_scheduling_meta": { "planned_day_of_week": null, "curriculum_part_title": "Flashcore MVP - Review Logic", "csm_tags": ["flashcore", "backend", "review"] },
+          "labels": ["project_dev", "component:flashcore", "epic:mvp", "type:backend_logic", "module:review_manager", "priority:high", "block:deep_work", "effort_tshirt:L"]
+        },
+        {
+          "id": 21,
+          "title": "[Flashcore] Develop Review UI (CLI MVP) in `flashcore.cli.review_ui`",
+          "description": "Create a command-line interface (CLI) for users to review flashcards. This UI will interact with the `ReviewSessionManager` to fetch cards and submit review outcomes.",
+          "details": "1. In `flashcore/cli/review_ui.py`, define a function `start_review_flow(manager: ReviewSessionManager)`.\n2. Call `manager.start_session()` to load due cards.\n3. Loop while `manager.get_next_card()` returns a card:\n   a. Display card front content (e.g., `card.front`).\n   b. Prompt user to show answer (e.g., press Enter).\n   c. Display card back content (e.g., `card.back`).\n   d. Prompt user for rating (e.g., 1:Again, 2:Hard, 3:Good, 4:Easy). Validate input.\n   e. Record response time (optional, `resp_ms`).\n   f. Call `manager.submit_review(card.uuid, rating, resp_ms)`.\n   g. Display next review date or feedback.\n4. Handle cases: no due cards, session completion.\n5. Provide clear instructions and progress indicators (e.g., 'Card X of Y').",
+          "testStrategy": "• Manual testing: Run the CLI flow with a `ReviewSessionManager` connected to a test database.\n  - Verify card presentation, rating input, and session progression.\n  - Check behavior with no due cards and after completing all cards.\n• Unit tests in `tests/cli/test_review_ui.py` (using `pytest-mock` for `ReviewSessionManager`):\n  - Test card display and rating input loop.\n  - Test session start/completion messages.",
+          "status": "pending",
+          "dependencies": [20],
+          "priority": "high",
+          "subtasks": [
+            { "id": 1, "title": "Design basic CLI interaction flow", "description": "Outline the sequence of prompts, card display, and user inputs for a single card review cycle.", "dependencies": [], "status": "pending", "risks": "The interaction flow is clunky or unintuitive.", "mitigation": "Sketch the flow on paper first, simulating a user session. Prioritize clarity and minimal required keystrokes." },
+            { "id": 2, "title": "Implement card content display", "description": "Write code to present the front and back content, potentially using the `rich` library for better rendering.", "dependencies": [1], "status": "pending", "risks": "Complex Markdown or KaTeX in cards breaks terminal rendering.", "mitigation": "Use `rich.markdown.Markdown` which handles many cases gracefully. For unsupported elements, showing the raw Markdown/KaTeX is an acceptable fallback for the MVP." },
+            { "id": 3, "title": "Implement rating input and processing", "description": "Write code to prompt for a rating (1-4), validate it, and call `ReviewSessionManager.submit_review`.", "dependencies": [2], "status": "pending", "risks": "User enters invalid input (e.g., 'text', 5), crashing the program.", "mitigation": "Implement a robust input validation loop that handles non-integer input and out-of-range numbers, re-prompting the user with a clear error message." },
+            { "id": 4, "title": "Implement main session loop", "description": "Develop the main loop to iterate through all due cards fetched by the `ReviewSessionManager`, showing session progress.", "dependencies": [1], "status": "pending" },
+            { "id": 5, "title": "Add session boundary messages and error handling", "description": "Implement clear messages for starting a session, completing a session, and handling the case where there are no cards due.", "dependencies": [4], "status": "pending" }
+          ],
+          "hpe_csm_reference": { "source_document": "cultivation/outputs/deep_work_candidates/task_plans/flashcore_plan.json", "csm_id": "DW_FC_REVIEW_002" },
+          "hpe_learning_meta": { "task_objective_summary": "Build an interactive CLI for users to review their flashcards, providing ratings and seeing session progress.", "estimated_effort_tshirt": "M", "estimated_effort_hours_raw": "6-10h", "estimated_effort_hours_min": 6, "estimated_effort_hours_max": 10, "completion_criteria_summary": "CLI allows users to review a session of cards, input ratings, and see these persisted via ReviewSessionManager; basic progress and instructions are clear.", "activity_type": "ui_development_cli", "recommended_block": "deep_work", "deliverables": ["flashcore/cli/review_ui.py", "tests/cli/test_review_ui.py"] },
+          "hpe_scheduling_meta": { "planned_day_of_week": null, "curriculum_part_title": "Flashcore MVP - CLI Review UI", "csm_tags": ["flashcore", "cli", "review"] },
+          "labels": [ "project_dev", "component:flashcore", "epic:mvp", "type:ui_dev_cli", "module:review_ui", "priority:high", "block:deep_work", "effort_tshirt:M" ]
+        },
+        {
+          "id": 23,
+          "title": "[Flashcore] Implement Anki and Markdown Exporters",
+          "description": "Develop modules to export flashcard data to Anki (via .apkg) and plain Markdown formats to support data backup and interoperability.",
+          "details": "1. In `flashcore/exporters/anki_exporter.py`, implement `AnkiExporter` using the `genanki` library to create .apkg files. Include options for deck name and card templates. \n2. In `flashcore/exporters/markdown_exporter.py`, implement `MarkdownExporter` to convert cards to a user-friendly Markdown format (e.g., Q: Front / A: Back). \n3. Ensure both exporters can take a list of `Card` objects or fetch from `FlashcardDatabase`. \n4. Include comprehensive type hints, docstrings, and logging.",
+          "testStrategy": "• Unit tests in `tests/exporters/test_anki_exporter.py` and `test_markdown_exporter.py` using pytest. \n  - Test Anki export with `genanki` by creating a small package and verifying its structure (or mock `genanki` calls). \n  - Test Markdown export by verifying output string format for various card contents. \n• Manual testing: Export a small set of cards and verify Anki import and Markdown readability.",
+          "status": "pending",
+          "dependencies": [],
+          "priority": "medium",
+          "subtasks": [
+            {
+              "id": 1,
+              "title": "Implement AnkiExporter using genanki",
+              "description": "Develop `flashcore.exporters.anki_exporter.AnkiExporter` to generate .apkg files from card data. Handle card model/template definition and media packaging.",
+              "dependencies": [],
+              "status": "pending",
+              "risks": "`genanki` dependency might have breaking changes. Media file path resolution might be complex.",
+              "mitigation": "Pin the `genanki` version in `requirements.txt`. Write a dedicated utility function to resolve and copy media files to a temporary location for packaging.",
+              "implementation_details": {
+                "steps": [
+                  "1. Define a custom `genanki.Model` with fields for `Front`, `Back`, `UUID`, and `Tags`.",
+                  "2. Implement a method to fetch all cards from the database.",
+                  "3. Loop through cards, creating a `genanki.Note` for each.",
+                  "4. For each note, identify media files and add them to the `genanki.Package`'s media list.",
+                  "5. Group notes into decks based on the `deck_name` hierarchy.",
+                  "6. Write the final `genanki.Package` to an `.apkg` file."
+                ],
+                "testing": [
+                  "Verify that the generated `.apkg` file is a valid zip archive.",
+                  "Test with a card that has multiple media files.",
+                  "Test deck names with `::` separators are correctly handled."
+                ]
+              }
+            },
+            {
+              "id": 2,
+              "title": "Implement MarkdownExporter",
+              "description": "Develop `flashcore.exporters.markdown_exporter.MarkdownExporter` to convert cards to a clear and readable Markdown format.",
+              "dependencies": [],
+              "status": "pending",
+              "risks": "Complex Markdown or KaTeX in cards might render poorly without a proper viewer.",
+              "mitigation": "The exporter will focus on creating structurally correct Markdown. The user is responsible for using a capable viewer. Add a comment at the top of the exported file about recommended viewers.",
+              "implementation_details": {
+                "steps": [
+                  "1. Define a clear Markdown template for a single card (e.g., using `Q: ...`, `A: ...`, and `---` as a separator).",
+                  "2. Fetch all cards, grouped by deck, from the database.",
+                  "3. Iterate through decks, writing a top-level heading (e.g., `# Deck Name`).",
+                  "4. Iterate through cards in the deck, appending the formatted Markdown to a string buffer.",
+                  "5. Write the final string to a `.md` file."
+                ],
+                "testing": [
+                  "Verify the output for a card containing code blocks and KaTeX.",
+                  "Test that the deck hierarchy is correctly represented with Markdown headings."
+                ]
+              }
+            },
+            {
+              "id": 3,
+              "title": "Write unit tests for both exporters",
+              "description": "Create comprehensive unit tests for Anki and Markdown exporters, covering output format and data integrity.",
+              "dependencies": [1, 2],
+              "status": "pending"
+            }
+          ],
+          "hpe_csm_reference": {
+            "source_document": "cultivation/outputs/deep_work_candidates/task_plans/flashcore_plan.json",
+            "csm_id": "DW_FC_EXPORT_001_002",
+            "anchor_link": null
+          },
+          "hpe_learning_meta": {
+            "task_objective_summary": "Implement Anki and Markdown exporters for flashcard data to support data backup and interoperability.",
+            "estimated_effort_tshirt": "M",
+            "estimated_effort_hours_raw": "6-10h",
+            "estimated_effort_hours_min": 6,
+            "estimated_effort_hours_max": 10,
+            "completion_criteria_summary": "Exporters for Anki (.apkg) and Markdown are functional, produce valid output, and are unit tested.",
+            "activity_type": "feature_implementation_exporter",
+            "recommended_block": "focused_dev_block",
+            "deliverables": ["flashcore/exporters/anki_exporter.py", "flashcore/exporters/markdown_exporter.py", "tests/exporters/test_anki_exporter.py", "tests/exporters/test_markdown_exporter.py"]
+          },
+          "hpe_scheduling_meta": {
+            "planned_day_of_week": null,
+            "curriculum_part_title": "Flashcore MVP - Exporters",
+            "csm_tags": ["flashcore", "exporter", "anki", "markdown"]
+          },
+          "labels": [
+            "project_dev",
+            "component:flashcore",
+            "epic:mvp",
+            "type:feature_exporter",
+            "module:exporters",
+            "priority:medium",
+            "block:focused_dev_block",
+            "effort_tshirt:M"
+          ]
+        },
+        {
+          "id": 22,
+          "title": "[Flashcore] Finalize Flashcore CLI Tool (`tm-fc`) with Typer/Click",
+          "description": "Create a main entry point `tm-fc` (using Typer or Click) and wrap all completed MVP functionality (card ingest, review sessions, data export, stats) into a unified set of subcommands.",
+          "details": "1. In `flashcore/cli/main.py`, define the main `tm-fc` Typer application.\n2. Implement subcommand `tm-fc ingest`: This will wrap the logic from `ingest_flashcards.py`.\n3. Implement subcommand `tm-fc review`: This will call `flashcore.cli.review_ui.start_review_flow` and accept options like `--limit`.\n4. Implement subcommand `tm-fc export anki`: This will call the `AnkiExporter`.\n5. Implement subcommand `tm-fc export md`: This will call the `MarkdownExporter`.\n6. Implement subcommand `tm-fc stats`: Displays basic statistics like total cards and due cards.\n7. Ensure `--help` messages are clear for all commands and subcommands.\n8. Configure `pyproject.toml` to make `tm-fc` an installable script/entry point.",
+          "testStrategy": "• Manual testing of all subcommands and their options (e.g., `tm-fc --help`, `tm-fc review --limit 10`, `tm-fc export anki --output-path ...`).\n• Verify that each subcommand correctly invokes the underlying logic (review manager, exporters, ingest script) and produces the expected output or behavior.\n• Test error handling for invalid subcommands or options.\n• Verify `pyproject.toml` script installation.",
+          "status": "pending",
+          "dependencies": [21, 23],
+          "priority": "medium",
+          "subtasks": [
+            { "id": 1, "title": "Setup main CLI structure with Typer", "description": "Create `flashcore/cli/main.py` with the basic `tm-fc` app structure and `pyproject.toml` entry point.", "dependencies": [], "status": "pending", "risks": "Dependency conflicts with Typer or its dependencies.", "mitigation": "Add `typer[all]` to `requirements.txt` and run `pip check` to ensure a clean environment." },
+            { "id": 2, "title": "Implement `ingest` and `stats` subcommands", "description": "Wrap the existing ingest script and use ReviewSessionManager for stats.", "dependencies": [1], "status": "pending" },
+            { "id": 3, "title": "Implement `review` subcommand", "description": "Integrate the review UI flow (from Task 21) into a subcommand, with options like `--limit`.", "dependencies": [1], "status": "pending", "risks": "Passing options like `--limit` to the underlying `ReviewSessionManager` requires modifying its `start_session` method, which could be a breaking change.", "mitigation": "Carefully refactor `ReviewSessionManager` to accept optional filter parameters and update its tests accordingly." },
+            { "id": 4, "title": "Implement `export` subcommand group", "description": "Create the `export` group with `anki` and `md` sub-subcommands calling the completed exporters.", "dependencies": [1], "status": "pending" },
+            { "id": 5, "title": "Add comprehensive --help messages and conduct manual E2E testing", "description": "Ensure all commands and subcommands have clear help text and perform thorough manual testing of the full CLI.", "dependencies": [2,3,4], "status": "pending" }
+          ],
+          "hpe_csm_reference": { "source_document": "cultivation/outputs/deep_work_candidates/task_plans/flashcore_plan.json", "csm_id": "DW_FC_CLI_WRAP" },
+          "hpe_learning_meta": { "task_objective_summary": "To finalize the `tm-fc` CLI tool by integrating all core MVP functionalities (ingest, review, export, stats) into a single, cohesive interface.", "estimated_effort_tshirt": "M", "estimated_effort_hours_raw": "5-8h", "estimated_effort_hours_min": 5, "estimated_effort_hours_max": 8, "completion_criteria_summary": "`tm-fc` command is installable and provides fully working subcommands for `ingest`, `review`, `export`, and `stats`. Help messages are functional.", "activity_type": "cli_development_integration", "recommended_block": "focused_dev_block" },
+          "hpe_scheduling_meta": { "planned_day_of_week": null, "curriculum_part_title": "Flashcore MVP - CLI Finalization", "csm_tags": ["flashcore", "cli", "integration", "typer"] },
+          "labels": [ "project_dev", "component:flashcore", "epic:mvp", "type:cli_dev_integration", "module:main_cli", "priority:medium", "block:focused_dev_block", "effort_tshirt:M" ]
+        }
+    ]
   }
 }
