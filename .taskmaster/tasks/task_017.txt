@@ -3,7 +3,10 @@
 # Status: done
 # Dependencies: None
 # Priority: critical
-# Description: Implement the core Free Spaced Repetition Scheduler (FSRS) algorithm in flashcore.scheduler.py to calculate card stability, difficulty, and next review date based on review history and rating.
+
+# Description:
+Implement the core Free Spaced Repetition Scheduler (FSRS) algorithm in flashcore.scheduler.py to calculate card stability, difficulty, and next review date based on review history and rating.
+
 # Details:
 This task involves implementing the FSRS algorithm which is essential for the spaced repetition functionality. The implementation should:
 
@@ -56,3 +59,15 @@ Testing should verify both the correctness of the algorithm implementation and i
    - Test the full review workflow from card presentation to rescheduling
 
 Create a test harness that allows visualizing the scheduling behavior over simulated review sequences to validate the algorithm produces sensible spacing intervals.
+
+# HPE Learning Meta (Main Task):
+    Learning objective summary: 
+    Estimated effort tshirt: 
+    Estimated effort hours raw: 
+    Estimated effort hours min: 0
+    Estimated effort hours max: 0
+    Mastery criteria summary: 
+    Activity type: 
+    Recommended block: 
+    Deliverables: []
+

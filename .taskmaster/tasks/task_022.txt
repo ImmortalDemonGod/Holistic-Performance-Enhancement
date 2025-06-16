@@ -3,58 +3,68 @@
 # Status: pending
 # Dependencies: 21, 23
 # Priority: medium
-# Description: Create a main entry point `tm-fc` (using Typer or Click) and wrap existing/planned functionality (card import, review sessions, data export, stats) into subcommands.
+
+# Description:
+Create a main entry point `tm-fc` (using Typer or Click) and wrap all completed MVP functionality (card ingest, review sessions, data export, stats) into a unified set of subcommands.
+
 # Details:
-1. Choose a CLI framework (Typer recommended). Set up `flashcore/cli/main.py`.
-2. Define the main `tm-fc` Typer application.
-3. Create subcommand `tm-fc review`: This will call `flashcore.cli.review_ui.start_review_flow` (from Task 21). It might take `--max-cards` as an option.
-4. Create subcommand `tm-fc import <filepath>`: This will handle importing cards from a specified file (details for this import mechanism are TBD/part of another task, but the CLI structure can be set up as a stub).
-5. Create subcommand `tm-fc export <filepath>`: This will handle exporting card data (details TBD/part of another task, stub for now).
-6. Create subcommand `tm-fc stats`: Displays basic statistics like total cards, due cards (using `ReviewSessionManager.get_due_card_count`).
-7. Add subcommand `tm-fc ingest <filepath>`: Integrate the logic from `ingest_flashcards.py` to allow ingestion of flashcards into the database from a file.
-8. Ensure `--help` messages are clear for the main command and all subcommands.
-9. Set up `pyproject.toml` so `tm-fc` is an installable script/entry point.
+1. In `flashcore/cli/main.py`, define the main `tm-fc` Typer application.
+2. Implement subcommand `tm-fc ingest`: This will wrap the logic from `ingest_flashcards.py`.
+3. Implement subcommand `tm-fc review`: This will call `flashcore.cli.review_ui.start_review_flow` and accept options like `--limit`.
+4. Implement subcommand `tm-fc export anki`: This will call the `AnkiExporter`.
+5. Implement subcommand `tm-fc export md`: This will call the `MarkdownExporter`.
+6. Implement subcommand `tm-fc stats`: Displays basic statistics like total cards and due cards.
+7. Ensure `--help` messages are clear for all commands and subcommands.
+8. Configure `pyproject.toml` to make `tm-fc` an installable script/entry point.
 
 # Test Strategy:
-• Manual testing of all subcommands and their options (e.g., `tm-fc --help`, `tm-fc review --help`, `tm-fc review --max-cards 10`, `tm-fc import dummy.csv`, `tm-fc stats`).
-• For subcommands with backend logic (review, stats), ensure they correctly call the underlying managers/functions and display expected output or behavior.
+• Manual testing of all subcommands and their options (e.g., `tm-fc --help`, `tm-fc review --limit 10`, `tm-fc export anki --output-path ...`).
+• Verify that each subcommand correctly invokes the underlying logic (review manager, exporters, ingest script) and produces the expected output or behavior.
 • Test error handling for invalid subcommands or options.
 • Verify `pyproject.toml` script installation.
 
-# Subtasks:
-## 1. Choose CLI framework and set up main entry point [pending]
-### Dependencies: None
-### Description: Select Typer, and create `flashcore/cli/main.py` with the basic `tm-fc` app structure.
-### Details:
+# HPE Learning Meta (Main Task):
+    Task objective summary: To finalize the `tm-fc` CLI tool by integrating all core MVP functionalities (ingest, review, export, stats) into a single, cohesive interface.
+    Estimated effort tshirt: M
+    Estimated effort hours raw: 5-8h
+    Estimated effort hours min: 5
+    Estimated effort hours max: 8
+    Completion criteria summary: `tm-fc` command is installable and provides fully working subcommands for `ingest`, `review`, `export`, and `stats`. Help messages are functional.
+    Activity type: cli_development_integration
+    Recommended block: focused_dev_block
+# Subtask Details:
 
+## Subtask 22.1: Setup main CLI structure with Typer
+Description: Create `flashcore/cli/main.py` with the basic `tm-fc` app structure and `pyproject.toml` entry point.
+Dependencies: None
+Status: pending
+Risks: Dependency conflicts with Typer or its dependencies.
+Mitigation: Add `typer[all]` to `requirements.txt` and run `pip check` to ensure a clean environment.
 
-## 2. Implement `tm-fc review` subcommand [pending]
-### Dependencies: 22.1
-### Description: Integrate the review UI flow (from Task 21) into a subcommand, potentially with options like `--max-cards`.
-### Details:
+## Subtask 22.2: Implement `ingest` and `stats` subcommands
+Description: Wrap the existing ingest script and use ReviewSessionManager for stats.
+Dependencies: 1
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
 
+## Subtask 22.3: Implement `review` subcommand
+Description: Integrate the review UI flow (from Task 21) into a subcommand, with options like `--limit`.
+Dependencies: 1
+Status: pending
+Risks: Passing options like `--limit` to the underlying `ReviewSessionManager` requires modifying its `start_session` method, which could be a breaking change.
+Mitigation: Carefully refactor `ReviewSessionManager` to accept optional filter parameters and update its tests accordingly.
 
-## 3. Stub `tm-fc import` and `tm-fc export` subcommands [pending]
-### Dependencies: 22.1
-### Description: Create placeholder subcommands for import and export, focusing on the CLI structure rather than full implementation.
-### Details:
+## Subtask 22.4: Implement `export` subcommand group
+Description: Create the `export` group with `anki` and `md` sub-subcommands calling the completed exporters.
+Dependencies: 1
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
 
-
-## 4. Implement `tm-fc stats` subcommand [pending]
-### Dependencies: 22.1
-### Description: Develop the subcommand to display basic card statistics by calling relevant `ReviewSessionManager` methods.
-### Details:
-
-
-## 5. Configure `pyproject.toml` for CLI script installation [pending]
-### Dependencies: 22.1
-### Description: Add the necessary configuration to make `tm-fc` available as a command after package installation.
-### Details:
-
-
-## 6. Add comprehensive --help messages and conduct manual testing [pending]
-### Dependencies: 22.2, 22.3, 22.4, 22.5
-### Description: Ensure all commands and subcommands have clear help text and perform thorough manual testing of the CLI.
-### Details:
-
-
+## Subtask 22.5: Add comprehensive --help messages and conduct manual E2E testing
+Description: Ensure all commands and subcommands have clear help text and perform thorough manual testing of the full CLI.
+Dependencies: 2, 3, 4
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
