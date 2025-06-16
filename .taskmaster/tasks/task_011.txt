@@ -3,18 +3,31 @@
 # Status: pending
 # Dependencies: 9
 # Priority: high
-# Description: Complete the self-created quiz and practical assessment for Week 1 RNA foundations.
+
+# Description:
+Complete the self-created quiz and practical assessment for Week 1 RNA foundations.
+
 # Details:
 Take the quiz created in Task 9.1. Complete the practical drawing/explanation task from Task 9.2. Self-grade using rubrics from Task 9.3.
 
 # Test Strategy:
 Achieve >=85% on quiz. Achieve satisfactory self-grade on practical task based on rubric.
 
-# Subtasks:
-## 1. Complete and Score Self-Created Week 1 RNA Quiz [pending]
-### Dependencies: None
-### Description: Take the previously created Week 1 RNA foundations quiz (from Task 9.1), record your answers, and calculate your initial score.
-### Details:
+# HPE Learning Meta (Main Task):
+    Learning objective summary: Complete the self-created quiz and the practical assessment task for Week 1 RNA foundations, aiming for >=85% mastery, and self-grade.
+    Estimated effort tshirt: M
+    Estimated effort hours raw: 1.0-1.5 hours
+    Estimated effort hours min: 1
+    Estimated effort hours max: 1.5
+    Mastery criteria summary: Self-quiz completed and scored (>=85% target). Practical task completed and self-graded against rubric (satisfactory).
+    Activity type: self_assessment_active_execution
+    Recommended block: active_learning
+    Deliverables: ['Completed self-quiz with score (maps to PRD Task 3.2).', 'Completed practical assessment (drawing/explanation) and self-graded result (maps to PRD Task 3.3 completion part).']
+# Subtask Details:
+
+## Subtask 11.1: Complete and Score Self-Created Week 1 RNA Quiz
+Description: Take the previously created Week 1 RNA foundations quiz (from Task 9.1), record your answers, and calculate your initial score.
+Subtask Details:
 Implementation steps:
 1. Retrieve the quiz created in Task 9.1
 2. Set aside 30-45 minutes of uninterrupted time to complete the quiz
@@ -26,10 +39,14 @@ Implementation steps:
 
 Testing approach: Verify all questions have been answered and initial scoring is complete before proceeding to the next subtask.
 
-## 2. Complete and Document Practical RNA Drawing/Explanation Task [pending]
-### Dependencies: None
-### Description: Perform the practical assessment created in Task 9.2 that involves drawing RNA structures and explaining key RNA concepts.
-### Details:
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 11.2: Complete and Document Practical RNA Drawing/Explanation Task
+Description: Perform the practical assessment created in Task 9.2 that involves drawing RNA structures and explaining key RNA concepts.
+Subtask Details:
 Implementation steps:
 1. Retrieve the practical assessment instructions from Task 9.2
 2. Gather necessary materials (paper, drawing tools, or digital drawing tools)
@@ -42,10 +59,14 @@ Implementation steps:
 
 Testing approach: Review the completed practical work against the original requirements to ensure all components have been addressed.
 
-## 3. Self-Grade Assessments and Create Improvement Plan [pending]
-### Dependencies: 11.1, 11.2
-### Description: Using the rubrics from Task 9.3, evaluate your quiz and practical assessment performance, record results, and develop a targeted improvement plan.
-### Details:
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
+
+## Subtask 11.3: Self-Grade Assessments and Create Improvement Plan
+Description: Using the rubrics from Task 9.3, evaluate your quiz and practical assessment performance, record results, and develop a targeted improvement plan.
+Subtask Details:
 Implementation steps:
 1. Retrieve the grading rubrics created in Task 9.3
 2. Re-review your quiz answers and apply the quiz rubric criteria
@@ -63,3 +84,7 @@ Implementation steps:
 
 Testing approach: Ensure the improvement plan addresses all identified weaknesses and includes concrete, actionable steps with specific resources and timelines.
 
+Dependencies: 1, 2
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
