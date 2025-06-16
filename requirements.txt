@@ -22,3 +22,11 @@ duckdb>=1.0.0
 mkdocs>=1.5.3
 mkdocs-material>=9.5.13
 pymarkdownlnt
+
+# Dependencies for JARC-Reactor
+torch
+pytorch-lightning
+optuna
+tqdm
+kagglehub
+orjson
