@@ -1,18 +1,20 @@
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
 import pytorch_lightning as pl
+from omegaconf import DictConfig # Added for Hydra
 from cultivation.systems.arc_reactor.jarc_reactor.data.data_preparation import prepare_data
 import logging
 class MyDataModule(pl.LightningDataModule):
-    def __init__(self, batch_size):
+    def __init__(self, cfg: DictConfig):
         super().__init__()
-        self.batch_size = batch_size
+        self.cfg = cfg # Store Hydra config
+        self.batch_size = cfg.training.batch_size # Get batch_size from cfg
         self.logger = logging.getLogger(__name__)
 
     def setup(self, stage=None):
         try:
-            # Keep using prepare_data from data_preparation.py which already uses training paths
+            # Pass the full cfg object to prepare_data
             self.train_dataset, self.val_dataset = prepare_data(
-                batch_size=self.batch_size,
+                cfg=self.cfg,
                 return_datasets=True
             )
             self.logger.info(f"Successfully loaded training data: {len(self.train_dataset)} train samples, {len(self.val_dataset)} validation samples")
