@@ -2,7 +2,6 @@ import json
 import logging
 import optuna
 from optuna import Trial
-from cultivation.systems.arc_reactor.jarc_reactor.utils.train import TransformerTrainer
 from pathlib import Path
 from typing import Dict, Any, Optional, Union
 from dataclasses import dataclass
@@ -22,7 +21,7 @@ class BestParamsManager:
         self.study_name = study_name
         self.save_path = Path(save_path)
         
-        logger.debug(f"Initialized BestParamsManager")
+        logger.debug("Initialized BestParamsManager")
         logger.debug(f"Storage URL: {storage_url}")
         logger.debug(f"Study name: {study_name}")
         logger.debug(f"Save path: {save_path}")
