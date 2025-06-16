@@ -4,12 +4,11 @@ import torch
 import logging
 from dataclasses import dataclass
 import optuna
+from torch.utils.data import DataLoader
 from cultivation.systems.arc_reactor.jarc_reactor.config import Config
-from cultivation.systems.arc_reactor.jarc_reactor.data.data_preparation import prepare_data
 from cultivation.systems.arc_reactor.jarc_reactor.utils.model_factory import create_transformer_trainer
 from pytorch_lightning import Trainer, Callback
 from pytorch_lightning.callbacks import EarlyStopping
-from math import ceil
 
 from cultivation.utils.logging_config import setup_logging
 
@@ -144,10 +143,6 @@ def validate_dimensions(model):
 
         # Additional Checks:
 
-        # Check that decoder_layers and encoder_layers are positive integers
-        encoder_layers = model.encoder_layers
-        decoder_layers = model.decoder_layers
-
         # Check that d_ff is greater than d_model
         d_ff = model.d_ff
         if d_ff < d_model:
@@ -166,8 +161,6 @@ def validate_dimensions(model):
     except Exception as e:
         logger.error(f"Error validating dimensions: {str(e)}")
         return False
-
-from torch.utils.data import DataLoader  # Ensure DataLoader is imported
 
 def create_objective(base_config, train_dataset, val_dataset):
     """Creates an objective function with closure over base_config and datasets"""
