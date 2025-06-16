@@ -39,12 +39,9 @@ class TaskFineTuner:
         self.log_dir.mkdir(parents=True, exist_ok=True)
         self.save_dir.mkdir(parents=True, exist_ok=True)  # Add this line
 
-        # Setup logging
+        # Logging is configured in the main entry point.
+        # This logger will propagate messages to the root logger.
         self.logger = logging.getLogger("task_finetuner")
-        fh = logging.FileHandler(self.log_dir / "finetuning.log")
-        fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-        self.logger.addHandler(fh)
-        self.logger.setLevel(logging.INFO)
 
         # Store configuration
         self.base_model = base_model
@@ -483,15 +480,10 @@ def main(config):
     # Ensure the logs directory exists
     Path(config.logging.log_dir).mkdir(parents=True, exist_ok=True)
 
-    # Configure logging with both file and console output
-    logging.basicConfig(
-        level=getattr(logging, config.logging.level.upper(), logging.INFO),
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler(Path(config.logging.log_dir) / "finetuning_debug.log"),
-            logging.StreamHandler()
-        ]
-    )
+    # Configure logging
+    from cultivation.utils.logging_config import setup_logging
+    log_file_path = Path(config.logging.log_dir) / "finetuning_debug.log"
+    setup_logging(log_file=str(log_file_path))
     logger = logging.getLogger("finetuning_main")
     
     try:
