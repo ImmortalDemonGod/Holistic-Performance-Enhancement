@@ -4,6 +4,8 @@ import os
 import signal
 import torch
 from pathlib import Path
+from .config_schema import LoggingConfigSchema # Added for type hint
+from cultivation.utils import logging_config as project_logging # Added for logging utility
 
 import hydra
 from omegaconf import DictConfig, OmegaConf
@@ -15,7 +17,6 @@ from cultivation.systems.arc_reactor.jarc_reactor.data.data_module import MyData
 from cultivation.systems.arc_reactor.jarc_reactor.utils.train import TransformerTrainer
 from cultivation.systems.arc_reactor.jarc_reactor.optimization.best_params_manager import BestParamsManager
 from cultivation.systems.arc_reactor.jarc_reactor.hydra_setup import register_hydra_configs
-from cultivation.utils.logging_config import setup_logging as setup_central_logging # Aliased
 
 # Call to register Hydra configurations with ConfigStore
 # This needs to be done before @hydra.main is encountered
@@ -121,17 +122,58 @@ def setup_model_training(cfg: DictConfig):
 def main_app(cfg: DictConfig) -> None:
     # 1. Setup Centralized Logging
     # The log_dir from cfg.logging will be relative to Hydra's output directory
+    def print_stdout_status(label: str):
+        print(f"{label}: type(sys.stdout) is {type(sys.stdout)}, hasattr(sys.stdout, 'encoding'): {hasattr(sys.stdout, 'encoding')}, id: {id(sys.stdout)}", file=sys.__stdout__)
+        if hasattr(sys.stdout, 'encoding'):
+            print(f"{label}: sys.stdout.encoding is {sys.stdout.encoding}", file=sys.__stdout__)
+
+    def setup_central_logging(logging_config: LoggingConfigSchema):
+        """
+        Configures logging using the centralized utility, making log_dir absolute.
+        Hydra's output directory (where logs are typically placed) is dynamic.
+        This function resolves the log_dir relative to the current Hydra output path.
+        """
+        # Debug prints to inspect types and values
+        print(f"DEBUG: Type of logging_config: {type(logging_config)}")
+        if hasattr(logging_config, 'log_dir') and logging_config.log_dir is not None:
+            print(f"DEBUG: Type of logging_config.log_dir: {type(logging_config.log_dir)}")
+            print(f"DEBUG: Value of logging_config.log_dir: {str(logging_config.log_dir)}") # Print string value
+        else:
+            print("DEBUG: logging_config has no 'log_dir' or it is None")
+
+        if hasattr(logging_config, 'file_logging') and logging_config.file_logging is not None:
+            if hasattr(logging_config.file_logging, 'log_file_name') and logging_config.file_logging.log_file_name is not None:
+                print(f"DEBUG: Type of logging_config.file_logging.log_file_name: {type(logging_config.file_logging.log_file_name)}")
+                print(f"DEBUG: Value of logging_config.file_logging.log_file_name: {str(logging_config.file_logging.log_file_name)}") # Print string value
+            else:
+                print("DEBUG: logging_config.file_logging has no 'log_file_name' or it is None")
+        else:
+            print("DEBUG: logging_config has no 'file_logging' or it is None")
+
+        # Ensure log_dir is a string before Path conversion
+        log_dir_str = str(logging_config.log_dir)
+        log_dir = Path(log_dir_str)
+
+        if not log_dir.is_absolute():
+            # If hydra.run.dir is available (standard Hydra output path)
+            hydra_output_path = Path(hydra.core.hydra_config.HydraConfig.get().run.dir)
+            log_dir = hydra_output_path / log_dir
+        
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        log_file_path = None
+        if logging_config.file_logging.enable:
+            # Ensure log_file_name is a string before path concatenation
+            log_file_name_str = str(logging_config.file_logging.log_file_name)
+            log_file_path = log_dir / log_file_name_str
+        
+        project_logging.setup_logging(log_file=log_file_path)
+        print_stdout_status("After setup_central_logging")
+
     setup_central_logging(cfg.logging)
     main_logger = logging.getLogger(__name__) # Use a logger specific to this main function
     main_logger.info(f"Logging initialized. Hydra CWD: {os.getcwd()}")
     main_logger.info(f"Original CWD (if available via hydra.utils.get_original_cwd()): {hydra.utils.get_original_cwd() if hasattr(hydra.utils, 'get_original_cwd') else 'N/A'}")
-
-    # Redirect stdout/stderr after central logging is set up
-    # Use a specific logger for these streams if desired, e.g., logging.getLogger('stdio')
-    # For simplicity, using the main_logger here.
-    sys.stdout = StreamToLogger(main_logger, logging.INFO)
-    sys.stderr = StreamToLogger(main_logger, logging.ERROR)
-    main_logger.info("Stdout and Stderr redirected to logger.")
 
     # 2. Setup CUDA Optimizations
     setup_cuda_optimizations_script(cfg)
@@ -193,6 +235,7 @@ def main_app(cfg: DictConfig) -> None:
     if not isinstance(trainer_precision, str) and trainer_precision in [16,32,64]:
         trainer_precision = int(trainer_precision)
 
+    print_stdout_status("Before Trainer() init")
     trainer = Trainer(
         max_epochs=cfg.training.max_epochs,
         enable_progress_bar=cfg.training.get('enable_progress_bar', True),
@@ -207,10 +250,12 @@ def main_app(cfg: DictConfig) -> None:
         fast_dev_run=cfg.training.fast_dev_run
     )
     main_logger.info(f"Pytorch Lightning Trainer initialized. Accelerator: {accelerator_type}, Devices: {devices_val}, Precision: {trainer_precision}")
+    print_stdout_status("After Trainer() init")
 
     # 9. Start training and testing
     try:
         main_logger.info("Starting training...")
+        print_stdout_status("Before trainer.fit()")
         trainer.fit(model, data_module, ckpt_path=cfg.training.get('resume_from_checkpoint_pl', None))
         main_logger.info("Training finished.")
         
@@ -218,10 +263,11 @@ def main_app(cfg: DictConfig) -> None:
             main_logger.info(f"Best model saved to: {trainer.checkpoint_callback.best_model_path}")
         else:
             main_logger.warning("No best model path found from checkpoint callback.")
-        
-        main_logger.info("Starting testing...")
-        trainer.test(model, data_module, ckpt_path='best' if trainer.checkpoint_callback and trainer.checkpoint_callback.best_model_path else None)
-        main_logger.info("Testing finished.")
+        if cfg.training.get('do_train', True):
+            logger.info("Starting testing phase...")
+            print_stdout_status("Before trainer.test()")
+            trainer.test(model, data_module, ckpt_path='best' if trainer.checkpoint_callback and trainer.checkpoint_callback.best_model_path else None)
+            main_logger.info("Testing finished.")
 
     except KeyboardInterrupt:
         main_logger.warning("Training interrupted by user. Exiting gracefully.")
