@@ -1,0 +1,58 @@
+# Task ID: 17
+# Title: OBSOLETE - See Task 19: Implement FSRS Algorithm for Spaced Repetition Scheduling
+# Status: done
+# Dependencies: None
+# Priority: critical
+# Description: Implement the core Free Spaced Repetition Scheduler (FSRS) algorithm in flashcore.scheduler.py to calculate card stability, difficulty, and next review date based on review history and rating.
+# Details:
+This task involves implementing the FSRS algorithm which is essential for the spaced repetition functionality. The implementation should:
+
+1. Create a function that accepts two parameters: a card's review history (list of previous reviews with timestamps, ratings, etc.) and a new rating (typically on a scale of 1-4 where 1=Again, 2=Hard, 3=Good, 4=Easy).
+
+2. Calculate the following based on the FSRS algorithm:
+   - New stability value (how well the information is retained)
+   - Updated difficulty value (how challenging the card is for the user)
+   - Next optimal review date/time
+
+3. The implementation should follow the mathematical model from the FSRS paper, including:
+   - Forgetting curve calculation
+   - Difficulty adjustment based on rating
+   - Stability calculation with memory decay
+
+4. The function should handle edge cases such as:
+   - First-time reviews (no history)
+   - Lapsed cards (failed reviews)
+   - Very high stability cards
+
+5. Ensure the implementation is computationally efficient as it will be called frequently during review sessions.
+
+6. Document the code thoroughly with explanations of the algorithm steps and parameter meanings.
+
+7. Expose appropriate configuration parameters to allow future tuning of the algorithm (e.g., forgetting curve parameters).
+
+# Test Strategy:
+Testing should verify both the correctness of the algorithm implementation and its behavior in various scenarios:
+
+1. Unit tests:
+   - Test with known input/output pairs from published FSRS examples
+   - Verify all edge cases (first review, failed review, perfect recall)
+   - Test boundary conditions for ratings and history lengths
+
+2. Property-based tests:
+   - Verify that higher ratings result in longer intervals
+   - Confirm that repeated good ratings increase stability over time
+   - Check that difficulty decreases with consistent good ratings
+
+3. Regression tests:
+   - Create a dataset of review histories and expected outputs
+   - Ensure algorithm changes don't unexpectedly alter scheduling behavior
+
+4. Performance tests:
+   - Measure execution time for various history lengths
+   - Ensure scheduling calculations complete within acceptable time limits
+
+5. Integration tests:
+   - Verify the scheduler interacts correctly with the card storage system
+   - Test the full review workflow from card presentation to rescheduling
+
+Create a test harness that allows visualizing the scheduling behavior over simulated review sequences to validate the algorithm produces sensible spacing intervals.

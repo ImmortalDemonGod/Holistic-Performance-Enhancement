@@ -1,0 +1,72 @@
+# Task ID: 16
+# Title: Integrate jarc_reactor Codebase & Establish ARC Sprint Environment
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Epic foundational task for Track A of the ARC Prize sprint: transform jarc-reactor from an external asset into a fully integrated, quality-assured, and testable component of the Cultivation project, establishing the baseline for all future ARC Prize work.
+# Details:
+This task is the cornerstone of the ARC Prize sprint, activating the baseline, enforcing Cultivation's Infrastructure & Automation (IA) Layer standards, and providing the testbed for all future ARC experimentation.
+
+Strategic Purpose:
+- De-risk the sprint by establishing a robust, operational baseline.
+- Enforce code quality and prevent technical debt from day one.
+- Provide a stable, standardized platform for all future R&D.
+
+Dependency Graph (see mermaid diagram in project docs):
+16.1 → 16.2 → 16.3 → (16.4 & 16.6) → 16.5 → 16.7
+
+See subtasks for detailed risk analysis, mitigation strategies, and workflow guidance.
+
+# Test Strategy:
+Definition of Done (Checklist):
+1. Confirm jarc_reactor has been properly integrated using git subtree with full history preserved.
+2. Verify all dependencies are harmonized in the root requirements.txt with no conflicts.
+3. Validate IA Layer compliance through pre-commit hooks and code standards.
+4. Ensure ARC dataset is properly configured and accessible.
+5. Check that documentation is complete and accurate.
+6. Verify CI workflow is implemented and functioning.
+7. Confirm successful end-to-end training cycle on ARC data.
+
+# Subtasks:
+## 1. Structure Repo: `git subtree` & Import Path Refactoring [pending]
+### Dependencies: None
+### Description: Use `git subtree` to merge jarc_reactor into `cultivation/systems/arc_reactor/` with full history. Then, refactor all internal Python import paths to be absolute from the `cultivation` root, or bridge temporarily with PYTHONPATH in Taskfile targets.
+### Details:
+
+
+## 2. Harmonize Dependencies [pending]
+### Dependencies: 16.1
+### Description: Analyze `jarc-reactor/requirements.txt`, merge dependencies into the root `requirements.txt`. Resolve version conflicts by defaulting to the newer version, then validate the unified environment using `pip check` and by running both projects' test suites.
+### Details:
+
+
+## 3. Implement IA Layer Compliance [pending]
+### Dependencies: 16.2
+### Description: Run `pre-commit run --all-files` and fix all `black`, `ruff`, and `isort` issues. Refactor all `logging` calls to use the Cultivation project's standard logger. Add `arc:lint` and `arc:test` targets to the root `Taskfile.yml`.
+### Details:
+
+
+## 4. Configure ARC Dataset Environment [pending]
+### Dependencies: 16.3
+### Description: Download the official ARC dataset to `cultivation/data/raw/arc_prize_2025/`. Create an override config file for `jarc-reactor` pointing to this path. Audit and adapt `jarc-reactor`'s data loaders to parse the official ARC JSON format.
+### Details:
+
+
+## 5. Create CI Workflow [pending]
+### Dependencies: 16.4, 16.6
+### Description: Implement `arc-reactor-ci.yml` GitHub Actions workflow. Configure it to run `arc:lint` and `arc:test` targets. Trigger workflow only on changes to relevant paths (e.g., `cultivation/systems/arc_reactor/**`) for efficiency.
+### Details:
+
+
+## 6. Document Integrated System [pending]
+### Dependencies: 16.3
+### Description: Create `cultivation/systems/arc_reactor/README.md`. As a living document, it should explain the integrated setup, how to use the new Taskfile targets, and the ARC dataset configuration.
+### Details:
+
+
+## 7. Perform "First Light" Integration Test [pending]
+### Dependencies: 16.6
+### Description: Execute a complete, short, end-to-end training cycle on a small subset of ARC data using the `task arc:run-baseline` target. Success is defined as the run completing without errors and saving a model checkpoint. Document the process and results in a concise validation report.
+### Details:
+
+

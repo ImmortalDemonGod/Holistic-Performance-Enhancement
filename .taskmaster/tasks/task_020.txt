@@ -1,0 +1,51 @@
+# Task ID: 20
+# Title: [Flashcore] Implement `ReviewSessionManager` in flashcore/review_manager.py
+# Status: pending
+# Dependencies: 19
+# Priority: high
+# Description: Develop the backend logic to manage a review session. This involves fetching due cards from the `FlashcardDatabase`, using the FSRS scheduler for updates, and saving review results.
+# Details:
+1. Define `ReviewSessionManager` class in `flashcore/review_manager.py`.
+2. Constructor `__init__(self, db: FlashcardDatabase)`.
+3. Method `start_session(self, limit: int = 20) -> None`: fetches due cards using `db.get_due_cards` and populates an internal queue.
+4. Method `get_next_card(self) -> Optional[Card]`: returns the next card from the queue or None.
+5. Method `submit_review(self, card_uuid: UUID, rating: int, resp_ms: Optional[int]) -> Review`: retrieves card history from `db`, calls the FSRS scheduler, constructs a new `Review` object, and saves it to the `db` via `db.add_review()`.
+6. Method `get_due_card_count(self) -> int`: returns the total number of cards currently due for review.
+
+# Test Strategy:
+• Unit tests in `tests/flashcore/test_review_manager.py` using pytest and mocks for `FlashcardDatabase` and `FSRS_Scheduler`.
+  - `start_session`: verify `db.get_due_cards` is called correctly.
+  - `submit_review`: mock scheduler return values, verify `db.add_review` is called with a correctly constructed `Review` object.
+• Integration test using an in-memory `FlashcardDatabase`.
+
+# Subtasks:
+## 1. Define ReviewSessionManager class structure [pending]
+### Dependencies: None
+### Description: Create the `ReviewSessionManager` class with its constructor and internal state attributes.
+### Details:
+
+
+## 2. Implement `start_session` and `get_next_card` methods [pending]
+### Dependencies: 20.1
+### Description: Develop the logic to fetch due cards and manage the session queue.
+### Details:
+
+
+## 3. Implement `submit_review` method [pending]
+### Dependencies: 20.1
+### Description: Develop the logic to update a card's state after a review, integrating with the FSRS scheduler and database.
+### Details:
+
+
+## 4. Implement `get_due_card_count` method [pending]
+### Dependencies: 20.1
+### Description: Develop the method to return the count of due cards.
+### Details:
+
+
+## 5. Write unit tests for ReviewSessionManager [pending]
+### Dependencies: 20.2, 20.3, 20.4
+### Description: Create tests in `tests/flashcore/test_review_manager.py` covering all methods and edge cases, using mocks.
+### Details:
+
+
