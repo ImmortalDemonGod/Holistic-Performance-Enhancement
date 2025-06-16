@@ -294,3 +294,5 @@ docs_file_map.txt
 cultivation/literature/pdf/molecular_biology_of_the_cell_2022.pdf
 
 cultivation/scripts/software/github_automation_output/
+# From JARC-Reactor subtree
+.aider*
