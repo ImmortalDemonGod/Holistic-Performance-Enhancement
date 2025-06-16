@@ -144,9 +144,9 @@ def main_app(cfg: DictConfig) -> None:
     model = setup_model_training(cfg)
     
     # 5. Setup DataModule
-    # MyDataModule needs to be compatible with cfg.training.batch_size
-    data_module = MyDataModule(batch_size=cfg.training.batch_size, data_dir_config=cfg.training.training_data_dir) 
-    main_logger.info(f"DataModule initialized with batch_size: {cfg.training.batch_size}")
+    # MyDataModule now accepts the full cfg object
+    data_module = MyDataModule(cfg=cfg) 
+    main_logger.info(f"DataModule initialized with batch_size from cfg: {cfg.training.batch_size}")
 
     # 6. Setup ModelCheckpoint callback
     # dirpath will be relative to Hydra's output directory
