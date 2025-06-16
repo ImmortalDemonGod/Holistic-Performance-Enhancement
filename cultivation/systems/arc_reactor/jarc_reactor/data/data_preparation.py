@@ -4,6 +4,7 @@ import orjson
 import json
 import logging
 from pathlib import Path
+import hydra # For hydra.utils.to_absolute_path
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import torch
@@ -159,13 +160,15 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
 def _validate_and_inspect_path(cfg: DictConfig, directory: str) -> Path:
     """Validates the data directory path and inspects a few files."""
     logger.info(f"Preparing data from directory: {directory}")
-    data_path = Path(directory)
+    # Resolve path relative to Hydra's original working directory
+    absolute_directory_path = hydra.utils.to_absolute_path(directory)
+    data_path = Path(absolute_directory_path)
     if not data_path.exists():
-        logger.error(f"Data directory does not exist: {directory}")
-        raise FileNotFoundError(f"Data directory does not exist: {directory}")
+        logger.error(f"Absolute data directory does not exist: {absolute_directory_path} (original input: {directory})")
+        raise FileNotFoundError(f"Absolute data directory does not exist: {absolute_directory_path} (original input: {directory})")
     if not data_path.is_dir():
-        logger.error(f"Provided path is not a directory: {directory}")
-        raise NotADirectoryError(f"Provided path is not a directory: {directory}")
+        logger.error(f"Provided absolute path is not a directory: {absolute_directory_path} (original input: {directory})")
+        raise NotADirectoryError(f"Provided absolute path is not a directory: {absolute_directory_path} (original input: {directory})")
 
     # Inspect a limited number of files for basic structure validation
     logger.info(f"Inspecting data structure for a sample of files in {directory}...")
@@ -248,6 +251,9 @@ def _process_and_create_tensors(raw_data: dict) -> dict:
     }
 
 def prepare_data(cfg: DictConfig, return_datasets: bool = False):
+    logger.info(f"prepare_data called. cfg.training.training_data_dir = {cfg.training.training_data_dir}")
+    logger.info(f"prepare_data: cfg.training.synthetic_data_dir = {cfg.training.synthetic_data_dir}")
+    logger.info(f"prepare_data: cfg.training.include_synthetic_training_data = {cfg.training.include_synthetic_training_data}")
     """
     Prepares training and validation data from a specified directory using Hydra config.
     This function orchestrates the loading, processing, and batching of data.
