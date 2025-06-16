@@ -4,8 +4,8 @@ import os
 # Get the script's directory and navigate to repository root
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..', '..'))
-TASKS_JSON_PATH = os.path.join(REPO_ROOT, 'tasks', 'tasks.json')
-TASKS_DIR = os.path.join(REPO_ROOT, 'tasks')
+TASKS_JSON_PATH = os.path.join(REPO_ROOT, '.taskmaster', 'tasks', 'tasks.json')
+TASKS_DIR = os.path.join(REPO_ROOT, '.taskmaster', 'tasks')
 
 def format_hpe_learning_meta(meta):
     if not meta or not isinstance(meta, dict):
@@ -31,8 +31,16 @@ def enhance_task_files():
     if isinstance(data, list):
         all_tasks_list = data
     elif isinstance(data, dict):
-        if 'tasks' in data and isinstance(data['tasks'], list):
+        # New check for task-master v0.17.0 structure with tags (e.g., "master")
+        if "master" in data and \
+           isinstance(data.get("master"), dict) and \
+           "tasks" in data.get("master") and \
+           isinstance(data.get("master").get("tasks"), list):
+            all_tasks_list = data["master"]["tasks"]
+        # Fallback to old structure: root dictionary with a "tasks" list
+        elif 'tasks' in data and isinstance(data.get('tasks'), list):
             all_tasks_list = data['tasks']
+        # Fallback to old structure: root dictionary with other top-level keys whose values are task lists
         else:
             for key in data:
                 if isinstance(data.get(key), list):
