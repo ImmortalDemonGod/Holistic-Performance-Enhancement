@@ -1,0 +1,111 @@
+config: !!python/object:config.Config
+  checkpoint_path: /workspaces/JARC-Reactor/lightning_logs/version_11/checkpoints/epoch=epoch=1-val_loss=val_loss=0.8080.ckpt
+  context_encoder_d_model: 128
+  context_encoder_heads: 8
+  d_ff: 256
+  d_model: 128
+  decoder_layers: 2
+  dropout: 0.35
+  encoder_layers: 2
+  finetuning: !!python/object:config.FineTuningConfig
+    learning_rate: 1.0e-05
+    max_epochs: 100
+    mode: all
+    num_random_tasks: 1
+    patience: 5
+    save_dir: finetuning_results
+    val_source: evaluation
+  heads: 8
+  input_dim: 30
+  logging: !!python/object:config.LoggingConfig
+    debug_mode: false
+    level: INFO
+  model: !!python/object:config.ModelConfig
+    checkpoint_path: /workspaces/JARC-Reactor/lightning_logs/version_11/checkpoints/epoch=epoch=1-val_loss=val_loss=0.8080.ckpt
+    context_encoder_d_model: 128
+    context_encoder_heads: 8
+    d_ff: 256
+    d_model: 128
+    decoder_layers: 2
+    dropout: 0.35
+    encoder_layers: 2
+    heads: 8
+    input_dim: 30
+    output_dim: 30
+  optuna: !!python/object:config.OptunaConfig
+    n_trials: 1
+    param_ranges:
+      batch_size: !!python/tuple
+      - 8
+      - 512
+      context_encoder_d_model: !!python/tuple
+      - 32
+      - 512
+      - 32
+      context_encoder_heads:
+      - 2
+      - 4
+      - 8
+      d_ff: !!python/tuple
+      - 64
+      - 2048
+      - 64
+      d_model: !!python/tuple
+      - 32
+      - 2048
+      - 16
+      decoder_layers: &id001 !!python/tuple
+      - 1
+      - 12
+      dropout: !!python/tuple
+      - 0.01
+      - 0.7
+      encoder_layers: *id001
+      gradient_clip_val: !!python/tuple
+      - 0.0
+      - 5.0
+      heads:
+      - 2
+      - 4
+      - 8
+      - 16
+      - 32
+      - 64
+      learning_rate: !!python/tuple
+      - 1.0e-06
+      - 0.1
+      max_epochs: !!python/tuple
+      - 4
+      - 5
+      - 1
+    pruning:
+      n_startup_trials: 10
+      n_warmup_steps: 5
+      patience: 2
+      pruning_percentile: 25
+    storage_url: sqlite:///jarc_optuna.db
+    study_name: jarc_optimization_v3
+  output_dim: 30
+  training: !!python/object:config.TrainingConfig
+    FAST_DEV_RUN: true
+    batch_size: 50
+    device_choice: cpu
+    gradient_clip_val: 1.0
+    include_synthetic_training_data: false
+    learning_rate: 7.0e-05
+    max_epochs: 100
+    precision: 32
+    train_from_checkpoint: false
+  use_best_params: false
+context_encoder_d_model: 128
+context_encoder_heads: 8
+d_ff: 256
+d_model: 128
+decoder_layers: 2
+dropout: 0.35
+encoder_layers: 2
+heads: 8
+include_synthetic_training_data: false
+input_dim: 30
+learning_rate: 7.0e-05
+output_dim: 30

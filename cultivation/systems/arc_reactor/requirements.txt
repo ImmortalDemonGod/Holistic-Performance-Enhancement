@@ -1,0 +1,9 @@
+torch
+pytorch-lightning
+numpy
+optuna
+orjson
+transformers
+tokenizers==0.19.0
+tqdm
+kagglehub
