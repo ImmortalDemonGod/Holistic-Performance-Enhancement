@@ -155,38 +155,22 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 test_task_ids.append(task_id)
                 test_context_pairs.append(context_pair)
 
-def prepare_data(directory=None, batch_size=None, return_datasets=False):
-    """Prepare evaluation data with configurable directory"""
-    logger = logging.getLogger(__name__)
-
-    # Set directory path - use training data directory by default
-    if directory is None:
-        directory = config.training.training_data_dir
+def _validate_and_inspect_path(directory: str) -> Path:
+    """Validates the data directory path and inspects a few files."""
     logger.info(f"Preparing data from directory: {directory}")
-
-    # Validate directory using Path
     data_path = Path(directory)
     if not data_path.exists():
         logger.error(f"Data directory does not exist: {directory}")
         raise FileNotFoundError(f"Data directory does not exist: {directory}")
-    
     if not data_path.is_dir():
         logger.error(f"Provided path is not a directory: {directory}")
         raise NotADirectoryError(f"Provided path is not a directory: {directory}")
 
-    logger.info(f"Listing files in {directory}:")
-    for file in data_path.iterdir():
-        logger.info(f" - {file.name}")
-
-    if batch_size is None:
-        batch_size = config.training.batch_size  # Use training batch size from config
-    
-    logger.info(f"Starting data preparation with batch_size={batch_size}...")
-    log_limit = 2
+    # Inspect a limited number of files for basic structure validation
+    logger.info(f"Inspecting data structure for a sample of files in {directory}...")
     successful_files = 0
     total_files = 0
-
-    # Inspect data structure for a limited number of files
+    log_limit = 2
     for filename in os.listdir(directory):
         if filename.endswith('.json'):
             total_files += 1
@@ -195,21 +179,21 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
                     successful_files += 1
             else:
                 break
-
     logger.info(f"Successfully inspected {successful_files}/{total_files} files for structure.")
+    return data_path
 
+def _load_raw_data(data_path: Path) -> dict:
+    """Loads context pairs and main data concurrently."""
     train_inputs, train_outputs, train_task_ids = [], [], []
     test_inputs, test_outputs, test_task_ids = [], [], []
     context_map = {}
     train_context_pairs, test_context_pairs = [], []
 
-    # Load context pairs from directory
-    load_context_pairs(directory, context_map)
-
-    # Load main dataset with progress bar
-    logger.info("Loading evaluation data with progress bar...")
+    load_context_pairs(str(data_path), context_map)
+    
+    logger.info("Loading main dataset...")
     load_main_data_concurrently(
-        directory=directory,
+        directory=str(data_path),
         context_map=context_map,
         train_inputs=train_inputs,
         train_outputs=train_outputs,
@@ -220,58 +204,82 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
         test_task_ids=test_task_ids,
         test_context_pairs=test_context_pairs
     )
+    
+    return {
+        "train_inputs": train_inputs, "train_outputs": train_outputs, "train_task_ids": train_task_ids,
+        "test_inputs": test_inputs, "test_outputs": test_outputs, "test_task_ids": test_task_ids,
+        "train_context_pairs": train_context_pairs, "test_context_pairs": test_context_pairs
+    }
+
+def _process_and_create_tensors(raw_data: dict) -> dict:
+    """Converts data lists to tensors and creates task ID mappings."""
+    # Create a sorted list of unique task_ids and the mapping
+    unique_task_ids = sorted(set(raw_data["train_task_ids"] + raw_data["test_task_ids"]))
+    task_id_map = {task_id: idx for idx, task_id in enumerate(unique_task_ids)}
+    logger.info(f"Total unique task_ids: {len(unique_task_ids)}")
 
     # Convert lists to tensors
-    train_inputs = torch.stack(train_inputs)
-    train_outputs = torch.stack(train_outputs)
-    test_inputs = torch.stack(test_inputs)
-    test_outputs = torch.stack(test_outputs)
-    
-    # Create a sorted list of unique task_ids
-    unique_task_ids = sorted(set(train_task_ids + test_task_ids))
-    task_id_map = {task_id: idx for idx, task_id in enumerate(unique_task_ids)}
+    train_inputs = torch.stack(raw_data["train_inputs"])
+    train_outputs = torch.stack(raw_data["train_outputs"])
+    test_inputs = torch.stack(raw_data["test_inputs"])
+    test_outputs = torch.stack(raw_data["test_outputs"])
 
-    # Convert task_ids to tensors
-    train_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in train_task_ids], dtype=torch.long)
-    test_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in test_task_ids], dtype=torch.long)
-    unique_task_ids = sorted(set(train_task_ids + test_task_ids))
-    logger.info(f"Total unique task_ids: {len(unique_task_ids)}")
-    
-    # Check for overlapping task_ids between training and test datasets
-    if len(unique_task_ids) != len(set(train_task_ids)) + len(set(test_task_ids)):
-        logger.warning("There are overlapping task_ids between training and test datasets.")
-
-    task_id_map = {task_id: idx for idx, task_id in enumerate(unique_task_ids)}
-
-    # Convert task_ids to tensors using the task_id_map
-    train_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in train_task_ids], dtype=torch.long)
-    test_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in test_task_ids], dtype=torch.long)
-
-    # Add Diagnostic Logging
-    logger.debug(f"Test Data Sizes - test_inputs: {len(test_inputs)}, "
-                 f"test_outputs: {len(test_outputs)}, "
-                 f"test_task_ids: {len(test_task_ids_tensor)}")
-
-    # Assertions to ensure data consistency
-    assert train_inputs.size(0) == train_outputs.size(0) == train_task_ids_tensor.size(0), "Mismatch in training data tensor sizes."
-    assert test_inputs.size(0) == test_outputs.size(0) == test_task_ids_tensor.size(0), (
-        f"Mismatch in testing data tensor sizes: "
-        f"test_inputs={test_inputs.size(0)}, "
-        f"test_outputs={test_outputs.size(0)}, "
-        f"test_task_ids={test_task_ids_tensor.size(0)}"
-    )
+    # Convert task_ids to tensors using the map
+    train_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in raw_data["train_task_ids"]], dtype=torch.long)
+    test_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in raw_data["test_task_ids"]], dtype=torch.long)
 
     # Convert context pairs to tensors
-    train_ctx_inputs = torch.stack([pair.context_input for pair in train_context_pairs])
-    train_ctx_outputs = torch.stack([pair.context_output for pair in train_context_pairs])
-    test_ctx_inputs = torch.stack([pair.context_input for pair in test_context_pairs])
-    test_ctx_outputs = torch.stack([pair.context_output for pair in test_context_pairs])
+    train_ctx_inputs = torch.stack([pair.context_input for pair in raw_data["train_context_pairs"]])
+    train_ctx_outputs = torch.stack([pair.context_output for pair in raw_data["train_context_pairs"]])
+    test_ctx_inputs = torch.stack([pair.context_input for pair in raw_data["test_context_pairs"]])
+    test_ctx_outputs = torch.stack([pair.context_output for pair in raw_data["test_context_pairs"]])
 
-    # Create TensorDatasets
-    train_dataset = TensorDataset(train_inputs, train_outputs, train_ctx_inputs, train_ctx_outputs, train_task_ids_tensor)
-    test_dataset = TensorDataset(test_inputs, test_outputs, test_ctx_inputs, test_ctx_outputs, test_task_ids_tensor)
+    # Assertions to ensure data consistency
+    assert train_inputs.size(0) == train_outputs.size(0) == train_task_ids_tensor.size(0) == train_ctx_inputs.size(0), "Mismatch in training data tensor sizes."
+    assert test_inputs.size(0) == test_outputs.size(0) == test_task_ids_tensor.size(0) == test_ctx_inputs.size(0), "Mismatch in testing data tensor sizes."
 
-    # Optional: Save the task_id_map
+    return {
+        "train_inputs": train_inputs, "train_outputs": train_outputs, "train_task_ids": train_task_ids_tensor,
+        "train_ctx_inputs": train_ctx_inputs, "train_ctx_outputs": train_ctx_outputs,
+        "test_inputs": test_inputs, "test_outputs": test_outputs, "test_task_ids": test_task_ids_tensor,
+        "test_ctx_inputs": test_ctx_inputs, "test_ctx_outputs": test_ctx_outputs,
+        "task_id_map": task_id_map
+    }
+
+def prepare_data(directory=None, batch_size=None, return_datasets=False):
+    """
+    Prepares training and validation data from a specified directory.
+    This function orchestrates the loading, processing, and batching of data.
+    """
+    # 1. Initialize paths and parameters
+    if directory is None:
+        directory = config.training.training_data_dir
+    if batch_size is None:
+        batch_size = config.training.batch_size
+    
+    # 2. Validate path and inspect a sample of data files
+    data_path = _validate_and_inspect_path(directory)
+
+    # 3. Load raw data from files
+    raw_data = _load_raw_data(data_path)
+
+    # 4. Process raw data into tensors and create mappings
+    processed_data = _process_and_create_tensors(raw_data)
+
+    # 5. Create TensorDatasets
+    train_dataset = TensorDataset(
+        processed_data["train_inputs"], processed_data["train_outputs"],
+        processed_data["train_ctx_inputs"], processed_data["train_ctx_outputs"],
+        processed_data["train_task_ids"]
+    )
+    test_dataset = TensorDataset(
+        processed_data["test_inputs"], processed_data["test_outputs"],
+        processed_data["test_ctx_inputs"], processed_data["test_ctx_outputs"],
+        processed_data["test_task_ids"]
+    )
+
+    # 6. Save the task_id_map for reference
+    task_id_map = processed_data["task_id_map"]
     logger.info("Saving task_id_map.json with the current task mappings.")
     try:
         with open('task_id_map.json', 'w') as f:
@@ -279,13 +287,13 @@ def prepare_data(directory=None, batch_size=None, return_datasets=False):
     except Exception as e:
         logger.error(f"Failed to save task_id_map.json: {str(e)}")
 
+    # 7. Return datasets or dataloaders as requested
     if return_datasets:
         logger.info("Returning TensorDatasets instead of DataLoaders.")
         return train_dataset, test_dataset
-    else:
-        # Create DataLoaders using the local batch_size variable
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
-        val_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0)  # Set batch_size=1 for evaluation
+    
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+    val_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0)
 
-        logger.info("Data preparation completed successfully.")
-        return train_loader, val_loader
+    logger.info("Data preparation completed successfully.")
+    return train_loader, val_loader
