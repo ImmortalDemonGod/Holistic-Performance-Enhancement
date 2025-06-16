@@ -2,11 +2,12 @@
 import pytorch_lightning as pl
 import logging
 import torch
-import torch.nn as nn
-import torch.optim # Retained as torch.optim.Adam and lr_scheduler are used
+import torch.nn as nn # For nn.Module, nn.Linear etc.
+import torch.optim as optim # For Adam, lr_scheduler
+from pathlib import Path # Re-added for Path objects
+import hydra 
 
 from cultivation.systems.arc_reactor.jarc_reactor.models.transformer_model import TransformerModel
-from pathlib import Path
 
 # Initialize logging
 logger = logging.getLogger(__name__)
@@ -22,7 +23,20 @@ class TransformerTrainer(pl.LightningModule):
         logger.propagate = True  # Ensure logger propagates to root logger
 
         # Initialize logging if necessary
-        fh = logging.FileHandler(Path(self.config.logging.log_dir) / "train.log")
+        # Resolve log_dir relative to Hydra's output directory
+        log_dir_name = self.config.logging.log_dir # e.g., "jarc_reactor/logs"
+        try:
+            hydra_run_dir = Path(hydra.core.hydra_config.HydraConfig.get().run.dir)
+            resolved_log_dir = hydra_run_dir / log_dir_name
+        except Exception as e:
+            # Fallback if not in a Hydra run context (e.g. direct instantiation for tests)
+            # This might not be ideal for production but prevents crashes in other contexts.
+            self.train_logger.warning(f"Could not get Hydra run directory (error: {e}). Using log_dir relative to CWD.")
+            resolved_log_dir = Path(log_dir_name)
+
+        resolved_log_dir.mkdir(parents=True, exist_ok=True)
+        log_file_path = resolved_log_dir / "train.log"
+        fh = logging.FileHandler(log_file_path)
         fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
         logger.addHandler(fh)
         # Initialize LoRA modules
