@@ -1,9 +1,9 @@
 from cultivation.systems.arc_reactor.jarc_reactor.utils.train import TransformerTrainer
 from typing import Union
-from cultivation.systems.arc_reactor.jarc_reactor.config import Config
+from omegaconf import DictConfig
 
 def create_transformer_trainer(
-    config: Config,
+    config: DictConfig, # Changed to DictConfig
     checkpoint_path: Union[str, None] = None
 ) -> TransformerTrainer:
     """
@@ -11,7 +11,7 @@ def create_transformer_trainer(
     or by instantiating with parameters from the config.
 
     Args:
-        config (Config): Configuration object containing all necessary parameters.
+        config (DictConfig): Hydra configuration object containing all necessary parameters.
         checkpoint_path (str, optional): Path to the checkpoint file. Defaults to None.
 
     Returns:
