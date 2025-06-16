@@ -11,8 +11,10 @@ from pytorch_lightning import Trainer, Callback
 from pytorch_lightning.callbacks import EarlyStopping
 from math import ceil
 
+from cultivation.utils.logging_config import setup_logging
+
 # Setup logging
-logging.basicConfig(level=logging.DEBUG)
+setup_logging()
 logger = logging.getLogger(__name__)
 
 @dataclass

@@ -5,21 +5,17 @@ import json
 from tqdm import tqdm
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
-logger = logging.getLogger(__name__)
 import torch
 import numpy as np
-import logging
 from torch.utils.data import DataLoader, TensorDataset
+
+from cultivation.utils.logging_config import setup_logging
 from cultivation.systems.arc_reactor.jarc_reactor.config import config
 from cultivation.systems.arc_reactor.jarc_reactor.data.context_data import ContextPair
 from cultivation.systems.arc_reactor.jarc_reactor.utils.padding_utils import pad_to_fixed_size
 
 # Initialize logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+setup_logging()
 logger = logging.getLogger(__name__)
 
 def inspect_data_structure(filename, directory=None):

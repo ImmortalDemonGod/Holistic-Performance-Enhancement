@@ -3,8 +3,9 @@ import sys
 import os
 import kagglehub
 import logging
+from cultivation.utils.logging_config import setup_logging
 
-logging.basicConfig(level=logging.INFO)
+setup_logging()
 logger = logging.getLogger(__name__)
 
 def main():
