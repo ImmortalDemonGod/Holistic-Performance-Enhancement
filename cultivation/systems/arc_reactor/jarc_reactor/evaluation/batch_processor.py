@@ -2,8 +2,7 @@
 import torch
 import math
 from dataclasses import dataclass
-from cultivation.systems.arc_reactor.jarc_reactor.evaluation.metrics_calculator import MetricsCalculator
-from cultivation.systems.arc_reactor.jarc_reactor.utils.metrics import compute_standard_accuracy, compute_differential_accuracy, PredictionRecord
+from cultivation.systems.arc_reactor.jarc_reactor.utils.metrics import PredictionRecord
 
 @dataclass
 class BatchData:
