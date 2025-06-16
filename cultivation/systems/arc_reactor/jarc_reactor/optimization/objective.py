@@ -5,7 +5,7 @@ import logging
 from dataclasses import dataclass
 import optuna
 from torch.utils.data import DataLoader
-from cultivation.systems.arc_reactor.jarc_reactor.config import Config
+from omegaconf import DictConfig, OmegaConf # Hydra config classes
 from cultivation.systems.arc_reactor.jarc_reactor.utils.model_factory import create_transformer_trainer
 from pytorch_lightning import Trainer, Callback
 from pytorch_lightning.callbacks import EarlyStopping
@@ -31,7 +31,7 @@ class TrialMetrics:
         logger.debug(f"  Val Accuracy: {self.val_accuracy:.4f}")
         logger.debug(f"  Memory Used: {self.memory_used:.2f} MB")
 
-def create_trial_config(trial, base_config):
+def create_trial_config(trial, base_config: DictConfig) -> DictConfig:
     """Create a new config with trial-suggested values"""
     try:
         logger.debug("Creating trial config")
@@ -65,47 +65,41 @@ def create_trial_config(trial, base_config):
             step=context_encoder_heads
         )
         
-        # Create new model config
-        model_config = base_config.model.__class__(
-            input_dim=base_config.model.input_dim,
-            seq_len=base_config.model.seq_len,
-            d_model=d_model,
-            encoder_layers=encoder_layers,
-            decoder_layers=decoder_layers,
-            heads=heads,
-            d_ff=d_ff,
-            output_dim=base_config.model.output_dim,
-            dropout_rate=dropout,
-            context_encoder_d_model=context_encoder_d_model,
-            context_encoder_heads=context_encoder_heads,
-            context_dropout_rate=base_config.model.context_dropout_rate,
-            encoder_dropout_rate=base_config.model.encoder_dropout_rate,
-            decoder_dropout_rate=base_config.model.decoder_dropout_rate,
-            lora_rank=base_config.model.lora_rank,
-            use_lora=base_config.model.use_lora,
-            checkpoint_path=base_config.model.checkpoint_path
-        )
+        # Create a mutable copy of the base_config to modify for this trial
+        # We'll update model and training parameters directly in this copy.
+        trial_cfg_dict = OmegaConf.to_container(base_config, resolve=True)
         
-        # Create training config
-        training_config = base_config.training.__class__(
-            batch_size=trial.suggest_int("batch_size", 8, 512, step=8),
-            learning_rate=trial.suggest_float("learning_rate", 1e-6, 1e-1, log=True),
-            include_synthetic_training_data=base_config.training.include_synthetic_training_data,
-            num_epochs=trial.suggest_int("max_epochs", 4, 5, step=1),
-            device_choice=base_config.training.device_choice,
-            precision=base_config.training.precision,
-            fast_dev_run=base_config.training.FAST_DEV_RUN,
-            train_from_checkpoint=base_config.training.train_from_checkpoint
-        )
+        # Update model parameters from trial suggestions
+        trial_cfg_dict['model']['d_model'] = d_model
+        trial_cfg_dict['model']['encoder_layers'] = encoder_layers
+        trial_cfg_dict['model']['decoder_layers'] = decoder_layers
+        trial_cfg_dict['model']['heads'] = heads
+        trial_cfg_dict['model']['d_ff'] = d_ff
+        trial_cfg_dict['model']['dropout_rate'] = dropout # Assuming 'dropout_rate' is the correct key
+        trial_cfg_dict['model']['context_encoder_d_model'] = context_encoder_d_model
+        trial_cfg_dict['model']['context_encoder_heads'] = context_encoder_heads
+        # Other model params like input_dim, seq_len, output_dim, lora etc., remain from base_config
+
+        # Update training parameters from trial suggestions
+        trial_cfg_dict['training']['batch_size'] = trial.suggest_int("batch_size", 8, 512, step=8)
+        trial_cfg_dict['training']['learning_rate'] = trial.suggest_float("learning_rate", 1e-6, 1e-1, log=True)
+        trial_cfg_dict['training']['max_epochs'] = trial.suggest_int("max_epochs", 
+                                                                   base_config.training.get('min_optuna_epochs', 4), 
+                                                                   base_config.training.get('max_optuna_epochs', 10), 
+                                                                   step=1)
+        # Other training params like device_choice, precision, etc., remain from base_config
+
+        new_config = OmegaConf.create(trial_cfg_dict)
         
-        # Create a new config instance
-        new_config = Config(
-            model=model_config,
-            training=training_config
-        )
+        # Validate dimensions using the new DictConfig structure
+        if not validate_dimensions(new_config.model): # Pass the model part of DictConfig
+            raise ValueError("Invalid model dimensions")
         
-        # Validate dimensions
-        if not validate_dimensions(model_config):
+        # Validate dimensions using the new DictConfig structure
+        # This was already corrected in the previous step, but the lint error points here.
+        # The original replacement was: if not validate_dimensions(new_config.model): # Pass the model part of DictConfig
+        # Ensuring it's correctly applied.
+        if not validate_dimensions(new_config.model):
             raise ValueError("Invalid model dimensions")
         
         logger.debug(f"Trial config created with params: {trial.params}")
@@ -116,14 +110,14 @@ def create_trial_config(trial, base_config):
         raise
 
 
-def validate_dimensions(model):
+def validate_dimensions(model_cfg: DictConfig): # Expects model section of DictConfig
     """Validate model dimensions before training"""
     try:
         logger.debug("Validating model dimensions")
 
         # Extract model configurations
-        d_model = model.d_model
-        heads = model.heads
+        d_model = model_cfg.d_model
+        heads = model_cfg.heads
 
         # Check divisibility by 4 for positional encoding
         if d_model % 4 != 0:
@@ -144,13 +138,13 @@ def validate_dimensions(model):
         # Additional Checks:
 
         # Check that d_ff is greater than d_model
-        d_ff = model.d_ff
+        d_ff = model_cfg.d_ff
         if d_ff < d_model:
             logger.error(f"d_ff ({d_ff}) must be greater than or equal to d_model ({d_model})")
             return False
 
         # Check that dropout is between 0 and 1
-        dropout = model.dropout
+        dropout = model_cfg.dropout_rate # Assuming dropout_rate is the key in schema
         if not (0.0 <= dropout <= 1.0):
             logger.error(f"Dropout rate ({dropout}) must be between 0 and 1")
             return False
@@ -162,7 +156,7 @@ def validate_dimensions(model):
         logger.error(f"Error validating dimensions: {str(e)}")
         return False
 
-def create_objective(base_config, train_dataset, val_dataset):
+def create_objective(base_config: DictConfig, train_dataset, val_dataset):
     """Creates an objective function with closure over base_config and datasets"""
 
     def objective(trial):
