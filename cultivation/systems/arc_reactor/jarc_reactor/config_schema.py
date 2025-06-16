@@ -125,6 +125,8 @@ class EvaluationConfigSchema:
     save_predictions: bool = True
     create_submission: bool = True
     data_dir: str = "${oc.env:EVALUATION_DATA_DIR,cultivation/systems/arc_reactor/jarc_reactor/data/evaluation_data}"
+    include_synthetic_data: bool = False
+    synthetic_data_dir: Optional[str] = "cultivation/systems/arc_reactor/jarc_reactor/data/synthetic_data/evaluation" # Path for synthetic evaluation data
 
 @dataclass
 class JARCReactorConfigSchema:
