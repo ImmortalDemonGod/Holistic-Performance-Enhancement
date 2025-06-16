@@ -9,8 +9,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import torch
 import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
+from omegaconf import DictConfig # Added for Hydra
 from cultivation.utils.logging_config import setup_logging
-from cultivation.systems.arc_reactor.jarc_reactor.config import config
+# from cultivation.systems.arc_reactor.jarc_reactor.config import config # Removed old config
 from cultivation.systems.arc_reactor.jarc_reactor.data.context_data import ContextPair
 from cultivation.systems.arc_reactor.jarc_reactor.utils.padding_utils import pad_to_fixed_size
 
@@ -18,9 +19,9 @@ from cultivation.systems.arc_reactor.jarc_reactor.utils.padding_utils import pad
 setup_logging()
 logger = logging.getLogger(__name__)
 
-def inspect_data_structure(filename, directory=None):
+def inspect_data_structure(cfg: DictConfig, filename: str, directory: str | None = None):
     if directory is None:
-        directory = config.evaluation.data_dir
+        directory = cfg.evaluation.data_dir
     """Debug helper to examine JSON structure"""
     filepath = os.path.join(directory, filename)
     try:
@@ -155,7 +156,7 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 test_task_ids.append(task_id)
                 test_context_pairs.append(context_pair)
 
-def _validate_and_inspect_path(directory: str) -> Path:
+def _validate_and_inspect_path(cfg: DictConfig, directory: str) -> Path:
     """Validates the data directory path and inspects a few files."""
     logger.info(f"Preparing data from directory: {directory}")
     data_path = Path(directory)
@@ -175,7 +176,7 @@ def _validate_and_inspect_path(directory: str) -> Path:
         if filename.endswith('.json'):
             total_files += 1
             if successful_files < log_limit:
-                if inspect_data_structure(filename, directory):
+                if inspect_data_structure(cfg, filename, directory):
                     successful_files += 1
             else:
                 break
@@ -246,19 +247,17 @@ def _process_and_create_tensors(raw_data: dict) -> dict:
         "task_id_map": task_id_map
     }
 
-def prepare_data(directory=None, batch_size=None, return_datasets=False):
+def prepare_data(cfg: DictConfig, return_datasets: bool = False):
     """
-    Prepares training and validation data from a specified directory.
+    Prepares training and validation data from a specified directory using Hydra config.
     This function orchestrates the loading, processing, and batching of data.
     """
-    # 1. Initialize paths and parameters
-    if directory is None:
-        directory = config.training.training_data_dir
-    if batch_size is None:
-        batch_size = config.training.batch_size
+    # 1. Initialize paths and parameters from Hydra config
+    directory = cfg.training.training_data_dir
+    batch_size = cfg.training.batch_size
     
     # 2. Validate path and inspect a sample of data files
-    data_path = _validate_and_inspect_path(directory)
+    data_path = _validate_and_inspect_path(cfg, directory)
 
     # 3. Load raw data from files
     raw_data = _load_raw_data(data_path)
