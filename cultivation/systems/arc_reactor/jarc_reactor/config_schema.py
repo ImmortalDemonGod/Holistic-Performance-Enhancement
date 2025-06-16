@@ -48,7 +48,7 @@ class TrainingConfigSchema:
     fast_dev_run: bool = False
     train_from_checkpoint: bool = False
     include_synthetic_training_data: bool = False
-    training_data_dir: str = "jarc_reactor/data/training_data/training"
+    training_data_dir: str = "${oc.env:TRAINING_DATA_DIR,cultivation/systems/arc_reactor/jarc_reactor/data/training_data/training}"
     synthetic_data_dir: Optional[str] = "cultivation/systems/arc_reactor/jarc_reactor/data/synthetic_data/training" # Path for synthetic training data
 
 @dataclass
