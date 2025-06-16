@@ -172,7 +172,8 @@ class TaskMetricsCollector:
                 self.task_metrics[task_id]['metrics'][metric_name].append(value)
             else:
                 # Store additional metric details with the prediction
-                prediction_details = value
+                # prediction_details = value  # TODO: Decide how to handle non-numeric metric details
+                pass  # Or log a warning, or decide how to store 'value'
         
         # Store prediction record if provided
         if prediction_record:
