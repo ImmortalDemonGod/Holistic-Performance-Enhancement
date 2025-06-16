@@ -1,5 +1,6 @@
-import logging
 import sys
+print("DEBUG: run_model.py top-level print", file=sys.__stderr__)
+import logging
 import os
 import signal
 import torch
@@ -21,6 +22,7 @@ from cultivation.systems.arc_reactor.jarc_reactor.hydra_setup import register_hy
 # Call to register Hydra configurations with ConfigStore
 # This needs to be done before @hydra.main is encountered
 register_hydra_configs()
+print("DEBUG: run_model.py after register_hydra_configs(), before @hydra.main", file=sys.__stderr__)
 
 # Global logger, will be configured by setup_central_logging
 logger = logging.getLogger(__name__) # Get logger for this module
@@ -120,6 +122,7 @@ def setup_model_training(cfg: DictConfig):
 
 @hydra.main(config_path="conf", config_name="config", version_base="1.2")
 def main_app(cfg: DictConfig) -> None:
+    print("DEBUG: run_model.py inside main_app, very first line", file=sys.__stderr__)
     # 1. Setup Centralized Logging
     # The log_dir from cfg.logging will be relative to Hydra's output directory
     def print_stdout_status(label: str):
@@ -152,13 +155,12 @@ def main_app(cfg: DictConfig) -> None:
 
         # Ensure log_dir is a string before Path conversion
         log_dir_str = str(logging_config.log_dir)
-        log_dir = Path(log_dir_str)
-
-        if not log_dir.is_absolute():
-            # If hydra.run.dir is available (standard Hydra output path)
-            hydra_output_path = Path(hydra.core.hydra_config.HydraConfig.get().run.dir)
-            log_dir = hydra_output_path / log_dir
+        # Resolve path relative to original working directory if it's not absolute
+        # hydra.utils.to_absolute_path converts a path to be absolute relative to the original CWD.
+        resolved_log_dir_str = hydra.utils.to_absolute_path(log_dir_str)
+        log_dir = Path(resolved_log_dir_str)
         
+        print(f"DEBUG: Resolved log_dir to: {log_dir}", file=sys.__stderr__)
         log_dir.mkdir(parents=True, exist_ok=True)
 
         log_file_path = None
@@ -276,4 +278,5 @@ def main_app(cfg: DictConfig) -> None:
         raise
 
 if __name__ == "__main__":
+    print("DEBUG: run_model.py inside if __name__ == \"__main__\"", file=sys.__stderr__)
     main_app()
