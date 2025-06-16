@@ -7,19 +7,20 @@ from typing import Dict, List, Any
 import logging
 from tqdm import tqdm
 import kagglehub
-import os
 
-from cultivation.systems.arc_reactor.jarc_reactor.optimization.best_params_manager import BestParamsManager
+# from cultivation.systems.arc_reactor.jarc_reactor.optimization.best_params_manager import BestParamsManager # Unused
 from cultivation.systems.arc_reactor.jarc_reactor.utils.padding_utils import pad_to_fixed_size
 from cultivation.systems.arc_reactor.jarc_reactor.data.context_data import ContextPair
-from cultivation.systems.arc_reactor.jarc_reactor.config import Config
-from cultivation.systems.arc_reactor.jarc_reactor.utils.train import TransformerTrainer
+import hydra
+from omegaconf import DictConfig
+# from cultivation.systems.arc_reactor.jarc_reactor.config import Config # Replaced with Hydra
+# from cultivation.systems.arc_reactor.jarc_reactor.utils.train import TransformerTrainer # Unused
 from cultivation.systems.arc_reactor.jarc_reactor.utils.model_factory import create_transformer_trainer
 
 class KaggleSubmissionHandler:
-    def __init__(self, model, config, output_dir: str = "/kaggle/working"):
+    def __init__(self, model, cfg: DictConfig, output_dir: str = "/kaggle/working"):
         self.model = model
-        self.config = config
+        self.config = cfg # Renamed for clarity, still holds the DictConfig
         self.output_dir = Path(output_dir)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = self.model.to(self.device)
@@ -213,10 +214,10 @@ class KaggleSubmissionHandler:
             raise
 
 
-def load_model_and_create_submission():
+@hydra.main(config_path="../conf", config_name="config", version_base=None)
+def load_model_and_create_submission(cfg: DictConfig):
     try:
-        # Initialize configuration
-        config = Config()
+        # Configuration is now handled by Hydra and passed as cfg
         
         # Load model from Kaggle Hub
         MODEL_SLUG = "arc_checkpoint_test"
@@ -233,12 +234,12 @@ def load_model_and_create_submission():
         
         print(f"Downloaded checkpoint to: {checkpoint_path}")
         
-        # Update config with checkpoint path
-        config.model.checkpoint_path = checkpoint_path
+        # Update config with checkpoint path (Note: direct modification of Hydra cfg)
+        cfg.model.checkpoint_path = checkpoint_path
         
         # Create model using factory
         model = create_transformer_trainer(
-            config=config,
+            config=cfg, # Pass Hydra config
             checkpoint_path=checkpoint_path
         )
         
@@ -247,7 +248,7 @@ def load_model_and_create_submission():
         # Initialize submission handler
         submission_handler = KaggleSubmissionHandler(
             model=model,
-            config=config,
+            cfg=cfg, # Pass Hydra config
             output_dir="/kaggle/working"
         )
         
@@ -280,7 +281,7 @@ def load_model_and_create_submission():
 
 if __name__ == "__main__":
     # Login to Kaggle
-    kagglehub.login()
+    # kagglehub.login() # Login should ideally be handled outside or as a setup step
     
-    # Load model and create submission
+    # Load model and create submission (Hydra will manage the call)
     load_model_and_create_submission()
