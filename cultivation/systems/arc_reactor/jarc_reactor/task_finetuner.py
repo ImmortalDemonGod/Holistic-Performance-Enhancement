@@ -1,36 +1,34 @@
+import json
+import logging
 import sys
 from pathlib import Path
+from typing import Any, Dict
 
+# Third-party imports
+import pytorch_lightning as pl
+import torch
+from pytorch_lightning.callbacks import EarlyStopping
+from torch.utils.data import DataLoader, TensorDataset
+from tqdm import tqdm
+
+# Local application imports
+# The following sys.path manipulation is to ensure local imports work correctly.
 # Determine the current directory and the parent directory
 current_dir = Path(__file__).resolve().parent
 parent_dir = current_dir.parent
-
 # Add the parent directory to sys.path
 sys.path.append(str(parent_dir))
 
 from cultivation.systems.arc_reactor.jarc_reactor.config import Config
-import random
-import pytorch_lightning as pl
-import torch                                                                                           
-import logging                                                                                         
-from pathlib import Path                                                                               
-from typing import Dict, Any                                                                           
-import json
-from tqdm import tqdm
-from torch.utils.data import DataLoader, TensorDataset
-
 from cultivation.systems.arc_reactor.jarc_reactor.utils.metrics import TaskMetricsCollector
 from cultivation.systems.arc_reactor.jarc_reactor.utils.model_factory import create_transformer_trainer
-from copy import deepcopy
+from cultivation.systems.arc_reactor.jarc_reactor.data.data_preparation import prepare_data
 from cultivation.systems.arc_reactor.jarc_reactor.utils.train import TransformerTrainer
-from pytorch_lightning.callbacks import EarlyStopping                                                  
-from cultivation.systems.arc_reactor.jarc_reactor.data.data_preparation import prepare_data                                                        
-from cultivation.systems.arc_reactor.jarc_reactor.utils.metrics import TaskMetricsCollector
+from cultivation.utils.logging_config import setup_logging
                                                                                                         
 class TaskFineTuner:
     def __init__(self, base_model: TransformerTrainer, config: Config):
         """Initialize fine-tuner with base model and configuration."""
-        from pathlib import Path
         # Set up directories using config
         self.log_dir = Path(config.logging.log_dir)
         self.save_dir = Path(config.finetuning.save_dir)  # Add this line
@@ -58,7 +56,7 @@ class TaskFineTuner:
         self.results: Dict[str, Any] = {}
         
         # Log initialization
-        self.logger.info(f"TaskFineTuner initialized:")
+        self.logger.info("TaskFineTuner initialized:")
         self.logger.info(f"Save directory: {self.save_dir}")
         self.logger.info(f"Log directory: {self.log_dir}")
         self.logger.info(f"Device: {self.device}")
@@ -475,20 +473,15 @@ class TaskFineTuner:
 
 def main(config):
     """Main entry point for fine-tuning process."""
-    from pathlib import Path
-
     # Ensure the logs directory exists
     Path(config.logging.log_dir).mkdir(parents=True, exist_ok=True)
 
     # Configure logging
-    from cultivation.utils.logging_config import setup_logging
     log_file_path = Path(config.logging.log_dir) / "finetuning_debug.log"
     setup_logging(log_file=str(log_file_path))
     logger = logging.getLogger("finetuning_main")
     
     try:
-        from pathlib import Path
-
         # Use the checkpoint path from config
         checkpoint_file = Path(config.model.checkpoint_path)
         logger.info(f"Looking for checkpoint at: {config.model.checkpoint_path}")
