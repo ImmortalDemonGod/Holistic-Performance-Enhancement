@@ -19,7 +19,7 @@ def register_hydra_configs():
 
     # Register the main application config
     # This is the top-level config that will be loaded by @hydra.main()
-    cs.store(name="base_jarc_reactor_config", node=JARCReactorConfigSchema)
+    cs.store(group="schema", name="jarc_app", node=JARCReactorConfigSchema)  # Main application schema
 
     # Register individual group configs. 
     # This allows them to be selected or overridden from the command line
