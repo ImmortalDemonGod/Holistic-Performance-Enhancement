@@ -1,25 +1,12 @@
 # train.py
 import pytorch_lightning as pl
-from cultivation.systems.arc_reactor.jarc_reactor.utils.padding_utils import pad_to_fixed_size
 import logging
-from typing import Optional
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader, TensorDataset
-import pytorch_lightning as pl
-from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+import torch.optim # Retained as torch.optim.Adam and lr_scheduler are used
 
 from cultivation.systems.arc_reactor.jarc_reactor.models.transformer_model import TransformerModel
-import torch.nn.functional as F
-import os
-import json
-from typing import Optional
-import torch
 from pathlib import Path
-from optuna import Trial
-from cultivation.systems.arc_reactor.jarc_reactor.data.data_preparation import prepare_data
 
 # Initialize logging
 logger = logging.getLogger(__name__)
@@ -43,20 +30,23 @@ class TransformerTrainer(pl.LightningModule):
         #self.lora_B = nn.Linear(config.model.lora_in_features, config.model.lora_out_features)
 
         self.model = TransformerModel(
-            input_dim=config.model.input_dim,  # Access input_dim through config.model
-            seq_len=config.model.seq_len,  # Access seq_len through config.model
+            input_dim=config.model.input_dim,
+            seq_len=config.model.seq_len,
             d_model=config.model.d_model,
             encoder_layers=config.model.encoder_layers,
             decoder_layers=config.model.decoder_layers,
             heads=config.model.heads,
             d_ff=config.model.d_ff,
             output_dim=config.model.output_dim,
-            dropout_rate=config.model.dropout,
-            context_encoder_d_model=config.model.context_encoder_d_model,
-            context_encoder_heads=config.model.context_encoder_heads,
-            checkpoint_path=config.model.checkpoint_path,  # Ensure checkpoint_path is passed
-            use_lora=config.model.use_lora,  # Ensure use_lora is passed
-            lora_rank=config.model.lora_rank  # Pass lora_rank here
+            dropout_rate=config.model.dropout_rate,  # Corrected: was config.model.dropout
+            context_encoder_d_model=config.model.context_encoder.d_model, # Corrected path
+            context_encoder_heads=config.model.context_encoder.heads, # Corrected path
+            context_dropout_rate=config.model.context_encoder.dropout_rate, # Added
+            encoder_dropout_rate=config.model.encoder_dropout_rate, # Added
+            decoder_dropout_rate=config.model.decoder_dropout_rate, # Added
+            checkpoint_path=config.model.checkpoint_path,
+            use_lora=config.model.lora.use_lora,  # Corrected path for lora
+            lora_rank=config.model.lora.rank  # Corrected path for lora
         )
 
         self.dropout = self.model.dropout  # Expose dropout attribute
@@ -94,8 +84,8 @@ class TransformerTrainer(pl.LightningModule):
         Returns:
             loss: scalar loss value
         """
-        batch_size = y_hat.size(0)
-        H = W = self.config.model.seq_len
+        # batch_size = y_hat.size(0) # Unused
+        # H = W = self.config.model.seq_len # Unused
 
         # Debug shapes and dtypes before reshaping
         #logger.info(f"\nDEBUG - Loss computation input:")
