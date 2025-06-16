@@ -3,7 +3,10 @@
 # Status: pending
 # Dependencies: 20
 # Priority: high
-# Description: Create a command-line interface (CLI) for users to review flashcards. This UI will interact with the `ReviewSessionManager` to fetch cards and submit review outcomes.
+
+# Description:
+Create a command-line interface (CLI) for users to review flashcards. This UI will interact with the `ReviewSessionManager` to fetch cards and submit review outcomes.
+
 # Details:
 1. In `flashcore/cli/review_ui.py`, define a function `start_review_flow(manager: ReviewSessionManager)`.
 2. Call `manager.start_session()` to load due cards.
@@ -26,34 +29,49 @@
   - Test card display and rating input loop.
   - Test session start/completion messages.
 
-# Subtasks:
-## 1. Design basic CLI interaction flow for card review [pending]
-### Dependencies: None
-### Description: Outline the sequence of prompts, card display, and user inputs for a single card review cycle.
-### Details:
+# HPE Learning Meta (Main Task):
+    Task objective summary: Build an interactive CLI for users to review their flashcards, providing ratings and seeing session progress.
+    Estimated effort tshirt: M
+    Estimated effort hours raw: 6-10h
+    Estimated effort hours min: 6
+    Estimated effort hours max: 10
+    Completion criteria summary: CLI allows users to review a session of cards, input ratings, and see these persisted via ReviewSessionManager; basic progress and instructions are clear.
+    Activity type: ui_development_cli
+    Recommended block: deep_work
+    Deliverables: ['flashcore/cli/review_ui.py', 'tests/cli/test_review_ui.py']
+# Subtask Details:
 
+## Subtask 21.1: Design basic CLI interaction flow
+Description: Outline the sequence of prompts, card display, and user inputs for a single card review cycle.
+Dependencies: None
+Status: pending
+Risks: The interaction flow is clunky or unintuitive.
+Mitigation: Sketch the flow on paper first, simulating a user session. Prioritize clarity and minimal required keystrokes.
 
-## 2. Implement card display (front and back) in CLI [pending]
-### Dependencies: 21.1
-### Description: Write code to present the front content, wait for user action, then present the back content.
-### Details:
+## Subtask 21.2: Implement card content display
+Description: Write code to present the front and back content, potentially using the `rich` library for better rendering.
+Dependencies: 1
+Status: pending
+Risks: Complex Markdown or KaTeX in cards breaks terminal rendering.
+Mitigation: Use `rich.markdown.Markdown` which handles many cases gracefully. For unsupported elements, showing the raw Markdown/KaTeX is an acceptable fallback for the MVP.
 
+## Subtask 21.3: Implement rating input and processing
+Description: Write code to prompt for a rating (1-4), validate it, and call `ReviewSessionManager.submit_review`.
+Dependencies: 2
+Status: pending
+Risks: User enters invalid input (e.g., 'text', 5), crashing the program.
+Mitigation: Implement a robust input validation loop that handles non-integer input and out-of-range numbers, re-prompting the user with a clear error message.
 
-## 3. Implement rating input and processing [pending]
-### Dependencies: 21.2
-### Description: Write code to prompt for a rating (1-4), validate it, and call `ReviewSessionManager.submit_review`.
-### Details:
+## Subtask 21.4: Implement main session loop
+Description: Develop the main loop to iterate through all due cards fetched by the `ReviewSessionManager`, showing session progress.
+Dependencies: 1
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
 
-
-## 4. Implement session loop and progress display [pending]
-### Dependencies: 21.1
-### Description: Develop the main loop to iterate through cards fetched by `ReviewSessionManager`, showing progress.
-### Details:
-
-
-## 5. Add session start/end messages and error handling [pending]
-### Dependencies: 21.4
-### Description: Implement messages for session start, completion, and handling for scenarios like no due cards or interruptions.
-### Details:
-
-
+## Subtask 21.5: Add session boundary messages and error handling
+Description: Implement clear messages for starting a session, completing a session, and handling the case where there are no cards due.
+Dependencies: 4
+Status: pending
+Risks: Not specified
+Mitigation: Not specified

@@ -3,7 +3,10 @@
 # Status: pending
 # Dependencies: None
 # Priority: critical
-# Description: Implement the Free Spaced Repetition Scheduling (FSRS) algorithm by integrating a suitable library into the flashcore.scheduler module. This will compute updated stability, difficulty, and the next review date from a card’s review history and a new rating.
+
+# Description:
+Implement the Free Spaced Repetition Scheduling (FSRS) algorithm by integrating a suitable library into the flashcore.scheduler module. This will compute updated stability, difficulty, and the next review date from a card’s review history and a new rating.
+
 # Details:
 1. Research and select a suitable, well-maintained Python FSRS library (e.g., open-spaced-repetition, fsrs-optimizer, pyFSRS). Evaluate based on features, ease of use, maintenance, and license.
 2. In `flashcore/scheduler.py`, define `FSRS_Scheduler` class. Implement a wrapper method `compute_next_state(history: List[Review], new_rating: int, review_ts: datetime) -> Dict` that calls the chosen library.
@@ -20,22 +23,60 @@
   - Test invalid rating inputs raise `ValueError`.
 • Logging test using pytest’s `caplog` to confirm DEBUG messages.
 
-# Subtasks:
-## 1. Research and select a suitable Python FSRS library [pending]
-### Dependencies: None
-### Description: Evaluate available Python FSRS libraries based on features, maintenance, license, and ease of integration. Document the choice and rationale.
-### Details:
+# HPE Learning Meta (Main Task):
+    Task objective summary: Integrate a robust FSRS library to enable dynamic review interval calculation, mitigating risks of a from-scratch implementation.
+    Estimated effort tshirt: M
+    Estimated effort hours raw: 6-10h
+    Estimated effort hours min: 6
+    Estimated effort hours max: 10
+    Completion criteria summary: FSRS library wrapper correctly calculates stability, difficulty, and next review date based on test vectors; unit tests pass with high coverage.
+    Activity type: algorithm_implementation_library_integration
+    Recommended block: deep_work
+    Deliverables: ['flashcore/scheduler.py', 'flashcore/config.py', 'tests/flashcore/test_scheduler.py']
+# Subtask Details:
 
+## Subtask 19.1: Research and select a suitable Python FSRS library
+Description: Evaluate available Python FSRS libraries based on features, maintenance, license, and ease of integration. Document the choice and rationale.
+Dependencies: None
+Status: pending
+Risks: Analysis paralysis; spending excessive time on selection. Chosen library could be unmaintained or have a restrictive license.
+Mitigation: Time-box research to 2-3 hours. Prioritize libraries with recent commit activity, good documentation, and a permissive license (MIT, Apache 2.0). Create a small ADR to document the final choice.
+Implementation Steps:
+  1. 1. Identify candidate libraries: open-spaced-repetition, fsrs-optimizer, pyFSRS, etc.
+  2. 2. Compare licenses for compatibility with the project.
+  3. 3. Evaluate API clarity, documentation quality, and maintenance status (e.g., last commit date, open issues).
+  4. 4. Create a small proof-of-concept for the top 1-2 candidates to test ease of integration.
+  5. 5. Document the final choice and reasoning in a project note or ADR.
+Testing Approach:
+  - N/A (This is a research subtask).
 
-## 2. Implement the FSRS_Scheduler class as a wrapper [pending]
-### Dependencies: 19.1
-### Description: Develop the `FSRS_Scheduler` class in `flashcore.scheduler` to wrap the chosen FSRS library, handling input/output translation and configuration.
-### Details:
+## Subtask 19.2: Implement the FSRS_Scheduler class as a wrapper
+Description: Develop the `FSRS_Scheduler` class in `flashcore.scheduler` to wrap the chosen FSRS library, handling input/output translation and configuration.
+Dependencies: 1
+Status: pending
+Risks: The chosen library's API may have subtle behaviors or require complex input data structures. An upstream library update could introduce breaking changes.
+Mitigation: Pin the library's version in `requirements.txt`. Write clear data mapping functions to translate between `flashcore.card.Review` and the library's internal format. Add extensive logging.
+Implementation Steps:
+  1. 1. Create `flashcore/config.py` and define default FSRS parameters.
+  2. 2. In `flashcore/scheduler.py`, create the `FSRS_Scheduler` class.
+  3. 3. Implement the `compute_next_state` method.
+  4. 4. Inside the method, write helper functions to convert `List[Review]` into the format required by the library (e.g., a sequence of ratings and intervals).
+  5. 5. Call the library's scheduling function.
+  6. 6. Map the library's output object back to a `Dict` that matches the `Review` model's fields.
+Testing Approach:
+  - Unit tests will verify that the mapping functions handle various data types correctly (datetimes, integers, floats).
 
-
-## 3. Write comprehensive unit tests for the FSRS wrapper [pending]
-### Dependencies: 19.2
-### Description: Create tests in `tests/flashcore/test_scheduler.py` for the wrapper, covering various scenarios, edge cases, and library interactions.
-### Details:
-
-
+## Subtask 19.3: Write comprehensive unit tests for the FSRS wrapper
+Description: Create tests in `tests/flashcore/test_scheduler.py` for the wrapper, covering various scenarios, edge cases, and library interactions.
+Dependencies: 2
+Status: pending
+Risks: Tests become too coupled to the specific library's API, making it hard to switch libraries later. Lack of official test vectors for the library.
+Mitigation: Abstract test cases to test the FSRS *concept* (e.g., 'a low rating should result in a shorter interval'). Use examples from FSRS research papers as a source for test vectors if the library lacks them.
+Implementation Steps:
+  1. 1. Set up `tests/flashcore/test_scheduler.py` with pytest.
+  2. 2. Create a test case for the first review of a new card.
+  3. 3. Create test cases for subsequent reviews with all possible ratings.
+  4. 4. Create a test case for a lapsed card (a review long after its due date).
+  5. 5. Add a test to ensure invalid ratings (e.g., 5) raise an appropriate error.
+Testing Approach:
+  - Run tests with `pytest --cov` to ensure high test coverage for the `scheduler.py` module.

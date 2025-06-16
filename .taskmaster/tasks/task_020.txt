@@ -3,7 +3,10 @@
 # Status: pending
 # Dependencies: 19
 # Priority: high
-# Description: Develop the backend logic to manage a review session. This involves fetching due cards from the `FlashcardDatabase`, using the FSRS scheduler for updates, and saving review results.
+
+# Description:
+Develop the backend logic to manage a review session. This involves fetching due cards from the `FlashcardDatabase`, using the FSRS scheduler for updates, and saving review results.
+
 # Details:
 1. Define `ReviewSessionManager` class in `flashcore/review_manager.py`.
 2. Constructor `__init__(self, db: FlashcardDatabase)`.
@@ -18,34 +21,55 @@
   - `submit_review`: mock scheduler return values, verify `db.add_review` is called with a correctly constructed `Review` object.
 • Integration test using an in-memory `FlashcardDatabase`.
 
-# Subtasks:
-## 1. Define ReviewSessionManager class structure [pending]
-### Dependencies: None
-### Description: Create the `ReviewSessionManager` class with its constructor and internal state attributes.
-### Details:
+# HPE Learning Meta (Main Task):
+    Task objective summary: Develop the backend logic for managing flashcard review sessions, including fetching cards, processing reviews, and updating card states.
+    Estimated effort tshirt: L
+    Estimated effort hours raw: 8-12h
+    Estimated effort hours min: 8
+    Estimated effort hours max: 12
+    Completion criteria summary: ReviewSessionManager correctly fetches due cards, processes reviews using FSRS, updates card data, and has comprehensive unit tests.
+    Activity type: application_logic_development
+    Recommended block: deep_work
+    Deliverables: ['flashcore/review_manager.py', 'tests/flashcore/test_review_manager.py']
+# Subtask Details:
 
+## Subtask 20.1: Define ReviewSessionManager class structure
+Description: Create the `ReviewSessionManager` class with its constructor and internal state attributes (e.g., `self.db`, `self.scheduler`, `self.review_queue`).
+Dependencies: None
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
 
-## 2. Implement `start_session` and `get_next_card` methods [pending]
-### Dependencies: 20.1
-### Description: Develop the logic to fetch due cards and manage the session queue.
-### Details:
+## Subtask 20.2: Implement `start_session` and `get_next_card` methods
+Description: Develop the logic to fetch due cards and manage the session queue.
+Dependencies: 1
+Status: pending
+Risks: The `db.get_due_cards` query might be slow for a very large database.
+Mitigation: Ensure the underlying database query is indexed and optimized. For now, accept the performance as-is for the MVP.
 
+## Subtask 20.3: Implement `submit_review` method
+Description: Develop the core logic to update a card's state after a review, integrating with the FSRS scheduler and database.
+Dependencies: 1
+Status: pending
+Risks: Incorrectly calculating `elapsed_days_at_review` passed to FSRS, leading to scheduling errors.
+Mitigation: Write a specific helper function for this calculation that handles both first-time reviews (delta from `card.added_at`) and subsequent reviews (delta from previous `review.ts`). Cover these cases in unit tests.
+Implementation Steps:
+  1. 1. Fetch the card's full review history from the database.
+  2. 2. Calculate `elapsed_days_at_review` based on the history.
+  3. 3. Instantiate `FSRS_Scheduler` and call `compute_next_state`.
+  4. 4. Construct a new `Review` Pydantic model with all required fields from the card and scheduler output.
+  5. 5. Call `db.add_review` to persist the new review object.
 
-## 3. Implement `submit_review` method [pending]
-### Dependencies: 20.1
-### Description: Develop the logic to update a card's state after a review, integrating with the FSRS scheduler and database.
-### Details:
+## Subtask 20.4: Implement `get_due_card_count` method
+Description: Develop the method to return the count of due cards.
+Dependencies: 1
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
 
-
-## 4. Implement `get_due_card_count` method [pending]
-### Dependencies: 20.1
-### Description: Develop the method to return the count of due cards.
-### Details:
-
-
-## 5. Write unit tests for ReviewSessionManager [pending]
-### Dependencies: 20.2, 20.3, 20.4
-### Description: Create tests in `tests/flashcore/test_review_manager.py` covering all methods and edge cases, using mocks.
-### Details:
-
-
+## Subtask 20.5: Write unit and integration tests for ReviewSessionManager
+Description: Create tests in `tests/flashcore/test_review_manager.py` covering all methods and edge cases, using mocks and an in-memory DB.
+Dependencies: 2, 3, 4
+Status: pending
+Risks: Mocks for the database and scheduler become overly complex and brittle.
+Mitigation: Prioritize a full integration test using an in-memory DuckDB instance to validate the end-to-end flow, reducing reliance on complex mocks for the core `submit_review` logic.

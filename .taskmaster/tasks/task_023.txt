@@ -3,7 +3,10 @@
 # Status: pending
 # Dependencies: None
 # Priority: medium
-# Description: Develop modules to export flashcard data to Anki (via .apkg or .txt for direct import) and plain Markdown formats.
+
+# Description:
+Develop modules to export flashcard data to Anki (via .apkg) and plain Markdown formats to support data backup and interoperability.
+
 # Details:
 1. In `flashcore/exporters/anki_exporter.py`, implement `AnkiExporter` using the `genanki` library to create .apkg files. Include options for deck name and card templates. 
 2. In `flashcore/exporters/markdown_exporter.py`, implement `MarkdownExporter` to convert cards to a user-friendly Markdown format (e.g., Q: Front / A: Back). 
@@ -16,22 +19,55 @@
   - Test Markdown export by verifying output string format for various card contents. 
 • Manual testing: Export a small set of cards and verify Anki import and Markdown readability.
 
-# Subtasks:
-## 1. Implement AnkiExporter using genanki [pending]
-### Dependencies: None
-### Description: Develop `flashcore.exporters.anki_exporter.AnkiExporter` to generate .apkg files from card data. Handle card model/template definition.
-### Details:
+# HPE Learning Meta (Main Task):
+    Task objective summary: Implement Anki and Markdown exporters for flashcard data to support data backup and interoperability.
+    Estimated effort tshirt: M
+    Estimated effort hours raw: 6-10h
+    Estimated effort hours min: 6
+    Estimated effort hours max: 10
+    Completion criteria summary: Exporters for Anki (.apkg) and Markdown are functional, produce valid output, and are unit tested.
+    Activity type: feature_implementation_exporter
+    Recommended block: focused_dev_block
+    Deliverables: ['flashcore/exporters/anki_exporter.py', 'flashcore/exporters/markdown_exporter.py', 'tests/exporters/test_anki_exporter.py', 'tests/exporters/test_markdown_exporter.py']
+# Subtask Details:
 
+## Subtask 23.1: Implement AnkiExporter using genanki
+Description: Develop `flashcore.exporters.anki_exporter.AnkiExporter` to generate .apkg files from card data. Handle card model/template definition and media packaging.
+Dependencies: None
+Status: pending
+Risks: `genanki` dependency might have breaking changes. Media file path resolution might be complex.
+Mitigation: Pin the `genanki` version in `requirements.txt`. Write a dedicated utility function to resolve and copy media files to a temporary location for packaging.
+Implementation Steps:
+  1. 1. Define a custom `genanki.Model` with fields for `Front`, `Back`, `UUID`, and `Tags`.
+  2. 2. Implement a method to fetch all cards from the database.
+  3. 3. Loop through cards, creating a `genanki.Note` for each.
+  4. 4. For each note, identify media files and add them to the `genanki.Package`'s media list.
+  5. 5. Group notes into decks based on the `deck_name` hierarchy.
+  6. 6. Write the final `genanki.Package` to an `.apkg` file.
+Testing Approach:
+  - Verify that the generated `.apkg` file is a valid zip archive.
+  - Test with a card that has multiple media files.
+  - Test deck names with `::` separators are correctly handled.
 
-## 2. Implement MarkdownExporter [pending]
-### Dependencies: None
-### Description: Develop `flashcore.exporters.markdown_exporter.MarkdownExporter` to convert cards to a clear and readable Markdown format.
-### Details:
+## Subtask 23.2: Implement MarkdownExporter
+Description: Develop `flashcore.exporters.markdown_exporter.MarkdownExporter` to convert cards to a clear and readable Markdown format.
+Dependencies: None
+Status: pending
+Risks: Complex Markdown or KaTeX in cards might render poorly without a proper viewer.
+Mitigation: The exporter will focus on creating structurally correct Markdown. The user is responsible for using a capable viewer. Add a comment at the top of the exported file about recommended viewers.
+Implementation Steps:
+  1. 1. Define a clear Markdown template for a single card (e.g., using `Q: ...`, `A: ...`, and `---` as a separator).
+  2. 2. Fetch all cards, grouped by deck, from the database.
+  3. 3. Iterate through decks, writing a top-level heading (e.g., `# Deck Name`).
+  4. 4. Iterate through cards in the deck, appending the formatted Markdown to a string buffer.
+  5. 5. Write the final string to a `.md` file.
+Testing Approach:
+  - Verify the output for a card containing code blocks and KaTeX.
+  - Test that the deck hierarchy is correctly represented with Markdown headings.
 
-
-## 3. Write unit tests for both exporters [pending]
-### Dependencies: 23.1, 23.2
-### Description: Create comprehensive unit tests for Anki and Markdown exporters, covering output format and data integrity.
-### Details:
-
-
+## Subtask 23.3: Write unit tests for both exporters
+Description: Create comprehensive unit tests for Anki and Markdown exporters, covering output format and data integrity.
+Dependencies: 1, 2
+Status: pending
+Risks: Not specified
+Mitigation: Not specified
