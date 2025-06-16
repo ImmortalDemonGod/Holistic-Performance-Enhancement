@@ -42,6 +42,17 @@ tasks:
     cmds:
       - "{{.PYTHON_VENV}}/bin/pymarkdown scan {{.DOCS_DIR}} --recurse"
 
+  arc:lint:
+    desc: "Runs Ruff linter on the ARC reactor Python files."
+    cmds:
+      - "{{.PYTHON_INTERPRETER}} -m ruff check --fix {{.CULTIVATION_ROOT}}/systems/arc_reactor/jarc_reactor/"
+
+  arc:test:
+    desc: "Runs pytest on the ARC reactor module."
+    deps: [setup]
+    cmds:
+      - "{{.PYTHON_INTERPRETER}} -m pytest -v {{.CULTIVATION_ROOT}}/systems/arc_reactor/jarc_reactor/kaggle/test_script.py"
+
   # --- CodeScene Integration Tasks ---
   codescene:check:
     desc: "Run CodeScene lint-style check on all Python files (excluding .venv)."
