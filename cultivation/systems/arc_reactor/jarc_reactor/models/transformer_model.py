@@ -1,18 +1,17 @@
 # transformer_model.py
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.quantization
-from torch.nn import TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder, Parameter
+from torch.nn import TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder
 from cultivation.systems.arc_reactor.jarc_reactor.utils.positional_encoding import Grid2DPositionalEncoding
 from cultivation.systems.arc_reactor.jarc_reactor.models.context_encoder import ContextEncoderModule
-from cultivation.systems.arc_reactor.jarc_reactor.config import Config  # Import the Config class
 
 class TransformerModel(nn.Module):
-    def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads, checkpoint_path, use_lora=False, lora_rank=None):
+    def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, 
+                 dropout_rate, context_encoder_d_model, context_encoder_heads, 
+                 context_dropout_rate, encoder_dropout_rate, decoder_dropout_rate, # Added new dropout rates
+                 checkpoint_path, use_lora=False, lora_rank=None):
         super(TransformerModel, self).__init__()
-        # Create a config instance to access dropout rates
-        config = Config()
         
         # Store all dimension-related parameters
         self.input_dim = input_dim
@@ -21,7 +20,7 @@ class TransformerModel(nn.Module):
         self.grid_size = seq_len * seq_len  # Total elements in grid (e.g., 900 for 30x30)
         
         # DEBUG: Print initialization dimensions
-        print(f"\nInitializing TransformerModel with dimensions:")
+        print("\nInitializing TransformerModel with dimensions:")
         print(f"input_dim: {input_dim}, seq_len: {seq_len}, d_model: {d_model}")
         print(f"grid_size (seq_len * seq_len): {self.grid_size}")
         
@@ -74,10 +73,10 @@ class TransformerModel(nn.Module):
         self.output_projection = nn.Linear(d_model, d_model)
         self.output_fc = nn.Linear(d_model, 11)  # Still 11 classes for padding handling
         
-        # Initialize dropout layers using config
-        self.context_dropout = nn.Dropout(p=config.model.context_dropout_rate)
-        self.encoder_dropout = nn.Dropout(p=config.model.encoder_dropout_rate)
-        self.decoder_dropout = nn.Dropout(p=config.model.decoder_dropout_rate)
+        # Initialize dropout layers using passed arguments
+        self.context_dropout = nn.Dropout(p=context_dropout_rate)
+        self.encoder_dropout = nn.Dropout(p=encoder_dropout_rate)
+        self.decoder_dropout = nn.Dropout(p=decoder_dropout_rate)
 
         # Add quantization stubs
         self.quant = torch.quantization.QuantStub()
