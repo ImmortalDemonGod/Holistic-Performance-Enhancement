@@ -1,0 +1,37 @@
+# Task ID: 23
+# Title: [Flashcore] Implement Anki and Markdown Exporters
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Develop modules to export flashcard data to Anki (via .apkg or .txt for direct import) and plain Markdown formats.
+# Details:
+1. In `flashcore/exporters/anki_exporter.py`, implement `AnkiExporter` using the `genanki` library to create .apkg files. Include options for deck name and card templates. 
+2. In `flashcore/exporters/markdown_exporter.py`, implement `MarkdownExporter` to convert cards to a user-friendly Markdown format (e.g., Q: Front / A: Back). 
+3. Ensure both exporters can take a list of `Card` objects or fetch from `FlashcardDatabase`. 
+4. Include comprehensive type hints, docstrings, and logging.
+
+# Test Strategy:
+• Unit tests in `tests/exporters/test_anki_exporter.py` and `test_markdown_exporter.py` using pytest. 
+  - Test Anki export with `genanki` by creating a small package and verifying its structure (or mock `genanki` calls). 
+  - Test Markdown export by verifying output string format for various card contents. 
+• Manual testing: Export a small set of cards and verify Anki import and Markdown readability.
+
+# Subtasks:
+## 1. Implement AnkiExporter using genanki [pending]
+### Dependencies: None
+### Description: Develop `flashcore.exporters.anki_exporter.AnkiExporter` to generate .apkg files from card data. Handle card model/template definition.
+### Details:
+
+
+## 2. Implement MarkdownExporter [pending]
+### Dependencies: None
+### Description: Develop `flashcore.exporters.markdown_exporter.MarkdownExporter` to convert cards to a clear and readable Markdown format.
+### Details:
+
+
+## 3. Write unit tests for both exporters [pending]
+### Dependencies: 23.1, 23.2
+### Description: Create comprehensive unit tests for Anki and Markdown exporters, covering output format and data integrity.
+### Details:
+
+

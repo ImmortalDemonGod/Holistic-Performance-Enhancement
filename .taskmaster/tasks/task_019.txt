@@ -1,0 +1,41 @@
+# Task ID: 19
+# Title: [Flashcore] Integrate FSRS Library for Core Scheduling in `flashcore.scheduler`
+# Status: pending
+# Dependencies: None
+# Priority: critical
+# Description: Implement the Free Spaced Repetition Scheduling (FSRS) algorithm by integrating a suitable library into the flashcore.scheduler module. This will compute updated stability, difficulty, and the next review date from a card’s review history and a new rating.
+# Details:
+1. Research and select a suitable, well-maintained Python FSRS library (e.g., open-spaced-repetition, fsrs-optimizer, pyFSRS). Evaluate based on features, ease of use, maintenance, and license.
+2. In `flashcore/scheduler.py`, define `FSRS_Scheduler` class. Implement a wrapper method `compute_next_state(history: List[Review], new_rating: int, review_ts: datetime) -> Dict` that calls the chosen library.
+3. Map `flashcore.card.Review` objects and ratings to the library's expected input format.
+4. Map the library's output (new stability, difficulty, next due date) back to the expected `Dict` structure.
+5. Use `flashcore/config.py` for any library-specific configurations or default FSRS parameters if not handled by the library.
+6. Include comprehensive type hints, docstrings, and DEBUG-level logging for the wrapper.
+
+# Test Strategy:
+• Unit tests in `tests/flashcore/test_scheduler.py` using pytest:
+  - Test the wrapper's translation of inputs/outputs to/from the selected FSRS library.
+  - Parameterize known input/output pairs from FSRS publications/examples, adapted for the library.
+  - Test edge cases: empty history, rating=0 (Again) resets stability, etc.
+  - Test invalid rating inputs raise `ValueError`.
+• Logging test using pytest’s `caplog` to confirm DEBUG messages.
+
+# Subtasks:
+## 1. Research and select a suitable Python FSRS library [pending]
+### Dependencies: None
+### Description: Evaluate available Python FSRS libraries based on features, maintenance, license, and ease of integration. Document the choice and rationale.
+### Details:
+
+
+## 2. Implement the FSRS_Scheduler class as a wrapper [pending]
+### Dependencies: 19.1
+### Description: Develop the `FSRS_Scheduler` class in `flashcore.scheduler` to wrap the chosen FSRS library, handling input/output translation and configuration.
+### Details:
+
+
+## 3. Write comprehensive unit tests for the FSRS wrapper [pending]
+### Dependencies: 19.2
+### Description: Create tests in `tests/flashcore/test_scheduler.py` for the wrapper, covering various scenarios, edge cases, and library interactions.
+### Details:
+
+

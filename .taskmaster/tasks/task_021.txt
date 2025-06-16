@@ -1,0 +1,59 @@
+# Task ID: 21
+# Title: [Flashcore] Develop Review UI (CLI MVP) in `flashcore.cli.review_ui`
+# Status: pending
+# Dependencies: 20
+# Priority: high
+# Description: Create a command-line interface (CLI) for users to review flashcards. This UI will interact with the `ReviewSessionManager` to fetch cards and submit review outcomes.
+# Details:
+1. In `flashcore/cli/review_ui.py`, define a function `start_review_flow(manager: ReviewSessionManager)`.
+2. Call `manager.start_session()` to load due cards.
+3. Loop while `manager.get_next_card()` returns a card:
+   a. Display card front content (e.g., `card.front`).
+   b. Prompt user to show answer (e.g., press Enter).
+   c. Display card back content (e.g., `card.back`).
+   d. Prompt user for rating (e.g., 1:Again, 2:Hard, 3:Good, 4:Easy). Validate input.
+   e. Record response time (optional, `resp_ms`).
+   f. Call `manager.submit_review(card.uuid, rating, resp_ms)`.
+   g. Display next review date or feedback.
+4. Handle cases: no due cards, session completion.
+5. Provide clear instructions and progress indicators (e.g., 'Card X of Y').
+
+# Test Strategy:
+• Manual testing: Run the CLI flow with a `ReviewSessionManager` connected to a test database.
+  - Verify card presentation, rating input, and session progression.
+  - Check behavior with no due cards and after completing all cards.
+• Unit tests in `tests/cli/test_review_ui.py` (using `pytest-mock` for `ReviewSessionManager`):
+  - Test card display and rating input loop.
+  - Test session start/completion messages.
+
+# Subtasks:
+## 1. Design basic CLI interaction flow for card review [pending]
+### Dependencies: None
+### Description: Outline the sequence of prompts, card display, and user inputs for a single card review cycle.
+### Details:
+
+
+## 2. Implement card display (front and back) in CLI [pending]
+### Dependencies: 21.1
+### Description: Write code to present the front content, wait for user action, then present the back content.
+### Details:
+
+
+## 3. Implement rating input and processing [pending]
+### Dependencies: 21.2
+### Description: Write code to prompt for a rating (1-4), validate it, and call `ReviewSessionManager.submit_review`.
+### Details:
+
+
+## 4. Implement session loop and progress display [pending]
+### Dependencies: 21.1
+### Description: Develop the main loop to iterate through cards fetched by `ReviewSessionManager`, showing progress.
+### Details:
+
+
+## 5. Add session start/end messages and error handling [pending]
+### Dependencies: 21.4
+### Description: Implement messages for session start, completion, and handling for scenarios like no due cards or interruptions.
+### Details:
+
+
