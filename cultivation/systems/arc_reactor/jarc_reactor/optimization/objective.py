@@ -54,7 +54,7 @@ def create_trial_config(trial, base_config: DictConfig) -> DictConfig:
         # Other parameters
         encoder_layers = trial.suggest_int("encoder_layers", 1, 12)
         decoder_layers = trial.suggest_int("decoder_layers", 1, 12)
-        dropout = trial.suggest_float("dropout", 0.01, 0.7)
+        dropout_rate_val = trial.suggest_float("dropout_rate", 0.01, 0.7) # Changed from 'dropout'
         
         # Context encoder parameters
         context_encoder_heads = trial.suggest_categorical("context_encoder_heads", [2, 4, 8])
@@ -75,7 +75,7 @@ def create_trial_config(trial, base_config: DictConfig) -> DictConfig:
         trial_cfg_dict['model']['decoder_layers'] = decoder_layers
         trial_cfg_dict['model']['heads'] = heads
         trial_cfg_dict['model']['d_ff'] = d_ff
-        trial_cfg_dict['model']['dropout_rate'] = dropout # Assuming 'dropout_rate' is the correct key
+        trial_cfg_dict['model']['dropout_rate'] = dropout_rate_val # Changed from 'dropout'
         trial_cfg_dict['model']['context_encoder_d_model'] = context_encoder_d_model
         trial_cfg_dict['model']['context_encoder_heads'] = context_encoder_heads
         # Other model params like input_dim, seq_len, output_dim, lora etc., remain from base_config
