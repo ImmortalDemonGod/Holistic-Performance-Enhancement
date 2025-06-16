@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-import typing # Added import
 from typing import Optional, List # Removed TextIO
 
 class StreamToLogger:
@@ -66,7 +65,7 @@ def setup_logging(log_file: Optional[str] = None):
     root_handlers: List[logging.StreamHandler] = [root_console_handler]
     if log_file:
         file_handler: logging.FileHandler = logging.FileHandler(log_file) # FileHandler is a StreamHandler
-        root_handlers.append(file_handler) # No cast needed if list is StreamHandler compatible
+        root_handlers.append(file_handler) # type: ignore[arg-type] # Mypy struggles with FileHandler vs StreamHandler[TextIO]
 
     # --- Dedicated Loggers for STDOUT/STDERR Redirection --- 
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
