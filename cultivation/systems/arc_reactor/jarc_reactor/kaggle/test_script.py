@@ -3,15 +3,9 @@ import sys
 import os
 import logging
 
-# Set up logging to both file and console
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('submission_debug.log'),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+# Set up logging
+from cultivation.utils.logging_config import setup_logging
+setup_logging(log_file='submission_debug.log')
 
 logger = logging.getLogger(__name__)
 

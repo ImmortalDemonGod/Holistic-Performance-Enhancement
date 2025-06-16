@@ -1,30 +1,15 @@
 # Utils/optuna/optimize.py
-import optuna                                                                                          
-import logging                                                                                         
-import torch                                                                                           
-import sys                                                                                             
-from pathlib import Path                                                                               
-                                                                                                    
-# Add project root to path to ensure modules can be imported correctly                                 
-project_root = Path(__file__).resolve().parents[2]  # Navigate two levels up to root
-sys.path.append(str(project_root))                                                                     
-                                                                                                    
+import optuna
+import logging
+import sys
+
+from cultivation.utils.logging_config import setup_logging
 from cultivation.systems.arc_reactor.jarc_reactor.config import Config
-from cultivation.systems.arc_reactor.jarc_reactor.utils.train import TransformerTrainer
-from pytorch_lightning import Trainer
 from cultivation.systems.arc_reactor.jarc_reactor.optimization.objective import create_objective
 from cultivation.systems.arc_reactor.jarc_reactor.data.data_preparation import prepare_data
-from pytorch_lightning.callbacks import EarlyStopping
-                                                                                                    
-# Setup logging                                                                                        
-logging.basicConfig(                                                                                   
-    level=logging.DEBUG,                                                                               
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',                                     
-    handlers=[                                                                                         
-        logging.FileHandler('optuna_optimization.log'),                                                
-        logging.StreamHandler()                                                                        
-    ]                                                                                                  
-)                                                                                                      
+
+# Setup logging
+setup_logging(log_file='optuna_optimization.log')                                                                                                      
 logger = logging.getLogger(__name__)                                                                   
                                                                                                     
 def run_optimization(config, delete_study=False):
