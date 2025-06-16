@@ -1,6 +1,6 @@
 # train.py
 import pytorch_lightning as pl
-from jarc_reactor.utils.padding_utils import pad_to_fixed_size
+from cultivation.systems.arc_reactor.jarc_reactor.utils.padding_utils import pad_to_fixed_size
 import logging
 from typing import Optional
 import torch
@@ -11,7 +11,7 @@ import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
-from jarc_reactor.models.transformer_model import TransformerModel
+from cultivation.systems.arc_reactor.jarc_reactor.models.transformer_model import TransformerModel
 import torch.nn.functional as F
 import os
 import json
@@ -19,7 +19,7 @@ from typing import Optional
 import torch
 from pathlib import Path
 from optuna import Trial
-from jarc_reactor.data.data_preparation import prepare_data
+from cultivation.systems.arc_reactor.jarc_reactor.data.data_preparation import prepare_data
 
 # Initialize logging
 logger = logging.getLogger(__name__)

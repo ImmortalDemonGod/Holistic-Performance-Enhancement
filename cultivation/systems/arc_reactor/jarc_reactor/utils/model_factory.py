@@ -1,6 +1,6 @@
-from jarc_reactor.utils.train import TransformerTrainer
+from cultivation.systems.arc_reactor.jarc_reactor.utils.train import TransformerTrainer
 from typing import Union
-from jarc_reactor.config import Config
+from cultivation.systems.arc_reactor.jarc_reactor.config import Config
 
 def create_transformer_trainer(
     config: Config,

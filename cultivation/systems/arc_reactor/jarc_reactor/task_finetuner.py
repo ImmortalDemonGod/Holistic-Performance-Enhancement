@@ -8,7 +8,7 @@ parent_dir = current_dir.parent
 # Add the parent directory to sys.path
 sys.path.append(str(parent_dir))
 
-from jarc_reactor.config import Config
+from cultivation.systems.arc_reactor.jarc_reactor.config import Config
 import random
 import pytorch_lightning as pl
 import torch                                                                                           
@@ -19,13 +19,13 @@ import json
 from tqdm import tqdm
 from torch.utils.data import DataLoader, TensorDataset
 
-from jarc_reactor.utils.metrics import TaskMetricsCollector
-from jarc_reactor.utils.model_factory import create_transformer_trainer
+from cultivation.systems.arc_reactor.jarc_reactor.utils.metrics import TaskMetricsCollector
+from cultivation.systems.arc_reactor.jarc_reactor.utils.model_factory import create_transformer_trainer
 from copy import deepcopy
-from jarc_reactor.utils.train import TransformerTrainer
+from cultivation.systems.arc_reactor.jarc_reactor.utils.train import TransformerTrainer
 from pytorch_lightning.callbacks import EarlyStopping                                                  
-from jarc_reactor.data.data_preparation import prepare_data                                                        
-from jarc_reactor.utils.metrics import TaskMetricsCollector
+from cultivation.systems.arc_reactor.jarc_reactor.data.data_preparation import prepare_data                                                        
+from cultivation.systems.arc_reactor.jarc_reactor.utils.metrics import TaskMetricsCollector
                                                                                                         
 class TaskFineTuner:
     def __init__(self, base_model: TransformerTrainer, config: Config):

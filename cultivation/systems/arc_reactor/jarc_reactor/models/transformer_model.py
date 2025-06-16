@@ -4,9 +4,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.quantization
 from torch.nn import TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder, Parameter
-from jarc_reactor.utils.positional_encoding import Grid2DPositionalEncoding
-from jarc_reactor.models.context_encoder import ContextEncoderModule
-from jarc_reactor.config import Config  # Import the Config class
+from cultivation.systems.arc_reactor.jarc_reactor.utils.positional_encoding import Grid2DPositionalEncoding
+from cultivation.systems.arc_reactor.jarc_reactor.models.context_encoder import ContextEncoderModule
+from cultivation.systems.arc_reactor.jarc_reactor.config import Config  # Import the Config class
 
 class TransformerModel(nn.Module):
     def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, dropout_rate, context_encoder_d_model, context_encoder_heads, checkpoint_path, use_lora=False, lora_rank=None):

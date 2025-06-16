@@ -42,7 +42,7 @@ class StreamToLogger(object):
 
 sys.stdout = StreamToLogger(logger, logging.INFO)
 sys.stderr = StreamToLogger(logger, logging.ERROR)
-from jarc_reactor.optimization.best_params_manager import BestParamsManager
+from cultivation.systems.arc_reactor.jarc_reactor.optimization.best_params_manager import BestParamsManager
 import signal
 import sys
 
@@ -55,13 +55,13 @@ import torch
 import logging
 import os
 import torch
-from jarc_reactor.data.data_module import MyDataModule
-from jarc_reactor.utils.train import TransformerTrainer
+from cultivation.systems.arc_reactor.jarc_reactor.data.data_module import MyDataModule
+from cultivation.systems.arc_reactor.jarc_reactor.utils.train import TransformerTrainer
 from pytorch_lightning import Trainer
 import pytorch_lightning as pl
 from pathlib import Path
-from jarc_reactor.utils.model_factory import create_transformer_trainer
-from jarc_reactor.config import Config
+from cultivation.systems.arc_reactor.jarc_reactor.utils.model_factory import create_transformer_trainer
+from cultivation.systems.arc_reactor.jarc_reactor.config import Config
 import torch.quantization
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping

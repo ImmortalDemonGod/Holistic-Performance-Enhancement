@@ -2,7 +2,7 @@ import json
 import logging
 import optuna
 from optuna import Trial
-from jarc_reactor.utils.train import TransformerTrainer
+from cultivation.systems.arc_reactor.jarc_reactor.utils.train import TransformerTrainer
 from pathlib import Path
 from typing import Dict, Any, Optional, Union
 from dataclasses import dataclass

@@ -9,11 +9,11 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parents[2]  # Navigate two levels up to root
 sys.path.append(str(project_root))                                                                     
                                                                                                     
-from jarc_reactor.config import Config
-from jarc_reactor.utils.train import TransformerTrainer
+from cultivation.systems.arc_reactor.jarc_reactor.config import Config
+from cultivation.systems.arc_reactor.jarc_reactor.utils.train import TransformerTrainer
 from pytorch_lightning import Trainer
-from jarc_reactor.optimization.objective import create_objective
-from jarc_reactor.data.data_preparation import prepare_data
+from cultivation.systems.arc_reactor.jarc_reactor.optimization.objective import create_objective
+from cultivation.systems.arc_reactor.jarc_reactor.data.data_preparation import prepare_data
 from pytorch_lightning.callbacks import EarlyStopping
                                                                                                     
 # Setup logging                                                                                        

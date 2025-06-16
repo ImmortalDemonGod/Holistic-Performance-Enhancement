@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 from typing import Set, Dict
 import logging
 from pathlib import Path
-from jarc_reactor.data.eval_data_prep import prepare_data as prepare_eval_data
+from cultivation.systems.arc_reactor.jarc_reactor.data.eval_data_prep import prepare_data as prepare_eval_data
 
 class TaskMapper:
     def __init__(self, logger: logging.Logger, config):

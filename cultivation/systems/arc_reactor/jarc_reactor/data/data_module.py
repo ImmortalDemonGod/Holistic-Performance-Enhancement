@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader, TensorDataset
 import pytorch_lightning as pl
-from jarc_reactor.data.data_preparation import prepare_data
+from cultivation.systems.arc_reactor.jarc_reactor.data.data_preparation import prepare_data
 import logging
 class MyDataModule(pl.LightningDataModule):
     def __init__(self, batch_size):
