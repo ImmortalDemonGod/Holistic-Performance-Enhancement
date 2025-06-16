@@ -51,7 +51,7 @@ tasks:
     desc: "Runs pytest on the ARC reactor module."
     deps: [setup]
     cmds:
-      - "{{.PYTHON_INTERPRETER}} -m pytest -v {{.CULTIVATION_ROOT}}/systems/arc_reactor/jarc_reactor/kaggle/test_script.py"
+      - "{{.PYTHON_INTERPRETER}} -m pytest -v {{.CULTIVATION_ROOT}}/systems/arc_reactor/jarc_reactor/"
 
   # --- CodeScene Integration Tasks ---
   codescene:check:
