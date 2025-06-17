@@ -2,7 +2,7 @@
 
 level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
 debug_mode: false
-log_dir: "jarc_reactor/logs"
+log_dir: "cultivation/systems/arc_reactor/logs/app"
 
 # Configuration for the centralized logging utility (cultivation/utils/logging_config.py)
 # These can be used by the application to set up the logger upon initialization.
