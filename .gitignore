@@ -296,3 +296,8 @@ cultivation/literature/pdf/molecular_biology_of_the_cell_2022.pdf
 cultivation/scripts/software/github_automation_output/
 # From JARC-Reactor subtree
 .aider*
+task_id_map.json
+.tensorboard_env/*
+cultivation/data/raw/arc_prize_2025/*
+cultivation/systems/george/*
+cultivation/systems/george0_2_5.zip
