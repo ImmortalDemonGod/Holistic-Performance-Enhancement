@@ -1,5 +1,6 @@
 # cultivation/systems/arc_reactor/jarc_reactor/hydra_setup.py
 
+import sys # Add this import
 from hydra.core.config_store import ConfigStore
 from .config_schema import (
     JARCReactorConfigSchema,
@@ -14,6 +15,7 @@ from .config_schema import (
 )
 
 def register_hydra_configs():
+    print("DEBUG: hydra_setup.py inside register_hydra_configs()", file=sys.__stderr__) # Add this print
     """Registers all structured configs with Hydra's ConfigStore."""
     cs = ConfigStore.instance()
 
