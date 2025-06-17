@@ -95,7 +95,7 @@ class ConsoleLoggingConfig:
 class LoggingConfigSchema:
     level: str = "INFO"
     debug_mode: bool = False
-    log_dir: str = "jarc_reactor/logs"
+    log_dir: str = "cultivation/systems/arc_reactor/logs/app"
     file_logging: FileLoggingConfig = field(default_factory=FileLoggingConfig)
     console_logging: ConsoleLoggingConfig = field(default_factory=ConsoleLoggingConfig)
 
