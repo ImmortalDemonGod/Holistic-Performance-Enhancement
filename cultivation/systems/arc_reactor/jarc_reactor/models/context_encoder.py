@@ -37,7 +37,7 @@ class ContextEncoderModule(nn.Module):
         x = torch.cat([ctx_input, ctx_output], dim=1)                                                                                                        
                                                                                                                                                             
         # Add channel dimension and project                                                                                                                  
-        x = self.input_projection(x)                                                                                                                         
+        x = self.input_projection(x.float())                                                                                                                         
                                                                                                                                                             
         # Self-attention with residual and normalization                                                                                                     
         attn_out, _ = self.self_attention(x, x, x)                                                                                                           
