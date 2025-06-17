@@ -8,44 +8,17 @@ import hydra # For hydra.utils.to_absolute_path
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import torch
-import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 from omegaconf import DictConfig # Added for Hydra
 from cultivation.utils.logging_config import setup_logging
 # from cultivation.systems.arc_reactor.jarc_reactor.config import config # Removed old config
 from cultivation.systems.arc_reactor.jarc_reactor.data.context_data import ContextPair
 from cultivation.systems.arc_reactor.jarc_reactor.utils.padding_utils import pad_to_fixed_size
+from .data_loading_utils import inspect_data_structure # Added import
 
 # Initialize logging
 setup_logging()
 logger = logging.getLogger(__name__)
-
-def inspect_data_structure(cfg: DictConfig, filename: str, directory: str | None = None):
-    if directory is None:
-        directory = cfg.evaluation.data_dir
-    """Debug helper to examine JSON structure"""
-    filepath = os.path.join(directory, filename)
-    try:
-        with open(filepath, 'rb') as f:
-            data = orjson.loads(f.read())
-        logger.debug(f"File structure for {filepath}:")
-        logger.debug(f"Keys in data: {list(data.keys()) if isinstance(data, dict) else 'N/A'}")
-        if isinstance(data, dict):
-            logger.debug(f"Number of train examples: {len(data.get('train', []))}")
-            logger.debug(f"Number of test examples: {len(data.get('test', []))}")
-            if data.get('train'):
-                sample_train = data['train'][0]
-                logger.debug(f"Sample train input shape: {np.array(sample_train.get('input', [])).shape}")
-                logger.debug(f"Sample train context_input exists: {'context_input' in sample_train}")
-                logger.debug(f"Sample train context_output exists: {'context_output' in sample_train}")
-            if data.get('test'):
-                sample_test = data['test'][0]
-                logger.debug(f"Sample test context_input exists: {'context_input' in sample_test}")
-                logger.debug(f"Sample test context_output exists: {'context_output' in sample_test}")
-        return True
-    except Exception as e:
-        logger.error(f"Error inspecting {filepath}: {str(e)}")
-        return False
 
 def load_context_pair(filepath, task_id, context_map):
     try:

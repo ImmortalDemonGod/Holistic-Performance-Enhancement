@@ -3,10 +3,10 @@ import os
 import orjson
 import json
 from tqdm import tqdm
+from typing import List, Dict, Tuple # Re-added Tuple
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import torch
-import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 from omegaconf import DictConfig # Added for Hydra
 
@@ -14,37 +14,11 @@ from cultivation.utils.logging_config import setup_logging
 # from cultivation.systems.arc_reactor.jarc_reactor.config import config, include_synthetic_training_data, synthetic_dir # Removed old config
 from cultivation.systems.arc_reactor.jarc_reactor.data.context_data import ContextPair
 from cultivation.systems.arc_reactor.jarc_reactor.utils.padding_utils import pad_to_fixed_size
+from .data_loading_utils import inspect_data_structure # Added import
 
 # Initialize logging
 setup_logging()
 logger = logging.getLogger(__name__)
-
-def inspect_data_structure(cfg: DictConfig, filename: str, directory: str | None = None):
-    if directory is None:
-        directory = cfg.evaluation.data_dir
-    """Debug helper to examine JSON structure"""
-    filepath = os.path.join(directory, filename)
-    try:
-        with open(filepath, 'rb') as f:
-            data = orjson.loads(f.read())
-        logger.debug(f"File structure for {filepath}:")
-        logger.debug(f"Keys in data: {list(data.keys()) if isinstance(data, dict) else 'N/A'}")
-        if isinstance(data, dict):
-            logger.debug(f"Number of train examples: {len(data.get('train', []))}")
-            logger.debug(f"Number of test examples: {len(data.get('test', []))}")
-            if data.get('train'):
-                sample_train = data['train'][0]
-                logger.debug(f"Sample train input shape: {np.array(sample_train.get('input', [])).shape}")
-                logger.debug(f"Sample train context_input exists: {'context_input' in sample_train}")
-                logger.debug(f"Sample train context_output exists: {'context_output' in sample_train}")
-            if data.get('test'):
-                sample_test = data['test'][0]
-                logger.debug(f"Sample test context_input exists: {'context_input' in sample_test}")
-                logger.debug(f"Sample test context_output exists: {'context_output' in sample_test}")
-        return True
-    except Exception as e:
-        logger.error(f"Error inspecting {filepath}: {str(e)}")
-        return False
 
 def load_context_pair(filepath, task_id, context_map):
     try:
@@ -82,12 +56,26 @@ def load_context_pairs(directory, context_map):
         for future in tqdm(as_completed(futures), total=len(futures), desc="Loading context pairs"):
             future.result()  # Ensure any exceptions are raised
 
-def load_main_data_concurrently(directory, context_map, train_inputs, train_outputs, train_task_ids, train_context_pairs,
-                                test_inputs, test_outputs, test_task_ids, test_context_pairs, is_synthetic=False):
+def load_main_data_concurrently(
+    directory: str,
+    context_map: Dict[str, ContextPair],
+    train_inputs: List[torch.Tensor],
+    train_outputs: List[torch.Tensor],
+    train_task_ids: List[str],
+    train_context_pairs: List[ContextPair],
+    test_inputs: List[torch.Tensor],
+    test_outputs: List[torch.Tensor],
+    test_task_ids: List[str],
+    test_context_pairs: List[ContextPair],
+    is_synthetic: bool = False
+):
     """Load main dataset from the specified directory concurrently"""
     logger.info(f"Loading main dataset from '{directory}'{' (synthetic)' if is_synthetic else ''}...")
 
-    def load_single_file(filepath, task_id):
+    SingleFileResultType = Tuple[torch.Tensor, torch.Tensor, str, ContextPair]
+    LoadSingleFileReturnType = Tuple[List[SingleFileResultType], List[SingleFileResultType]]
+
+    def load_single_file(filepath: str, task_id: str) -> LoadSingleFileReturnType:
         try:
             with open(filepath, 'rb') as f:
                 data = orjson.loads(f.read())
@@ -99,7 +87,7 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 train_data = data
                 test_data = []
 
-            train_results = []
+            train_results: List[SingleFileResultType] = []
             for item in train_data:
                 input_tensor = pad_to_fixed_size(
                     torch.tensor(item['input'], dtype=torch.float32),
@@ -124,6 +112,9 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 test_results.append((input_tensor, output_tensor, task_id, context_map[task_id]))
 
             return train_results, test_results
+        except KeyError as e:
+            logger.error(f"KeyError: Task ID '{task_id}' not found in context_map while processing '{filepath}'. Original error: {str(e)}")
+            return [], [] # Return empty lists to prevent further issues
         except Exception as e:
             logger.error(f"Error processing file '{filepath}': {str(e)}")
             return [], []
@@ -201,10 +192,15 @@ def prepare_data(cfg: DictConfig, return_datasets: bool = False):
         raise ValueError("No valid data files found in directory")
 
     # Initialize data containers
-    train_inputs, train_outputs, train_task_ids = [], [], []
-    test_inputs, test_outputs, test_task_ids = [], [], []
-    context_map = {}
-    train_context_pairs, test_context_pairs = [], [], 
+    train_inputs: List[torch.Tensor] = []
+    train_outputs: List[torch.Tensor] = []
+    train_task_ids: List[str] = [] # Task IDs are strings initially
+    test_inputs: List[torch.Tensor] = []
+    test_outputs: List[torch.Tensor] = []
+    test_task_ids: List[str] = [] # Task IDs are strings initially
+    context_map: Dict[str, ContextPair] = {}
+    train_context_pairs: List[ContextPair] = []
+    test_context_pairs: List[ContextPair] = [] 
 
     try:
         # Load context pairs first
