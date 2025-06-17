@@ -44,6 +44,7 @@ tasks:
 
   arc:lint:
     desc: "Runs Ruff linter on the ARC reactor Python files."
+    deps: [setup]
     cmds:
       - "{{.PYTHON_INTERPRETER}} -m ruff check --fix {{.CULTIVATION_ROOT}}/systems/arc_reactor/jarc_reactor/"
 
