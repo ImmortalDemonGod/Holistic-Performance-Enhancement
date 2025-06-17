@@ -50,6 +50,7 @@ class TrainingConfigSchema:
     include_synthetic_training_data: bool = False
     training_data_dir: str = "${oc.env:TRAINING_DATA_DIR,cultivation/systems/arc_reactor/jarc_reactor/data/training_data/training}"
     synthetic_data_dir: Optional[str] = "cultivation/systems/arc_reactor/jarc_reactor/data/synthetic_data/training" # Path for synthetic training data
+    checkpoint_dir: Optional[str] = "jarc_reactor/checkpoints"  # Directory to save model checkpoints
 
 @dataclass
 class OptunaPruningConfig:
