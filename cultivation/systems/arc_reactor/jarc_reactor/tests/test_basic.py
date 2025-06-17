@@ -10,7 +10,7 @@ from cultivation.systems.arc_reactor.jarc_reactor.data.data_module import MyData
 def test_output_dirs():
     """Creates test output directories before any tests in this module run."""
     current_file_path = Path(__file__).resolve()
-    test_logs_dir = current_file_path.parent / "test_outputs" / "logs"
+    test_logs_dir = Path("cultivation/systems/arc_reactor/logs/tests")
     test_checkpoints_dir = current_file_path.parent / "test_outputs" / "checkpoints"
     
     test_logs_dir.mkdir(parents=True, exist_ok=True)
@@ -33,7 +33,7 @@ def _get_base_test_config_dict() -> dict:
     # Determine the absolute path to the dummy data directory
     current_file_path = Path(__file__).resolve()
     dummy_data_dir = current_file_path.parent / "data" / "dummy_training_data"
-    test_logs_dir = current_file_path.parent / "test_outputs" / "logs"
+    test_logs_dir = Path("cultivation/systems/arc_reactor/logs/tests")
     test_checkpoints_dir = current_file_path.parent / "test_outputs" / "checkpoints"
 
     # Directory creation is now handled by the 'test_output_dirs' fixture
