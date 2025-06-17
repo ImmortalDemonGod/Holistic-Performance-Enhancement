@@ -3,12 +3,17 @@ import optuna
 import logging
 import sys
 import hydra # Added for Hydra
-from omegaconf import DictConfig # Added for Hydra
 
-from cultivation.utils.logging_config import setup_logging # This should ideally also use Hydra config
-# from cultivation.systems.arc_reactor.jarc_reactor.config import Config # Removed old config
+from hydra.core.config_store import ConfigStore
+
+from cultivation.utils.logging_config import setup_logging
+from cultivation.systems.arc_reactor.jarc_reactor.config_schema import JARCReactorConfigSchema
 from cultivation.systems.arc_reactor.jarc_reactor.optimization.objective import create_objective
 from cultivation.systems.arc_reactor.jarc_reactor.data.data_preparation import prepare_data
+
+# --- Hydra Config Store Setup ---
+cs = ConfigStore.instance()
+cs.store(name="jarc_app", group="schema", node=JARCReactorConfigSchema)
 
 # Setup logging - Note: This might be overridden or enhanced by Hydra's own logging setup
 # For now, we keep it, but ensure Hydra's config can also control logging levels.
@@ -16,7 +21,7 @@ setup_logging(log_file='optuna_optimization.log')
 logger = logging.getLogger(__name__) 
 
 @hydra.main(config_path="../conf", config_name="config", version_base=None)
-def run_optimization(cfg: DictConfig):
+def run_optimization(cfg: JARCReactorConfigSchema):
     """Main optimization entry point, configured by Hydra."""
     try:
         logger.info("Starting optimization")
@@ -33,10 +38,8 @@ def run_optimization(cfg: DictConfig):
         else:
             logger.info("Using real data for hyperparameter optimization as per configuration.")
 
-        # Handle --delete_study argument manually as it's an action
-        delete_study_flag = "--delete_study" in sys.argv
-        if delete_study_flag:
-            logger.info(f"Deleting existing study '{cfg.optuna.study_name}' due to --delete_study flag.")
+        if cfg.optuna.delete_study:
+            logger.info(f"Deleting existing study '{cfg.optuna.study_name}' as per configuration (optuna.delete_study=True).")
             try:
                 optuna.delete_study(study_name=cfg.optuna.study_name, storage=cfg.optuna.storage_url)
                 logger.info(f"Successfully deleted study '{cfg.optuna.study_name}'.")
