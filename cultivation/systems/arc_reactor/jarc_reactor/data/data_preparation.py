@@ -95,7 +95,7 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
 
             # Determine data structure based on directory
             if not is_synthetic:  # Use is_synthetic flag instead of directory string comparison
-                train_data = data.get('train', [])[1:]  # Skip the first example (used for context)
+                train_data = data.get('train', [])  # Use all examples for training; context is handled separately
                 test_data = data.get('test', [])
             else:  # 'sythtraining' assumed to have a flat list
                 train_data = data[1:]  # Skip the first example if needed
