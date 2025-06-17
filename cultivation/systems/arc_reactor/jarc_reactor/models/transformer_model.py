@@ -12,7 +12,7 @@ from cultivation.systems.arc_reactor.jarc_reactor.models.context_encoder import 
 logger = logging.getLogger(__name__)
 
 class TransformerModel(nn.Module):
-    def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, 
+    def __init__(self, input_dim, seq_len, max_h, max_w, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, 
                  dropout_rate, context_encoder_d_model, context_encoder_heads, 
                  context_dropout_rate, encoder_dropout_rate, decoder_dropout_rate, # Added new dropout rates
                  checkpoint_path, use_lora=False, lora_rank=None):
@@ -21,20 +21,22 @@ class TransformerModel(nn.Module):
         # Store all dimension-related parameters
         self.input_dim = input_dim
         self.seq_len = seq_len
+        self.max_h = max_h
+        self.max_w = max_w
         self.d_model = d_model
-        self.grid_size = seq_len * seq_len  # Total elements in grid (e.g., 900 for 30x30)
+        self.grid_size = max_h * max_w  # Total elements in grid (e.g., 900 for 30x30)
         
         # Log initialization dimensions for debugging
         logger.debug("Initializing TransformerModel with dimensions:")
-        logger.debug(f"input_dim: {input_dim}, seq_len: {seq_len}, d_model: {d_model}")
-        logger.debug(f"grid_size (seq_len * seq_len): {self.grid_size}")
+        logger.debug(f"input_dim: {input_dim}, seq_len: {seq_len}, max_h: {max_h}, max_w: {max_w}, d_model: {d_model}")
+        logger.debug(f"grid_size (max_h * max_w): {self.grid_size}")
         
         # Modified input projections for grid structure
         self.input_fc = nn.Linear(1, d_model)  # Project each grid cell to d_model dimensions
         logger.debug(f"Input projection will convert each element from 1 → {d_model} dimensions")
         
         # Positional encoding and dropout
-        self.positional_encoding = Grid2DPositionalEncoding(d_model, max_height=seq_len, max_width=input_dim)
+        self.positional_encoding = Grid2DPositionalEncoding(d_model, max_height=max_h, max_width=max_w)
         self.dropout = nn.Dropout(p=dropout_rate)  # Initialize dropout layer
 
         # Conditionally create the encoder
@@ -235,7 +237,7 @@ class TransformerModel(nn.Module):
         
         # 9. Reshape back to grid structure
         try:
-            output = output.view(batch_size, self.seq_len, self.seq_len, -1)
+            output = output.view(batch_size, self.max_h, self.max_w, -1)
             #self.debug_shape(output, "9. Final output (grid structure)")
         except RuntimeError as e:
             print("\nERROR during final reshape:")
