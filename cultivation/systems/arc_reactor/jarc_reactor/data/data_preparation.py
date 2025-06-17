@@ -58,11 +58,11 @@ def load_context_pair(filepath, task_id, context_map):
         input_key = 'input' if 'input' in context_example else 'input_data'
         output_key = 'output' if 'output' in context_example else 'output_data'
         context_input = pad_to_fixed_size(
-            torch.tensor(context_example[input_key], dtype=torch.float32),
+            torch.tensor(context_example[input_key], dtype=torch.long),
             target_shape=(30, 30)
         )
         context_output = pad_to_fixed_size(
-            torch.tensor(context_example[output_key], dtype=torch.float32),
+            torch.tensor(context_example[output_key], dtype=torch.long),
             target_shape=(30, 30)
         )
         context_map[task_id] = ContextPair(
@@ -105,11 +105,11 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
             train_results = []
             for item in train_data:
                 input_tensor = pad_to_fixed_size(
-                    torch.tensor(item['input'], dtype=torch.float32),
+                    torch.tensor(item['input'], dtype=torch.long),
                     target_shape=(30, 30)
                 )
                 output_tensor = pad_to_fixed_size(
-                    torch.tensor(item['output'], dtype=torch.float32),
+                    torch.tensor(item['output'], dtype=torch.long),
                     target_shape=(30, 30)
                 )
                 train_results.append((input_tensor, output_tensor, task_id, context_map[task_id]))
@@ -118,11 +118,11 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
             test_results = []
             for item in test_data:
                 input_tensor = pad_to_fixed_size(
-                    torch.tensor(item['input'], dtype=torch.int8),
+                    torch.tensor(item['input'], dtype=torch.long),
                     target_shape=(30, 30)
                 )
                 output_tensor = pad_to_fixed_size(
-                    torch.tensor(item['output'], dtype=torch.int8),
+                    torch.tensor(item['output'], dtype=torch.long),
                     target_shape=(30, 30)
                 )
                 test_results.append((input_tensor, output_tensor, task_id, context_map[task_id]))
