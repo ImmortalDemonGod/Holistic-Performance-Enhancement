@@ -1,6 +1,6 @@
 ## **Onboarding Document: Holistic Performance Enhancement (Cultivation) Project**
 
-**Version:** 2.1 (Post-Validation Iteration)
+**Version:** 2.2 (Post-Validation Iteration)
 **Date:** 2025-06-17
 
 **Objective:** This document provides a definitive, comprehensive analysis of the "Holistic-Performance-Enhancement" (HPE) or "Cultivation" repository. It is designed to give a new project member a deep understanding of the project's vision, architecture, current state, and development workflows, enabling them to quickly become a productive contributor to deep work tasks.
