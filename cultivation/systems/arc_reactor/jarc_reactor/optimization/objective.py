@@ -45,7 +45,11 @@ def create_trial_config(trial: optuna.Trial, base_config: DictConfig) -> DictCon
     suggested_params = {}
 
     # --- Suggest parameters based on the structured schema ---
-    param_ranges = instantiate(base_config.optuna.param_ranges)
+    # Manually instantiate each parameter range from the config
+    param_ranges = {
+        name: instantiate(p_range_cfg)
+        for name, p_range_cfg in base_config.optuna.param_ranges.items()
+    }
 
 
 

@@ -1,7 +1,7 @@
 # cultivation/systems/arc_reactor/jarc_reactor/config_schema.py
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, ClassVar
 
 # It's good practice to import MISSING for optional fields without defaults
 # from hydra.core.config_store import OmegaConf
@@ -60,23 +60,48 @@ class OptunaPruningConfig:
     pruning_percentile: int = 25
 
 @dataclass
+class IntRange:
+    _target_: ClassVar[str] = "cultivation.systems.arc_reactor.jarc_reactor.config_schema.IntRange"
+    """Defines an integer hyperparameter range for Optuna."""
+    low: int
+    high: int
+    step: int = 1
+    log: bool = False
+
+@dataclass
+class FloatRange:
+    _target_: ClassVar[str] = "cultivation.systems.arc_reactor.jarc_reactor.config_schema.FloatRange"
+    """Defines a float hyperparameter range for Optuna."""
+    low: float
+    high: float
+    step: Optional[float] = None
+    log: bool = False
+
+@dataclass
+class CategoricalChoice:
+    _target_: ClassVar[str] = "cultivation.systems.arc_reactor.jarc_reactor.config_schema.CategoricalChoice"
+    """Defines a categorical hyperparameter choice for Optuna."""
+    choices: List[Any]
+
+@dataclass
 class OptunaConfigSchema:
+    delete_study: bool = False
     n_trials: int = 1
     study_name: str = "jarc_optimization_v3"
     storage_url: str = "sqlite:///jarc_optuna.db"
-    param_ranges: Dict[str, List[Any]] = field(default_factory=lambda: {
-        "d_model": [32, 2048, 16],
-        "heads": [2, 4, 8, 16, 32, 64],
-        "encoder_layers": [1, 12],
-        "decoder_layers": [1, 12],
-        "d_ff": [64, 2048, 64],
-        "dropout_rate": [0.01, 0.7],
-        "context_encoder_d_model": [32, 512, 32],
-        "context_encoder_heads": [2, 4, 8],
-        "batch_size": [8, 512],
-        "learning_rate": [0.000001, 0.1],
-        "max_epochs": [4, 5, 1],
-        "gradient_clip_val": [0.0, 5.0]
+    param_ranges: Dict[str, Any] = field(default_factory=lambda: {
+        "d_model": IntRange(low=32, high=2048, step=16),
+        "heads": CategoricalChoice(choices=[2, 4, 8, 16, 32, 64]),
+        "encoder_layers": IntRange(low=1, high=12),
+        "decoder_layers": IntRange(low=1, high=12),
+        "d_ff": IntRange(low=64, high=2048, step=64),
+        "dropout_rate": FloatRange(low=0.01, high=0.7),
+        "context_encoder_d_model": IntRange(low=32, high=512, step=32),
+        "context_encoder_heads": CategoricalChoice(choices=[2, 4, 8]),
+        "batch_size": IntRange(low=8, high=512, log=True),
+        "learning_rate": FloatRange(low=1e-6, high=1e-1, log=True),
+        "max_epochs": IntRange(low=4, high=5, step=1),
+        "gradient_clip_val": FloatRange(low=0.0, high=5.0)
     })
     pruning: OptunaPruningConfig = field(default_factory=OptunaPruningConfig)
 
