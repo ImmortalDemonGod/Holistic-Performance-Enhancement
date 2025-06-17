@@ -10,6 +10,7 @@ defaults:
   - metrics: default
   - scheduler: default
   - evaluation: default
+  - dataloader: default
 
 # Global settings (can be overridden by group configs or command line)
 use_best_params: false
