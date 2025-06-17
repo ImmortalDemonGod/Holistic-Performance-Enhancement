@@ -41,7 +41,7 @@ def register_hydra_configs():
     except hydra.errors.ConfigAlreadyRegistered:
         pass
     try:
-        cs.store(group="dataloader", name="default", node=DataLoaderConfig)
+        cs.store(group="dataloader", name="base_dataloader", node=DataLoaderConfig)
     except hydra.errors.ConfigAlreadyRegistered:
         pass
     try:

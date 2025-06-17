@@ -108,17 +108,61 @@ def setup_callbacks(cfg: DictConfig, logger: logging.Logger) -> list:
 
 def initialize_trainer(cfg: DictConfig, callbacks: list, t_logger: TensorBoardLogger, main_logger: logging.Logger) -> Trainer:
     """Initializes and returns the PyTorch Lightning Trainer."""
-    accelerator = 'cpu'
-    devices = 1
-    if cfg.training.device_choice == "auto" and torch.cuda.is_available():
-        accelerator = 'gpu'
-        devices = torch.cuda.device_count()
-    elif cfg.training.device_choice in ("gpu", "cuda"):
+    accelerator_name = 'cpu'  # Default accelerator
+    devices_count = 1          # Default number of devices
+
+    # Ensure cfg.training.device_choice exists and is lowercase, default to 'auto'
+    device_choice = cfg.training.get('device_choice', 'auto').lower()
+    main_logger.debug(f"Raw device_choice from config: {cfg.training.get('device_choice')}, processed as: {device_choice}")
+
+    if device_choice == "auto":
+        main_logger.info("Device choice: auto. Detecting available hardware...")
         if torch.cuda.is_available():
-            accelerator = 'gpu'
-            devices = torch.cuda.device_count()
+            accelerator_name = 'cuda'  # PyTorch Lightning uses 'cuda' for CUDA
+            devices_count = torch.cuda.device_count()
+            main_logger.info(f"CUDA available. Using accelerator: '{accelerator_name}', devices: {devices_count}")
+        elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            accelerator_name = 'mps'
+            devices_count = 1  # MPS typically uses 1 device
+            main_logger.info(f"MPS available. Using accelerator: '{accelerator_name}', devices: {devices_count}")
         else:
-            main_logger.warning("Configured for GPU, but CUDA not available. Falling back to CPU.")
+            accelerator_name = 'cpu' # Explicitly set, though it's the default
+            devices_count = 1
+            main_logger.info("Neither CUDA nor MPS available. Using accelerator: 'cpu', devices: 1")
+    elif device_choice in ("gpu", "cuda"):
+        main_logger.info(f"Device choice: '{device_choice}'. Checking CUDA availability...")
+        if torch.cuda.is_available():
+            accelerator_name = 'cuda'
+            devices_count = torch.cuda.device_count()
+            main_logger.info(f"CUDA available. Using accelerator: '{accelerator_name}', devices: {devices_count}")
+        else:
+            main_logger.warning(f"Configured for '{device_choice}', but CUDA not available. Checking for MPS as fallback.")
+            if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+                accelerator_name = 'mps'
+                devices_count = 1
+                main_logger.info(f"MPS available. Using accelerator: '{accelerator_name}' (fallback), devices: {devices_count}")
+            else:
+                accelerator_name = 'cpu'
+                devices_count = 1
+                main_logger.warning(f"MPS not available. Falling back to accelerator: '{accelerator_name}', devices: {devices_count}")
+    elif device_choice == "mps":
+        main_logger.info(f"Device choice: '{device_choice}'. Checking MPS availability...")
+        if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            accelerator_name = 'mps'
+            devices_count = 1
+            main_logger.info(f"MPS available. Using accelerator: '{accelerator_name}', devices: {devices_count}")
+        else:
+            accelerator_name = 'cpu'
+            devices_count = 1
+            main_logger.warning(f"Configured for MPS, but MPS not available. Falling back to accelerator: '{accelerator_name}', devices: {devices_count}")
+    elif device_choice == "cpu":
+        accelerator_name = 'cpu'
+        devices_count = 1
+        main_logger.info(f"Device choice: '{device_choice}'. Using accelerator: '{accelerator_name}', devices: {devices_count}")
+    else:
+        accelerator_name = 'cpu'
+        devices_count = 1
+        main_logger.warning(f"Invalid device_choice '{cfg.training.get('device_choice')}'. Falling back to accelerator: '{accelerator_name}', devices: {devices_count}")
 
     trainer = Trainer(
         max_epochs=cfg.training.max_epochs,
@@ -126,11 +170,15 @@ def initialize_trainer(cfg: DictConfig, callbacks: list, t_logger: TensorBoardLo
         precision=cfg.training.precision,
         log_every_n_steps=cfg.training.get('log_every_n_steps', 50),
         logger=t_logger,
-        accelerator=accelerator,
-        devices=devices,
-        fast_dev_run=cfg.training.fast_dev_run
+        accelerator=accelerator_name,
+        devices=devices_count,
+        fast_dev_run=cfg.training.fast_dev_run,
+        gradient_clip_val=cfg.training.get('gradient_clip_val', 1.0)  # Default from schema if not in config
     )
-    main_logger.info(f"Trainer initialized. Accelerator: {accelerator}, Devices: {devices}")
+    
+    # Log the actual accelerator PTL decided to use
+    actual_accelerator_used = trainer.accelerator.__class__.__name__ if trainer.accelerator else accelerator_name
+    main_logger.info(f"Trainer initialized. Accelerator used: '{actual_accelerator_used}', Devices: {devices_count}")
     return trainer
 
 @hydra.main(config_path="conf", config_name="config", version_base="1.2")
