@@ -3,7 +3,8 @@ import os
 import orjson
 import json
 from tqdm import tqdm
-from typing import List, Dict, Tuple # Re-added Tuple
+from typing import List, Dict, Tuple, cast # Re-added Tuple, added cast
+from dataclasses import dataclass
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import torch
@@ -20,6 +21,18 @@ logger = logging.getLogger(__name__)
 # Module-level Type Aliases for clarity and static analysis
 SingleFileResultType = Tuple[torch.Tensor, torch.Tensor, str, ContextPair]
 LoadSingleFileReturnType = Tuple[List[SingleFileResultType], List[SingleFileResultType]]
+
+@dataclass
+class DataContainers:
+    train_inputs_list: List[torch.Tensor]
+    train_outputs_list: List[torch.Tensor]
+    train_task_ids_list: List[str]
+    train_context_pairs_list: List[ContextPair]
+    test_inputs_list: List[torch.Tensor]
+    test_outputs_list: List[torch.Tensor]
+    test_task_ids_list: List[str]
+    test_context_pairs_list: List[ContextPair]
+
 
 def load_context_pair(filepath: str, task_id: str, context_map: Dict[str, ContextPair]):
     try:
@@ -60,14 +73,7 @@ def load_context_pairs(directory: str, context_map: Dict[str, ContextPair]):
 def load_main_data_concurrently(
     directory: str,
     context_map: Dict[str, ContextPair],
-    train_inputs: List[torch.Tensor],
-    train_outputs: List[torch.Tensor],
-    train_task_ids: List[str],
-    train_context_pairs: List[ContextPair],
-    test_inputs: List[torch.Tensor],
-    test_outputs: List[torch.Tensor],
-    test_task_ids: List[str],
-    test_context_pairs: List[ContextPair],
+    data_containers: DataContainers,
     is_synthetic: bool = False
 ):
     """Load main dataset from the specified directory concurrently"""
@@ -100,11 +106,11 @@ def load_main_data_concurrently(
             test_results: List[SingleFileResultType] = []
             for item in test_data:
                 input_tensor = pad_to_fixed_size(
-                    torch.tensor(item['input'], dtype=torch.int8),
+                    torch.tensor(item['input'], dtype=torch.float32),
                     target_shape=(30, 30)
                 )
                 output_tensor = pad_to_fixed_size(
-                    torch.tensor(item['output'], dtype=torch.int8),
+                    torch.tensor(item['output'], dtype=torch.float32),
                     target_shape=(30, 30)
                 )
                 test_results.append((input_tensor, output_tensor, task_id, context_map[task_id]))
@@ -128,15 +134,15 @@ def load_main_data_concurrently(
         for future in tqdm(as_completed(futures), total=len(futures), desc="Loading data"):
             train_results, test_results = future.result()
             for input_tensor, output_tensor, task_id, context_pair in train_results:
-                train_inputs.append(input_tensor)
-                train_outputs.append(output_tensor)
-                train_task_ids.append(task_id)
-                train_context_pairs.append(context_pair)
+                data_containers.train_inputs_list.append(input_tensor)
+                data_containers.train_outputs_list.append(output_tensor)
+                data_containers.train_task_ids_list.append(task_id)
+                data_containers.train_context_pairs_list.append(context_pair)
             for input_tensor, output_tensor, task_id, context_pair in test_results:
-                test_inputs.append(input_tensor)
-                test_outputs.append(output_tensor)
-                test_task_ids.append(task_id)
-                test_context_pairs.append(context_pair)
+                data_containers.test_inputs_list.append(input_tensor)
+                data_containers.test_outputs_list.append(output_tensor)
+                data_containers.test_task_ids_list.append(task_id)
+                data_containers.test_context_pairs_list.append(context_pair)
 
 def prepare_data(cfg: DictConfig, return_datasets: bool = False):
     """Prepare evaluation data with robust error handling using Hydra config."""
@@ -190,90 +196,93 @@ def prepare_data(cfg: DictConfig, return_datasets: bool = False):
         raise ValueError("No valid data files found in directory")
 
     # Initialize data containers
-    train_inputs: List[torch.Tensor] = []
-    train_outputs: List[torch.Tensor] = []
-    train_task_ids: List[str] = [] # Task IDs are strings initially
-    test_inputs: List[torch.Tensor] = []
-    test_outputs: List[torch.Tensor] = []
-    test_task_ids: List[str] = [] # Task IDs are strings initially
+    train_inputs_list: List[torch.Tensor] = []
+    train_outputs_list: List[torch.Tensor] = []
+    train_task_ids_list: List[str] = [] # Task IDs are strings initially
+    test_inputs_list: List[torch.Tensor] = []
+    test_outputs_list: List[torch.Tensor] = []
+    test_task_ids_list: List[str] = [] # Task IDs are strings initially
     context_map: Dict[str, ContextPair] = {}
-    train_context_pairs: List[ContextPair] = []
-    test_context_pairs: List[ContextPair] = [] 
+    train_context_pairs_list: List[ContextPair] = []
+    test_context_pairs_list: List[ContextPair] = [] 
 
     try:
         # Load context pairs first
         load_context_pairs(effective_data_dir, context_map) # Use effective_data_dir
 
         # Load main data
+        data_containers = DataContainers(
+            train_inputs_list=train_inputs_list,
+            train_outputs_list=train_outputs_list,
+            train_task_ids_list=train_task_ids_list,
+            train_context_pairs_list=train_context_pairs_list,
+            test_inputs_list=test_inputs_list,
+            test_outputs_list=test_outputs_list,
+            test_task_ids_list=test_task_ids_list,
+            test_context_pairs_list=test_context_pairs_list
+        )
         load_main_data_concurrently(
             directory=effective_data_dir, # Use effective_data_dir
             context_map=context_map,
-            train_inputs=train_inputs,
-            train_outputs=train_outputs,
-            train_task_ids=train_task_ids,
-            train_context_pairs=train_context_pairs,
-            test_inputs=test_inputs,
-            test_outputs=test_outputs,
-            test_task_ids=test_task_ids,
-            test_context_pairs=test_context_pairs,
+            data_containers=data_containers,
             is_synthetic=is_synthetic_mode # Use the flag derived from cfg
         )
 
         # Validate data was loaded
-        if not train_inputs or not test_inputs:
+        if not train_inputs_list or not test_inputs_list:
             raise ValueError("No data loaded from files")
 
         # Convert lists to tensors with validation
         try:
-            train_inputs = torch.stack(train_inputs)
-            train_outputs = torch.stack(train_outputs)
-            test_inputs = torch.stack(test_inputs)
-            test_outputs = torch.stack(test_outputs)
+            train_inputs_tensor: torch.Tensor = torch.stack(train_inputs_list)
+            train_outputs_tensor: torch.Tensor = torch.stack(train_outputs_list)
+            test_inputs_tensor: torch.Tensor = torch.stack(test_inputs_list)
+            test_outputs_tensor: torch.Tensor = torch.stack(test_outputs_list)
         except Exception as e:
             raise ValueError(f"Failed to convert data to tensors: {str(e)}")
 
         # Create task mapping
-        unique_task_ids = sorted(set(train_task_ids + test_task_ids))
+        unique_task_ids: List[str] = sorted(set(train_task_ids_list + test_task_ids_list))
         if not unique_task_ids:
             raise ValueError("No task IDs found in data")
             
-        task_id_map = {task_id: idx for idx, task_id in enumerate(unique_task_ids)}
+        task_id_map: Dict[str, int] = {task_id: idx for idx, task_id in enumerate(unique_task_ids)}
         logger.info(f"Created mapping for {len(unique_task_ids)} unique tasks")
 
         # Convert task IDs to tensors
-        train_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in train_task_ids], dtype=torch.long)
-        test_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in test_task_ids], dtype=torch.long)
+        train_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in train_task_ids_list], dtype=torch.long)
+        test_task_ids_tensor = torch.tensor([task_id_map[tid] for tid in test_task_ids_list], dtype=torch.long)
 
         # Validate tensor shapes match
-        if not (train_inputs.size(0) == train_outputs.size(0) == train_task_ids_tensor.size(0)):
+        if not (train_inputs_tensor.size(0) == train_outputs_tensor.size(0) == train_task_ids_tensor.size(0)):
             raise ValueError(
-                f"Mismatched training tensor sizes: inputs={train_inputs.size(0)}, "
-                f"outputs={train_outputs.size(0)}, task_ids={train_task_ids_tensor.size(0)}"
+                f"Mismatched training tensor sizes: inputs={train_inputs_tensor.size(0)}, "
+                f"outputs={train_outputs_tensor.size(0)}, task_ids={train_task_ids_tensor.size(0)}"
             )
-        if not (test_inputs.size(0) == test_outputs.size(0) == test_task_ids_tensor.size(0)):
+        if not (test_inputs_tensor.size(0) == test_outputs_tensor.size(0) == test_task_ids_tensor.size(0)):
             raise ValueError(
-                f"Mismatched test tensor sizes: inputs={test_inputs.size(0)}, "
-                f"outputs={test_outputs.size(0)}, task_ids={test_task_ids_tensor.size(0)}"
+                f"Mismatched test tensor sizes: inputs={test_inputs_tensor.size(0)}, "
+                f"outputs={test_outputs_tensor.size(0)}, task_ids={test_task_ids_tensor.size(0)}"
             )
 
         # Convert context pairs to tensors
         try:
-            train_ctx_inputs = torch.stack([pair.context_input for pair in train_context_pairs])
-            train_ctx_outputs = torch.stack([pair.context_output for pair in train_context_pairs])
-            test_ctx_inputs = torch.stack([pair.context_input for pair in test_context_pairs])
-            test_ctx_outputs = torch.stack([pair.context_output for pair in test_context_pairs])
+            train_ctx_inputs_tensor: torch.Tensor = torch.stack([cast(torch.Tensor, pair.context_input) for pair in train_context_pairs_list])
+            train_ctx_outputs_tensor: torch.Tensor = torch.stack([cast(torch.Tensor, pair.context_output) for pair in train_context_pairs_list])
+            test_ctx_inputs_tensor: torch.Tensor = torch.stack([cast(torch.Tensor, pair.context_input) for pair in test_context_pairs_list])
+            test_ctx_outputs_tensor: torch.Tensor = torch.stack([cast(torch.Tensor, pair.context_output) for pair in test_context_pairs_list])
         except Exception as e:
             raise ValueError(f"Failed to process context pairs: {str(e)}")
 
         # Create datasets
         train_dataset = TensorDataset(
-            train_inputs, train_outputs, 
-            train_ctx_inputs, train_ctx_outputs, 
+            train_inputs_tensor, train_outputs_tensor, 
+            train_ctx_inputs_tensor, train_ctx_outputs_tensor, 
             train_task_ids_tensor
         )
         test_dataset = TensorDataset(
-            test_inputs, test_outputs,
-            test_ctx_inputs, test_ctx_outputs, 
+            test_inputs_tensor, test_outputs_tensor,
+            test_ctx_inputs_tensor, test_ctx_outputs_tensor, 
             test_task_ids_tensor
         )
 
