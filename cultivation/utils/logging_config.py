@@ -62,7 +62,7 @@ def setup_logging(log_file: Optional[str] = None):
     # These handlers will be used by the root logger, configured by basicConfig.
     # The console handler for the root logger should write to the *original* stderr.
     root_console_handler: logging.StreamHandler = logging.StreamHandler(sys.__stderr__)
-    root_handlers: List[logging.StreamHandler] = [root_console_handler]
+    root_handlers: List[logging.Handler] = [root_console_handler]
     if log_file:
         file_handler: logging.FileHandler = logging.FileHandler(log_file) # FileHandler is a StreamHandler
         root_handlers.append(file_handler) # type: ignore[arg-type] # Mypy struggles with FileHandler vs StreamHandler[TextIO]
