@@ -11,6 +11,7 @@ from omegaconf import DictConfig, OmegaConf
 
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+from pytorch_lightning.loggers import TensorBoardLogger
 
 from cultivation.systems.arc_reactor.jarc_reactor.data.data_module import MyDataModule
 from cultivation.systems.arc_reactor.jarc_reactor.utils.train import TransformerTrainer
@@ -172,7 +173,7 @@ def main_app(cfg: DictConfig) -> None:
     # 6. Setup ModelCheckpoint callback
     # dirpath will be relative to Hydra's output directory
     checkpoint_callback = ModelCheckpoint(
-        dirpath=hydra.utils.to_absolute_path(cfg.training.checkpoint_dir), 
+        dirpath=f"{cfg.training.training_log_dir}/checkpoints", 
         filename='model-{epoch:02d}-{step}-val_loss={val_loss:.4f}',
         save_top_k=cfg.training.get('save_top_k', 1),
         monitor=cfg.training.get('monitor_metric', 'val_loss'),
@@ -215,6 +216,13 @@ def main_app(cfg: DictConfig) -> None:
         trainer_precision = int(trainer_precision)
 
     print_stdout_status("Before Trainer() init")
+    # 7. Setup Logger
+    tensorboard_logger = TensorBoardLogger(
+        save_dir=hydra.utils.to_absolute_path(cfg.training.training_log_dir),
+        name="lightning_logs"
+    )
+    main_logger.info(f"TensorBoard logger configured. Save dir: {tensorboard_logger.save_dir}")
+
     trainer = Trainer(
         max_epochs=cfg.training.max_epochs,
         enable_progress_bar=cfg.training.get('enable_progress_bar', True),
@@ -223,7 +231,7 @@ def main_app(cfg: DictConfig) -> None:
         log_every_n_steps=cfg.training.get('log_every_n_steps', 50),
         detect_anomaly=cfg.training.get('detect_anomaly', False),
         enable_checkpointing=True, # Handled by ModelCheckpoint callback
-        default_root_dir=cfg.training.training_log_dir, # Log files will go into the unified training log directory
+        logger=tensorboard_logger,
         accelerator=accelerator_type,
         devices=devices_val,
         fast_dev_run=cfg.training.fast_dev_run
