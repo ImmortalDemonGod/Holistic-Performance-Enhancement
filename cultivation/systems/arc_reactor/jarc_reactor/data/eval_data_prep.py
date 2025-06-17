@@ -8,15 +8,12 @@ import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import torch
 from torch.utils.data import DataLoader, TensorDataset
-from omegaconf import DictConfig 
+from omegaconf import DictConfig
 
-from cultivation.utils.logging_config import setup_logging
 # from cultivation.systems.arc_reactor.jarc_reactor.config import config, include_synthetic_training_data, synthetic_dir # Removed old config
-from cultivation.systems.arc_reactor.jarc_reactor.data.context_data import ContextPair
+from cultivation.systems.arc_reactor.jarc_reactor.data.context_data import ContextPair # Keep this one
 from cultivation.systems.arc_reactor.jarc_reactor.utils.padding_utils import pad_to_fixed_size
-from .data_loading_utils import inspect_data_structure 
-from ..config.config_schema import ContextTensorConfig 
-from .context_data import ContextPair 
+from .data_loading_utils import inspect_data_structure
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +21,7 @@ logger = logging.getLogger(__name__)
 SingleFileResultType = Tuple[torch.Tensor, torch.Tensor, str, ContextPair]
 LoadSingleFileReturnType = Tuple[List[SingleFileResultType], List[SingleFileResultType]]
 
-def load_context_pair(filepath, task_id, context_map):
+def load_context_pair(filepath: str, task_id: str, context_map: Dict[str, ContextPair]):
     try:
         with open(filepath, 'rb') as f:
             data = orjson.loads(f.read())
@@ -49,7 +46,7 @@ def load_context_pair(filepath, task_id, context_map):
     except Exception as e:
         logger.error(f"Error loading context for task '{task_id}' from '{filepath}': {str(e)}")
 
-def load_context_pairs(directory, context_map):
+def load_context_pairs(directory: str, context_map: Dict[str, ContextPair]):
     logger.info(f"Loading context pairs from '{directory}'...")
     json_files = [f for f in os.listdir(directory) if f.endswith('.json')]
     with ThreadPoolExecutor() as executor:
