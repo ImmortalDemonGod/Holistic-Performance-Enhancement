@@ -1,0 +1,31 @@
+# Default training configuration
+
+batch_size: 1
+learning_rate: 0.00002009
+max_epochs: 100
+
+# 'auto' will resolve to 'gpu' if available, else 'cpu' in the application logic.
+# Alternatively, set to 'cpu' or 'gpu' directly.
+device_choice: "auto"
+
+# Precision: 16 (mixed), 32 (full), 64 (double), 'bf16' (bfloat16)
+precision: 32
+
+gradient_clip_val: 1.0
+
+fast_dev_run: false # Set to true for a quick development run (e.g., 1 batch)
+
+train_from_checkpoint: false
+
+include_synthetic_training_data: false
+current_data_is_synthetic: false
+
+training_data_dir: "cultivation/systems/arc_reactor/jarc_reactor/data/training_data/training"
+synthetic_data_dir: "cultivation/systems/arc_reactor/jarc_reactor/data/synthetic_data/training"
+
+checkpoint_dir: "jarc_reactor/checkpoints" # Directory to save model checkpoints
+training_log_dir: "cultivation/systems/arc_reactor/logs/training" # Directory to save model training logs
+
+# Related global settings from original config.py
+# calculate_parameters: true # Whether to calculate and print total param size (can be a script flag or app logic)
+# run_for_100_epochs: true # This seems like a specific run condition, better handled by script logic or overrides

@@ -1,0 +1,18 @@
+# Default evaluation configuration
+
+# Mode can be: 'training-validation', 'training-train', 'evaluation-only', 'all'
+mode: 'all'
+
+output_dir: 'evaluation_results'
+debug_mode: true  # Enable extensive debugging during evaluation
+save_predictions: true  # Save model predictions for analysis
+create_submission: true # Whether to create a submission file (e.g., for Kaggle)
+
+# Data directory for evaluation. Can be overridden by EVALUATION_DATA_DIR environment variable.
+# The path here is relative to the cultivation root, assuming the application runs from there.
+# Or, it can be an absolute path.
+data_dir: "${oc.env:EVALUATION_DATA_DIR,cultivation/systems/arc_reactor/jarc_reactor/data/evaluation_data}"
+
+# Synthetic data settings for evaluation
+include_synthetic_data: false
+synthetic_data_dir: "cultivation/systems/arc_reactor/jarc_reactor/data/synthetic_data/evaluation"

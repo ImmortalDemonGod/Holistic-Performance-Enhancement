@@ -292,5 +292,36 @@ docs_file_map.txt
 *.sw?
 # OS specific
 cultivation/literature/pdf/molecular_biology_of_the_cell_2022.pdf
+# Running data
+walk_segments.csv
+walk_segments_out.csv
+run_segments_out.csv
+walk_over_time.txt
+run_summary.csv
+
+# Notebooks
+*.ipynb
 
 cultivation/scripts/software/github_automation_output/
+# From JARC-Reactor subtree
+.aider*
+task_id_map.json
+.tensorboard_env/*
+cultivation/data/raw/arc_prize_2025/*
+cultivation/systems/arc_reactor/jarc_reactor/data/training_data/sythtraining/
+cultivation/systems/george/*
+cultivation/systems/george0_2_5.zip
+
+# JARC Reactor specific data directories (training and evaluation)
+cultivation/systems/arc_reactor/jarc_reactor/data/evaluation_data/*
+cultivation/systems/arc_reactor/jarc_reactor/data/training_data/evaluation_2_tasks/*
+cultivation/systems/arc_reactor/jarc_reactor/data/training_data/synthtraining/*
+cultivation/systems/arc_reactor/jarc_reactor/data/training_data/training/*
+cultivation/systems/arc_reactor/jarc_reactor/data/training_data/training_2_tasks/*
+cultivation/systems/arc_reactor/evaluation_results/*
+cultivation/systems/arc_reactor/dist/
+cultivation/systems/arc_reactor/jarc_reactor/tests/test_outputs/*
+cultivation/systems/arc_reactor/jarc_optuna.db
+cultivation/systems/arc_reactor/jarc_reactor/evaluation/finetuning_results/*
+cultivation/systems/arc_reactor/jarc_reactor/evaluation/evaluation_results/*
+jarc_optuna.db

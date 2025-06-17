@@ -1,0 +1,6 @@
+# Default scheduler configuration
+
+use_cosine_annealing: true
+T_0: 4                # Number of epochs for the first restart in CosineAnnealingWarmRestarts
+T_mult: 2             # Multiplicative factor to increase T_0 after each restart
+eta_min: 0.0000004    # Minimum learning rate (4e-7)

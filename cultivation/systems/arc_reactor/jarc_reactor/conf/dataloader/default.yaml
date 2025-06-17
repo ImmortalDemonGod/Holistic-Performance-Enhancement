@@ -1,0 +1,6 @@
+# Default values for the dataloader configuration.
+# These align with the DataLoaderConfig schema.
+num_workers: 4
+pin_memory: false
+drop_last_train: false
+drop_last_eval: false

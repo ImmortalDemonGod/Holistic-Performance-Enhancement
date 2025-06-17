@@ -1,0 +1,70 @@
+# Default Optuna configuration
+
+delete_study: false
+
+n_trials: 1
+study_name: "jarc_optimization_v3"
+storage_url: "sqlite:///jarc_optuna.db"
+
+param_ranges:
+  # Model Architecture Parameters
+  d_model:
+    _target_: cultivation.systems.arc_reactor.jarc_reactor.config_schema.IntRange
+    low: 32
+    high: 2048
+    step: 16
+  heads:
+    _target_: cultivation.systems.arc_reactor.jarc_reactor.config_schema.CategoricalChoice
+    choices: [2, 4, 8, 16, 32, 64]
+  encoder_layers:
+    _target_: cultivation.systems.arc_reactor.jarc_reactor.config_schema.IntRange
+    low: 1
+    high: 12
+  decoder_layers:
+    _target_: cultivation.systems.arc_reactor.jarc_reactor.config_schema.IntRange
+    low: 1
+    high: 12
+  d_ff:
+    _target_: cultivation.systems.arc_reactor.jarc_reactor.config_schema.IntRange
+    low: 64
+    high: 2048
+    step: 64
+  dropout_rate:
+    _target_: cultivation.systems.arc_reactor.jarc_reactor.config_schema.FloatRange
+    low: 0.01
+    high: 0.7
+  # Context Encoder Parameters
+  context_encoder_d_model:
+    _target_: cultivation.systems.arc_reactor.jarc_reactor.config_schema.IntRange
+    low: 32
+    high: 512
+    step: 32
+  context_encoder_heads:
+    _target_: cultivation.systems.arc_reactor.jarc_reactor.config_schema.CategoricalChoice
+    choices: [2, 4, 8]
+  # Training Parameters
+  batch_size:
+    _target_: cultivation.systems.arc_reactor.jarc_reactor.config_schema.IntRange
+    low: 8
+    high: 512
+    log: true
+  learning_rate:
+    _target_: cultivation.systems.arc_reactor.jarc_reactor.config_schema.FloatRange
+    low: 0.000001
+    high: 0.1
+    log: true
+  max_epochs:
+    _target_: cultivation.systems.arc_reactor.jarc_reactor.config_schema.IntRange
+    low: 4
+    high: 5
+    step: 1
+  gradient_clip_val:
+    _target_: cultivation.systems.arc_reactor.jarc_reactor.config_schema.FloatRange
+    low: 0.0
+    high: 5.0
+
+pruning:
+  n_warmup_steps: 5
+  n_startup_trials: 10
+  patience: 20
+  pruning_percentile: 25
