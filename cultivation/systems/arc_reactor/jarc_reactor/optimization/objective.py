@@ -3,9 +3,15 @@
 import torch
 import logging
 from dataclasses import dataclass
+from cultivation.systems.arc_reactor.jarc_reactor.config_schema import (
+    IntRange,
+    FloatRange,
+    CategoricalChoice,
+)
 import optuna
 from torch.utils.data import DataLoader
-from omegaconf import DictConfig, OmegaConf # Hydra config classes
+from omegaconf import DictConfig, OmegaConf
+from hydra.utils import instantiate # Hydra config classes
 from cultivation.systems.arc_reactor.jarc_reactor.utils.model_factory import create_transformer_trainer
 from pytorch_lightning import Trainer, Callback
 from pytorch_lightning.callbacks import EarlyStopping
@@ -31,83 +37,70 @@ class TrialMetrics:
         logger.debug(f"  Val Accuracy: {self.val_accuracy:.4f}")
         logger.debug(f"  Memory Used: {self.memory_used:.2f} MB")
 
-def create_trial_config(trial, base_config: DictConfig) -> DictConfig:
-    """Create a new config with trial-suggested values"""
-    try:
-        logger.debug("Creating trial config")
-        
-        # First suggest number of heads (power of 2)
-        heads = trial.suggest_categorical("heads", [2, 4, 8, 16, 32])
-        
-        # Then suggest d_model ensuring it's divisible by heads
-        d_model_min = ((32 + heads - 1) // heads) * heads  # Round up to nearest multiple of heads
-        d_model_max = (2048 // heads) * heads  # Round down to nearest multiple of heads
-        d_model = trial.suggest_int("d_model", d_model_min, d_model_max, step=heads)
-        
-        logger.debug(f"Selected heads={heads}, d_model={d_model}")
-        assert d_model % heads == 0, f"d_model ({d_model}) must be divisible by heads ({heads})"
-        
-        # Ensure d_ff is larger than d_model
-        d_ff_min = max(64, d_model)
-        d_ff = trial.suggest_int("d_ff", d_ff_min, 2048, step=64)
-        
-        # Other parameters
-        encoder_layers = trial.suggest_int("encoder_layers", 1, 12)
-        decoder_layers = trial.suggest_int("decoder_layers", 1, 12)
-        dropout_rate_val = trial.suggest_float("dropout_rate", 0.01, 0.7) # Changed from 'dropout'
-        
-        # Context encoder parameters
-        context_encoder_heads = trial.suggest_categorical("context_encoder_heads", [2, 4, 8])
-        context_encoder_d_model = trial.suggest_int(
-            "context_encoder_d_model",
-            context_encoder_heads * 16,  # Minimum size that's divisible by heads
-            512,
-            step=context_encoder_heads
-        )
-        
-        # Create a mutable copy of the base_config to modify for this trial
-        # We'll update model and training parameters directly in this copy.
-        trial_cfg_dict = OmegaConf.to_container(base_config, resolve=True)
-        
-        # Update model parameters from trial suggestions
-        trial_cfg_dict['model']['d_model'] = d_model
-        trial_cfg_dict['model']['encoder_layers'] = encoder_layers
-        trial_cfg_dict['model']['decoder_layers'] = decoder_layers
-        trial_cfg_dict['model']['heads'] = heads
-        trial_cfg_dict['model']['d_ff'] = d_ff
-        trial_cfg_dict['model']['dropout_rate'] = dropout_rate_val # Changed from 'dropout'
-        trial_cfg_dict['model']['context_encoder_d_model'] = context_encoder_d_model
-        trial_cfg_dict['model']['context_encoder_heads'] = context_encoder_heads
-        # Other model params like input_dim, seq_len, output_dim, lora etc., remain from base_config
+def create_trial_config(trial: optuna.Trial, base_config: DictConfig) -> DictConfig:
+    """Create a new config with trial-suggested values based on the structured schema."""
+    logger.debug("Creating trial config from structured schema")
+    
+    trial_cfg_dict = OmegaConf.to_container(base_config, resolve=True)
+    suggested_params = {}
 
-        # Update training parameters from trial suggestions
-        trial_cfg_dict['training']['batch_size'] = trial.suggest_int("batch_size", 8, 512, step=8)
-        trial_cfg_dict['training']['learning_rate'] = trial.suggest_float("learning_rate", 1e-6, 1e-1, log=True)
-        trial_cfg_dict['training']['max_epochs'] = trial.suggest_int("max_epochs", 
-                                                                   base_config.training.get('min_optuna_epochs', 4), 
-                                                                   base_config.training.get('max_optuna_epochs', 10), 
-                                                                   step=1)
-        # Other training params like device_choice, precision, etc., remain from base_config
+    # --- Suggest parameters based on the structured schema ---
+    param_ranges = instantiate(base_config.optuna.param_ranges)
 
-        new_config = OmegaConf.create(trial_cfg_dict)
+
+
+    # Suggest all other parameters
+    for name, p_range in param_ranges.items():
+        if name in suggested_params:
+            continue
+
+        value = None
+        if isinstance(p_range, CategoricalChoice):
+            value = trial.suggest_categorical(name, p_range.choices)
+        elif isinstance(p_range, IntRange):
+            low, high, step = p_range.low, p_range.high, p_range.step
+            # Handle special dependency logic
+            if name == 'd_model':
+                heads = suggested_params.get("heads", base_config.model.heads)
+                low = ((low + heads - 1) // heads) * heads
+                high = (high // heads) * heads
+                step = step if step % heads == 0 else heads
+            elif name == 'd_ff':
+                d_model = suggested_params.get('d_model', base_config.model.d_model)
+                low = max(low, d_model)
+            elif name == 'context_encoder_d_model':
+                ce_heads = suggested_params.get("context_encoder_heads", base_config.model.context_encoder.heads)
+                low = ((low + ce_heads - 1) // ce_heads) * ce_heads
+                high = (high // ce_heads) * ce_heads
+                step = step if step % ce_heads == 0 else ce_heads
+
+            value = trial.suggest_int(name, low, high, step=step, log=p_range.log)
+        elif isinstance(p_range, FloatRange):
+            value = trial.suggest_float(name, p_range.low, p_range.high, step=p_range.step, log=p_range.log)
+        else:
+            raise TypeError(f"Unsupported parameter range type for '{name}': {type(p_range)}")
         
-        # Validate dimensions using the new DictConfig structure
-        if not validate_dimensions(new_config.model): # Pass the model part of DictConfig
-            raise ValueError("Invalid model dimensions")
-        
-        # Validate dimensions using the new DictConfig structure
-        # This was already corrected in the previous step, but the lint error points here.
-        # The original replacement was: if not validate_dimensions(new_config.model): # Pass the model part of DictConfig
-        # Ensuring it's correctly applied.
-        if not validate_dimensions(new_config.model):
-            raise ValueError("Invalid model dimensions")
-        
-        logger.debug(f"Trial config created with params: {trial.params}")
-        return new_config
-        
-    except Exception as e:
-        logger.error(f"Error creating trial config: {str(e)}")
-        raise
+        suggested_params[name] = value
+
+    # --- Update the config dictionary with the suggested parameters ---
+    for name, value in suggested_params.items():
+        if name.startswith('context_encoder_'):
+            key = name.replace('context_encoder_', '')
+            trial_cfg_dict['model']['context_encoder'][key] = value
+        elif name in trial_cfg_dict.get('model', {}):
+            trial_cfg_dict['model'][name] = value
+        elif name in trial_cfg_dict.get('training', {}):
+            trial_cfg_dict['training'][name] = value
+        else:
+            logger.warning(f"Parameter '{name}' not found in model or training config sections.")
+
+    new_config = OmegaConf.create(trial_cfg_dict)
+
+    if not validate_dimensions(new_config.model):
+        raise ValueError("Invalid model dimensions")
+    
+    logger.debug(f"Trial config created with params: {trial.params}")
+    return new_config
 
 
 def validate_dimensions(model_cfg: DictConfig): # Expects model section of DictConfig
