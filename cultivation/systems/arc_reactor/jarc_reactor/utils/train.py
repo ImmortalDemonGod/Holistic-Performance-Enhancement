@@ -46,6 +46,8 @@ class TransformerTrainer(pl.LightningModule):
         self.model = TransformerModel(
             input_dim=config.model.input_dim,
             seq_len=config.model.seq_len,
+            max_h=config.model.max_h,
+            max_w=config.model.max_w,
             d_model=config.model.d_model,
             encoder_layers=config.model.encoder_layers,
             decoder_layers=config.model.decoder_layers,
