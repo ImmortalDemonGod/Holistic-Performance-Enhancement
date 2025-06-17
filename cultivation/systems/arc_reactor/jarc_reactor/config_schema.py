@@ -1,7 +1,8 @@
 # cultivation/systems/arc_reactor/jarc_reactor/config_schema.py
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, ClassVar
+from typing import List, Dict, Any, Optional, ClassVar, Union
+from enum import Enum
 
 # It's good practice to import MISSING for optional fields without defaults
 # from hydra.core.config_store import OmegaConf
@@ -37,13 +38,25 @@ class ModelConfigSchema:
     lora: LoraConfig = field(default_factory=LoraConfig)
     checkpoint_path: Optional[str] = None
 
+class DeviceChoice(Enum):
+    AUTO = "auto"
+    CPU = "cpu"
+    GPU = "gpu"
+
+
+class PrecisionOpt(Enum):
+    BF16 = "bf16"
+    MIXED_16 = "16-mixed"
+    MIXED_32 = "32-mixed"
+
+
 @dataclass
 class TrainingConfigSchema:
     batch_size: int = 1
     learning_rate: float = 0.00002009
     max_epochs: int = 100
-    device_choice: str = "auto"  # 'auto', 'cpu', 'gpu'
-    precision: Any = 32 # int or str like 'bf16'
+    device_choice: DeviceChoice = DeviceChoice.AUTO
+    precision: Union[int, PrecisionOpt] = 32
     gradient_clip_val: float = 1.0
     fast_dev_run: bool = False
     train_from_checkpoint: bool = False
@@ -68,6 +81,14 @@ class IntRange:
     step: int = 1
     log: bool = False
 
+    def __post_init__(self):
+        if self.low >= self.high:
+            raise ValueError(f"IntRange 'low' ({self.low}) must be less than 'high' ({self.high}).")
+        if self.step <= 0:
+            raise ValueError(f"IntRange 'step' ({self.step}) must be positive.")
+        if self.log and self.low <= 0:
+            raise ValueError(f"Log-scaled IntRange requires 'low' ({self.low}) to be positive.")
+
 @dataclass
 class FloatRange:
     _target_: ClassVar[str] = "cultivation.systems.arc_reactor.jarc_reactor.config_schema.FloatRange"
@@ -76,6 +97,14 @@ class FloatRange:
     high: float
     step: Optional[float] = None
     log: bool = False
+
+    def __post_init__(self):
+        if self.low >= self.high:
+            raise ValueError(f"FloatRange 'low' ({self.low}) must be less than 'high' ({self.high}).")
+        if self.log and self.low <= 0:
+            raise ValueError(f"Log-scaled FloatRange requires 'low' ({self.low}) to be positive.")
+        if self.step is not None and self.step <= 0:
+            raise ValueError(f"If provided, FloatRange 'step' ({self.step}) must be positive.")
 
 @dataclass
 class CategoricalChoice:
