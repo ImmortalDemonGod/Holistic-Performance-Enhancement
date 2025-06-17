@@ -4,54 +4,53 @@ This document provides an overview of the **JARC-Reactor**, a machine learning s
 
 ---
 
-## Table of Contents
-1.  [Overview](#overview)
-2.  [Getting Started](#getting-started)
-    -   [Prerequisites](#prerequisites)
-    -   [Running the Model](#running-the-model)
-    -   [Running Tests](#running-tests)
-3.  [System Architecture](#system-architecture)
-4.  [Configuration](#configuration)
-5.  [Integration Details](#integration-details)
-
----
-
 ## 1. Overview
 
-The JARC-Reactor is a Transformer-based model built with PyTorch Lightning and configured using Hydra. It is designed to learn and solve abstract reasoning tasks presented as 2D grids of colored cells. The system includes a complete pipeline for data preparation, model training, and evaluation.
+The JARC-Reactor is a Transformer-based model built with PyTorch Lightning and configured using Hydra. It is designed to learn and solve abstract reasoning tasks presented as 2D grids of colored cells. The system includes a complete pipeline for data preparation, model training, and evaluation, with a unified logging and artifact management system.
 
-## 2. Getting Started
+## 2. System Architecture
 
-All commands should be run from the root of the `Holistic-Performance-Enhancement` project.
+The integrated system is organized as follows:
+
+-   `cultivation/systems/arc_reactor/`: The root of the integrated system.
+    -   `jarc_reactor/`: The core Python package for the model.
+        -   `conf/`: Hydra configuration files (`.yaml`).
+        -   `data/`: Data loading and preparation modules.
+        -   `models/`: Core model components.
+        -   `utils/`: Utility scripts and the main `LightningModule`.
+        -   `run_model.py`: The main entry point for training and evaluation.
+    -   `logs/`: **Unified directory for all logs and artifacts.**
+    -   `README.md`: This file.
+
+## 3. Getting Started
+
+All commands should be run from the root of the `Holistic-Performance-Enhancement` project to ensure correct path resolution.
 
 ### Prerequisites
 
-Ensure all dependencies are installed. Key dependencies include:
+Ensure all dependencies from the root `requirements.txt` file are installed. Key dependencies include:
 -   PyTorch & PyTorch Lightning
 -   Hydra & OmegaConf
 -   NumPy & Pandas
 
-*Refer to the project's main dependency files for specific versions.*
-
 ### Running the Model
 
-To run a training session, execute the `run_model.py` script as a module to ensure correct import resolution:
+To run a training session, execute the `run_model.py` script as a module. Any parameter from the `jarc_reactor/conf/` directory can be overridden via the command line.
 
+**Base Command:**
 ```bash
-PYTHONPATH=. python -m cultivation.systems.arc_reactor.jarc_reactor.run_model [HYDRA_OVERRIDES]
+python -m cultivation.systems.arc_reactor.jarc_reactor.run_model [HYDRA_OVERRIDES]
 ```
 
 **Example: "First Light" Integration Test**
 
-This command runs a quick, one-step training and validation cycle to verify the system is working correctly:
+This command runs a quick, one-epoch cycle to verify the system is working correctly. It uses the default logging paths.
 
 ```bash
-PYTHONPATH=. python -m cultivation.systems.arc_reactor.jarc_reactor.run_model \
+python -m cultivation.systems.arc_reactor.jarc_reactor.run_model \
     training.max_epochs=1 \
     training.batch_size=1 \
-    training.fast_dev_run=true \
-    logging.level=DEBUG \
-    logging.log_dir='jarc_reactor/logs/first_light_test'
+    logging.level=DEBUG
 ```
 
 ### Running Tests
@@ -59,28 +58,42 @@ PYTHONPATH=. python -m cultivation.systems.arc_reactor.jarc_reactor.run_model \
 The unit tests are located in `cultivation/systems/arc_reactor/jarc_reactor/tests/`. To run them, use `pytest`:
 
 ```bash
-PYTHONPATH=. pytest cultivation/systems/arc_reactor/jarc_reactor/tests/
+pytest cultivation/systems/arc_reactor/jarc_reactor/tests/
 ```
 
-## 3. System Architecture
+## 4. Unified Logging System
 
-The `jarc_reactor` codebase is organized as follows:
+All outputs from the system are consolidated into the `cultivation/systems/arc_reactor/logs/` directory, organized as follows:
 
--   `jarc_reactor/`: The root of the Python package.
-    -   `conf/`: Hydra configuration files (`.yaml`) for managing all parameters.
-    -   `data/`: Modules for data loading (`ARCDataset`, `ARCDataModule`) and preparation.
-    -   `models/`: Core model components (`TransformerModel`, `ContextEncoderModule`).
-    -   `utils/`: Utility scripts, including the `TransformerTrainer` (`LightningModule`) and logging setup.
-    -   `run_model.py`: The main entry point for training and evaluation.
+```
+logs/
+├── app/
+│   ├── .hydra/             # Hydra's run-specific outputs (configs, overrides)
+│   └── jarc_reactor_app.log  # Main application log file
+│
+└── training/
+    ├── checkpoints/        # Saved model checkpoints (.ckpt)
+    ├── lightning_logs/     # TensorBoard event files
+    │   └── version_X/
+    ├── metrics_version_X.csv # Extracted metrics per run
+    └── training_plots.png    # Visualization of training metrics
+```
 
-## 4. Configuration
+-   **Application Logs (`logs/app`):** Contains the main application log file and all of Hydra's metadata for each run, ensuring reproducibility.
+-   **Training Artifacts (`logs/training`):** Contains all outputs from PyTorch Lightning, including TensorBoard logs for visualization, model checkpoints, and extracted metric reports.
 
-The system uses [Hydra](https://hydra.cc/) for configuration.
+## 5. Configuration
+
+The system uses [Hydra](https://hydra.cc/) for all configuration.
 
 -   **Main Config**: `jarc_reactor/conf/config.yaml`
--   **Defaults**: Stored in subdirectories within `jarc_reactor/conf/`.
--   **Overrides**: Any parameter can be overridden from the command line.
+-   **Config Groups**: Stored in subdirectories within `jarc_reactor/conf/` (e.g., `training`, `logging`).
+-   **Schema**: The structure of the configuration is defined in `jarc_reactor/config_schema.py`.
 
-## 5. Integration Details
+## 6. Continuous Integration (CI)
+
+This system is covered by a CI workflow defined in `.github/workflows/arc-ci.yml`. This workflow automatically runs linting and unit tests on any changes pushed to the `cultivation/systems/arc_reactor/` path, ensuring code quality and stability.
+
+## 7. Integration Details
 
 The original `jarc-reactor` codebase was integrated into this project using `git subtree`. All import paths were refactored to align with the `cultivation` project structure, and dependencies were harmonized to create a seamless, unified development environment.
