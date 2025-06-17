@@ -110,7 +110,11 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                     torch.tensor(item['output'], dtype=torch.long),
                     target_shape=(30, 30)
                 )
-                train_results.append((input_tensor, output_tensor, task_id, context_map[task_id]))
+                context_pair = context_map.get(task_id)
+                if context_pair is None:
+                    logger.warning(f"Context missing for task {task_id} in training data – skipping sample.")
+                    continue
+                train_results.append((input_tensor, output_tensor, task_id, context_pair))
 
             # Process test data
             test_results = []
@@ -123,7 +127,11 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                     torch.tensor(item['output'], dtype=torch.long),
                     target_shape=(30, 30)
                 )
-                test_results.append((input_tensor, output_tensor, task_id, context_map[task_id]))
+                context_pair = context_map.get(task_id)
+                if context_pair is None:
+                    logger.warning(f"Context missing for task {task_id} in test data – skipping sample.")
+                    continue
+                test_results.append((input_tensor, output_tensor, task_id, context_pair))
 
             return train_results, test_results
         except Exception as e:
