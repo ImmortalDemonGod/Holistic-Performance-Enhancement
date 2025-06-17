@@ -185,7 +185,22 @@ Follow these steps to get up and running:
         *   Enhancing analytics for the **Strength Training domain**.
         *   Implementing a new CLI command for the **Flashcore system**.
         *   Adding test cases to an existing data pipeline.
-    *   Create a feature branch, make your changes, add tests, and verify locally with `task lint` and `task test` before submitting a Pull Request.
+    *   Create a feature branch, make yourchanges, add tests, and verify locally with `task lint` and `task test` before submitting a Pull Request.
+
+    **Task Completion Verification Checklist (especially for AI Agents):**
+    Before considering a development task complete and ready for PR, ensure ALL of the following steps are VERIFIED (do not rely on exit codes alone; inspect logs thoroughly):
+
+        1.  **Execution of New/Modified Components & Log Review:**
+            *   Any newly created or modified executable components (e.g., scripts, `Taskfile.yml` commands) have been run locally.
+            *   Their output logs MUST be meticulously reviewed for correctness, expected behavior, and the absence of errors or warnings.
+        2.  **Automated Tests Passed & Log Review:**
+            *   All relevant automated tests, particularly any newly added ones, pass when executed via the project's standard testing command (e.g., `task test`).
+            *   Output logs MUST be meticulously reviewed.
+        3.  **Code Quality Checks Passed & Log Review:**
+            *   All code and documentation conform to project standards, as verified by linters and other quality checks (e.g., `task lint`).
+            *   Output logs MUST be meticulously reviewed.
+        4.  **Core Task Objective Achieved & Verified:**
+            *   The primary functional goal of the task has been confirmed. This may involve manual inspection, reviewing generated files, or other verification methods if not fully covered by automated tests.
 
 ---
 
