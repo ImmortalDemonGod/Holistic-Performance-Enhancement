@@ -21,7 +21,13 @@ from .data_loading_utils import inspect_data_structure # Added import
 setup_logging()
 logger = logging.getLogger(__name__)
 
+# Note: inspect_data_structure is imported from .data_loading_utils
 def load_context_pair(filepath, task_id, context_map):
+    """
+    Loads the first training example from a JSON file and stores its input and output as a padded ContextPair in the context map.
+
+    If the file contains a 'train' key, the first example from 'train' is used; otherwise, the file is treated as a single example. Input and output fields are padded to a fixed size of 30x30 and stored in the provided context map under the given task ID.
+    """
     try:
         with open(filepath, 'rb') as f:
             data = orjson.loads(f.read())
@@ -47,6 +53,11 @@ def load_context_pair(filepath, task_id, context_map):
         logger.error(f"Error loading context for task '{task_id}' from '{filepath}': {str(e)}")
 
 def load_context_pairs(directory, context_map):
+    """
+    Loads all context pairs from JSON files in a directory concurrently.
+
+    Each JSON file is processed in a separate thread, and the resulting context pairs are stored in the provided context map keyed by task ID.
+    """
     logger.info(f"Loading context pairs from '{directory}'...")
     json_files = [f for f in os.listdir(directory) if f.endswith('.json')]
     with ThreadPoolExecutor() as executor:
@@ -59,10 +70,27 @@ def load_context_pairs(directory, context_map):
 
 def load_main_data_concurrently(directory, context_map, train_inputs, train_outputs, train_task_ids, train_context_pairs,
                                 test_inputs, test_outputs, test_task_ids, test_context_pairs, is_synthetic=False):
-    """Load main dataset from the specified directory concurrently"""
+    """
+                                Concurrently loads and processes main dataset files from a directory into provided lists.
+
+                                Each JSON file is parsed to extract training and test examples, which are padded to a fixed size and associated with their context pairs. Supports both standard and synthetic data formats. Populates the given lists with input tensors, output tensors, task IDs, and context pairs for both training and test sets.
+                                """
     logger.info(f"Loading main dataset from '{directory}'{' (synthetic)' if is_synthetic else ''}...")
 
     def load_single_file(filepath, task_id):
+        """
+        Loads and processes a single dataset file, returning padded input/output tensors and associated metadata for training and test examples.
+
+        Args:
+            filepath: Path to the dataset JSON file.
+            task_id: Identifier for the task corresponding to the file.
+
+        Returns:
+            A tuple containing two lists:
+                - The first list contains tuples of (input_tensor, output_tensor, task_id, context_pair) for training examples.
+                - The second list contains the same structure for test examples.
+            If an error occurs during processing, both lists are empty.
+        """
         try:
             with open(filepath, 'rb') as f:
                 data = orjson.loads(f.read())
@@ -164,7 +192,19 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 test_context_pairs.append(context_pair)
 
 def _validate_and_inspect_path(cfg: DictConfig, directory: str) -> Path:
-    """Validates the data directory path and inspects a few files."""
+    """
+    Validates that the specified directory exists and is a directory, then inspects up to two JSON files within it for structural correctness.
+
+    Args:
+    	directory: Path to the data directory to validate and inspect.
+
+    Returns:
+    	The absolute Path object to the validated data directory.
+
+    Raises:
+    	FileNotFoundError: If the directory does not exist.
+    	NotADirectoryError: If the path is not a directory.
+    """
     logger.info(f"Preparing data from directory: {directory}")
     # Resolve path relative to Hydra's original working directory
     absolute_directory_path = hydra.utils.to_absolute_path(directory)
@@ -196,14 +236,25 @@ def _validate_and_inspect_path(cfg: DictConfig, directory: str) -> Path:
     return data_path
 
 def _load_raw_data(data_path: Path, is_synthetic: bool = False) -> dict:
-    """Loads context pairs and main data concurrently."""
+    """
+    Loads context pairs and main dataset examples from the specified directory concurrently.
+
+    The function populates lists for training and testing inputs, outputs, task IDs, and context pairs by first loading context pairs and then loading the main dataset files in parallel. Returns a dictionary containing all collected raw data lists.
+
+    Args:
+        data_path: Path to the directory containing the dataset files.
+        is_synthetic: Whether the data being loaded is synthetic data.
+
+    Returns:
+        A dictionary containing all collected raw data lists.
+    """
     train_inputs, train_outputs, train_task_ids = [], [], []
     test_inputs, test_outputs, test_task_ids = [], [], []
     context_map = {}
     train_context_pairs, test_context_pairs = [], []
 
     load_context_pairs(str(data_path), context_map)
-    
+
     logger.info("Loading main dataset...")
     load_main_data_concurrently(
         directory=str(data_path),
@@ -218,7 +269,7 @@ def _load_raw_data(data_path: Path, is_synthetic: bool = False) -> dict:
         test_task_ids=test_task_ids,
         test_context_pairs=test_context_pairs
     )
-    
+
     return {
         "train_inputs": train_inputs, "train_outputs": train_outputs, "train_task_ids": train_task_ids,
         "test_inputs": test_inputs, "test_outputs": test_outputs, "test_task_ids": test_task_ids,
@@ -226,7 +277,15 @@ def _load_raw_data(data_path: Path, is_synthetic: bool = False) -> dict:
     }
 
 def _process_and_create_tensors(raw_data: dict) -> dict:
-    """Converts data lists to tensors and creates task ID mappings."""
+    """
+    Converts raw data lists into PyTorch tensors and creates a mapping from task IDs to integer indices.
+
+    Args:
+        raw_data: A dictionary containing lists of training and testing inputs, outputs, task IDs, and context pairs.
+
+    Returns:
+        A dictionary with PyTorch tensors for train/test inputs, outputs, context inputs/outputs, task ID tensors, and a task ID to index mapping.
+    """
     # Create a sorted list of unique task_ids and the mapping
     unique_task_ids = sorted(set(raw_data["train_task_ids"] + raw_data["test_task_ids"]))
     task_id_map = {task_id: idx for idx, task_id in enumerate(unique_task_ids)}
@@ -261,6 +320,18 @@ def _process_and_create_tensors(raw_data: dict) -> dict:
     }
 
 def prepare_data(cfg: DictConfig, return_datasets: bool = False):
+    """
+    Prepares and processes training and validation data for model input.
+
+    Loads data from the directory specified in the Hydra configuration, validates and inspects the data files, processes them into PyTorch tensors, and packages them into TensorDataset or DataLoader objects. Also saves a mapping of task IDs to a JSON file for reference.
+
+    Args:
+        cfg: Hydra configuration object specifying data directories and parameters.
+        return_datasets: If True, returns raw TensorDataset objects; otherwise, returns DataLoader objects.
+
+    Returns:
+        A tuple of (train, validation) DataLoader objects if `return_datasets` is False, or TensorDataset objects if True.
+    """
     logger.info(f"prepare_data called. cfg.training.training_data_dir = {cfg.training.training_data_dir}")
     logger.info(f"prepare_data: cfg.training.synthetic_data_dir = {cfg.training.synthetic_data_dir}")
     logger.info(f"prepare_data: cfg.training.include_synthetic_training_data = {cfg.training.include_synthetic_training_data}")
@@ -271,7 +342,7 @@ def prepare_data(cfg: DictConfig, return_datasets: bool = False):
     # 1. Initialize paths and parameters from Hydra config
     directory = cfg.training.training_data_dir
     batch_size = cfg.training.batch_size
-    
+
     # 2. Validate path and inspect a sample of data files
     data_path = _validate_and_inspect_path(cfg, directory)
 
@@ -312,7 +383,7 @@ def prepare_data(cfg: DictConfig, return_datasets: bool = False):
     if return_datasets:
         logger.info("Returning TensorDatasets instead of DataLoaders.")
         return train_dataset, test_dataset
-    
+
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
     val_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0)
 

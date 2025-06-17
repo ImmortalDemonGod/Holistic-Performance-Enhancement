@@ -33,8 +33,14 @@ class DataContainers:
     test_task_ids_list: List[str]
     test_context_pairs_list: List[ContextPair]
 
+# Note: inspect_data_structure is imported from .data_loading_utils
 
 def load_context_pair(filepath: str, task_id: str, context_map: Dict[str, ContextPair]):
+    """
+    Loads and stores the context input and output tensors for a given task from a JSON file.
+
+    Extracts the first training example from the file, pads its input and output arrays to a fixed size, and saves them as a ContextPair in the provided context map keyed by task ID. Logs an error if loading or processing fails.
+    """
     try:
         with open(filepath, 'rb') as f:
             data = orjson.loads(f.read())
@@ -60,6 +66,11 @@ def load_context_pair(filepath: str, task_id: str, context_map: Dict[str, Contex
         logger.error(f"Error loading context for task '{task_id}' from '{filepath}': {str(e)}")
 
 def load_context_pairs(directory: str, context_map: Dict[str, ContextPair]):
+    """
+    Loads context pairs from all JSON files in a directory concurrently.
+
+    Each context pair is extracted and stored in the provided context map, keyed by task ID. Raises exceptions encountered during loading.
+    """
     logger.info(f"Loading context pairs from '{directory}'...")
     json_files = [f for f in os.listdir(directory) if f.endswith('.json')]
     with ThreadPoolExecutor() as executor:
@@ -76,10 +87,30 @@ def load_main_data_concurrently(
     data_containers: DataContainers,
     is_synthetic: bool = False
 ):
-    """Load main dataset from the specified directory concurrently"""
+    """
+    Concurrently loads and processes main dataset files from a directory into padded tensors.
+
+    Each JSON file is parsed to extract training and test examples, which are padded to fixed-size tensors and associated with their context pairs. Training and test data are separated based on the `is_synthetic` flag. The loaded tensors and metadata are appended to the provided data containers for further processing.
+
+    Args:
+        directory: Path to the directory containing dataset JSON files.
+        context_map: Mapping from task IDs to context pairs.
+        data_containers: DataContainers object to append processed training and test data.
+        is_synthetic: If True, treats all data as training data and skips test data.
+    """
     logger.info(f"Loading main dataset from '{directory}'{' (synthetic)' if is_synthetic else ''}...")
 
     def load_single_file(filepath: str, task_id: str) -> LoadSingleFileReturnType:
+        """
+        Loads and processes a single dataset file, returning padded tensors for training and test data.
+
+        Reads the specified JSON file, extracts training and test examples, pads input and output arrays to a fixed shape, and associates each example with its task ID and context pair. Returns lists of tuples for training and test data, or empty lists if an error occurs.
+
+        Returns:
+            A tuple containing two lists:
+                - List of (input_tensor, output_tensor, task_id, context_pair) for training data.
+                - List of (input_tensor, output_tensor, task_id, context_pair) for test data.
+        """
         try:
             with open(filepath, 'rb') as f:
                 data = orjson.loads(f.read())
@@ -145,9 +176,20 @@ def load_main_data_concurrently(
                 data_containers.test_context_pairs_list.append(context_pair)
 
 def prepare_data(cfg: DictConfig, return_datasets: bool = False):
-    """Prepare evaluation data with robust error handling using Hydra config."""
+    """
+    Prepares evaluation data for machine learning tasks using configuration settings.
+
+    Loads and validates data from JSON files in the specified directory, supporting both standard and synthetic datasets. Inspects data structure, loads context pairs and main data concurrently, pads and stacks tensors, maps task IDs, and packages the data into PyTorch datasets or DataLoaders. Handles errors robustly and logs progress throughout. Optionally saves a mapping from task IDs to indices for future reference.
+
+    Args:
+        cfg: Hydra configuration object specifying data directories, batch size, and synthetic data options.
+        return_datasets: If True, returns PyTorch TensorDataset objects; otherwise, returns DataLoader objects.
+
+    Returns:
+        Tuple of (train, test) datasets or DataLoaders, depending on `return_datasets`.
+    """
     # from jarc_reactor.config import Config # Old config system no longer needed
-    
+
     logger = logging.getLogger(__name__)
 
     batch_size = cfg.training.batch_size # Assuming eval uses training batch size for now
@@ -164,7 +206,7 @@ def prepare_data(cfg: DictConfig, return_datasets: bool = False):
         # For now, let's assume if include_synthetic is true, we ONLY use synthetic_data_path for this eval prep.
         # If merging is intended, this logic needs to be more complex.
         effective_data_dir = synthetic_data_path
-        is_synthetic_mode = True 
+        is_synthetic_mode = True
 
     logger.info(f"Starting data preparation with batch_size={batch_size} from directory {effective_data_dir}")
 
@@ -178,12 +220,12 @@ def prepare_data(cfg: DictConfig, return_datasets: bool = False):
     total_files = 0
     successful_files = 0
     log_limit = 2
-    
+
     # Get list of JSON files first
     json_files = [f for f in os.listdir(effective_data_dir) if f.endswith('.json')]
     if not json_files:
         raise ValueError(f"No JSON files found in {effective_data_dir}")
-    
+
     # Inspect data structure for a limited number of files
     for filename in json_files:
         total_files += 1
@@ -204,7 +246,7 @@ def prepare_data(cfg: DictConfig, return_datasets: bool = False):
     test_task_ids_list: List[str] = [] # Task IDs are strings initially
     context_map: Dict[str, ContextPair] = {}
     train_context_pairs_list: List[ContextPair] = []
-    test_context_pairs_list: List[ContextPair] = [] 
+    test_context_pairs_list: List[ContextPair] = []
 
     try:
         # Load context pairs first
@@ -245,7 +287,7 @@ def prepare_data(cfg: DictConfig, return_datasets: bool = False):
         unique_task_ids: List[str] = sorted(set(train_task_ids_list + test_task_ids_list))
         if not unique_task_ids:
             raise ValueError("No task IDs found in data")
-            
+
         task_id_map: Dict[str, int] = {task_id: idx for idx, task_id in enumerate(unique_task_ids)}
         logger.info(f"Created mapping for {len(unique_task_ids)} unique tasks")
 
@@ -276,13 +318,13 @@ def prepare_data(cfg: DictConfig, return_datasets: bool = False):
 
         # Create datasets
         train_dataset = TensorDataset(
-            train_inputs_tensor, train_outputs_tensor, 
-            train_ctx_inputs_tensor, train_ctx_outputs_tensor, 
+            train_inputs_tensor, train_outputs_tensor,
+            train_ctx_inputs_tensor, train_ctx_outputs_tensor,
             train_task_ids_tensor
         )
         test_dataset = TensorDataset(
             test_inputs_tensor, test_outputs_tensor,
-            test_ctx_inputs_tensor, test_ctx_outputs_tensor, 
+            test_ctx_inputs_tensor, test_ctx_outputs_tensor,
             test_task_ids_tensor
         )
 

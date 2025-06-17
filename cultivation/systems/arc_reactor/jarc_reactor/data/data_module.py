@@ -5,6 +5,11 @@ from cultivation.systems.arc_reactor.jarc_reactor.data.data_preparation import p
 import logging
 class MyDataModule(pl.LightningDataModule):
     def __init__(self, cfg: DictConfig):
+        """
+        Initializes the data module with the provided Hydra configuration.
+
+        Stores the configuration, extracts the batch size for data loading, and sets up a logger for the module.
+        """
         super().__init__()
         self.cfg = cfg # Store Hydra config
         self.batch_size = cfg.training.batch_size # Get batch_size from cfg
@@ -14,13 +19,18 @@ class MyDataModule(pl.LightningDataModule):
         self.test_dataset = None
 
     def setup(self, stage=None):
+        """
+        Prepares and assigns the training and validation datasets for the data module.
+
+        Attempts to load datasets using the provided configuration. Logs the number of samples loaded for each dataset. If dataset preparation fails, logs the error and re-raises the exception.
+        """
         # train_dataset, val_dataset, test_dataset are initialized to None in __init__
         try:
             datasets = prepare_data(
                 cfg=self.cfg,
                 return_datasets=True
             )
-            
+
             num_datasets = len(datasets) if isinstance(datasets, (list, tuple)) else 0
 
             if num_datasets == 3:
@@ -49,6 +59,11 @@ class MyDataModule(pl.LightningDataModule):
             raise
 
     def train_dataloader(self):
+        """
+        Returns a DataLoader for the training dataset with shuffling enabled.
+
+        The DataLoader uses the batch size specified in the configuration and configurable worker processes for data loading.
+        """
         dl_cfg = self.cfg.dataloader
         return DataLoader(
             self.train_dataset,
@@ -60,6 +75,11 @@ class MyDataModule(pl.LightningDataModule):
         )
 
     def val_dataloader(self):
+        """
+        Returns a DataLoader for the validation dataset.
+
+        The DataLoader uses the configured batch size, does not shuffle the data, and uses configurable worker processes.
+        """
         dl_cfg = self.cfg.dataloader
         return DataLoader(
             self.val_dataset,
@@ -71,6 +91,12 @@ class MyDataModule(pl.LightningDataModule):
         )
 
     def test_dataloader(self):
+        """
+        Returns a DataLoader for the test dataset, falling back to validation dataset if needed.
+
+        The DataLoader uses the configured batch size, does not shuffle the data, and uses configurable worker processes.
+        Logs appropriate warnings when falling back to validation dataset.
+        """
         dl_cfg = self.cfg.dataloader
         if self.test_dataset is not None:
             self.logger.info(f"Using dedicated test_dataset for testing with {len(self.test_dataset)} samples.")

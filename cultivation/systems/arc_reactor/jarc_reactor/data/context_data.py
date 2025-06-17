@@ -21,7 +21,7 @@ class ContextPair:
             return self.context_input.dtype, str(self.context_input.device)
         if self.context_output is not None and isinstance(self.context_output, torch.Tensor):
             return self.context_output.dtype, str(self.context_output.device)
-        
+
         return default_dtype, default_device
 
     def _validate_or_create_tensor(
@@ -53,6 +53,13 @@ class ContextPair:
             )
 
     def __post_init__(self):
+        """
+        Validates and initializes context_input and context_output tensors after dataclass creation.
+
+        Ensures that both context_input and context_output are PyTorch tensors of the expected shape.
+        If either is None, assigns a zero tensor of the correct shape and logs a warning.
+        Raises a ValueError if a provided tensor does not match the expected shape.
+        """
         default_dtype, default_device = self._determine_default_tensor_attributes()
 
         self.context_input = self._validate_or_create_tensor(
