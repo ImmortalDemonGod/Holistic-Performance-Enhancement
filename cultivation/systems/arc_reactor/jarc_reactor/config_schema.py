@@ -35,7 +35,7 @@ class ModelConfigSchema:
     encoder_dropout_rate: float = 0.61
     decoder_dropout_rate: float = 0.12
     lora: LoraConfig = field(default_factory=LoraConfig)
-    checkpoint_path: Optional[str] = "/workspaces/JARC-Reactor/lightning_logs/checkpoints/model-step=step=40-val_loss=val_loss=1.7084.ckpt"
+    checkpoint_path: Optional[str] = None
 
 @dataclass
 class TrainingConfigSchema:

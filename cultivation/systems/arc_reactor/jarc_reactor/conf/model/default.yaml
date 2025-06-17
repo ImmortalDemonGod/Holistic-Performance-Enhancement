@@ -26,4 +26,4 @@ lora:
   in_features: 128 # Default, consider making this dynamic or more configurable if needed
   out_features: 128 # Default, consider making this dynamic or more configurable if needed
 
-checkpoint_path: "/workspaces/JARC-Reactor/lightning_logs/checkpoints/model-step=step=40-val_loss=val_loss=1.7084.ckpt"
+checkpoint_path: null
