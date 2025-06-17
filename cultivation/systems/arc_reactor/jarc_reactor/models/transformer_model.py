@@ -1,10 +1,15 @@
 # transformer_model.py
+import logging
 import torch
 import torch.nn as nn
 import torch.quantization
 from torch.nn import TransformerDecoder, TransformerDecoderLayer, TransformerEncoderLayer, TransformerEncoder
+
 from cultivation.systems.arc_reactor.jarc_reactor.utils.positional_encoding import Grid2DPositionalEncoding
 from cultivation.systems.arc_reactor.jarc_reactor.models.context_encoder import ContextEncoderModule
+
+# Initialize logger
+logger = logging.getLogger(__name__)
 
 class TransformerModel(nn.Module):
     def __init__(self, input_dim, seq_len, d_model, encoder_layers, decoder_layers, heads, d_ff, output_dim, 
@@ -19,14 +24,14 @@ class TransformerModel(nn.Module):
         self.d_model = d_model
         self.grid_size = seq_len * seq_len  # Total elements in grid (e.g., 900 for 30x30)
         
-        # DEBUG: Print initialization dimensions
-        print("\nInitializing TransformerModel with dimensions:")
-        print(f"input_dim: {input_dim}, seq_len: {seq_len}, d_model: {d_model}")
-        print(f"grid_size (seq_len * seq_len): {self.grid_size}")
+        # Log initialization dimensions for debugging
+        logger.debug("Initializing TransformerModel with dimensions:")
+        logger.debug(f"input_dim: {input_dim}, seq_len: {seq_len}, d_model: {d_model}")
+        logger.debug(f"grid_size (seq_len * seq_len): {self.grid_size}")
         
         # Modified input projections for grid structure
         self.input_fc = nn.Linear(1, d_model)  # Project each grid cell to d_model dimensions
-        print(f"Input projection will convert each element from 1 → {d_model} dimensions")
+        logger.debug(f"Input projection will convert each element from 1 → {d_model} dimensions")
         
         # Positional encoding and dropout
         self.positional_encoding = Grid2DPositionalEncoding(d_model, max_height=seq_len, max_width=input_dim)
