@@ -308,3 +308,6 @@ cultivation/systems/arc_reactor/jarc_reactor/data/training_data/evaluation_2_tas
 cultivation/systems/arc_reactor/jarc_reactor/data/training_data/synthtraining/
 cultivation/systems/arc_reactor/jarc_reactor/data/training_data/training/
 cultivation/systems/arc_reactor/jarc_reactor/data/training_data/training_2_tasks/
+cultivation/systems/arc_reactor/evaluation_results/
+cultivation/systems/arc_reactor/dist/
+cultivation/systems/arc_reactor/jarc_reactor/tests/test_outputs/
