@@ -1,5 +1,4 @@
 import sys
-print("DEBUG: run_model.py top-level print", file=sys.__stderr__)
 import logging
 import os
 import signal
@@ -7,7 +6,6 @@ import torch
 from pathlib import Path
 from .config_schema import LoggingConfigSchema # Added for type hint
 from cultivation.utils import logging_config as project_logging # Added for logging utility
-
 import hydra
 from omegaconf import DictConfig, OmegaConf
 
@@ -22,7 +20,6 @@ from cultivation.systems.arc_reactor.jarc_reactor.hydra_setup import register_hy
 # Call to register Hydra configurations with ConfigStore
 # This needs to be done before @hydra.main is encountered
 register_hydra_configs()
-print("DEBUG: run_model.py after register_hydra_configs(), before @hydra.main", file=sys.__stderr__)
 
 # Global logger, will be configured by setup_central_logging
 logger = logging.getLogger(__name__) # Get logger for this module
@@ -70,7 +67,7 @@ def setup_model_training(cfg: DictConfig):
         )
         # Assuming update_config can work with DictConfig or is adapted.
         # This might involve OmegaConf.merge or direct updates.
-        if params_manager.update_config_hydra(cfg): 
+        if params_manager.update_config(cfg): 
             logger.info("Successfully applied best parameters from Optuna study.")
         else:
             logger.warning("Failed to load or apply best parameters, using current configuration.")
@@ -122,7 +119,6 @@ def setup_model_training(cfg: DictConfig):
 
 @hydra.main(config_path="conf", config_name="config", version_base="1.2")
 def main_app(cfg: DictConfig) -> None:
-    print("DEBUG: run_model.py inside main_app, very first line", file=sys.__stderr__)
     # 1. Setup Centralized Logging
     # The log_dir from cfg.logging will be relative to Hydra's output directory
     def print_stdout_status(label: str):
@@ -136,31 +132,12 @@ def main_app(cfg: DictConfig) -> None:
         Hydra's output directory (where logs are typically placed) is dynamic.
         This function resolves the log_dir relative to the current Hydra output path.
         """
-        # Debug prints to inspect types and values
-        print(f"DEBUG: Type of logging_config: {type(logging_config)}")
-        if hasattr(logging_config, 'log_dir') and logging_config.log_dir is not None:
-            print(f"DEBUG: Type of logging_config.log_dir: {type(logging_config.log_dir)}")
-            print(f"DEBUG: Value of logging_config.log_dir: {str(logging_config.log_dir)}") # Print string value
-        else:
-            print("DEBUG: logging_config has no 'log_dir' or it is None")
-
-        if hasattr(logging_config, 'file_logging') and logging_config.file_logging is not None:
-            if hasattr(logging_config.file_logging, 'log_file_name') and logging_config.file_logging.log_file_name is not None:
-                print(f"DEBUG: Type of logging_config.file_logging.log_file_name: {type(logging_config.file_logging.log_file_name)}")
-                print(f"DEBUG: Value of logging_config.file_logging.log_file_name: {str(logging_config.file_logging.log_file_name)}") # Print string value
-            else:
-                print("DEBUG: logging_config.file_logging has no 'log_file_name' or it is None")
-        else:
-            print("DEBUG: logging_config has no 'file_logging' or it is None")
-
         # Ensure log_dir is a string before Path conversion
         log_dir_str = str(logging_config.log_dir)
         # Resolve path relative to original working directory if it's not absolute
         # hydra.utils.to_absolute_path converts a path to be absolute relative to the original CWD.
         resolved_log_dir_str = hydra.utils.to_absolute_path(log_dir_str)
         log_dir = Path(resolved_log_dir_str)
-        
-        print(f"DEBUG: Resolved log_dir to: {log_dir}", file=sys.__stderr__)
         log_dir.mkdir(parents=True, exist_ok=True)
 
         log_file_path = None
@@ -195,7 +172,7 @@ def main_app(cfg: DictConfig) -> None:
     # 6. Setup ModelCheckpoint callback
     # dirpath will be relative to Hydra's output directory
     checkpoint_callback = ModelCheckpoint(
-        dirpath="checkpoints", 
+        dirpath=hydra.utils.to_absolute_path(cfg.training.checkpoint_dir), 
         filename='model-{epoch:02d}-{step}-val_loss={val_loss:.4f}',
         save_top_k=cfg.training.get('save_top_k', 1),
         monitor=cfg.training.get('monitor_metric', 'val_loss'),
@@ -278,5 +255,4 @@ def main_app(cfg: DictConfig) -> None:
         raise
 
 if __name__ == "__main__":
-    print("DEBUG: run_model.py inside if __name__ == \"__main__\"", file=sys.__stderr__)
     main_app()
