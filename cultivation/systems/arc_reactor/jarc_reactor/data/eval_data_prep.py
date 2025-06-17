@@ -8,17 +8,21 @@ import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import torch
 from torch.utils.data import DataLoader, TensorDataset
-from omegaconf import DictConfig # Added for Hydra
+from omegaconf import DictConfig 
 
 from cultivation.utils.logging_config import setup_logging
 # from cultivation.systems.arc_reactor.jarc_reactor.config import config, include_synthetic_training_data, synthetic_dir # Removed old config
 from cultivation.systems.arc_reactor.jarc_reactor.data.context_data import ContextPair
 from cultivation.systems.arc_reactor.jarc_reactor.utils.padding_utils import pad_to_fixed_size
-from .data_loading_utils import inspect_data_structure # Added import
+from .data_loading_utils import inspect_data_structure 
+from ..config.config_schema import ContextTensorConfig 
+from .context_data import ContextPair 
 
-# Initialize logging
-setup_logging()
 logger = logging.getLogger(__name__)
+
+# Module-level Type Aliases for clarity and static analysis
+SingleFileResultType = Tuple[torch.Tensor, torch.Tensor, str, ContextPair]
+LoadSingleFileReturnType = Tuple[List[SingleFileResultType], List[SingleFileResultType]]
 
 def load_context_pair(filepath, task_id, context_map):
     try:
@@ -72,9 +76,6 @@ def load_main_data_concurrently(
     """Load main dataset from the specified directory concurrently"""
     logger.info(f"Loading main dataset from '{directory}'{' (synthetic)' if is_synthetic else ''}...")
 
-    SingleFileResultType = Tuple[torch.Tensor, torch.Tensor, str, ContextPair]
-    LoadSingleFileReturnType = Tuple[List[SingleFileResultType], List[SingleFileResultType]]
-
     def load_single_file(filepath: str, task_id: str) -> LoadSingleFileReturnType:
         try:
             with open(filepath, 'rb') as f:
@@ -99,7 +100,7 @@ def load_main_data_concurrently(
                 )
                 train_results.append((input_tensor, output_tensor, task_id, context_map[task_id]))
 
-            test_results = []
+            test_results: List[SingleFileResultType] = []
             for item in test_data:
                 input_tensor = pad_to_fixed_size(
                     torch.tensor(item['input'], dtype=torch.int8),
