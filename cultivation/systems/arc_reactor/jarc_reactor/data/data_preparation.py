@@ -10,6 +10,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 from omegaconf import DictConfig # Added for Hydra
+from sklearn.model_selection import train_test_split # For synthetic data splitting
 from cultivation.utils.logging_config import setup_logging
 # from cultivation.systems.arc_reactor.jarc_reactor.config import config # Removed old config
 from cultivation.systems.arc_reactor.jarc_reactor.data.context_data import ContextPair
@@ -71,8 +72,32 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 train_data = data.get('train', [])  # Use all examples for training; context is handled separately
                 test_data = data.get('test', [])
             else:  # 'sythtraining' assumed to have a flat list
-                train_data = data[1:]  # Skip the first example if needed
-                test_data = []  # Synthetic data may not have a separate test set
+                # Synthetic data: first example is context, rest is for train/test
+                potential_examples_for_splitting = data[1:] # Skip the first example (context)
+                if len(potential_examples_for_splitting) >= 2: # Need at least 2 samples for a split
+                    # Split synthetic data into training and test sets (e.g., 80/20 split)
+                    train_data, test_data = train_test_split(
+                        potential_examples_for_splitting,
+                        test_size=0.2, # 20% for test set
+                        shuffle=True # Shuffle before splitting, good for IID data
+                    )
+                    logger.debug(f"Synthetic data for task '{task_id}': split into {len(train_data)} train and {len(test_data)} test samples.")
+                elif len(potential_examples_for_splitting) == 1:
+                    # Not enough data to split, use all for training, none for testing
+                    train_data = potential_examples_for_splitting
+                    test_data = []
+                    logger.warning(
+                        f"Synthetic data for task '{task_id}' has only 1 sample after context. "
+                        f"Using it for training, no test samples for this task's synthetic data."
+                    )
+                else:
+                    # No data left after context
+                    train_data = []
+                    test_data = []
+                    logger.warning(
+                        f"Synthetic data for task '{task_id}' has no samples after context. "
+                        f"No train or test samples for this task's synthetic data."
+                    )
 
             # Process training data
             train_results = []
@@ -162,7 +187,7 @@ def _validate_and_inspect_path(cfg: DictConfig, directory: str) -> Path:
     logger.info(f"Successfully inspected {successful_files}/{total_files} files for structure.")
     return data_path
 
-def _load_raw_data(data_path: Path) -> dict:
+def _load_raw_data(data_path: Path, is_synthetic: bool = False) -> dict:
     """Loads context pairs and main data concurrently."""
     train_inputs, train_outputs, train_task_ids = [], [], []
     test_inputs, test_outputs, test_task_ids = [], [], []
@@ -175,6 +200,7 @@ def _load_raw_data(data_path: Path) -> dict:
     load_main_data_concurrently(
         directory=str(data_path),
         context_map=context_map,
+        is_synthetic=is_synthetic, # Pass the flag
         train_inputs=train_inputs,
         train_outputs=train_outputs,
         train_task_ids=train_task_ids,
@@ -242,7 +268,13 @@ def prepare_data(cfg: DictConfig, return_datasets: bool = False):
     data_path = _validate_and_inspect_path(cfg, directory)
 
     # 3. Load raw data from files
-    raw_data = _load_raw_data(data_path)
+    # Determine if the current directory being loaded is synthetic based on config
+    # This assumes a new config option like `cfg.training.current_data_is_synthetic` exists
+    # For a more robust solution, prepare_data might need to handle multiple data sources (normal + synthetic)
+    # and merge them, passing is_synthetic appropriately for each source.
+    current_data_is_synthetic = cfg.training.get('current_data_is_synthetic', False)
+    logger.info(f"Loading data from '{directory}' with is_synthetic={current_data_is_synthetic}")
+    raw_data = _load_raw_data(data_path, is_synthetic=current_data_is_synthetic)
 
     # 4. Process raw data into tensors and create mappings
     processed_data = _process_and_create_tensors(raw_data)

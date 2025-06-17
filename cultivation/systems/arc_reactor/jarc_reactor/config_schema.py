@@ -61,6 +61,7 @@ class TrainingConfigSchema:
     fast_dev_run: bool = False
     train_from_checkpoint: bool = False
     include_synthetic_training_data: bool = False
+    current_data_is_synthetic: bool = False  # Indicates if the loaded dataset is synthetic
     training_data_dir: str = "${oc.env:TRAINING_DATA_DIR,cultivation/systems/arc_reactor/jarc_reactor/data/training_data/training}"
     synthetic_data_dir: Optional[str] = "cultivation/systems/arc_reactor/jarc_reactor/data/synthetic_data/training" # Path for synthetic training data
     training_log_dir: str = "cultivation/systems/arc_reactor/logs/training"  # Directory to save model checkpoints

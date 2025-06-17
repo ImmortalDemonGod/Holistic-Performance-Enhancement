@@ -18,6 +18,7 @@ fast_dev_run: false # Set to true for a quick development run (e.g., 1 batch)
 train_from_checkpoint: false
 
 include_synthetic_training_data: false
+current_data_is_synthetic: false
 
 training_data_dir: "cultivation/systems/arc_reactor/jarc_reactor/data/training_data/training"
 synthetic_data_dir: "cultivation/systems/arc_reactor/jarc_reactor/data/synthetic_data/training"
