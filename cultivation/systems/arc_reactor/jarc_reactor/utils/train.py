@@ -3,7 +3,7 @@ import pytorch_lightning as pl
 import logging
 import torch
 import torch.nn as nn # For nn.Module, nn.Linear etc.
-import torch.optim as optim # For Adam, lr_scheduler
+
 from pathlib import Path # Re-added for Path objects
 import hydra 
 
@@ -31,7 +31,7 @@ class TransformerTrainer(pl.LightningModule):
         except Exception as e:
             # Fallback if not in a Hydra run context (e.g. direct instantiation for tests)
             # This might not be ideal for production but prevents crashes in other contexts.
-            self.train_logger.warning(f"Could not get Hydra run directory (error: {e}). Using log_dir relative to CWD.")
+            logger.warning(f"Could not get Hydra run directory (error: {e}). Using log_dir relative to CWD.")
             resolved_log_dir = Path(log_dir_name)
 
         resolved_log_dir.mkdir(parents=True, exist_ok=True)
