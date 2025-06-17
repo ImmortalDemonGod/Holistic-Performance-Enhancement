@@ -131,6 +131,13 @@ class EvaluationConfigSchema:
     synthetic_data_dir: Optional[str] = "cultivation/systems/arc_reactor/jarc_reactor/data/synthetic_data/evaluation" # Path for synthetic evaluation data
 
 @dataclass
+class DataLoaderConfig:
+    num_workers: int = 0
+    pin_memory: bool = False
+    drop_last_train: bool = False  # For training dataloader
+    drop_last_eval: bool = False   # For val/test dataloaders
+
+@dataclass
 class JARCReactorConfigSchema:
     # Defaults list for Hydra to know which sub-configs to load by default
     # This is usually in the main config.yaml, but can also be structured here if preferred for programmatic access
@@ -155,6 +162,7 @@ class JARCReactorConfigSchema:
     metrics: MetricsConfigSchema = field(default_factory=MetricsConfigSchema)
     scheduler: SchedulerConfigSchema = field(default_factory=SchedulerConfigSchema)
     evaluation: EvaluationConfigSchema = field(default_factory=EvaluationConfigSchema)
+    dataloader: DataLoaderConfig = field(default_factory=DataLoaderConfig)
 
     # Global settings from config.yaml, merged via _self_
     use_best_params: bool = False
