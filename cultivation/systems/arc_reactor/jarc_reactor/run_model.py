@@ -223,7 +223,7 @@ def main_app(cfg: DictConfig) -> None:
         log_every_n_steps=cfg.training.get('log_every_n_steps', 50),
         detect_anomaly=cfg.training.get('detect_anomaly', False),
         enable_checkpointing=True, # Handled by ModelCheckpoint callback
-        default_root_dir=".", # Log files will go into Hydra's output directory
+        default_root_dir=cfg.training.training_log_dir, # Log files will go into the unified training log directory
         accelerator=accelerator_type,
         devices=devices_val,
         fast_dev_run=cfg.training.fast_dev_run
