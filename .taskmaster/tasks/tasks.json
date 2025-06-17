@@ -1526,7 +1526,7 @@
               4,
               6
             ],
-            "status": "pending",
+            "status": "done",
             "hpe_learning_meta": {
               "estimated_effort_hours_min": 1,
               "estimated_effort_hours_max": 2.5,
@@ -2266,7 +2266,7 @@
         "description": "Consolidate all log outputs (lightning_logs, app logs, test logs) from the jarc_reactor system into a unified directory under cultivation/systems/arc_reactor/logs/",
         "details": "",
         "testStrategy": "",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [],
         "priority": "high",
         "subtasks": []
@@ -2274,7 +2274,7 @@
     ],
     "metadata": {
       "created": "2025-06-16T21:05:48.595Z",
-      "updated": "2025-06-17T01:18:19.284Z",
+      "updated": "2025-06-17T01:49:11.456Z",
       "description": "Tasks for master context"
     }
   }
