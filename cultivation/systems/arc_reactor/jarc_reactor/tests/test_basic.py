@@ -42,14 +42,16 @@ def _get_base_test_config_dict() -> dict:
         "model": {
             "name": "bert-base-uncased",
             "dropout_rate": 0.1,
-            "input_dim": 12,  # Vocab size: 0-9 colors, 10 padding, 11 EOS
-            "seq_len": 3,     # Grid side length (e.g., 3 for 3x3)
-            "d_model": 32,    # Small for testing
-            "encoder_layers": 2, # Small for testing
+            "input_dim": 12,
+            "seq_len": 901,  # Flattened sequence length: 30*30 + 1
+            "max_h": 30,     # Max grid height for positional encoding
+            "max_w": 30,     # Max grid width for positional encoding
+            "d_model": 32,
+            "encoder_layers": 2,
             "decoder_layers": 0,
-            "heads": 2,       # Small for testing
-            "d_ff": 64,       # Small for testing
-            "output_dim": 12, # Vocab size
+            "heads": 2,
+            "d_ff": 64,
+            "output_dim": 12,
             "context_encoder": {
                 "d_model": 32,
                 "path": "bert-base-uncased",
@@ -65,7 +67,7 @@ def _get_base_test_config_dict() -> dict:
             }
         },
         "training": {
-            "num_labels": 12, # Corresponds to output_dim/vocab_size
+            "num_labels": 12,
             "learning_rate": 5e-5,
             "batch_size": 1,
             "max_epochs": 1,
@@ -74,21 +76,21 @@ def _get_base_test_config_dict() -> dict:
             "synthetic_data_dir": None,
             "include_synthetic_training_data": False,
             "fast_dev_run": False,
-            "checkpoint_dir": str(test_checkpoints_dir) # Added for trainer init
+            "checkpoint_dir": str(test_checkpoints_dir)
         },
         "logging": {
             "log_level": "DEBUG",
             "log_dir": str(test_logs_dir),
-            "file_logging": { # Nested as per LoggingConfigSchema
+            "file_logging": {
                 "enable": True,
                 "log_file_name": "test_trainer.log"
             }
         },
-        "data_preparation": { # Added for MyDataModule
-            "max_grid_size": 3,
+        "data_preparation": {
+            "max_grid_size": 30, # Match dummy data
             "padding_value": 10,
             "eos_token_id": 11,
-            "max_output_length": 10 # 3*3 grid + 1 EOS token
+            "max_output_length": 901 # 30*30 grid + 1 EOS token
         }
     }
 
@@ -124,10 +126,12 @@ def test_data_module_loads_dummy_data(test_output_dirs):
         src, tgt, ctx_input, ctx_output, task_ids = batch
 
         expected_batch_size = cfg.training.batch_size
-        expected_seq_len = cfg.data_preparation.max_output_length
+        expected_grid_size = cfg.data_preparation.max_grid_size
 
-        assert src.shape == (expected_batch_size, expected_seq_len), f"src shape mismatch: {src.shape}"
-        assert tgt.shape == (expected_batch_size, expected_seq_len), f"tgt shape mismatch: {tgt.shape}"
+        # The data loader provides 2D grids, not flattened sequences
+        expected_shape = (expected_batch_size, expected_grid_size, expected_grid_size)
+        assert src.shape == expected_shape, f"src shape mismatch: expected {expected_shape}, got {src.shape}"
+        assert tgt.shape == expected_shape, f"tgt shape mismatch: expected {expected_shape}, got {tgt.shape}"
         
         assert task_ids.shape == (expected_batch_size,), f"task_ids shape mismatch: {task_ids.shape}"
 
