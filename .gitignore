@@ -311,3 +311,5 @@ cultivation/systems/arc_reactor/jarc_reactor/data/training_data/training_2_tasks
 cultivation/systems/arc_reactor/evaluation_results/
 cultivation/systems/arc_reactor/dist/
 cultivation/systems/arc_reactor/jarc_reactor/tests/test_outputs/
+cultivation/systems/arc_reactor/jarc_optuna.db
+cultivation/systems/arc_reactor/jarc_reactor/evaluation/finetuning_results/
