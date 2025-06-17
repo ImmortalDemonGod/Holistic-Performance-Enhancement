@@ -20,6 +20,11 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 def inspect_data_structure(cfg: DictConfig, filename: str, directory: str | None = None):
+    """
+    Inspects and logs the structure of a JSON evaluation data file.
+    
+    Examines the presence and shape of key fields such as 'train', 'test', 'input', 'context_input', and 'context_output' in the specified file. Returns True if inspection succeeds, otherwise logs the error and returns False.
+    """
     if directory is None:
         directory = cfg.evaluation.data_dir
     """Debug helper to examine JSON structure"""
@@ -47,6 +52,11 @@ def inspect_data_structure(cfg: DictConfig, filename: str, directory: str | None
         return False
 
 def load_context_pair(filepath, task_id, context_map):
+    """
+    Loads and stores the context input and output tensors for a given task from a JSON file.
+    
+    Extracts the first training example from the file, pads its input and output arrays to a fixed size, and saves them as a ContextPair in the provided context map keyed by task ID. Logs an error if loading or processing fails.
+    """
     try:
         with open(filepath, 'rb') as f:
             data = orjson.loads(f.read())
@@ -72,6 +82,11 @@ def load_context_pair(filepath, task_id, context_map):
         logger.error(f"Error loading context for task '{task_id}' from '{filepath}': {str(e)}")
 
 def load_context_pairs(directory, context_map):
+    """
+    Loads context pairs from all JSON files in a directory concurrently.
+    
+    Each context pair is extracted and stored in the provided context map, keyed by task ID. Raises exceptions encountered during loading.
+    """
     logger.info(f"Loading context pairs from '{directory}'...")
     json_files = [f for f in os.listdir(directory) if f.endswith('.json')]
     with ThreadPoolExecutor() as executor:
@@ -84,10 +99,31 @@ def load_context_pairs(directory, context_map):
 
 def load_main_data_concurrently(directory, context_map, train_inputs, train_outputs, train_task_ids, train_context_pairs,
                                 test_inputs, test_outputs, test_task_ids, test_context_pairs, is_synthetic=False):
-    """Load main dataset from the specified directory concurrently"""
+    """
+                                Concurrently loads and processes main dataset files from a directory into padded tensors.
+                                
+                                Each JSON file is parsed to extract training and test examples, which are padded to fixed-size tensors and associated with their context pairs. Training and test data are separated based on the `is_synthetic` flag. The loaded tensors and metadata are appended to the provided lists for further processing.
+                                
+                                Args:
+                                    directory: Path to the directory containing dataset JSON files.
+                                    context_map: Mapping from task IDs to context pairs.
+                                    train_inputs, train_outputs, train_task_ids, train_context_pairs: Lists to append processed training data.
+                                    test_inputs, test_outputs, test_task_ids, test_context_pairs: Lists to append processed test data.
+                                    is_synthetic: If True, treats all data as training data and skips test data.
+                                """
     logger.info(f"Loading main dataset from '{directory}'{' (synthetic)' if is_synthetic else ''}...")
 
     def load_single_file(filepath, task_id):
+        """
+        Loads and processes a single dataset file, returning padded tensors for training and test data.
+        
+        Reads the specified JSON file, extracts training and test examples, pads input and output arrays to a fixed shape, and associates each example with its task ID and context pair. Returns lists of tuples for training and test data, or empty lists if an error occurs.
+        
+        Returns:
+            A tuple containing two lists:
+                - List of (input_tensor, output_tensor, task_id, context_pair) for training data.
+                - List of (input_tensor, output_tensor, task_id, context_pair) for test data.
+        """
         try:
             with open(filepath, 'rb') as f:
                 data = orjson.loads(f.read())
@@ -150,7 +186,18 @@ def load_main_data_concurrently(directory, context_map, train_inputs, train_outp
                 test_context_pairs.append(context_pair)
 
 def prepare_data(cfg: DictConfig, return_datasets: bool = False):
-    """Prepare evaluation data with robust error handling using Hydra config."""
+    """
+    Prepares evaluation data for machine learning tasks using configuration settings.
+    
+    Loads and validates data from JSON files in the specified directory, supporting both standard and synthetic datasets. Inspects data structure, loads context pairs and main data concurrently, pads and stacks tensors, maps task IDs, and packages the data into PyTorch datasets or DataLoaders. Handles errors robustly and logs progress throughout. Optionally saves a mapping from task IDs to indices for future reference.
+    
+    Args:
+        cfg: Hydra configuration object specifying data directories, batch size, and synthetic data options.
+        return_datasets: If True, returns PyTorch TensorDataset objects; otherwise, returns DataLoader objects.
+    
+    Returns:
+        Tuple of (train, test) datasets or DataLoaders, depending on `return_datasets`.
+    """
     # from jarc_reactor.config import Config # Old config system no longer needed
     
     logger = logging.getLogger(__name__)

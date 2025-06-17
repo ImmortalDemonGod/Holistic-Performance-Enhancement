@@ -7,7 +7,11 @@ import json
 from pathlib import Path
 
 def read_lightning_logs(log_dir):
-    """Read and display PyTorch Lightning logs"""
+    """
+    Reads and displays a summary of PyTorch Lightning training logs from a specified directory.
+    
+    For each versioned log directory, prints hyperparameters, metrics summary, TensorBoard event files, and available model checkpoints. Handles missing files and read errors gracefully.
+    """
     log_path = Path(log_dir)
     
     if not log_path.exists():

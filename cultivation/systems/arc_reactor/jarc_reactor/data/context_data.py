@@ -11,6 +11,11 @@ class ContextPair:
     context_output: torch.Tensor = None
 
     def __post_init__(self):
+        """
+        Validates and initializes context_input and context_output tensors after dataclass creation.
+        
+        Ensures that both context_input and context_output are PyTorch tensors of shape (30, 30). If either is None, assigns a zero tensor of the correct shape and logs a warning. Raises a ValueError if a provided tensor does not match the expected shape.
+        """
         expected_shape = (30, 30)  # Adjust based on your specific requirements
         if self.context_input is not None:
             if self.context_input.shape != expected_shape:
