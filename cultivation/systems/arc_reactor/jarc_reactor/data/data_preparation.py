@@ -148,11 +148,14 @@ def _validate_and_inspect_path(cfg: DictConfig, directory: str) -> Path:
     successful_files = 0
     total_files = 0
     log_limit = 2
-    for filename in os.listdir(directory):
+    for filename in os.listdir(data_path):
         if filename.endswith('.json'):
             total_files += 1
             if successful_files < log_limit:
-                if inspect_data_structure(cfg, filename, directory):
+                # The original `directory` can be a relative path.
+                # Using `data_path` ensures the absolute path is used, which is robust
+                # against Hydra's CWD changes.
+                if inspect_data_structure(cfg, filename, str(data_path)):
                     successful_files += 1
             else:
                 break
