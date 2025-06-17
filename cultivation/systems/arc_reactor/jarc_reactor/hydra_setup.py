@@ -1,11 +1,12 @@
 # cultivation/systems/arc_reactor/jarc_reactor/hydra_setup.py
 
-import sys # Add this import
+import sys 
 from hydra.core.config_store import ConfigStore
 from .config_schema import (
     JARCReactorConfigSchema,
     ModelConfigSchema,
     TrainingConfigSchema,
+    DataLoaderConfig,
     OptunaConfigSchema,
     LoggingConfigSchema,
     FineTuningConfigSchema,
@@ -15,7 +16,7 @@ from .config_schema import (
 )
 
 def register_hydra_configs():
-    print("DEBUG: hydra_setup.py inside register_hydra_configs()", file=sys.__stderr__) # Add this print
+    print("DEBUG: hydra_setup.py inside register_hydra_configs()", file=sys.__stderr__) 
     """Registers all structured configs with Hydra's ConfigStore."""
     cs = ConfigStore.instance()
 
@@ -29,6 +30,7 @@ def register_hydra_configs():
     # The 'group' parameter corresponds to the subdirectories in the 'conf' folder.
     cs.store(group="model", name="base_model", node=ModelConfigSchema)
     cs.store(group="training", name="base_training", node=TrainingConfigSchema)
+    cs.store(group="dataloader", name="default", node=DataLoaderConfig)
     cs.store(group="optuna", name="base_optuna", node=OptunaConfigSchema)
     cs.store(group="logging", name="base_logging", node=LoggingConfigSchema)
     cs.store(group="finetuning", name="base_finetuning", node=FineTuningConfigSchema)
