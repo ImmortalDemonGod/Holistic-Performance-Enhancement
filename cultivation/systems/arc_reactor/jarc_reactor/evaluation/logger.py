@@ -5,7 +5,7 @@ from datetime import datetime
 
 class EvaluationLogger:
     @staticmethod
-    def setup_logging(log_dir='evaluation_logs', logger_name='evaluation'):
+    def setup_logging(log_dir='cultivation/systems/arc_reactor/logs/evaluation', logger_name='evaluation'):
         """Setup detailed logging configuration."""
         Path(log_dir).mkdir(exist_ok=True)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
