@@ -16,3 +16,10 @@ use_best_params: false
 
 # CUDA Optimizations (handled by a script, but can be toggled here if needed)
 enable_cuda_optimizations: true
+
+hydra:
+  run:
+    dir: ${logging.log_dir}/.hydra/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: ${logging.log_dir}/.hydra/multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}

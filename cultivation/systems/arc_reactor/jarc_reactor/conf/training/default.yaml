@@ -23,6 +23,7 @@ training_data_dir: "cultivation/systems/arc_reactor/jarc_reactor/data/training_d
 synthetic_data_dir: "cultivation/systems/arc_reactor/jarc_reactor/data/synthetic_data/training"
 
 checkpoint_dir: "jarc_reactor/checkpoints" # Directory to save model checkpoints
+training_log_dir: "cultivation/systems/arc_reactor/logs/training" # Directory to save model training logs
 
 # Related global settings from original config.py
 # calculate_parameters: true # Whether to calculate and print total param size (can be a script flag or app logic)
