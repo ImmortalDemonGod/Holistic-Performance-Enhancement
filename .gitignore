@@ -310,7 +310,7 @@ task_id_map.json
 cultivation/data/raw/arc_prize_2025/*
 cultivation/systems/arc_reactor/jarc_reactor/data/training_data/sythtraining/
 cultivation/systems/george/*
-cultivation/systems/george0_2_5.zip
+cultivation/systems/*.zip
 
 # JARC Reactor specific data directories (training and evaluation)
 cultivation/systems/arc_reactor/jarc_reactor/data/evaluation_data/*
