@@ -174,6 +174,84 @@ Pull Request opened by [Augment Code](https://www.augmentcode.com/) with guidanc
 
 ... (truncated)
 
+## CodeRabbit Walkthrough
+## Walkthrough
+
+This update introduces a comprehensive RNA Biophysics knowledge base, including foundational content, quizzes, templates, and a concept map. It adds a detailed, phased project roadmap, reorganizes template strategy, and implements a session timer tool with integrated tests. Several documentation and task status updates are also included.
+
+## Changes
+
+| Files / Groups                                                                                      | Change Summary                                                                                                                                                                                                                                                      |
+|-----------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `cultivation/docs/5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/` (index.md, Concept_Map.md, 1_RNA_Nucleotide_Structure/index.md, 2_Phosphodiester_Backbone/index.md, 3_RNA_vs_DNA_Comparison/index.md, 4_Thermodynamic_Principles/index.md, 5_Energetic_Contributions/index.md, 6_Environmental_Factors/index.md) | Added foundational knowledge base, concept map, and six structured topic sections for RNA biophysical modeling.                                                                                                              |
+| `cultivation/docs/5_domain_knowledge_and_curricula/biology/RNA_MODELING/Pillar1_Biophysical_Modeling/Quizzes_and_Assessments/` (index.md, Quiz-1.1-RNA-Nucleotide-Structure.md, Quiz-1.2-Phosphodiester-Backbone.md, Quiz-1.3-RNA-vs-DNA-Comparison.md, Quiz-1.4-Thermodynamic-Principles.md, Quiz-1.5-Energetic-Contributions.md, Quiz-1.6-Environmental-Factors.md) | Added quiz index and six detailed quizzes covering each knowledge subsection.                                                                                                                                                |
+| `cultivation/docs/meta/templates/` (knowledge_base_subsection_template.md, quiz_subsection_template.md, general_analysis_report_template.md, running_analysis_template.md, self_assessment_test_template.md, strategic_initiative_plan_template.md, strategic_project_overview_template.md, strength_training_block_template.md, weekly_learning_plan_template.md) | Added multiple markdown templates for knowledge base subsections, quizzes, analysis reports, self-assessment tests, strategic plans, strength training blocks, and weekly learning plans; also updated running analysis template formatting. |
+| `cultivation/docs/3_design_and_architecture/roadmap_Cultivation_Integrated_v1.0.md`                 | Added a new, detailed, phased project roadmap for the Cultivation project.                                                                                                                                                   |
+| `cultivation/docs/0_vision_and_strategy/archive/roadmap_vSigma.md`                                  | Marked roadmap as archived and superseded by the new integrated roadmap.                                                                                                                                                     |
+| `cultivation/docs/5_domain_knowledge_and_curricula/biology/RNA_MODELING/SKILL_MAP_CSM_pillar1.md`   | Condensed to only the legend for source attribution, removing all other content.                                                                                                                                             |
+| `cultivation/docs/5_domain_knowledge_and_curricula/running_methodology/training_blocks/synergistic_performance_amplification_block_w22_w25_v1.md` | Clarified the emphasis on cadence over heart rate in short cadence run session templates.                                                                                                                                    |
+| `cultivation/docs/meta/templates/TODO.md`                                                           | Added a strategic plan for organizing and consolidating template files.                                                                                                                                                      |
+| `cultivation/scripts/task_management/session_timer.py`                                              | Introduced a new session timer tool with logging, recovery, Task Master integration, and macOS notifications.                                                                                                                |
+| `cultivation/scripts/task_management/test_session_timer.py`                                         | Added unit tests for session logging functionality.                                                                                                                                                                          |
+| `cultivation/scripts/task_management/test_session_recovery.py`                                      | Added tests for detection and handling of unclosed task sessions.                                                                                                                                                            |
+| `cultivation/scripts/task_management/test_session_integration.py`                                   | Added integration tests for session timer script, covering recovery and normal session flows.                                                                                                                                |
+| `tasks/task_001.txt`                                                                               | Updated task and subtasks statuses from "pending" to "done" for RNA Biophysics Knowledge Base setup.                                                                                                                         |
+| `tasks/tasks.json`                                                                                  | Reformatted arrays for readability, normalized numeric values, and updated statuses to "done" for completed tasks.                                                                                                           |
+| `cultivation/scripts/task_management/tm_how_to.md`                                                 | Modified document title to a concise how-to guide heading for RNA Modeling Curriculum & Daily Scheduling.                                                                                                                    |
+| `.pymarkdown.json`                                                                                  | Added configuration file for PyMarkdown linter with default plugin and customized max line length.                                                                                                                          |
+| `cultivation/docs/7_user_guides_and_sops/pymarkdownlnt_setup_and_usage.md`                          | Added comprehensive guide for setting up and using PyMarkdown linter including installation, configuration, running, and CI integration instructions.                                                                       |
+| `cultivation/docs/index.md`                                                                         | Reformatted and reorganized documentation index for improved readability and navigation with section headings and clearer structure.                                                                                        |
+| `cultivation/scripts/task_management/test_active_scheduler.py`                                     | Modified test to update task status to "pending" before scheduling.                                                                                                                                                          |
+| `cultivation/scripts/task_management/test_passive_scheduler.py`                                    | Modified test to mark all tasks as "done" to ensure only default passive review task is scheduled.                                                                                                                          |
+
+## Sequence Diagram(s)
+
+### Session Timer—Manual and Fixed Duration Modes
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant SessionTimer
+    participant LogFile
+    participant TaskMaster
+
+    User->>SessionTimer: Start script (manual or duration mode)
+    alt Recovery Needed
+        SessionTimer->>LogFile: Parse for unclosed sessions
+        SessionTimer->>User: Prompt to close unclosed session
+        User->>SessionTimer: Provide end time
+        SessionTimer->>LogFile: Log recovery END entry
+    end
+    alt Manual Mode
+        User->>SessionTimer: --manual start/stop
+        SessionTimer->>LogFile: Log START or END entry
+        alt On END
+            SessionTimer->>TaskMaster: Optionally update task status/comment
+        end
+    else Fixed Duration Mode
+        SessionTimer->>User: Prompt for duration, task, notes
+        SessionTimer->>LogFile: Log START entry
+        SessionTimer->>SessionTimer: Sleep for duration
+        SessionTimer->>LogFile: Log END entry
+        SessionTimer->>TaskMaster: Optionally update task status/comment
+        SessionTimer->>User: macOS notification (session complete)
+    end
+```
+
+## Poem
+
+> 🐇  
+>   
+> A knowledge base blooms, with quizzes anew,  
+> Templates for structure, and roadmaps in view.  
+> The session timer ticks, logs each task with care,  
+> Tests run in harmony—robustness everywhere!  
+>   
+> With cadence and clarity, this warren grows strong—  
+> Onward, dear rabbits, to learning lifelong!  
+>   
+>
+
 ## Git Commit Log
 
 ```text

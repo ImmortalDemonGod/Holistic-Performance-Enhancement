@@ -143,6 +143,9 @@ CodeRabbit cannot perform edits on its own pull requests yet.
 > 
 > You can disable... (truncated)
 
+## CodeRabbit Walkthrough
+> No CodeRabbit Walkthrough comment found.
+
 ## Git Commit Log
 
 ```text

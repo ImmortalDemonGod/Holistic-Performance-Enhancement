@@ -37,6 +37,49 @@ def truncate(text, maxlen=500):
         return text
     return text[:maxlen] + "... (truncated)"
 
+def extract_coderabbit_walkthrough(comments):
+    if not comments:
+        return "> No CodeRabbit Walkthrough comment found."
+
+    start_html_marker = '<!-- walkthrough_start -->'
+    end_html_marker = '<!-- walkthrough_end -->'
+    walkthrough_md_header = '## Walkthrough'
+
+    for comment in comments:
+        author_login = comment.get('author', {}).get('login', '').lower()
+        body = comment.get('body', '')
+
+        is_coderabbit_comment = 'coderabbitai' in author_login or 'coderabbit-ai' in author_login
+
+        if not is_coderabbit_comment:
+            continue
+
+        # Find the start of the HTML comment block for the walkthrough
+        html_start_index = body.find(start_html_marker)
+        if html_start_index == -1:
+            continue
+
+        # Adjust index to be after the start marker
+        content_start_index = html_start_index + len(start_html_marker)
+
+        # Find the end of the HTML comment block for the walkthrough
+        html_end_index = body.find(end_html_marker, content_start_index)
+        if html_end_index == -1:
+            # If no end marker, this might be a malformed comment or not the one we want
+            continue
+        
+        # Extract the segment between the HTML markers
+        walkthrough_segment = body[content_start_index:html_end_index]
+
+        # Within this segment, find the '## Walkthrough' markdown header
+        md_header_start_index = walkthrough_segment.find(walkthrough_md_header)
+
+        if md_header_start_index != -1:
+            # Return the content from '## Walkthrough' onwards, stripped
+            return walkthrough_segment[md_header_start_index:].strip()
+
+    return "> No CodeRabbit Walkthrough comment found."
+
 def extract_top_comments(comments, max_comments=3):
     if not comments:
         return "-"
@@ -67,7 +110,8 @@ def main():
         additions = pr.get("additions", "-")
         deletions = pr.get("deletions", "-")
         body = pr.get("body", "-")
-        comments = extract_top_comments(pr.get("comments", []))
+        comments_text = extract_top_comments(pr.get("comments", []))
+        coderabbit_walkthrough_text = extract_coderabbit_walkthrough(pr.get("comments", []))
 
         # Find log file by PR number
         pr_logs_dir = os.path.join(SCRIPT_DIR, "github_automation_output", "pr_logs")
@@ -105,7 +149,10 @@ def main():
 {body}
 
 ## Top-level Comments
-{comments}
+{comments_text}
+
+## CodeRabbit Walkthrough
+{coderabbit_walkthrough_text}
 
 {log_section}
 """

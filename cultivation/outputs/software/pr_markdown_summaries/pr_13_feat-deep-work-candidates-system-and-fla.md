@@ -83,6 +83,72 @@ This update introduces a comprehensive overhaul and expansion of the documentati
 - **coderabbitai**: > [!NOTE]
 > Generated docstrings for this pull request at https://github.com/ImmortalDemonGod/Holistic-Performance-Enhancement/pull/14
 
+## CodeRabbit Walkthrough
+## Walkthrough
+
+This update introduces a comprehensive overhaul and expansion of the documentation and project management infrastructure for the Cultivation project. It adds detailed documentation sections, foundational vision and strategy documents, technical analyses, deep work task plans, and automation scripts for navigation and deployment. Several onboarding and requirements files are removed or updated for consistency.
+
+## Changes
+
+| Files / Groups                                                                                      | Change Summary                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| .github/workflows/deploy-mkdocs.yml, mkdocs.yml, requirements.txt                                   | Added GitHub Actions workflow for MkDocs deployment, introduced MkDocs configuration with navigation and theming, and updated requirements to include MkDocs dependencies.                                                                                                                                                                                                                                                                                   |
+| .gitignore                                                                                          | Updated to ignore MkDocs build output, Mac system files, and documentation file maps.                                                                                                                                                                                                                                                                                                                                                                                                               |
+| cultivation/README.md, cultivation/docs/2_requirements/requirements.md, project_onboarding.md       | Deleted onboarding and requirements markdown files, and the main project README, removing redundant or outdated documentation.                                                                                                                                                                                                                                                                                                                               |
+| cultivation/docs/index.md                                                                           | Added an auto-generated Markdown table of contents for the documentation, reflecting the full directory hierarchy.                                                                                                                                                                                                                                                                                                                                                                                  |
+| cultivation/docs/0_vision_and_strategy/...                                                          | Added foundational vision, philosophy, strategy, and archival documents, including the core vision, project philosophy, strategic initiatives, and supporting README files.                                                                                                                                                                                                                                                                                   |
+| cultivation/docs/1_background_and_theory/...                                                        | Introduced background theory README, domain scope updates, and detailed technical analyses of external projects relevant to Cultivation, plus a synthesis and integration strategy document.                                                                                                                                                                                                                                                                  |
+| cultivation/docs/2_requirements_and_specifications/...                                              | Added READMEs and updated internal documentation links for requirements, specifications, data schemas, and formal system sections.                                                                                                                                                                                                                                                                                                                           |
+| cultivation/docs/3_design_and_architecture/...                                                      | Added design and architecture section with READMEs for integrations, knowledge system, references, and scheduling system.                                                                                                                                                                                                                                                                                                                                    |
+| cultivation/docs/4_analysis_results_and_audits/...                                                  | Added analysis and audit section with new README, expanded analysis overview listing key reports, and a comprehensive architectural review and task consolidation document.                                                                                                                                                                                                                                                                                  |
+| cultivation/docs/5_domain_knowledge_and_curricula/...                                               | Added domain knowledge section with READMEs for biology, mathematical biology, running methodology, and software engineering practices.                                                                                                                                                                                                                                                                                                                      |
+| cultivation/docs/6_personal_schedules_and_protocols/README.md, cultivation/docs/7_user_guides_and_sops/README.md, cultivation/docs/meta/README.md | Added brief overview READMEs for personal schedules, user guides, and meta sections.                                                                                                                                                                                                                                                                                                                                                                         |
+| cultivation/outputs/deep_work_candidates/...                                                        | Added README and comprehensive deep work task plans (JSON) for Flashcore, Literature Pipeline, DevDailyReflect, Formal Methods, Holistic Integration Layer, Infrastructure & Automation, and supporting analyses on deep work gaps.                                                                                                                                            |
+| cultivation/outputs/flashcards/yaml/feature_showcase.yaml                                           | Reformatted a flashcard answer string with explicit quoting; no logic changes.                                                                                                                                                                                                                                                                                                                                                                               |
+| cultivation/scripts/flashcore/database.py                                                           | Refactored internal logic for handling media paths in card rows and changed batch review insertions to a loop, but introduced a likely bug by referencing an undefined variable.                                                                                                                                                                                                                                                                            |
+| scripts/generate_nav.py                                                                             | Added a Python script to auto-generate MkDocs navigation and Markdown ToC, update config files, and trigger MkDocs builds.                                                                                                                                                                                                                                                                                                                                   |
+| scripts/generated_nav_output.yml                                                                    | Added a YAML file with the full auto-generated navigation structure for documentation.                                                                                                                                                                                                                                                                                                                                                                        |
+
+## Sequence Diagram(s)
+
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant GitHub as GitHub Actions
+    participant MkDocs as MkDocs Builder
+    participant Pages as GitHub Pages
+
+    Dev->>GitHub: Push to main / trigger deploy workflow
+    GitHub->>GitHub: Checkout code, setup Python, install requirements
+    GitHub->>MkDocs: Run mkdocs build
+    MkDocs->>GitHub: Output static site
+    GitHub->>Pages: Deploy site using mkdocs gh-deploy
+```
+
+```mermaid
+sequenceDiagram
+    participant Script as generate_nav.py
+    participant FS as File System
+    participant MkDocsYML as mkdocs.yml
+    participant IndexMD as index.md
+
+    Script->>FS: Scan docs directory for files/folders
+    Script->>MkDocsYML: Read and parse mkdocs.yml
+    Script->>MkDocsYML: Update nav section with generated structure
+    Script->>IndexMD: Update auto-generated ToC block
+    Script->>MkDocs: Run mkdocs build --strict
+```
+
+## Poem
+
+> In burrows deep, a rabbit writes,  
+> Docs and plans for sleepless nights.  
+> With scripts that build and navs that grow,  
+> The garden of knowledge starts to show.  
+> From vision seeds to tasks that sprout,  
+> This hop-filled update leaves no doubt—  
+> Cultivation blooms, inside and out! 🥕📚
+
 ## Git Commit Log
 
 ```text

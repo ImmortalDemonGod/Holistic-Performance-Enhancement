@@ -52,6 +52,103 @@
 
 This update introduces comprehensive enhancements and refactoring across the wellness and running analytics pipeline. It adds new scripts for importing and analyzing Habit Dash export d... (truncated)
 
+## CodeRabbit Walkthrough
+## Walkthrough
+
+This update introduces comprehensive enhancements and refactoring across the wellness and running analytics pipeline. It adds new scripts for importing and analyzing Habit Dash export data, updates and relocates the Habit Dash sync script with improved robustness, and removes the legacy sync script. Numerous new weekly and session-level running reports and data summaries are added, reflecting recent training and performance breakthroughs. Documentation and configuration files are updated to align with recalibrated pace zones and improved data management practices.
+
+## Changes
+
+| File(s) / Path(s)                                                                                       | Change Summary                                                                                                                |
+|--------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| .gitignore                                                                                             | Added rule to ignore `cultivation/data/cache_backups` directory.                                                             |
+| cultivation/data/zones_personal.yml                                                                    | Updated pace ranges for all training zones; added rationale comments.                                                        |
+| cultivation/docs/0_vision_and_strategy/creator_psychological_profile_v2.0.md                            | Added detailed psychological profile of project creator "ImmortalDemonGod" with strategic recommendations.                   |
+| cultivation/docs/0_vision_and_strategy/README.md                                                       | Added reference to new psychological profile document.                                                                       |
+| cultivation/docs/4_analysis_results_and_audits/physiological_audits/w17-w23_physiological_progression_audit_v1.md | Added detailed physiological and performance progression audit for weeks 17-23.                                               |
+| cultivation/docs/4_analysis_results_and_audits/repository_audits/habitdash_export_vs_cache_report.md    | Added detailed report comparing Habit Dash export CSV data with wellness cache Parquet.                                       |
+| cultivation/docs/4_analysis_results_and_audits/run_reports/2025_05_31_run_report.md                      | Added weekly running report for Week 22 with detailed session analysis and action plan.                                       |
+| cultivation/docs/4_analysis_results_and_audits/run_reports/2025_06_08_run_report.md                      | Added weekly running report for Week 23 documenting low-volume, high-information training week.                              |
+| cultivation/docs/5_domain_knowledge_and_curricula/running_methodology/references/pace_and_hr_zones.md  | Updated document metadata and added rationale subsection for pace zone recalibration post Week 23 analysis.                  |
+| cultivation/outputs/figures/week20/...                                                                  | Updated run analysis metadata labels to detailed descriptive names.                                                           |
+| cultivation/outputs/figures/week21/...                                                                  | Updated run analysis metadata labels to detailed descriptive names.                                                           |
+| cultivation/outputs/figures/week22/...                                                                  | Added multiple detailed run and walk session analysis reports, metrics summaries, distributions, and environmental data.    |
+| cultivation/outputs/figures/week23/...                                                                  | Added multiple detailed run and walk session analysis reports, metrics summaries, distributions, and environmental data.    |
+| cultivation/scripts/running/fatigue_watch.py                                                           | Updated keys for resting heart rate and heart rate variability extraction from wellness data.                                |
+| cultivation/scripts/running/metrics.py                                                                 | Changed training zone label from 'Z5 (VO2max)' to 'Z5 (VO₂max)' using Unicode subscript.                                      |
+| cultivation/scripts/running/process_all_runs.py                                                        | Refactored subprocess calls to set `PYTHONPATH`; updated sync script path to new utilities directory.                         |
+| cultivation/scripts/running/run_performance_analysis.py                                                | Refactored wellness context extraction, metric naming, delta formatting, and date handling for robustness and clarity.       |
+| cultivation/scripts/running/parse_run_files.py                                                         | Improved elevation gain calculation and formatting; added debug prints; reformatted walk pace output.                         |
+| cultivation/scripts/utilities/analyze_habitdash_export_vs_cache.py                                     | New script added to compare Habit Dash export CSV fields with wellness cache and generate detailed markdown report.          |
+| cultivation/scripts/utilities/import_habitdash_export.py                                               | New script added to import Habit Dash export CSV data into wellness Parquet cache with backup and merge functionality.        |
+| cultivation/scripts/utilities/sync_habitdash.py                                                        | New robust Habit Dash sync script with retry logic, gap-filling, and improved error handling; replaces legacy sync script.   |
+| cultivation/scripts/sync_habitdash.py                                                                  | **Deleted** legacy Habit Dash sync script removed.                                                                            |
+| cultivation/scripts/utilities/habitdash_api.py                                                         | Extended FIELD_IDS dictionary with longer descriptive keys mapping to same field IDs.                                         |
+| cultivation/training_schedules/base_ox_execution/week24/README.md                                      | Added Week 24 training schedule overview focused on aerobic durability testing and data generation.                           |
+| cultivation/training_schedules/base_ox_execution/week24/Week24_Mon_2025-06-09_REST.md                   | Added full rest and strategic planning session for Week 24 Monday.                                                            |
+| cultivation/training_schedules/base_ox_execution/week24/Week24_Tue_2025-06-10_Z2_QUALITY.md             | Added Z2 quality volume run session plan for Week 24 Tuesday with detailed execution checklist.                               |
+| cultivation/training_schedules/base_ox_execution/week24/Week24_Wed_2025-06-11_NME1.md                    | Added NME1 neuromuscular stimulus session plan for Week 24 Wednesday with logging instructions.                               |
+| cultivation/training_schedules/base_ox_execution/week24/Week24_Thu_2025-06-12_Z2_RECOVERY.md            | Added Z2 cadence and recovery run session plan for Week 24 Thursday with wellness gating.                                     |
+| cultivation/training_schedules/base_ox_execution/week24/Week24_Fri_2025-06-13_OPTIONAL.md                | Added optional easy Z2 aerobic run session plan for Week 24 Friday with wellness-based go/no-go criteria.                    |
+| cultivation/training_schedules/base_ox_execution/week24/Week24_Sat_2025-06-14_LIMIT_PROBE.md             | Added extreme duration aerobic limit probe session plan for Week 24 Saturday with detailed logistics and mental notes.       |
+| cultivation/training_schedules/base_ox_execution/week24/Week24_Sun_2025-06-15_REST.md                    | Added full rest and data analysis session plan for Week 24 Sunday focusing on recovery and run data processing.               |
+| cultivation/outputs/figures/week23/week17/txt/compare_hr.txt                                           | Added heart rate comparison summary for week 17 runs.                                                                         |
+| cultivation/outputs/figures/week23/week17/txt/compare_pace.txt                                         | Added pace comparison summary for week 17 runs.                                                                               |
+| cultivation/outputs/figures/week23/week18/txt/compare_hr.txt                                           | Added heart rate comparison summary for week 18 runs.                                                                         |
+| cultivation/outputs/figures/week23/week18/txt/compare_pace.txt                                         | Added pace comparison summary for week 18 runs.                                                                               |
+| cultivation/outputs/figures/week23/week19/txt/compare_hr.txt                                           | Added heart rate comparison summary for week 19 runs.                                                                         |
+| cultivation/outputs/figures/week23/week19/txt/compare_pace.txt                                         | Added pace comparison summary for week 19 runs.                                                                               |
+| cultivation/outputs/figures/week23/week20/txt/compare_hr.txt                                           | Added heart rate comparison summary for week 20 runs.                                                                         |
+| cultivation/outputs/figures/week23/week20/txt/compare_pace.txt                                         | Added pace comparison summary for week 20 runs.                                                                               |
+| cultivation/outputs/figures/week23/week21/txt/compare_hr.txt                                           | Added heart rate comparison summary for week 21 runs.                                                                         |
+| cultivation/outputs/figures/week23/week21/txt/compare_pace.txt                                         | Added pace comparison summary for week 21 runs.                                                                               |
+| cultivation/outputs/figures/week23/week22/txt/compare_hr.txt                                           | Added heart rate comparison summary for week 22 runs.                                                                         |
+| cultivation/outputs/figures/week23/week22/txt/compare_pace.txt                                         | Added pace comparison summary for week 22 runs.                                                                               |
+| cultivation/outputs/figures/week23/week23/txt/compare_hr.txt                                           | Added heart rate comparison summary for week 23 runs.                                                                         |
+| cultivation/outputs/figures/week23/week23/txt/compare_pace.txt                                         | Added pace comparison summary for week 23 runs.                                                                               |
+
+## Sequence Diagram(s)
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant ImportScript as import_habitdash_export.py
+    participant AnalyzeScript as analyze_habitdash_export_vs_cache.py
+    participant SyncScript as sync_habitdash.py
+    participant ParquetCache
+    participant HabitDashAPI
+
+    User->>ImportScript: Run import script with export CSV
+    ImportScript->>ParquetCache: Read current cache
+    ImportScript->>ImportScript: Normalize & pivot export data
+    ImportScript->>ParquetCache: Backup existing cache
+    ImportScript->>ParquetCache: Merge and update cache
+
+    User->>AnalyzeScript: Run analysis script with export CSV and cache
+    AnalyzeScript->>ParquetCache: Read cache
+    AnalyzeScript->>AnalyzeScript: Compare fields, generate report
+
+    User->>SyncScript: Run sync script (days or gap CSV)
+    SyncScript->>HabitDashAPI: Fetch data (with retries)
+    SyncScript->>ParquetCache: Read/merge/update cache
+
+    Note over ParquetCache: Cache is now up-to-date and analyzed
+```
+
+## Possibly related PRs
+
+- ImmortalDemonGod/Holistic-Performance-Enhancement#1: Also modifies `cultivation/data/zones_personal.yml` to define or update personal training zones, directly relating to the recalibration of training zones in this PR.
+
+## Poem
+
+> A rabbit hops through data meadows wide,  
+> With scripts anew and zones recalibrated beside.  
+> Reports now bloom in the weekly sun,  
+> Sync and import—data wrangling done!  
+> Metrics aligned, the cache is bright—  
+> Hippity-hop, all systems right!  
+> 🐇✨
+
 ## Git Commit Log
 
 ```text

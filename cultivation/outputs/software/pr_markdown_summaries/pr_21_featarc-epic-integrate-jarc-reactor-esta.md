@@ -204,6 +204,67 @@ Pull Request opened by [Augment Code](https://www.augmentcode.com/) with guidanc
 - **coderabbitai**: > [!NOTE]
 > Generated docstrings for this pull request at https://github.com/ImmortalDemonGod/Holistic-Performance-Enhancement/pull/22
 
+## CodeRabbit Walkthrough
+## Walkthrough
+
+This update introduces the ARC Reactor system as a new, self-contained module for abstract reasoning tasks. It adds configuration files, data preparation utilities, a PyTorch Lightning data module, and comprehensive documentation. The update also establishes CI workflows, new Taskfile commands, and expanded `.gitignore` rules to support development, testing, and integration of the ARC Reactor subsystem.
+
+## Changes
+
+| File(s)                                                                                       | Change Summary                                                                                         |
+|----------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| .github/workflows/arc-ci.yml                                                                 | Added CI workflow for ARC Reactor: runs linting and tests on Python 3.10–3.12.                        |
+| .gitignore, cultivation/systems/arc_reactor/.gitignore                                       | Extended ignore rules for JARC-Reactor and ARC Reactor artifacts and directories.                    |
+| .taskmaster/.taskmasterconfig                                                                | Added Taskmaster AI model and global configuration JSON.                                             |
+| .taskmaster/tasks/tasks.json                                                                 | Updated task statuses and reformatted JSON for clarity; no logic changes.                            |
+| Taskfile.yml                                                                                 | Added ARC-specific tasks: `arc:lint`, `arc:test`, `arc:run-first-light`.                             |
+| cultivation/docs/WORK_IN_PROGRESS/view_training_logs.py                                      | Added script to inspect PyTorch Lightning training logs without TensorBoard.                         |
+| cultivation/docs/WORK_IN_PROGRESS/onboarding.md                                              | Added comprehensive onboarding document for the Cultivation project.                                |
+| cultivation/systems/arc_reactor/README.md                                                    | Added documentation for ARC Reactor system: architecture, setup, usage, and CI details.              |
+| cultivation/systems/arc_reactor/jarc_reactor/__init__.py, .../data/__init__.py               | Added empty `__init__.py` files to declare Python packages.                                          |
+| cultivation/systems/arc_reactor/jarc_reactor/conf/*.yaml                                     | Added default configuration files for model, training, optuna, logging, finetuning, metrics, etc.    |
+| cultivation/systems/arc_reactor/jarc_reactor/config_schema.py                                | Added dataclasses defining structured configuration schemas for the ARC Reactor system.               |
+| cultivation/systems/arc_reactor/jarc_reactor/data/context_data.py                            | Added `ContextPair` dataclass for context input/output tensor validation and handling.               |
+| cultivation/systems/arc_reactor/jarc_reactor/data/data_module.py                             | Added PyTorch Lightning DataModule (`MyDataModule`) for dataset and DataLoader management.           |
+| cultivation/systems/arc_reactor/jarc_reactor/data/data_preparation.py                        | Added functions for concurrent data loading, processing, and dataset preparation for training/testing.|
+| cultivation/systems/arc_reactor/jarc_reactor/data/eval_data_prep.py                          | Added evaluation data preparation module with concurrent loading and tensor conversion.               |
+| cultivation/systems/arc_reactor/jarc_reactor/data/data_loading_utils.py                      | Added utility function for inspecting and logging dataset JSON structure for debugging.               |
+| cultivation/systems/arc_reactor/jarc_reactor/hydra_setup.py                                 | Added Hydra config registration function for structured config schemas.                              |
+| cultivation/systems/arc_reactor/jarc_reactor/run_model.py                                   | Added training and testing pipeline integrating PyTorch Lightning and Hydra with logging and device selection. |
+| requirements.txt                                                                             | Added dependencies for JARC-Reactor including torch, pytorch-lightning, optuna, hydra-core, and others. |
+
+## Sequence Diagram(s)
+
+```mermaid
+sequenceDiagram
+    participant Developer
+    participant Taskfile
+    participant DataPrep
+    participant DataModule
+    participant PyTorchLightning
+
+    Developer->>Taskfile: Run arc:lint / arc:test / arc:run-first-light
+    Taskfile->>DataPrep: Prepare data (train/test/eval)
+    DataPrep->>DataModule: Provide DataLoader/Dataset
+    DataModule->>PyTorchLightning: Supply DataLoader for training/validation/testing
+    PyTorchLightning-->>Developer: Outputs logs, metrics, checkpoints
+```
+
+## Possibly related PRs
+
+- ImmortalDemonGod/Holistic-Performance-Enhancement#21: Adds the same GitHub Actions workflow `.github/workflows/arc-ci.yml` for ARC Reactor CI, indicating direct relation in CI setup.
+
+## Poem
+
+> In Reactor's warren, code takes flight,  
+> With configs, docs, and tests so bright.  
+> Data hops in, logs in tow,  
+> Linting, training, off we go!  
+> CI watches, carrots cheer—  
+> ARC's new home is finally here!  
+> 🥕🐇
+```
+
 ## Git Commit Log
 
 ```text

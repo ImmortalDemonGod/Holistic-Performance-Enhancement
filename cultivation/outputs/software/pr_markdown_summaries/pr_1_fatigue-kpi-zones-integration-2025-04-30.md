@@ -67,6 +67,103 @@
 
 ... (truncated)
 
+## CodeRabbit Walkthrough
+## Walkthrough
+
+Added an environment template and global `.gitignore` update. Introduced multiple GitHub Actions workflows for metrics gating, scheduling, fatigue monitoring, and wellness data sync. Revamped README with testing and QA guidance. Added extensive new data outputs and detailed run reports. Enhanced numerous scripts for parsing, metrics, scheduling, processing, and analysis. Added Habit Dash API integration utilities and synchronization scripts. Introduced stride and walk detection utilities. Added tests and new dependencies.
+
+## Changes
+
+| File(s)                                         | Summary                                                                                                                           |
+|------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `.env.template`                                 | New template with example environment variables (`WEATHER_API_KEY`, `OTHER_SECRET`).                                              |
+| `.gitignore`                                    | Added global rule to ignore `*.png` files.                                                                                        |
+| `.github/workflows/*.yml`                       | Added workflows: `fatigue-watch` (daily/manual triggers), `run-metrics` (KPI calc + gating), `schedule-next-week` (triggered post-metrics), and `sync-habitdash` (daily/manual). |
+| `README.md`                                     | Replaced Troubleshooting with Testing & QA section; added CI badge, pytest instructions, environment variable and dependency management, and Next Steps. |
+| `requirements.txt`                              | Added `pyarrow` and `python-dotenv` dependencies.                                                                                 |
+| `tests/`                                        | Added `tests/README.md`, `conftest.py`, sample GPX (`sample_missing_hr_cadence.gpx`), and test modules for metrics, GPX parsing, and walk utilities. |
+| `cultivation/data/status.json`, `zones_personal.yml` | Added `status.json` (phase info) and `zones_personal.yml` (personal HR/pace zone definitions).                                      |
+| `cultivation/scripts/__init__.py`               | Added empty line (no functional change).                                                                                          |
+| `cultivation/scripts/running/aggregate_weekly_runs.py` | New script to aggregate weekly running metrics from processed CSV files, outputting Parquet summary.                              |
+| `cultivation/scripts/running/analyze_hr_pace_distribution.py` | Enhanced to include power and cadence distributions with plots and statistics output.                                             |
+| `cultivation/scripts/running/detect_strides_temp.py` | New stride detection script based on pace and cadence thresholds, with CLI interface and summary output.                          |
+| `cultivation/scripts/running/fatigue_watch.py`  | New fatigue monitoring script analyzing subjective and objective data, creating GitHub issues on fatigue alerts.                 |
+| `cultivation/scripts/running/metrics.py`         | Enhanced GPX parsing to extract cadence and power; added personal zone loading; improved aerobic decoupling calculation; CLI for zone file regeneration and verbose debug. |
+| `cultivation/scripts/running/override_gpx_hr_with_fit.py` | New script to override GPX heart rate data using FIT file HR samples, matching timestamps.                                         |
+| `cultivation/scripts/running/parse_run_files.py` | Major enhancements: added walk detection, improved distance/speed calculations, verbose diagnostics, multiple output files, and CLI options. |
+| `cultivation/scripts/running/pid_scheduler.py`   | New scheduling script to automate running session tasks per week with phase management and KPI gate check via GitHub API.         |
+| `cultivation/scripts/running/process_all_runs.py`| Enhanced to sync wellness data, prioritize override GPX files, add planning IDs, detect marker files, and run weekly comparisons. |
+| `cultivation/scripts/running/run_performance_analysis.py` | Refactored to use metrics module zones, added fatigue KPI zones, stride detection, improved HR drift filtering, wellness context loading, expanded weather data handling, and enhanced reporting and plotting. |
+| `cultivation/scripts/running/walk_utils.py`      | New module for walk segment detection, GPS jitter filtering, segment summarization, and time-weighted pace calculation.           |
+| `cultivation/scripts/running/weather_utils.py`   | Added persistent weather data caching, WMO code mapping, improved Open-Meteo API usage with caching and retries, returning raw JSON data. |
+| `cultivation/scripts/sync_habitdash.py`           | New script to sync wellness metrics from Habit Dash API into a Parquet cache file with data merging and logging.                   |
+| `cultivation/scripts/utilities/field_id_discovery.py` | New utility to discover Habit Dash API field IDs for priority metrics across sources.                                             |
+| `cultivation/scripts/utilities/habitdash_api.py`  | New Habit Dash API client module with rate limiting, error handling, and methods to fetch fields and metric data.                 |
+| `cultivation/scripts/running/debug_process_runs.sh` | New bash script to clean output directories and rerun all runs processing for debugging.                                          |
+| `cultivation/outputs/figures/**`                  | Deleted legacy run outputs; added detailed run metrics, distributions, drift analyses, pacing and fatigue zone summaries across weeks 17–18; updated compare files. |
+| `cultivation/outputs/reports/2025_05_01_run_report.md` | Added detailed runner profile and baseline model report with recommendations and monitoring plan.                                 |
+| `cultivation/docs/4_analysis/running_analysis_template.md` | Added optimized audit template for running session analysis with detailed prompt and instructions.                                |
+| `cultivation/docs/habitdash_integration.md`       | Added documentation for Habit Dash API integration, data flow, usage, automation, and troubleshooting.                            |
+| `cultivation/outputs/training_plans/base_ox_block.md` | Updated weekly micro-cycle blueprint with HR% zones, cadence targets, instrumentation, and next steps.                            |
+| `cultivation/outputs/training_plans/pace-zones.md` | Added detailed reference for heart rate and pace zone models used in training blocks with switching instructions.                 |
+| `cultivation/outputs/training_plans/baseox_daily_plans/week2/*.md` | Added multiple Week 2 daily training plan markdown files with session details and execution checklists.                            |
+| `cultivation/outputs/training_plans/baseox_daily_plans/week2/Sat_2025-05-10_LONG‑RUN.md` | Added long-run session plan for durability and fuel pathway efficiency.                                                           |
+
+## Sequence Diagram(s)
+
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant GH as GitHub Actions
+    participant Metrics as run-metrics
+    participant Scheduler as schedule-next-week
+    participant PID as pid_scheduler
+
+    Dev->>GH: push to main
+    GH->>Metrics: trigger on push to processed data
+    Metrics->>Metrics: checkout, install, run aggregate_weekly_runs, calc KPIs
+    Metrics->>Metrics: set outputs (ef, drift, gate_fail)
+    alt gate_passed
+        Metrics-->>Scheduler: workflow_run (success)
+        Scheduler->>Scheduler: checkout, setup Python, run pid_scheduler.py
+        Scheduler->>PID: schedule tasks
+    else gate_failed
+        Metrics-->>Dev: fail workflow
+    end
+```
+
+```mermaid
+sequenceDiagram
+    participant Scheduler as GitHub (cron)
+    participant FW as fatigue-watch
+    participant Script as fatigue_watch.py
+    participant GHIssue as GitHub Issue API
+
+    Scheduler->>FW: daily at 06:00 UTC
+    FW->>Script: checkout, setup, run fatigue_watch.py
+    Script->>Script: analyze HRV, RHR, sRPE, pain, Saturday run
+    alt fatigue_detected
+        Script->>GHIssue: create issue "fatigue-alert"
+    else no_fatigue
+        Script-->>FW: exit
+    end
+```
+
+## Possibly related PRs
+
+- ImmortalDemonGod/Holistic-Performance-Enhancement#1: Introduces the same `.env.template` and `fatigue-watch.yml` workflow, indicating overlapping scope and shared code additions.
+
+## Poem
+
+> 🐰  
+> I hopped through code both old and new,  
+> Env templates shining bright as dew.  
+> Workflows cranked and data spun,  
+> Scripts enhanced with every run.  
+> Tests now guard each clever tweak—  
+> A rabbit’s cheer for progress sleek!  
+> 🎉
+
 ## Git Commit Log
 
 ```text

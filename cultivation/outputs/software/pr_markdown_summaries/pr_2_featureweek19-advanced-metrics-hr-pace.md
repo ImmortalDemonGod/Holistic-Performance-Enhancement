@@ -92,6 +92,80 @@
 
 ... (truncated)
 
+## CodeRabbit Walkthrough
+## Walkthrough
+
+This update introduces extensive documentation, structured training plans, and a large set of new output data files related to running analysis. It adds new design documents for knowledge systems and formal verification tools, implements robust data handling in scripts, and includes a comprehensive week of training plans with detailed daily instructions and supporting literature reviews. Numerous output files summarize running session metrics, distributions, and weather data.
+
+## Changes
+
+| File(s) | Change Summary |
+|---------|---------------|
+| `cultivation/README.md` | Added a comprehensive project README detailing goals, pillars, methodology, stack, and challenges. |
+| `cultivation/docs/2_requirements/lean_tools.md` | Introduced a document summarizing DeepSeek-Prover-V2 features, benchmarks, usage, and caveats. |
+| `cultivation/docs/3_design/knowledge_creation_and_validation.md` | Added a conceptual design document for an advanced personal R&D engine with Laboratory, Think Tank, and Patent Office components. |
+| `cultivation/docs/3_design/user_experience_knowledge_system.md` | New document describing the user experience and workflow for the knowledge acquisition and retention system. |
+| `cultivation/outputs/figures/week19/.../txt/*.txt` | Added numerous new output files summarizing running/walking session metrics, distributions, time in zones, weather, and session summaries for multiple dates in week 19. |
+| `cultivation/outputs/figures/week19/txt/compare_hr.txt`, `compare_pace.txt` | Added comparison summaries for heart rate and pace across week 19 activities. |
+| `cultivation/outputs/reports/2025_05_11_run_report.md` | Removed informal preamble, streamlining the report to start with the formal content. |
+| `cultivation/outputs/training_plans/baseox_daily_plans/week20/GOAL.md` | Introduced a detailed Week 20 training plan focusing on running economy, neuromuscular drills, and recovery. |
+| `cultivation/outputs/training_plans/baseox_daily_plans/week20/Week20_*.md` | Added daily training plan markdown files for each day of Week 20, specifying workouts, rest, recovery, and wellness adjustments. |
+| `cultivation/outputs/training_plans/long-distance_running.md` | Added a literature review and evidence-based synthesis on long-distance running training volume, intensity, and performance. |
+| `cultivation/outputs/training_plans/running_prediction.md` | Added a document outlining predictive goals, modeling strategies, and system requirements for running analytics. |
+| `cultivation/outputs/training_plans/strength_block_prototype.md` | Added a new strength block and calisthenics program with volume audit script and injury mitigation strategies. |
+| `cultivation/scripts/running/analyze_hr_pace_distribution.py` | Improved robustness: filters non-null data for plotting/correlation, wraps plotting in try-except, and checks for empty dataframes. |
+| `cultivation/scripts/running/parse_run_files.py` | Ensured 'timestamp' column is present when resetting index for walk data output; standardized max_hr representation as 'nan' if missing. |
+| `cultivation/scripts/running/weather_utils.py` | Added `make_json_serializable` function and enforced JSON string formatting for weather cache entries. |
+| `cultivation/scripts/running/run_performance_analysis.py` | Enhanced wellness context lookup, improved output formatting for HR drift and pacing strategy, extended weather data extraction, and removed redundant imports. |
+| `cultivation/scripts/sync_habitdash.py` | Added command-line argument support for specifying sync days, defaulting to 7. |
+| `strength_audit.py` | New script for auditing weekly muscle group set volumes from strength logs. |
+| `project_onboarding.md` | Added a comprehensive onboarding guide detailing project architecture, domains, synergy, and roadmap. |
+
+## Sequence Diagram(s)
+
+### Example: Data Output Generation and Summarization
+
+```mermaid
+sequenceDiagram
+    participant Sensor as Wearable Device
+    participant Script as Data Processing Script
+    participant Output as Output Files
+
+    Sensor->>Script: Record activity metrics (HR, pace, cadence, etc.)
+    Script->>Script: Process and analyze data
+    Script->>Output: Write summary files (metrics, distributions, weather, etc.)
+```
+
+### Example: Training Plan Workflow
+
+```mermaid
+sequenceDiagram
+    participant Athlete
+    participant Plan as Training Plan Document
+    participant Wellness as Wellness Check
+    participant Activity as Daily Workout
+
+    Athlete->>Wellness: Log daily metrics (HRV, RHR, sleep)
+    Wellness->>Plan: Determine readiness (Green/Amber/Red)
+    Plan->>Activity: Prescribe workout/rest modifications
+    Athlete->>Activity: Perform session as prescribed
+    Activity->>Wellness: Update wellness metrics post-session
+```
+
+## Possibly related PRs
+
+- ImmortalDemonGod/Holistic-Performance-Enhancement#2: Adds the same comprehensive README file for the Cultivation project, focusing on documentation and project overview, directly related as it introduces the same documentation content.
+
+## Poem
+
+> In the garden of code, new docs have grown,  
+> Training plans blossomed, their wisdom well-shown.  
+> Data files sprout, with metrics galore—  
+> Cadence and heartbeats, and weather in store.  
+> Scripts now robust, with errors in check,  
+> This bunny’s delighted—what a marvelous trek!  
+> 🐇🌱📊
+
 ## Git Commit Log
 
 ```text

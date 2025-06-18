@@ -132,6 +132,51 @@ Pull Request opened by [Augment Code](https://www.augmentcode.com/) with guidanc
 
 ... (truncated)
 
+## CodeRabbit Walkthrough
+## Walkthrough
+
+This update introduces comprehensive documentation for the Cognitive Augmentation Domain within the Cultivation project. It adds detailed specifications for cognitive training data schemas, a domain overview, a drill cookbook, the Mentat-OS architectural blueprint, and a 4-week pilot plan. Additionally, it provides an expanded curricula section overview, outlining all knowledge domains and their integration.
+
+## Changes
+
+| File(s)                                                                                     | Change Summary                                                                                                    |
+|--------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| cultivation/docs/2_requirements_and_specifications/data_schemas/cognitive_training_schemas.md | New document specifying schemas for cognitive drill session logs and weekly aggregated data.                      |
+| cultivation/docs/5_domain_knowledge_and_curricula/README.md                                 | Complete rewrite: now a detailed overview of curricula domains and their integration in the Cultivation project.  |
+| cultivation/docs/5_domain_knowledge_and_curricula/cognitive_augmentation/README.md          | New README: introduces the Cognitive Augmentation Domain, its mission, integration, objectives, and KPIs.         |
+| cultivation/docs/5_domain_knowledge_and_curricula/cognitive_augmentation/drill_cookbook.md  | New document: full specification of Mentat-OS Drill Cookbook, including drills, KPIs, and progression ladders.    |
+| cultivation/docs/5_domain_knowledge_and_curricula/cognitive_augmentation/mentat_os_blueprint.md | New document: Mentat-OS blueprint detailing cognitive architecture, training ranks, and system integration.       |
+| cultivation/docs/5_domain_knowledge_and_curricula/cognitive_augmentation/mentat_os_pilot_plan.md | New document: 4-week pilot plan for Mentat-OS cognitive augmentation, with objectives and integration roadmap.    |
+
+## Sequence Diagram(s)
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Drill_Cookbook
+    participant Autograder
+    participant Data_Schema
+    participant ETL
+    participant Potential_Engine
+
+    User->>Drill_Cookbook: Selects and performs drill
+    Drill_Cookbook->>Autograder: Provides drill protocol and KPIs
+    User->>Autograder: Submits drill results
+    Autograder->>Data_Schema: Logs session data (CSV)
+    ETL->>Data_Schema: Aggregates weekly data (Parquet)
+    ETL->>Potential_Engine: Supplies aggregated KPIs
+```
+
+## Poem
+
+> In the garden of knowledge, new seeds now grow,  
+> With blueprints and cookbooks, our minds in tow.  
+> Drills for the cortex, plans for the week,  
+> Data flows steady—insights we seek.  
+> A hop and a leap, with whiskers held high,  
+> The rabbit records progress, reaching for the sky!  
+> 🐇✨
+
 ## Git Commit Log
 
 ```text

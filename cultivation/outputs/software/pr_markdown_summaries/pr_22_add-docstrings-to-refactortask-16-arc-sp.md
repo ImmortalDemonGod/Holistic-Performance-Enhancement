@@ -208,6 +208,9 @@ CodeRabbit cannot perform edits on its own pull requests yet.
 > To trigger a single review, invoke the `@coderabbitai review` command.
 > ... (truncated)
 
+## CodeRabbit Walkthrough
+> No CodeRabbit Walkthrough comment found.
+
 ## Git Commit Log
 
 ```text
