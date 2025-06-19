@@ -2,9 +2,8 @@ import json
 import pytest
 from jsonschema import validate, ValidationError
 from pathlib import Path
-import json
 
-SCHEMA_PATH = Path(__file__).parent.parent.parent / "cultivation/schemas/paper.schema.json"
+SCHEMA_PATH = Path(__file__).parent.parent.parent / "cultivation/systems/knowledge/schemas/paper.schema.json"
 
 # Minimal valid metadata example
 def valid_metadata():

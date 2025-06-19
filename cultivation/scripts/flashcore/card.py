@@ -1,20 +1,17 @@
 """
-cultivation/scripts/flashcore/card.py
-
-Defines the core Pydantic data models for Cards and Reviews in the flashcore system.
-These models serve as the canonical internal representation of flashcard data and review events.
+_summary_
 """
 
 from __future__ import annotations
 
 import uuid
+import re
 from uuid import UUID
 from datetime import datetime, date, timezone
 from typing import List, Optional, Set
 from pathlib import Path
-import re
 
-from pydantic import BaseModel, Field, validator, conint, constr
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # Regex for Kebab-case validation (e.g., "my-cool-tag", "learning-python-3")
 KEBAB_CASE_REGEX_PATTERN = r"^[a-z0-9]+(?:-[a-z0-9]+)*$"
@@ -26,20 +23,25 @@ class Card(BaseModel):
 
     Media asset paths are always relative to 'cultivation/outputs/flashcards/yaml/assets/'.
     """
+    model_config = ConfigDict(validate_assignment=True, extra="forbid")
+
     uuid: UUID = Field(
         default_factory=uuid.uuid4,
         description="Unique UUIDv4 identifier for the card. Auto-generated if not provided in YAML 'id'."
     )
     deck_name: str = Field(
-        ..., min_length=1,
+        ...,
+        min_length=1,
         description="Fully qualified name of the deck the card belongs to (e.g., 'Backend::Auth'). Derived from YAML 'deck'."
     )
     front: str = Field(
-        ..., max_length=1024,
+        ...,
+        max_length=1024,
         description="The question or prompt text. Supports Markdown and KaTeX. Maps from YAML 'q'."
     )
     back: str = Field(
-        ..., max_length=1024,
+        ...,
+        max_length=1024,
         description="The answer text. Supports Markdown and KaTeX. Maps from YAML 'a'."
     )
     tags: Set[str] = Field(
@@ -50,12 +52,16 @@ class Card(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         description="UTC timestamp indicating when the card was first added/ingested into the system. This timestamp persists even if the card content is updated later."
     )
+    modified_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="UTC timestamp indicating when the card was last modified. It is updated upon any change to the card's content."
+    )
     origin_task: Optional[str] = Field(
         default=None,
         description="Optional reference to an originating task ID (e.g., from Task Master)."
     )
     media: Optional[List[Path]] = Field(
-        default=None,
+        default_factory=list,
         description="Optional list of paths to media files (images, audio, etc.) associated with the card. Paths should be relative to a defined assets root directory (e.g., 'outputs/flashcards/assets/')."
     )
     source_yaml_file: Optional[Path] = Field(
@@ -67,38 +73,22 @@ class Card(BaseModel):
         description="A field for internal system notes or flags about the card, not typically exposed to the user (e.g., 'needs_review_for_xss_risk_if_sanitizer_fails', 'generated_by_task_hook')."
     )
 
-    @validator("tags", each_item=True, pre=True)
-    def validate_tags_kebab_case(cls, v):
-        """Ensure each tag is a string and matches kebab-case pattern."""
-        if not isinstance(v, str):
-            raise ValueError("Input should be a valid string")
-        if not re.match(KEBAB_CASE_REGEX_PATTERN, v):
-            raise ValueError(f"Tag '{v}' is not in kebab-case.")
-        return v
-
-    @validator("front", pre=True)
-    def check_front_max_length(cls, v: str) -> str:
-        """Ensure front text does not exceed 1024 characters."""
-        if not isinstance(v, str) or len(v) > 1024:
-            raise ValueError("String should have at most 1024 characters")
-        return v
-
-    @validator("back", pre=True)
-    def check_back_max_length(cls, v: str) -> str:
-        """Ensure back text does not exceed 1024 characters."""
-        if not isinstance(v, str) or len(v) > 1024:
-            raise ValueError("String should have at most 1024 characters")
-        return v
-
-    class Config:
-        validate_assignment = True  # Enforce validation when field values are changed post-instantiation
-        extra = "forbid"            # Disallow any fields not defined in the model during instantiation
+    @field_validator("tags")
+    @classmethod
+    def validate_tags_kebab_case(cls, tags: Set[str]) -> Set[str]:
+        """Ensure each tag matches the kebab-case pattern."""
+        for tag in tags:
+            if not re.match(KEBAB_CASE_REGEX_PATTERN, tag):
+                raise ValueError(f"Tag '{tag}' is not in kebab-case.")
+        return tags
 
 class Review(BaseModel):
     """
     Represents a single review event for a flashcard, including user feedback
     and FSRS scheduling parameters.
     """
+    model_config = ConfigDict(validate_assignment=True, extra="forbid")
+
     review_id: Optional[int] = Field(
         default=None,
         description="The auto-incrementing primary key from the 'reviews' database table. Will be None for new Review objects before they are persisted."
@@ -111,8 +101,10 @@ class Review(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         description="The UTC timestamp when the review occurred."
     )
-    rating: conint(ge=0, le=3) = Field(  # type: ignore
+    rating: int = Field(
         ...,
+        ge=0,
+        le=3,
         description="The user's rating of their recall performance (0=Again, 1=Hard, 2=Good, 3=Easy)."
     )
     resp_ms: Optional[int] = Field(
@@ -152,15 +144,9 @@ class Review(BaseModel):
         description="Type of review, e.g., 'learn', 'review', 'relearn', 'manual'. Useful for advanced FSRS variants or analytics."
     )
 
-    @validator("rating", pre=True)
-    def validate_rating_type(cls, v):
-        """Ensure rating is an integer between 0 and 3., type check only."""
-        if not isinstance(v, int):
-            raise ValueError("Input should be a valid integer")
-        return v
-
-    @validator("review_type")
-    def check_review_type_is_allowed(cls, v: Optional[str]) -> Optional[str]:
+    @field_validator("review_type")
+    @classmethod
+    def check_review_type_is_allowed(cls, v: str | None) -> str | None:
         """Ensures review_type is one of the predefined allowed values or None."""
         ALLOWED_REVIEW_TYPES = {"learn", "review", "relearn", "manual"}
         if v is not None and v not in ALLOWED_REVIEW_TYPES:
@@ -168,7 +154,3 @@ class Review(BaseModel):
                 f"Invalid review_type: '{v}'. Allowed types are: {ALLOWED_REVIEW_TYPES} or None."
             )
         return v
-
-    class Config:
-        validate_assignment = True
-        extra = "forbid"

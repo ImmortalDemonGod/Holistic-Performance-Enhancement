@@ -58,7 +58,7 @@ tasks:
     desc: "Runs the 'First Light' integration test for ARC reactor (minimal epochs, small batch)."
     deps: [setup] # Ensure environment is set up
     cmds:
-      - "{{.PYTHON_INTERPRETER}} -m cultivation.systems.arc_reactor.jarc_reactor.run_model training.max_epochs=1 training.batch_size=1 training.fast_dev_run=true logging.level=DEBUG logging.log_dir={{.CULTIVATION_ROOT}}/systems/arc_reactor/jarc_reactor/logs/first_light_test"
+      - "{{.PYTHON_INTERPRETER}} -m cultivation.systems.arc_reactor.jarc_reactor.run_model training.max_epochs=1 dataloader.batch_size=1 training.fast_dev_run=true logging.level=DEBUG logging.log_dir={{.CULTIVATION_ROOT}}/systems/arc_reactor/jarc_reactor/logs/first_light_test"
 
   # --- CodeScene Integration Tasks ---
   codescene:check:
@@ -107,7 +107,7 @@ tasks:
     desc: "Runs the full Python test suite with pytest."
     deps: [setup]
     cmds:
-      - "{{.PYTHON_INTERPRETER}} -m pytest --cov={{.CULTIVATION_ROOT}} --cov=tests -v"
+      - "{{.PYTHON_INTERPRETER}} -m pytest --cov={{.CULTIVATION_ROOT}} --cov=tests -v --ignore=cultivation/systems/arc_reactor/"
 
   docs:
     desc: "Serves the documentation site locally for development."

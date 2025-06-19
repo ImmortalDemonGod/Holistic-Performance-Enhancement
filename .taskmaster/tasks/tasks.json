@@ -1737,7 +1737,7 @@
             "title": "Research and select a suitable Python FSRS library",
             "description": "Evaluate available Python FSRS libraries based on features, maintenance, license, and ease of integration. Document the choice and rationale.",
             "dependencies": [],
-            "status": "pending",
+            "status": "done",
             "risks": "Analysis paralysis; spending excessive time on selection. Chosen library could be unmaintained or have a restrictive license.",
             "mitigation": "Time-box research to 2-3 hours. Prioritize libraries with recent commit activity, good documentation, and a permissive license (MIT, Apache 2.0). Create a small ADR to document the final choice.",
             "implementation_details": {
@@ -2271,10 +2271,471 @@
         "priority": "high",
         "subtasks": []
       }
+,
+  {
+    "id": 25,
+    "title": "[EPIC] JARC-Reactor: Foundational Refactor & Bug Squashing",
+    "description": "This foundational epic addresses all critical bugs, inconsistencies, and architectural weaknesses identified in the JARC-Reactor codebase audit. The objective is to transform the platform from a 'brittle expert tool' into a stable, reliable, and trustworthy research platform, thereby enabling confident and efficient experimentation for the ARC Prize sprint. This task is a mandatory prerequisite for all subsequent training and HPO activities.",
+    "status": "pending",
+    "dependencies": [
+      16
     ],
-    "metadata": {
+    "priority": "critical",
+    "details": "A thorough audit of the JARC-Reactor codebase revealed several critical flaws that undermine its reliability, including a silent data-corrupting bug in the evaluation pipeline (dtype mismatch), confusing and redundant logic for Kaggle submission generation, and unexplained 'magic number' heuristics in the core model. This epic is designed to systematically remediate these issues, establishing a 'Golden Path' for the core workflow and ensuring that all future work is built on a solid foundation. The successful completion of this task will de-risk the entire 5-month sprint and provide the necessary confidence to build a winning solution.",
+    "testStrategy": "The epic is considered complete when all MUST-HAVE subtasks pass their respective definitions of done. The final validation will be a successful end-to-end run of the 'First Light' integration test (`task arc:run-first-light`) on the fully refactored codebase. This run must complete without errors and produce a validation report confirming system stability, data integrity, and correctness of the generated artifacts.",
+    "subtasks": [
+      {
+        "id": "25.1",
+        "title": "Unify Data Pipeline & Fix Critical `dtype` Bug",
+        "description": "Refactor data/data_preparation.py and data/eval_data_prep.py into a single, unified module. This new module must be configurable for 'train'/'eval' modes and MUST resolve the critical dtype mismatch bug, ensuring all grid tensors are output as `torch.long`.",
+        "status": "pending",
+        "dependencies": [],
+        "risks": "Refactoring data loaders could introduce subtle bugs affecting how context pairs or synthetic data are handled.",
+        "mitigation": "The new data integrity tests (Subtask 25.2) are the primary mitigation. Additionally, perform a manual diff of the output from the old vs. new pipeline on a single, representative task file to ensure logical equivalence, ignoring the intended dtype change.",
+        "implementation_details": {
+          "steps": [
+            "1. Analyze `cultivation/systems/arc_reactor/jarc_reactor/data/eval_data_prep.py` to identify the logic that incorrectly casts tensors to `torch.float32`.",
+            "2. Modify `cultivation/systems/arc_reactor/jarc_reactor/data/data_preparation.py` to accept a `mode` parameter (e.g., 'train', 'eval').",
+            "3. Port the evaluation-specific logic into the unified function, ensuring all tensor outputs are consistently cast to `torch.long`.",
+            "4. Delete the now-redundant `cultivation/systems/arc_reactor/jarc_reactor/data/eval_data_prep.py` file.",
+            "5. Refactor `MyDataModule` in `cultivation/systems/arc_reactor/jarc_reactor/data/data_module.py` to call the single, unified data preparation function for both training and validation/testing stages."
+          ],
+          "testing": [
+            "File `cultivation/systems/arc_reactor/jarc_reactor/data/eval_data_prep.py` is verified as DELETED.",
+            "The `MyDataModule` is confirmed to call only the new unified function.",
+            "The automated data integrity tests created in Subtask 25.2 pass, confirming the `dtype` is `torch.long`."
+          ]
+        }
+      },
+      {
+        "id": "25.2",
+        "title": "Implement Data Integrity Unit Tests & Integrate into CI",
+        "description": "Implement new unit tests in `tests/` to validate the unified data loading pipeline's output. These tests must explicitly check tensor dtypes (`torch.long`) and shapes to prevent future regressions. Integrate these tests into the `arc:test` Taskfile command.",
+        "status": "pending",
+        "dependencies": [
+          "25.1"
+        ],
+        "risks": "Tests might be too brittle if they rely on specific data files; they should be robust to changes in the dummy data.",
+        "mitigation": "Use the dedicated, static dummy ARC task file at `cultivation/systems/arc_reactor/jarc_reactor/tests/data/dummy_training_data/dummy_arc_task.json` as a stable input for the tests.",
+        "implementation_details": {
+          "steps": [
+            "1. Create a new test file: `cultivation/systems/arc_reactor/jarc_reactor/tests/test_data_pipeline.py`.",
+            "2. In the new test file, write a `pytest` test function that instantiates `MyDataModule` using a Hydra config override to point to the dummy data directory.",
+            "3. Call `data_module.setup()` and `data_module.train_dataloader()`.",
+            "4. In the test, iterate one batch from the dataloader.",
+            "5. Assert that the `dtype` of the source and target grid tensors is `torch.long`.",
+            "6. Assert that the shape of the tensors is as expected (e.g., `[B, 30, 30]`).",
+            "7. Ensure the `Taskfile.yml`'s `arc:test` target correctly discovers and runs this new test file."
+          ],
+          "testing": [
+            "The new test file (e.g., `tests/test_data_pipeline.py`) is created and committed.",
+            "Running `task arc:test` executes the new tests.",
+            "The new tests pass successfully in the CI workflow."
+          ]
+        }
+      },
+      {
+        "id": "25.3",
+        "title": "Consolidate Submission Generation Logic",
+        "description": "Deprecate redundant submission logic in `evaluate.py` and `kaggle/kaggle_submission.py`. Refactor the system to use `kaggle/submission_handler.py` as the single, canonical source for creating `submission.json` files.",
+        "status": "pending",
+        "dependencies": [],
+        "risks": "The padding removal and grid formatting logic is complex; centralizing it might break edge cases handled by one of the old implementations.",
+        "mitigation": "Before deleting old code, create a small suite of test cases with various prediction grid shapes and padding patterns. Ensure the new canonical `SubmissionManager` passes all these test cases.",
+        "implementation_details": {
+          "steps": [
+            "1. Identify `cultivation/systems/arc_reactor/jarc_reactor/kaggle/submission_handler.py` as the canonical module.",
+            "2. Refactor `evaluate.py` to import and call the `SubmissionManager` from the canonical module, removing its local `create_submission` implementation.",
+            "3. Refactor `kaggle/kaggle_submission.py` to also use the canonical `SubmissionManager`, ensuring consistency.",
+            "4. Create a new test file `tests/kaggle/test_submission_handler.py` with test cases for padding removal and correct JSON formatting."
+          ],
+          "testing": [
+            "`kaggle/submission_handler.py` is verified as the single source of truth.",
+            "A `git diff` confirms that redundant submission generation code has been removed from all other files.",
+            "The `evaluate.py` script successfully generates a submission file using the new handler."
+          ]
+        }
+      },
+      {
+        "id": "25.4",
+        "title": "Investigate & Remove Arbitrary Model Scaling",
+        "description": "Remove the `output = output * 5.0` line from `models/transformer_model.py`. Perform a brief experimental run (`fast_dev_run`) to ensure that removing it does not catastrophically destabilize training.",
+        "status": "pending",
+        "dependencies": [],
+        "risks": "Removing the scaling factor significantly destabilizes training, indicating a deeper, undiagnosed issue with loss scaling or gradient flow.",
+        "mitigation": "Time-box the investigation to 4 hours. If no root cause is found, revert the change, add a detailed `# TODO` comment explaining the issue, and create a new low-priority tech debt task. Do not let this block the epic.",
+        "implementation_details": {
+          "steps": [
+            "1. Locate and comment out the `output = output * 5.0` line in `cultivation/systems/arc_reactor/jarc_reactor/models/transformer_model.py`.",
+            "2. Run a `fast_dev_run` training cycle: `task arc:run-first-light training.fast_dev_run=true`.",
+            "3. Monitor the `val_loss` in the output. It must show a clear downward trend.",
+            "4. If stable, permanently delete the line and commit with a message documenting the stability check. If unstable, revert and add a detailed `# TODO` comment."
+          ],
+          "testing": [
+            "The line `output = output * 5.0` is confirmed as removed from `transformer_model.py`.",
+            "The log from a `fast_dev_run` training cycle is reviewed and confirms a decreasing loss curve."
+          ]
+        }
+      },
+      {
+        "id": "25.5",
+        "title": "[STRETCH] Decompose `EvaluationManager` Class",
+        "description": "If time permits, decompose the `EvaluationManager` 'God Object' in `evaluate.py` into smaller, single-responsibility classes (e.g., `EvaluationRunner`, `ReportGenerator`) to improve maintainability.",
+        "status": "pending",
+        "dependencies": [
+          "25.1",
+          "25.3"
+        ],
+        "risks": "The refactor proves more complex than anticipated and threatens the timeline for MUST-HAVE fixes.",
+        "mitigation": "Strictly adhere to this being a stretch goal. Defer immediately if any higher-priority subtasks encounter delays.",
+        "implementation_details": {
+          "steps": [
+            "1. Create a new file `evaluation/runner.py` for an `EvaluationRunner` class.",
+            "2. Create a new file `evaluation/reporting.py` for a `ReportGenerator` class.",
+            "3. Move the evaluation loop logic from `EvaluationManager` into `EvaluationRunner`.",
+            "4. Move the JSON/summary file generation logic into `ReportGenerator`.",
+            "5. Refactor the `evaluate.py` entry point script to orchestrate these new, smaller classes."
+          ],
+          "testing": [
+            "The `EvaluationManager` class is confirmed as removed and replaced by 2-3 smaller classes.",
+            "The public-facing functionality and outputs of the `evaluate.py` script are confirmed to be identical to the pre-refactor version."
+          ]
+        }
+      },
+      {
+        "id": "25.6",
+        "title": "Final Validation: E2E Integration Test & Documentation Update",
+        "description": "Run the full 'First Light' integration test (`task arc:run-first-light`) on the refactored codebase to ensure all components work together correctly. Update the `README.md` and other relevant docs to reflect the new, simplified 'Golden Path' workflow.",
+        "status": "pending",
+        "dependencies": [
+          "25.1",
+          "25.2",
+          "25.3",
+          "25.4"
+        ],
+        "risks": "An unforeseen integration error emerges only when all refactored components run together.",
+        "mitigation": "Run the test with a debugger attached. Analyze logs from the full run to trace the error. Be prepared to revisit and patch previous subtasks.",
+        "implementation_details": {
+          "steps": [
+            "1. After all other MUST-HAVE subtasks are complete, run `task arc:run-first-light` from the project root.",
+            "2. Verify that the run completes without any Python errors and that a model checkpoint and TensorBoard log file are generated in the `.../first_light_test/` directory.",
+            "3. Update `cultivation/systems/arc_reactor/README.md` to describe the new, unified workflow for training, evaluation, and submission."
+          ],
+          "testing": [
+            "The command `task arc:run-first-light` completes successfully without errors.",
+            "A model checkpoint and a TensorBoard log file are generated and their contents are briefly inspected for validity.",
+            "The project's main `README.md` is updated to describe the new, canonical workflow."
+          ]
+        }
+      }
+    ],
+    "hpe_csm_reference": {
+      "source_document": "cultivation/docs/WORK_IN_PROGRESS/GEORGE_System_Analysis_Report_2025-06-18.md",
+      "csm_id": "DW_ARC_JR_FIX_001",
+      "anchor_link": "#executive-summary"
+    },
+    "hpe_learning_meta": {
+      "task_objective_summary": "To transform the JARC-Reactor from a brittle expert tool into a stable, reliable, and trustworthy research platform by remediating all critical bugs and architectural flaws identified in the codebase audit.",
+      "estimated_effort_tshirt": "L",
+      "estimated_effort_hours_raw": "2-4 days",
+      "estimated_effort_hours_min": 16,
+      "estimated_effort_hours_max": 32,
+      "mastery_criteria_summary": "Data integrity is validated by CI tests. Submission generation is unified. The 'First Light' integration test passes on the refactored codebase without errors, and the README is updated to reflect the new canonical workflow.",
+      "activity_type": "refactoring_bug_fixing_testing",
+      "recommended_block": "deep_work",
+      "deliverables": [
+        "A unified data loading module in `cultivation/systems/arc_reactor/jarc_reactor/data/data_preparation.py`.",
+        "New data integrity unit tests passing in CI (`tests/test_data_pipeline.py`).",
+        "A single, canonical submission handler in `cultivation/systems/arc_reactor/jarc_reactor/kaggle/submission_handler.py`.",
+        "A final validation report confirming system stability post-refactor."
+      ],
+      "actionable_advice_for_execution": "1. **Tackle Subtasks Sequentially:** Follow the dependency chain: 25.1 -> 25.2. Subtasks 25.3 and 25.4 can be done in parallel. Subtask 25.6 is the final integration test.\n2. **Commit Atomically:** Create a separate, focused Git commit for each completed subtask. This isolates changes and makes the PR easy to review.\n3. **Test-Driven Refactoring:** For subtask 25.3 (Submission Logic), write the new unit tests first. These tests should initially fail. Then, refactor the code until the tests pass. This ensures correctness.\n4. **Time-Box Heuristic Investigation:** Strictly adhere to the 4-hour time box for subtask 25.4. Its priority is lower than fixing the data bugs. If it proves difficult, document it and move on to ensure the epic is not blocked."
+    },
+    "hpe_scheduling_meta": {
+      "curriculum_part_title": "ARC Sprint: P0 - Foundational Refactor",
+      "csm_tags": [
+        "arc_sprint",
+        "jarc_reactor",
+        "refactoring",
+        "bug_fix",
+        "tech_debt",
+        "track_a",
+        "data_integrity",
+        "code_health",
+        "epic"
+      ]
+    },
+    "labels": [
+      "domain:arc_sprint",
+      "component:ia_layer",
+      "activity:refactoring",
+      "block:deep_work",
+      "effort_tshirt:L",
+      "track:A",
+      "priority:critical"
+    ]
+    },
+    {
+      "id": 26,
+      "title": "[EPIC] Refactor Running Data Pipeline to V2.0",
+      "description": "A foundational architectural refactoring of the `cultivation/running` scripts to improve robustness, testability, and performance. This addresses significant technical debt and de-risks future development.",
+      "status": "pending",
+      "dependencies": [
+        14
+      ],
+      "priority": "critical",
+      "details": "The current running data pipeline is a brittle, script-based system with tight filesystem coupling, duplicated logic, and decentralized configuration. This epic initiative will re-architect the pipeline into an industrial-grade, configuration-driven, and highly-testable software component. The goal is to create a reliable engine that can be extended with confidence, enabling advanced features like predictive modeling and deeper integration with the Holistic Integration Layer (HIL). This is a MUST-HAVE technical debt-repayment initiative, as specified in the 'Running Data Pipeline V2.0' PRD.",
+      "testStrategy": "Success is validated by a multi-faceted approach, enforced by the CI pipeline: \n1. **Unit Testing:** All new, pure-logic utility functions must achieve >85% line coverage with `pytest`.\n2. **Regression Testing:** A 'Golden Dataset' test must be created. The refactored pipeline MUST produce numerically identical output artifacts (plots, summaries, dataframes, text files) to the old pipeline for a canonical run file, ensuring no logical regressions are introduced.\n3. **Data Contract Validation:** Key DataFrames at critical pipeline stages (e.g., post-parsing, pre-analysis) must be validated against `pandera` schemas to ensure data integrity.\n4. **Performance Benchmarking:** The final parallelized pipeline must show a >40% speedup for a benchmark set of 20 runs.",
+      "subtasks": [
+        {
+          "id": "26.1",
+          "title": "Centralize Configuration & Consolidate Logic",
+          "description": "Eliminate all hardcoded parameters and duplicated utility functions by creating a single source of truth for configuration and consolidating shared logic into a central utility module. This is the first step to reduce code sprawl and improve maintainability.",
+          "status": "pending",
+          "dependencies": [],
+          "risks": "A hardcoded parameter (e.g., a pace threshold) is missed during the refactor, leading to subtle bugs where part of the system uses the new config and another part uses an old, hidden default.",
+          "mitigation": "Perform a project-wide search for all numeric literals and string constants related to thresholds (e.g., pace, cadence, HR). Systematically replace each one with a call to the new config loader. The 'Golden Dataset' regression test (implemented in a later subtask) will be the final backstop to catch any missed values that alter the output.",
+          "implementation_details": {
+            "steps": [
+              "1. **Create the new package structure:** `mkdir -p cultivation/running/utils` and add `__init__.py` to `cultivation/running/` and `cultivation/running/utils/` to make them proper Python packages.",
+              "2. Create a new file `cultivation/running/config.py` and define a dictionary or dataclass `RUNNING_CONFIG` to hold all parameters from `metrics.py`, `parse_run_files.py`, `fatigue_watch.py`, etc.",
+              "3. The config MUST include the cadence auto-scaling threshold (e.g., `cadence_rpm_to_spm_threshold: 100`) to explicitly preserve this domain logic.",
+              "4. Create a `load_config()` function in this module.",
+              "5. Rename and move all core utility scripts to the `utils` package: `detect_strides_temp.py` -> `utils/stride_detection.py`, `metrics.py` -> `utils/physiological_metrics.py`, `walk_utils.py` -> `utils/walk_processing.py`.",
+              "6. The core architectural shift is from script-based `subprocess` calls to a Python-native pipeline. This subtask prepares for that by consolidating logic into importable modules.",
+              "7. Refactor all relevant utility scripts to import `load_config` and retrieve parameters from it instead of using local constants.",
+              "8. Remove the duplicated `detect_strides` function from `run_performance_analysis.py` and replace it with an import from the new canonical utility module.",
+              "9. Remove the redundant HR drift calculation from `run_performance_analysis.py`."
+            ],
+            "testing": [
+              "Create a new test file `tests/running/test_config.py` and write a unit test for the `load_config()` function.",
+              "Create a new test file `tests/running/test_stride_detection.py` and write unit tests for the consolidated `detect_strides` utility.",
+              "Add a concrete integration test for the config. Example: Write a test that calls the `walk_detection` logic. Pass it a mock DataFrame where a point has a pace of 11.5 min/km. First, test with the default config and assert the point is classified as a walk. Then, pass a mock config object where `walk_pace_min_per_km` is set to `12.0` and assert the same point is now classified as a run. This proves the config is correctly wired up and respected by the business logic."
+            ]
+          }
+        },
+        {
+          "id": "26.2",
+          "title": "Implement Data Schemas & Core Logic Unit Tests",
+          "description": "Define explicit data contracts for key DataFrames using `pandera`. Create a comprehensive unit test suite for the pure logic that was consolidated in the previous step.",
+          "status": "pending",
+          "dependencies": [
+            "26.1"
+          ],
+          "risks": "Pandera schemas are initially too strict or too loose, causing failures on valid edge-case data or allowing errors to pass through.",
+          "mitigation": "Develop schemas iteratively. First, use `pandera.infer_schema` on existing, valid processed CSV files to generate a baseline. Then, manually refine the schema to add specific constraints (e.g., ranges, non-nullability). Test against multiple historical run files.",
+          "implementation_details": {
+            "steps": [
+              "1. Create `cultivation/running/schemas.py` and define a `pandera.DataFrameSchema` for the main processed run DataFrame (the output of parsing a GPX/FIT file).",
+              "2. Ensure the schema validates column names, dtypes, and sensible ranges (e.g., latitude between -90 and 90).",
+              "3. Create `tests/running/test_metrics.py` and write `pytest` unit tests for the pure logic functions in `utils/physiological_metrics.py` (e.g., `_haversine`, hrTSS calculation). Use `pytest.mark.parametrize` to test with known inputs and expected outputs.",
+              "4. Aim for >85% test coverage on these pure utility functions."
+            ],
+            "testing": [
+              "Verify that the new `pandera` schemas can successfully validate a known-good processed run file.",
+              "Verify that the CI `task test` command runs the new unit tests and that they pass."
+            ]
+          }
+        },
+        {
+          "id": "26.3",
+          "title": "Implement Core `RunningSession` Class",
+          "description": "Create the central object-oriented structure, the `RunningSession` class, which will encapsulate the state and processing logic for a single run, migrating logic from the old procedural scripts.",
+          "status": "pending",
+          "dependencies": [
+            "26.2"
+          ],
+          "risks": "The class design becomes a monolithic 'God Object' that is difficult to manage and test.",
+          "mitigation": "Maintain a strict separation of concerns. The `RunningSession` class should be an *orchestrator*. Its methods should be high-level (e.g., `.calculate_metrics()`, `.generate_visualizations()`) and should call the pure utility functions (from `utils/`) for the actual computation. It should hold state, but delegate complex logic.",
+          "implementation_details": {
+            "steps": [
+              "1. Create `cultivation/running/session.py` and implement the `RunningSession` class.",
+              "2. The `__init__` method should accept a raw file path and the central config object.",
+              "3. In the `__init__` method, implement logic to detect if a corresponding `_hr_override.gpx` file exists. If so, set the internal file path to the override file. This preserves existing data correction functionality.",
+              "4. Implement a `.load_and_parse()` method that contains the logic from `parse_run_files.py` to load a GPX/FIT file into an internal DataFrame (`self.raw_df`).",
+              "5. Implement a `.segment_run_walk()` method that uses the walk detection logic on the DataFrame.",
+              "6. Implement a `.calculate_all_metrics()` method that calls the pure `run_metrics` function and stores the results in `self.metrics`.",
+              "7. Implement a `.generate_outputs(output_dir)` method to orchestrate the creation of plots and text summaries.",
+              "8. Implement a main `.process(output_dir)` method that calls the other methods in sequence.",
+              "9. In the appropriate methods, use the `pandera` schemas from subtask 26.2 to validate the internal DataFrames."
+            ],
+            "testing": [
+              "Create `tests/running/test_session.py` and write unit tests for the `RunningSession` class methods, mocking file I/O using `pyfakefs` or `pytest-mock`'s `mock_open`."
+            ]
+          }
+        },
+        {
+          "id": "26.4",
+          "title": "Refactor Orchestrator & Implement Golden Dataset Test",
+          "description": "Rewrite the main orchestrator script (`process_all_runs.py`) to use the new `RunningSession` class. Implement the critical 'Golden Dataset' regression test to ensure end-to-end correctness and prevent regressions.",
+          "status": "pending",
+          "dependencies": [
+            "26.3"
+          ],
+          "risks": "The refactored pipeline produces numerically different results due to subtle changes in data handling (e.g., floating point precision, `pandas` operation changes).",
+          "mitigation": "The Golden Dataset test is the primary mitigation. Use `pandas.testing.assert_frame_equal` for DataFrames and file diffs with a reasonable tolerance for floating-point comparisons. Log any differences meticulously during test development to ensure they are understood and acceptable.",
+          "implementation_details": {
+            "steps": [
+              "1. Refactor `process_all_runs.py` to scan for all raw run files.",
+              "2. Implement logic to identify corresponding `_hr_override.gpx` files and filter out the original base `.gpx` files from the processing list to prevent double-counting runs.",
+              "3. Initially, process the `RunningSession` objects in a simple serial loop to validate the class-based logic.",
+              "4. Create a new test in `tests/running/test_pipeline_integration.py` for the Golden Dataset test.",
+              "5. In a setup step for this test, select a canonical 'golden' run file. A good candidate is a run with diverse features: walking, strides, and some environmental variability (e.g., `20250531_..._LongThreshold...gpx`). Run the *old* pipeline on this file and store all its output artifacts in `tests/golden_files/`.",
+              "6. The test will then run the *new* refactored pipeline on the same 'golden' run file. It must perform a deep comparison of the newly generated artifacts against the stored golden master artifacts, asserting numerical and structural equivalence.",
+              "7. This comparison should be implemented as a helper function that recursively traverses the golden and new output directories, comparing files by content hash (for images) and with tolerance-based diffs (for CSV/TXT), and asserting that no unexpected files were created or omitted.",
+              "8. Update the `run:process-runs` command in `Taskfile.yml` to point to the new, refactored orchestrator script, ensuring the user-facing command is seamless.",
+              "9. Add a new target to `Taskfile.yml`, e.g., `task run:process-single-file -- <file_path>`, which allows the new orchestrator to be invoked for a single file, preserving developer utility for debugging and re-analysis."
+            ],
+            "testing": [
+              "The Golden Dataset test passing in CI is the primary acceptance criterion for this subtask."
+            ]
+          }
+        },
+        {
+          "id": "26.5",
+          "title": "[SHOULD] Parallelize Orchestrator & Integrate Aggregation",
+          "description": "Improve pipeline performance by processing multiple runs in parallel. Integrate the weekly aggregation step to ensure the longitudinal dataset is always up-to-date automatically.",
+          "status": "pending",
+          "dependencies": [
+            "26.4"
+          ],
+          "risks": "Parallel processing can introduce race conditions, especially with file I/O, or make debugging difficult due to interleaved log outputs.",
+          "mitigation": "Design the worker function (that processes a single `RunningSession`) to be completely stateless. It should only take a file path and config, and all its outputs should be written to a unique, per-run directory to avoid any conflicts. Use a robust logging setup that can handle multiprocessing.",
+          "implementation_details": {
+            "steps": [
+              "1. In the refactored orchestrator, modify the main loop to use Python's `multiprocessing.Pool` to distribute the `RunningSession.process()` calls across multiple cores.",
+              "2. Define a top-level worker function that can be pickled by `multiprocessing`.",
+              "3. The worker function must be wrapped in a `try...except` block. In case of an exception for a single file, it should log the error and return a failure status, allowing the main process to report on failures without halting the entire batch.",
+              "4. After all parallel jobs complete successfully, add a final step to the orchestrator that calls the `aggregate_weekly_runs` logic to update `weekly_metrics.parquet`.",
+              "5. Benchmark the new parallel pipeline against the old sequential one on a set of 20 files to verify the >40% performance improvement."
+            ],
+            "testing": [
+              "Successful completion of a batch run with parallel processing.",
+              "Verification that `weekly_metrics.parquet` is updated correctly after the run.",
+              "A documented benchmark test showing the performance improvement.",
+              "As part of this, a simple test should load the newly generated `weekly_metrics.parquet` and assert that it contains the expected columns (`ef_mean`, `decoupling_mean`, `km`, `rpe_avg`) required by downstream analysis or scheduling systems."
+            ]
+          }
+        },
+        {
+          "id": "26.6",
+          "title": "[SHOULD] Abstract External Service Interactions",
+          "description": "Decouple the pipeline from specific external tools and APIs by creating dedicated client classes. This improves modularity and testability.",
+          "status": "pending",
+          "dependencies": [],
+          "risks": "The new client abstractions are 'leaky' and do not fully encapsulate the complexity of the underlying tool or API, making them hard to use or mock.",
+          "mitigation": "Design the clients with a simple, clean interface that hides implementation details. For example, the `GitHubClient` should have a method `.create_issue(title, body)` and should handle the `subprocess` call internally. Ensure the clients can be easily mocked in tests.",
+          "implementation_details": {
+            "steps": [
+              "1. Create a `cultivation/utils/github_client.py` module with a `GitHubClient` class that wraps the `subprocess` call to the `gh` CLI.",
+              "2. Refactor `fatigue_watch.py` to instantiate and use this client instead of calling `subprocess` directly.",
+              "3. Create a `cultivation/running/utils/weather.py` module by refactoring the existing `weather_utils.py`. Wrap the logic in a `WeatherClient` class, making the caching mechanism an internal detail.",
+              "4. Refactor the `RunningSession` class to use this new `WeatherClient`."
+            ],
+            "testing": [
+              "Write unit tests for the new clients, mocking the `subprocess` and `requests` calls to test their internal logic.",
+              "Write a unit test for `fatigue_watch.py`'s main logic. Create mock DataFrames for wellness data that are designed to trigger the alert rules. Pass a mocked `GitHubClient` instance to the function and assert that its `.create_issue()` method is called with the expected title and body."
+            ]
+          }
+        },
+        {
+          "id": "26.7",
+          "title": "[COULD] Add Package-Level Documentation",
+          "description": "Create a `README.md` for the new `cultivation/running` package explaining its new object-oriented architecture, data flow, and usage. Ensure all new public classes and functions have clear docstrings.",
+          "status": "pending",
+          "dependencies": [
+            "26.5"
+          ],
+          "risks": "Documentation becomes outdated if written too early in the process.",
+          "mitigation": "This task is scheduled after the core implementation is complete to ensure the documentation reflects the final state of the refactored code.",
+          "implementation_details": {
+            "steps": [
+              "1. Create `cultivation/running/README.md`.",
+              "2. In the README, add sections for: Overview, Architecture (describing the `RunningSession` class), Configuration (`config.py`), and How to Run.",
+              "3. Review all new modules (`session.py`, `config.py`, `utils/*.py`) and add clear, concise docstrings to all public classes and functions."
+            ],
+            "testing": [
+              "The `README.md` file is present and contains the required sections.",
+              "A manual review confirms docstrings are present on key public APIs."
+            ]
+          }
+        },
+        {
+          "id": "26.8",
+          "title": "[COULD] Final Cleanup of Obsolete Scripts",
+          "description": "Once the new object-oriented pipeline is validated and stable, remove the old, superseded procedural scripts from `cultivation/scripts/running/` to prevent confusion and reduce code clutter.",
+          "status": "pending",
+          "dependencies": [
+            "26.7"
+          ],
+          "risks": "A piece of logic from an old script was missed during the refactor, and deleting the script removes the only implementation.",
+          "mitigation": "The 'Golden Dataset' test (26.4) is the primary mitigation. Before deletion, move the old scripts to a temporary `cultivation/scripts/running/archive/` directory for one full release cycle. If no issues arise, they can be safely deleted.",
+          "implementation_details": {
+            "steps": [
+              "1. Create a temporary `archive` directory inside `cultivation/scripts/running/`.",
+              "2. Move scripts like `parse_run_files.py`, `run_performance_analysis.py`, `analyze_hr_pace_distribution.py`, etc., into the archive directory.",
+              "3. Run the full test suite (`task test`) again to ensure no broken dependencies.",
+              "4. After a period of stability (e.g., one week of successful runs), delete the archive directory."
+            ],
+            "testing": [
+              "The project's test suite passes after the old scripts are moved/deleted.",
+              "The `task run:process-runs` command continues to function correctly, using only the new refactored code."
+            ]
+          }
+        }
+      ],
+      "hpe_csm_reference": {
+        "source_document": "cultivation/docs/2_requirements_and_specifications/running_pipeline_v2_prd.md",
+        "csm_id": "DW_RUN_PIPE_REFACTOR_001",
+        "anchor_link": "#executive-summary"
+      },
+      "hpe_learning_meta": {
+        "learning_objective_summary": null,
+        "task_objective_summary": "To transform the brittle, script-based running pipeline into a robust, object-oriented, testable, configuration-driven, and performant system, eliminating critical technical debt and enabling future scalability.",
+        "estimated_effort_tshirt": "XL",
+        "estimated_effort_hours_raw": "24-42 hours (4-7 Deep Work Days)",
+        "estimated_effort_hours_min": 24.0,
+        "estimated_effort_hours_max": 42.0,
+        "mastery_criteria_summary": "Pipeline is fully refactored into a class-based system, passes all unit tests (>85% coverage), validates data against schemas, runs >40% faster in parallel, and produces numerically identical results to the legacy pipeline for a 'golden dataset'.",
+        "activity_type": "systems_engineering_refactoring",
+        "recommended_block": "deep_work",
+        "deliverables": [
+          "A new `RunningSession` class encapsulating single-run processing.",
+          "A central `config.py` for all running parameters.",
+          "A parallelized pipeline orchestrator in `process_all_runs.py`.",
+          "A comprehensive `pytest` suite for core logic and a 'Golden Dataset' regression test.",
+          "Explicit `pandera` schemas for data validation.",
+          "Abstracted clients for GitHub and Weather APIs."
+        ]
+      },
+      "hpe_scheduling_meta": {
+        "planned_day_of_week": null,
+        "curriculum_part_title": "P1: Core Systems Refactoring",
+        "csm_tags": [
+          "p1_foundations",
+          "refactoring",
+          "running_pipeline",
+          "tech_debt",
+          "core_dev",
+          "ia_layer",
+          "testing",
+          "performance"
+        ]
+      },
+      "labels": [
+        "domain:running",
+        "component:pipeline",
+        "activity:refactoring",
+        "block:deep_work",
+        "effort_tshirt:XL",
+        "priority:critical",
+        "epic"
+      ]
+    }
+  ],
+  "metadata": {
       "created": "2025-06-16T21:05:48.595Z",
-      "updated": "2025-06-17T01:49:11.456Z",
+      "updated": "2025-06-18T22:27:14.580Z",
       "description": "Tasks for master context"
     }
   }

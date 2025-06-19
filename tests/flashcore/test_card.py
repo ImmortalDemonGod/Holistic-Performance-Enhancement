@@ -36,7 +36,7 @@ class TestCardModel:
         assert isinstance(card.added_at, datetime)
         assert card.added_at.tzinfo == timezone.utc
         assert card.origin_task is None
-        assert card.media is None
+        assert card.media == []
         assert card.source_yaml_file is None
         assert card.internal_note is None
 
