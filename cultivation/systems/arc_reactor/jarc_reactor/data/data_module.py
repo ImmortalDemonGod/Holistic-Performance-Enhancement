@@ -7,7 +7,7 @@ class MyDataModule(pl.LightningDataModule):
     def __init__(self, cfg: DictConfig):
         super().__init__()
         self.cfg = cfg # Store Hydra config
-        self.batch_size = cfg.training.batch_size # Get batch_size from cfg
+        self.batch_size = cfg.dataloader.batch_size # Get batch_size from cfg
         self.logger = logging.getLogger(__name__)
         self.train_dataset = None
         self.val_dataset = None
