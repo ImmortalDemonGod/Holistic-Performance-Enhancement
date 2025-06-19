@@ -29,7 +29,11 @@ def test_create_transformer_trainer_importable():
     assert create_transformer_trainer is not None
 
 def _get_base_test_config_dict() -> dict:
-    """Helper function to create a base mock config for tests."""
+    """
+    Create and return a base mock configuration dictionary for transformer training system tests.
+    
+    The configuration includes model, training, dataloader, logging, and data preparation parameters, with paths set relative to the current file for use with dummy data and test output directories.
+    """
     # Determine the absolute path to the dummy data directory
     current_file_path = Path(__file__).resolve()
     dummy_data_dir = current_file_path.parent / "data" / "dummy_training_data"
@@ -115,7 +119,7 @@ def test_create_transformer_trainer_returns_trainer(test_output_dirs):
 
 def test_data_module_loads_dummy_data(test_output_dirs):
     """
-    Tests that MyDataModule can load and process the dummy ARC task data.
+    Verify that MyDataModule correctly loads and processes dummy ARC task data, producing batches with expected shapes and types for source, target, and task ID tensors.
     """
     try:
         config_dict = _get_base_test_config_dict()

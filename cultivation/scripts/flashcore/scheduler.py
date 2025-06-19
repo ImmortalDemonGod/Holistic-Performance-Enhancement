@@ -34,24 +34,25 @@ class BaseScheduler(ABC):
         self, history: List[Review], new_rating: int, review_ts: datetime.datetime
     ) -> Dict[str, Any]:
         """
-        Computes the next state of a card based on its review history and a new rating.
-
-        Args:
-            history: A list of past Review objects for the card, sorted chronologically.
-            new_rating: The rating given for the current review (0=Again, 1=Hard, 2=Good, 3=Easy).
-            review_ts: The UTC timestamp of the current review.
-
+        Compute the updated scheduling state of a card after applying a new review.
+        
+        Replays the card's entire review history to reconstruct its current state, then applies the new rating and timestamp using the FSRS algorithm to determine the next review interval and state.
+        
+        Parameters:
+            history (List[Review]): Chronologically ordered list of the card's past reviews.
+            new_rating (int): Integer rating for the current review (0=Again, 1=Hard, 2=Good, 3=Easy).
+            review_ts (datetime.datetime): Timestamp of the current review (assumed UTC if naive).
+        
         Returns:
-            A dictionary containing the new state:
-            {
-                "stability": float,
-                "difficulty": float,
-                "next_review_date": datetime.date, 
-                "scheduled_days": int
-            }
+            Dict[str, Any]: Dictionary with the updated card state, including:
+                - "stability" (float): Estimated memory stability after the review.
+                - "difficulty" (float): Estimated card difficulty after the review.
+                - "next_review_date" (datetime.date): Scheduled date for the next review.
+                - "scheduled_days" (int): Number of days until the next review.
+                - "state" (str): FSRS state name after the review.
         
         Raises:
-            ValueError: If the new_rating is invalid.
+            ValueError: If the new_rating is not a valid flashcore rating (0-3).
         """
         pass
 
@@ -84,6 +85,11 @@ class FSRS_Scheduler(BaseScheduler):
     }
 
     def __init__(self, config: Optional[FSRSSchedulerConfig] = None):
+        """
+        Initialize an FSRS-based scheduler with the provided configuration.
+        
+        If no configuration is given, default parameters are used. Converts configuration values to the formats required by the py-fsrs library and initializes the internal FSRS scheduler instance.
+        """
         if config is None:
             config = FSRSSchedulerConfig()
         self.config = config
@@ -103,7 +109,15 @@ class FSRS_Scheduler(BaseScheduler):
         self.fsrs_scheduler = PyFSRSScheduler(**scheduler_args)
 
     def _ensure_utc(self, ts: datetime.datetime) -> datetime.datetime:
-        """Ensures the given datetime is UTC. Assumes UTC if naive."""
+        """
+        Return a timezone-aware datetime in UTC, converting or assuming UTC if the input is naive or in a different timezone.
+        
+        Parameters:
+            ts (datetime.datetime): The datetime to normalize.
+        
+        Returns:
+            datetime.datetime: The input datetime as a UTC-aware datetime object.
+        """
         if ts.tzinfo is None or ts.tzinfo.utcoffset(ts) is None:
             return ts.replace(tzinfo=datetime.timezone.utc)
         if ts.tzinfo != datetime.timezone.utc:
@@ -111,7 +125,15 @@ class FSRS_Scheduler(BaseScheduler):
         return ts
 
     def _map_flashcore_rating_to_fsrs(self, flashcore_rating: int) -> FSRSRating:
-        """Maps flashcore rating (0-3) to FSRSRating and validates."""
+        """
+        Convert a flashcore integer rating (0-3) to the corresponding FSRSRating enum, raising ValueError if the rating is invalid.
+        
+        Parameters:
+            flashcore_rating (int): Integer rating from flashcore, expected to be between 0 and 3 inclusive.
+        
+        Returns:
+            FSRSRating: The mapped FSRS rating enum.
+        """
         if not (0 <= flashcore_rating <= 3):
             raise ValueError(f"Invalid rating: {flashcore_rating}. Must be 0-3.")
         return self.RATING_MAP[flashcore_rating]
@@ -120,7 +142,15 @@ class FSRS_Scheduler(BaseScheduler):
         self, history: List[Review], new_rating: int, review_ts: datetime.datetime
     ) -> Dict[str, Any]:
         """
-        Computes the next state of a card by replaying its entire history.
+        Compute the updated scheduling state of a flashcard after applying a new review, by replaying its full review history and the latest rating.
+        
+        Parameters:
+            history (List[Review]): The chronological list of previous reviews for the card.
+            new_rating (int): The rating for the most recent review event.
+            review_ts (datetime.datetime): The timestamp of the new review.
+        
+        Returns:
+            Dict[str, Any]: A dictionary containing the card's updated stability, difficulty, next review due date, scheduled days until next review, and the FSRS state name.
         """
         # Start with a fresh card object.
         fsrs_card = FSRSCard()

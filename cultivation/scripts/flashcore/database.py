@@ -89,6 +89,11 @@ class FlashcardDatabase:
     ]
 
     def __init__(self, db_path: Optional[Union[str, Path]] = None, read_only: bool = False):
+        """
+        Initialize a FlashcardDatabase instance with the specified DuckDB database path and read-only mode.
+        
+        If no path is provided, uses the default database location. Supports both file-based and in-memory databases.
+        """
         if db_path is None:
             self.db_path_resolved: Path = DEFAULT_FLASHCORE_DATA_DIR / DEFAULT_DATABASE_FILENAME
             logger.info(f"No DB path provided, using default: {self.db_path_resolved}")
@@ -103,6 +108,12 @@ class FlashcardDatabase:
         self._is_closed: bool = False
 
     def get_connection(self) -> duckdb.DuckDBPyConnection:
+        """
+        Establish and return a DuckDB database connection, creating parent directories if necessary.
+        
+        Raises:
+            DatabaseConnectionError: If the connection to the DuckDB database cannot be established.
+        """
         if self._connection is None or getattr(self._connection, 'closed', False):
             try:
                 if str(self.db_path_resolved) != ":memory:":
@@ -118,12 +129,21 @@ class FlashcardDatabase:
         return self._connection
 
     def close_connection(self) -> None:
+        """
+        Closes the active DuckDB database connection if it is open.
+        """
         if self._connection:
             self._connection.close()
             self._connection = None
             logger.debug(f"DuckDB connection to {self.db_path_resolved} closed.")
 
     def __enter__(self) -> 'FlashcardDatabase':
+        """
+        Enter the runtime context for the FlashcardDatabase, ensuring the database connection is open.
+        
+        Returns:
+            FlashcardDatabase: The current instance with an active database connection.
+        """
         self.get_connection()
         return self
 
@@ -131,6 +151,11 @@ class FlashcardDatabase:
         self.close_connection()
 
     def initialize_schema(self, force_recreate_tables: bool = False) -> None:
+        """
+        Initializes the database schema, creating required tables, sequences, and indexes.
+        
+        If `force_recreate_tables` is True, existing tables and sequences are dropped and recreated, resulting in data loss. In read-only mode, schema initialization is skipped unless forced, in which case an error is raised. Raises `SchemaInitializationError` if schema setup fails.
+        """
         if self.read_only and not force_recreate_tables:
             if str(self.db_path_resolved) != ":memory:":
                 logger.warning("Attempting to initialize schema in read-only mode. Skipping.")
@@ -161,6 +186,15 @@ class FlashcardDatabase:
 
     # --- Data Marshalling Helpers (Internal) ---
     def _card_to_db_params_list(self, cards: Sequence['Card']) -> List[Tuple]:
+        """
+        Convert a sequence of Card objects into a list of tuples formatted for database insertion.
+        
+        Parameters:
+            cards (Sequence[Card]): The Card objects to convert.
+        
+        Returns:
+            List[Tuple]: List of tuples containing card attributes in the order expected by the database schema.
+        """
         params_list = []
         for card in cards:
             params_list.append((
@@ -180,6 +214,9 @@ class FlashcardDatabase:
 
     def _db_row_to_card(self, row_dict: Dict[str, Any]) -> 'Card':
         # Handle media: convert string list from 'media_paths' column to Path list for 'media' field
+        """
+        Convert a database row dictionary into a Card object, transforming media paths to Path objects, source file to Path, and tags to a set.
+        """
         media_paths_val = row_dict.pop("media_paths", None)
         if media_paths_val is not None:
             row_dict["media"] = [Path(p) for p in media_paths_val]
@@ -196,6 +233,15 @@ class FlashcardDatabase:
         return Card(**row_dict)
 
     def _review_to_db_params_tuple(self, review: 'Review') -> Tuple:
+        """
+        Convert a Review object into a tuple of values for database insertion.
+        
+        Parameters:
+            review (Review): The Review object to convert.
+        
+        Returns:
+            Tuple: A tuple containing the Review's fields in the order expected by the database schema.
+        """
         return (
             review.card_uuid,
             review.ts,
@@ -215,6 +261,14 @@ class FlashcardDatabase:
 
     # --- Card Operations ---
     def upsert_cards_batch(self, cards: Sequence['Card']) -> int:
+        """
+        Insert or update multiple cards in the database in a single batch operation.
+        
+        Each card is inserted or updated based on its UUID. The `modified_at` timestamp is updated on each upsert. Returns the number of cards processed. Raises a `CardOperationError` if the operation fails, or propagates DuckDB exceptions for read-only violations or similar errors.
+        
+        Returns:
+            int: The number of cards successfully inserted or updated.
+        """
         if not cards:
             return 0
         # Ensure NO explicit 'if self.read_only: raise ...' check here.
@@ -262,6 +316,18 @@ class FlashcardDatabase:
             raise CardOperationError(f"Batch card upsert failed: {e}", original_exception=e) from e
 
     def get_card_by_uuid(self, card_uuid: uuid.UUID) -> Optional['Card']:
+        """
+        Retrieve a card by its UUID.
+        
+        Parameters:
+            card_uuid (uuid.UUID): The unique identifier of the card to retrieve.
+        
+        Returns:
+            Optional[Card]: The card object if found, or None if no card with the given UUID exists.
+        
+        Raises:
+            CardOperationError: If a database error occurs during retrieval.
+        """
         conn = self.get_connection()
         sql = "SELECT * FROM cards WHERE uuid = $1;"
         try:
@@ -276,6 +342,18 @@ class FlashcardDatabase:
             raise CardOperationError(f"Failed to fetch card by UUID: {e}", original_exception=e) from e
 
     def get_all_cards(self, deck_name_filter: Optional[str] = None) -> List['Card']:
+        """
+        Retrieve all flashcards from the database, optionally filtered by deck name.
+        
+        Parameters:
+            deck_name_filter (str, optional): If provided, only cards from decks matching this filter are returned.
+        
+        Returns:
+            List[Card]: A list of Card objects matching the filter criteria, or all cards if no filter is applied.
+        
+        Raises:
+            CardOperationError: If a database error occurs during retrieval.
+        """
         conn = self.get_connection()
         params = []
         sql = "SELECT * FROM cards"
@@ -293,6 +371,16 @@ class FlashcardDatabase:
             raise CardOperationError(f"Failed to get all cards: {e}", original_exception=e) from e
 
     def get_due_cards(self, on_date: date, limit: Optional[int] = 20) -> List['Card']:
+        """
+        Retrieve a list of cards that are due for review on a specified date.
+        
+        Parameters:
+            on_date (date): The date to check for due cards.
+            limit (Optional[int]): Maximum number of cards to return. If zero, returns an empty list.
+        
+        Returns:
+            List[Card]: Cards due for review on the given date, ordered by earliest due date and addition time.
+        """
         if limit == 0:
             return []
         conn = self.get_connection()
@@ -332,6 +420,19 @@ class FlashcardDatabase:
             raise CardOperationError(f"Failed to fetch due cards: {e}", original_exception=e) from e
 
     def delete_cards_by_uuids_batch(self, card_uuids: Sequence[uuid.UUID]) -> int:
+        """
+        Delete multiple cards from the database by their UUIDs in a single batch operation.
+        
+        Parameters:
+        	card_uuids (Sequence[uuid.UUID]): The UUIDs of the cards to delete.
+        
+        Returns:
+        	int: The number of cards successfully deleted.
+        
+        Raises:
+        	DatabaseConnectionError: If the database is in read-only mode.
+        	CardOperationError: If a database error occurs during deletion.
+        """
         if not card_uuids:
             return 0
         if self.read_only:
@@ -353,6 +454,15 @@ class FlashcardDatabase:
             raise CardOperationError(f"Batch card delete failed: {e}", original_exception=e) from e
 
     def get_all_card_fronts_and_uuids(self) -> Dict[str, uuid.UUID]:
+        """
+        Retrieve a mapping of all normalized card fronts to their UUIDs.
+        
+        Returns:
+            A dictionary mapping each card's normalized front text (lowercased and whitespace-collapsed) to its UUID. If duplicate normalized fronts are found, a warning is logged and only the first occurrence is retained.
+        
+        Raises:
+            CardOperationError: If a database error occurs during retrieval.
+        """
         conn = self.get_connection()
         front_to_uuid: Dict[str, uuid.UUID] = {}
         sql = "SELECT front, uuid FROM cards;"
@@ -376,6 +486,16 @@ class FlashcardDatabase:
 
     # --- Review Operations ---
     def add_review(self, review: 'Review') -> int:
+        """
+        Insert a new review record into the database and return its unique review ID.
+        
+        Raises:
+            DatabaseConnectionError: If the database is in read-only mode.
+            ReviewOperationError: If the insert fails due to a constraint violation or other database error.
+        
+        Returns:
+            int: The unique ID of the newly inserted review.
+        """
         if self.read_only:
             raise DatabaseConnectionError("Cannot add review in read-only mode.")
         conn = self.get_connection()
@@ -408,6 +528,19 @@ class FlashcardDatabase:
             raise ReviewOperationError(f"Failed to add review: {e}", original_exception=e) from e
 
     def add_reviews_batch(self, reviews: Sequence['Review']) -> List[int]:
+        """
+        Insert multiple review records into the database in a single batch operation.
+        
+        Parameters:
+            reviews (Sequence[Review]): A sequence of Review objects to be added.
+        
+        Returns:
+            List[int]: A list of newly inserted review IDs, in the order of the input reviews.
+        
+        Raises:
+            DatabaseConnectionError: If the database is in read-only mode.
+            ReviewOperationError: If a constraint violation or other database error occurs during insertion.
+        """
         if not reviews:
             return []
         if self.read_only:
@@ -447,6 +580,16 @@ class FlashcardDatabase:
             raise ReviewOperationError(f"Batch review add failed: {e}", original_exception=e) from e
 
     def get_reviews_for_card(self, card_uuid: uuid.UUID, order_by_ts_desc: bool = True) -> List['Review']:
+        """
+        Retrieve all reviews associated with a specific card UUID.
+        
+        Parameters:
+        	card_uuid (uuid.UUID): The UUID of the card whose reviews are to be retrieved.
+        	order_by_ts_desc (bool): If True, reviews are ordered by timestamp descending; otherwise, ascending.
+        
+        Returns:
+        	List[Review]: A list of Review objects for the specified card, ordered by timestamp and review ID.
+        """
         conn = self.get_connection()
         order_clause = "ORDER BY ts DESC, review_id DESC" if order_by_ts_desc else "ORDER BY ts ASC, review_id ASC"
         sql = f"SELECT * FROM reviews WHERE card_uuid = $1 {order_clause};"
@@ -460,10 +603,26 @@ class FlashcardDatabase:
             raise ReviewOperationError(f"Failed to get reviews for card {card_uuid}: {e}", original_exception=e) from e
 
     def get_latest_review_for_card(self, card_uuid: uuid.UUID) -> Optional['Review']:
+        """
+        Retrieve the most recent review for a given card UUID.
+        
+        Returns:
+            The latest Review object for the specified card, or None if no reviews exist.
+        """
         reviews = self.get_reviews_for_card(card_uuid, order_by_ts_desc=True)
         return reviews[0] if reviews else None
 
     def get_all_reviews(self, start_ts: Optional[datetime] = None, end_ts: Optional[datetime] = None) -> List['Review']:
+        """
+        Retrieve all review records, optionally filtered by a timestamp range.
+        
+        Parameters:
+            start_ts (datetime, optional): If provided, only reviews with a timestamp greater than or equal to this value are returned.
+            end_ts (datetime, optional): If provided, only reviews with a timestamp less than or equal to this value are returned.
+        
+        Returns:
+            List[Review]: A list of Review objects ordered by timestamp and review ID in ascending order.
+        """
         conn = self.get_connection()
         sql = "SELECT * FROM reviews"
         params = []

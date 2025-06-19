@@ -5,6 +5,12 @@ from cultivation.systems.arc_reactor.jarc_reactor.data.data_preparation import p
 import logging
 class MyDataModule(pl.LightningDataModule):
     def __init__(self, cfg: DictConfig):
+        """
+        Initialize the data module with configuration settings and prepare dataset placeholders.
+        
+        Parameters:
+            cfg (DictConfig): Hydra configuration object containing dataloader and training parameters.
+        """
         super().__init__()
         self.cfg = cfg # Store Hydra config
         self.batch_size = cfg.dataloader.batch_size # Get batch_size from cfg

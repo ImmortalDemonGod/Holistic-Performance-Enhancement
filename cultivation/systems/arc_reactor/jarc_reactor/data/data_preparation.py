@@ -261,6 +261,18 @@ def _process_and_create_tensors(raw_data: dict) -> dict:
     }
 
 def prepare_data(cfg: DictConfig, return_datasets: bool = False):
+    """
+    Prepares and processes training and validation data into PyTorch datasets or dataloaders based on configuration.
+    
+    Loads data from the specified directory, validates and inspects files, processes raw data into tensors, and creates mappings for task IDs. Returns either TensorDataset objects or DataLoader instances for training and validation, depending on the `return_datasets` flag. Also saves the task ID mapping to a JSON file.
+    
+    Parameters:
+        cfg (DictConfig): Hydra configuration object specifying data directories, batch size, and synthetic data options.
+        return_datasets (bool): If True, returns TensorDataset objects; otherwise, returns DataLoader instances.
+    
+    Returns:
+        Tuple[TensorDataset, TensorDataset] or Tuple[DataLoader, DataLoader]: Training and validation datasets or dataloaders, depending on `return_datasets`.
+    """
     logger.info(f"prepare_data called. cfg.training.training_data_dir = {cfg.training.training_data_dir}")
     logger.info(f"prepare_data: cfg.training.synthetic_data_dir = {cfg.training.synthetic_data_dir}")
     logger.info(f"prepare_data: cfg.training.include_synthetic_training_data = {cfg.training.include_synthetic_training_data}")

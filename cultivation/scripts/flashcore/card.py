@@ -76,7 +76,18 @@ class Card(BaseModel):
     @field_validator("tags")
     @classmethod
     def validate_tags_kebab_case(cls, tags: Set[str]) -> Set[str]:
-        """Ensure each tag matches the kebab-case pattern."""
+        """
+        Validates that all tags in the set conform to the kebab-case pattern.
+        
+        Parameters:
+            tags (Set[str]): A set of tag strings to validate.
+        
+        Returns:
+            Set[str]: The original set of tags if all are valid.
+        
+        Raises:
+            ValueError: If any tag does not match the kebab-case pattern.
+        """
         for tag in tags:
             if not re.match(KEBAB_CASE_REGEX_PATTERN, tag):
                 raise ValueError(f"Tag '{tag}' is not in kebab-case.")
@@ -147,7 +158,18 @@ class Review(BaseModel):
     @field_validator("review_type")
     @classmethod
     def check_review_type_is_allowed(cls, v: str | None) -> str | None:
-        """Ensures review_type is one of the predefined allowed values or None."""
+        """
+        Validate that the review_type is one of the allowed values ("learn", "review", "relearn", "manual") or None.
+        
+        Parameters:
+            v (str | None): The review type to validate.
+        
+        Returns:
+            str | None: The validated review type.
+        
+        Raises:
+            ValueError: If the review type is not one of the allowed values or None.
+        """
         ALLOWED_REVIEW_TYPES = {"learn", "review", "relearn", "manual"}
         if v is not None and v not in ALLOWED_REVIEW_TYPES:
             raise ValueError(

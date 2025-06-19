@@ -265,11 +265,17 @@ class TestProcessSingleYAMLFile:
             _process_single_yaml_file(file, assets_dir, False, False)
             
     def test_invalid_top_level_schema_no_deck(self, tmp_path: Path, assets_dir: Path):
+        """
+        Test that processing a YAML file without a valid top-level 'deck' field raises a YAMLProcessingError.
+        """
         file = create_yaml_file(tmp_path, "no_deck.yaml", INVALID_YAML_SCHEMA_NO_DECK_CONTENT)
         with pytest.raises(YAMLProcessingError, match=r"Missing or invalid 'deck' field at top level"):
              _process_single_yaml_file(file, assets_dir, False, False)
 
     def test_card_level_error_collection(self, tmp_path: Path, assets_dir: Path):
+        """
+        Tests that invalid cards within a YAML file are skipped and corresponding errors are collected, while valid cards are processed successfully.
+        """
         content = """
 deck: MixedBag
 cards:
@@ -326,6 +332,11 @@ class TestLoadAndProcessFlashcardYamls:
         assert not errors
 
     def test_error_aggregation_fail_fast_false(self, tmp_path: Path, assets_dir: Path):
+        """
+        Test that errors from multiple invalid YAML files are aggregated when fail_fast is False.
+        
+        Verifies that only valid cards are processed and errors from files with invalid syntax or schema are collected and returned, rather than raising immediately.
+        """
         source_dir = tmp_path / "src_errors"
         source_dir.mkdir()
         create_yaml_file(source_dir, "valid.yaml", VALID_YAML_MINIMAL_CONTENT)
@@ -339,6 +350,9 @@ class TestLoadAndProcessFlashcardYamls:
         assert any("Card-level schema validation failed" in str(e) for e in errors if e.file_path.name == "card_no_q.yaml")
 
     def test_fail_fast_true_on_file_error(self, tmp_path: Path, assets_dir: Path):
+        """
+        Test that processing halts immediately with an error when a YAML syntax error is encountered and fail_fast is True.
+        """
         source_dir = tmp_path / "src_fail_fast"
         source_dir.mkdir()
         create_yaml_file(source_dir, "badsyntax.yaml", INVALID_YAML_SYNTAX_CONTENT) # This should cause immediate failure

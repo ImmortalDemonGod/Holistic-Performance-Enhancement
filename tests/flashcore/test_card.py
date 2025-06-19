@@ -22,7 +22,9 @@ except ImportError:
 
 class TestCardModel:
     def test_card_creation_minimal_required(self):
-        """Test Card creation with only absolutely required fields (others have defaults)."""
+        """
+        Verifies that a Card instance can be created with only required fields, and that all optional fields are set to their correct default values.
+        """
         card = Card(
             deck_name="Minimal Deck",
             front="Minimal Q?",

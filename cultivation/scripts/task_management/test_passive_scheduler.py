@@ -15,11 +15,17 @@ BASELINE_TASKS_PATH = os.path.join(os.path.dirname(__file__), '../../..', '.task
 class TestPassiveLearningBlockScheduler(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        """
+        Load baseline task data from the JSON file into the class variable for use in all tests.
+        """
         with open(BASELINE_TASKS_PATH, 'r') as f:
             json_data = json.load(f)
         cls.baseline_tasks_data = json_data["master"]["tasks"]
 
     def setUp(self):
+        """
+        Creates a deep copy of the baseline tasks data for use in each test, ensuring test isolation.
+        """
         self.current_tasks_data = copy.deepcopy(self.baseline_tasks_data)
 
     def test_new_task10_scheduled_when_deps_met(self):

@@ -11,7 +11,9 @@ UTC = datetime.timezone.utc
 
 @pytest.fixture
 def scheduler() -> FSRS_Scheduler:
-    """Provides an FSRS_Scheduler instance with default parameters."""
+    """
+    Pytest fixture that returns an FSRS_Scheduler instance configured with default parameters and desired retention.
+    """
     config = FSRSSchedulerConfig(
         parameters=tuple(DEFAULT_PARAMETERS),
         desired_retention=DEFAULT_DESIRED_RETENTION,
@@ -21,11 +23,21 @@ def scheduler() -> FSRS_Scheduler:
 
 @pytest.fixture
 def sample_card_uuid() -> UUID:
+    """
+    Generate and return a random UUID for use as a sample card identifier in tests.
+    
+    Returns:
+        UUID: A randomly generated UUID.
+    """
     return uuid4()
 
 
 def test_first_review_new_card(scheduler: FSRS_Scheduler, sample_card_uuid: UUID):
-    """Test scheduling for the first review of a new card."""
+    """
+    Test that the scheduler computes correct intervals and state for the first review of a new card.
+    
+    Verifies that a "Good" rating produces a valid next review state with positive interval, and that an "Again" rating results in a shorter interval and earlier due date than "Good".
+    """
     history: list[Review] = []
     review_ts = datetime.datetime(2024, 1, 1, 10, 0, 0, tzinfo=UTC)
     
@@ -57,7 +69,9 @@ def test_first_review_new_card(scheduler: FSRS_Scheduler, sample_card_uuid: UUID
 
 
 def test_invalid_rating_input(scheduler: FSRS_Scheduler, sample_card_uuid: UUID):
-    """Test that invalid rating inputs raise ValueError."""
+    """
+    Verify that compute_next_state raises ValueError for ratings outside the valid range (0-3).
+    """
     history: list[Review] = []
     review_ts = datetime.datetime(2024, 1, 1, 10, 0, 0, tzinfo=UTC)
 
@@ -69,7 +83,11 @@ def test_invalid_rating_input(scheduler: FSRS_Scheduler, sample_card_uuid: UUID)
 
 
 def test_rating_impact_on_interval(scheduler: FSRS_Scheduler, sample_card_uuid: UUID):
-    """Test that lower ratings generally result in shorter intervals."""
+    """
+    Test that lower review ratings produce shorter intervals and earlier next review dates.
+    
+    Simulates a card with one prior "Good" review, then verifies that subsequent ratings of "Again", "Hard", "Good", and "Easy" on the scheduled review date result in monotonically increasing scheduled intervals and next review due dates.
+    """
     # Simulate a card that has been reviewed once and was 'Good'
     # These values are illustrative; actual FSRS outputs would be used in a real scenario
     # For this test, we mainly care about the *relative* intervals from the *next* review.
@@ -111,7 +129,11 @@ def test_rating_impact_on_interval(scheduler: FSRS_Scheduler, sample_card_uuid: 
 
 
 def test_multiple_reviews_stability_increase(scheduler: FSRS_Scheduler, sample_card_uuid: UUID):
-    """Test that stability and scheduled_days generally increase with multiple successful (Good) reviews."""
+    """
+    Test that repeated successful ("Good") reviews increase a card's stability, scheduled interval, and next review due date.
+    
+    Simulates three consecutive "Good" reviews on their respective due dates and asserts that stability, scheduled_days, and next_review_due increase with each review.
+    """
     history: list[Review] = []
     review_ts_base = datetime.datetime(2024, 1, 1, 10, 0, 0, tzinfo=UTC)
     current_card_uuid = sample_card_uuid
@@ -177,8 +199,7 @@ def test_multiple_reviews_stability_increase(scheduler: FSRS_Scheduler, sample_c
 
 def test_review_lapsed_card(scheduler: FSRS_Scheduler, sample_card_uuid: UUID):
     """
-    Test scheduling for a card reviewed significantly after its due date.
-    A lapsed review should result in a greater stability increase than a timely one.
+    Test that reviewing a card after its due date (lapsed review) results in greater increases in stability, scheduled interval, and next review date compared to an on-time review.
     """
     history: list[Review] = []
     review_ts_base = datetime.datetime(2024, 1, 1, 10, 0, 0, tzinfo=UTC)
@@ -218,8 +239,9 @@ def test_review_lapsed_card(scheduler: FSRS_Scheduler, sample_card_uuid: UUID):
 
 def test_review_early_card(scheduler: FSRS_Scheduler, sample_card_uuid: UUID):
     """
-    Test scheduling for a card reviewed before its due date.
-    An early review should result in a smaller stability increase than a timely one.
+    Test that reviewing a card before its due date results in smaller stability and interval increases compared to an on-time review.
+    
+    Simulates a card's first review, then compares the scheduler's output for a second review performed on the due date versus two days early. Asserts that early reviews yield lower stability and shorter scheduled intervals.
     """
     history: list[Review] = []
     review_ts_base = datetime.datetime(2024, 1, 1, 10, 0, 0, tzinfo=UTC)
@@ -262,8 +284,9 @@ def test_review_early_card(scheduler: FSRS_Scheduler, sample_card_uuid: UUID):
 
 def test_mature_card_lapse(sample_card_uuid: UUID):
     """
-    Test the effect of forgetting a mature card (rating 'Again').
-    Stability should reset, but difficulty should increase.
+    Test that forgetting a mature card (rating 'Again') resets stability, increases difficulty, and sets the scheduled interval to the first relearning step.
+    
+    Simulates a card reaching maturity through multiple successful reviews, then verifies that a lapse review causes the expected changes in scheduling state.
     """
     # Use a dedicated scheduler with explicit relearning steps to isolate the test
     config = FSRSSchedulerConfig(
@@ -317,7 +340,9 @@ def test_mature_card_lapse(sample_card_uuid: UUID):
 
 def test_config_impact_on_scheduling():
     """
-    Test that changing scheduler config (e.g., desired_retention) affects outcomes.
+    Test that changing the scheduler's desired_retention parameter affects the scheduled review interval.
+    
+    Creates two FSRS_Scheduler instances with different desired_retention values and verifies that a higher desired_retention results in a shorter scheduled_days interval for the same review history and rating.
     """
     # Initial review to create some history, as retention has no effect on the first review's stability
     base_scheduler = FSRS_Scheduler()

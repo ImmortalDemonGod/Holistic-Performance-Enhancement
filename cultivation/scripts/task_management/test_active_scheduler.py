@@ -18,7 +18,15 @@ import active_learning_block_scheduler as scheduler
 scheduler.logger.setLevel(logging.CRITICAL)
 
 def get_project_root() -> Path:
-    """Traverses up to find the project root, marked by '.git' directory."""
+    """
+    Locate and return the project root directory by searching parent directories for a `.git` folder.
+    
+    Returns:
+        Path: The path to the project root directory.
+    
+    Raises:
+        FileNotFoundError: If no directory containing a `.git` folder is found.
+    """
     current_path = Path(__file__).resolve()
     while current_path != current_path.parent:
         if (current_path / '.git').exists():
@@ -32,7 +40,12 @@ TEST_DATA_PATH = PROJECT_ROOT / 'tests' / 'test_data' / 'tasks_for_scheduler.jso
 class TestActiveLearningBlockScheduler(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        """Load tasks from a baseline JSON file once for all tests."""
+        """
+        Loads baseline task data from a JSON file for use in all test cases.
+        
+        Raises:
+            FileNotFoundError: If the baseline tasks JSON file does not exist at the expected path.
+        """
         if not TEST_DATA_PATH.is_file():
             raise FileNotFoundError(
                 f"FATAL: Test data file 'tasks_for_scheduler.json' not found. "
@@ -43,6 +56,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
             cls.baseline_tasks = json.load(f)
 
     def setUp(self):
+        """
+        Prepares a fresh copy of baseline tasks and sets logging level to INFO before each test.
+        
+        Creates an isolated task dataset for the test case and ensures that both the scheduler and root logger output informational messages during test execution.
+        """
         self.current_tasks_data = copy.deepcopy(self.baseline_tasks)
         scheduler.logger.setLevel(logging.INFO)
         for handler in logging.root.handlers:
@@ -50,6 +68,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
 
     def _modify_tasks(self, modifications: List[Dict[str, Any]]):
 
+        """
+        Recursively applies modifications to tasks and subtasks based on provided criteria.
+        
+        Each modification can target a task by numeric `id` or string `csm_id`, and update fields such as `status`, `priority`, or nested fields specified by a `field_path`. If a modification's target is not found, a warning is printed. The method fails the test if a specified `field_path` is invalid or cannot be traversed.
+        """
         def recursive_modify(tasks_list: List[Dict[str, Any]], mod: Dict[str, Any]) -> bool:
             found_in_level = False
             for task in tasks_list:
@@ -117,6 +140,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         self.assertEqual(task1_scheduled_details.get("effort_minutes_planned"), 1.0 * 60, "Task 1 planned for its min effort.")
 
     def test_task2_not_scheduled_due_to_effort(self):
+        """
+        Test that Task 2 and its subtasks are not scheduled when their minimum effort exceeds the available block size.
+        
+        This test marks Task 1 and all other potentially schedulable tasks as done, then sets all subtasks of Task 2 to require more effort than the scheduler's block allows. It verifies that Task 2 is not scheduled and that the scheduled block is empty.
+        """
         target_date = "2025-05-19"
         modifications = [
             {"id": 1, "status": "done"},
@@ -149,6 +177,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         self.assertNotIn("RNA.P1.Foundations.W1.Part1.Biochem.BackboneDirectionality", scheduled_csm_ids, "Task 3 should not be scheduled due to unmet dependency.")
 
     def test_task3_scheduled_when_dependencies_met(self):
+        """
+        Test that Task 3 is scheduled when all its dependencies are marked as done.
+        
+        Marks tasks 1, 2, and other unrelated tasks as done to isolate Task 3. Runs the scheduler for the specified date and asserts that Task 3 is included in the scheduled block with the correct planned effort.
+        """
         target_date = "2025-05-20"
         modifications = [
             {"id": 1, "status": "done"},
@@ -189,7 +222,9 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
 
     def test_subtask_promotion_parent_too_large_subtask_fits(self):
         """
-        Parent task min effort > block, but one subtask fits (should be scheduled)
+        Test that a subtask is promoted and scheduled when its parent task's minimum effort exceeds the block size but the subtask fits.
+        
+        Ensures that if a parent task cannot be scheduled due to excessive effort, but one of its subtasks meets the effort constraint and dependencies are satisfied, the subtask is promoted and scheduled instead. Verifies correct reporting of parent task ID and title in the scheduled subtask.
         """
         target_date = "2025-05-26"
         # Pick Task 2 (RNA.P1.Foundations.W1.Part1.Biochem.NucleotideStructure), min effort 1.5hr, has subtasks
@@ -227,7 +262,7 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
 
     def test_subtask_promotion_all_subtasks_too_large(self):
         """
-        Parent and all subtasks have min effort > block (should schedule nothing)
+        Test that no subtasks are scheduled when both the parent task and all subtasks require more effort than the available block.
         """
         target_date = "2025-05-27"
         # Pick Task 2, set parent and all subtasks to 2hr
@@ -253,7 +288,7 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
 
     def test_subtask_promotion_subtask_no_explicit_effort(self):
         """
-        Subtask lacks explicit effort, should use parent divided by number of pending subtasks
+        Tests that when subtasks lack explicit effort estimates, the scheduler assigns each a fallback effort equal to the parent task's effort divided by the number of pending subtasks.
         """
         target_date = "2025-05-28"
         modifications = [
@@ -288,7 +323,9 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
 
     def test_subtask_promotion_reporting_and_labeling(self):
         """
-        Scheduled subtask should include parent ID, parent title, and correct labeling.
+        Test that scheduled promoted subtasks include parent task ID and title fields for reporting and labeling.
+        
+        Ensures that when a subtask is promoted to the schedule, it contains `_parent_task_id` and `_parent_title` fields with correct values.
         """
         target_date = "2025-05-29"
         modifications = [
@@ -400,6 +437,11 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         self.assertEqual(len(scheduled_block), 2, "Only the two dummy tasks should fit perfectly.")
 
     def test_exclusion_of_passive_review_task(self):
+        """
+        Test that passive review tasks are excluded from the active scheduler's output.
+        
+        This test marks all active tasks as completed and modifies a specific task to have a passive review block and a non-active activity type. It verifies that the scheduler does not include this passive task in the scheduled block.
+        """
         target_date = "2025-05-23"
         modifications = []
         # Mark all active tasks as done to isolate the passive task

@@ -7,6 +7,9 @@ SCHEMA_PATH = Path(__file__).parent.parent.parent / "cultivation/systems/knowled
 
 # Minimal valid metadata example
 def valid_metadata():
+    """
+    Return a minimal valid paper metadata dictionary conforming to the expected JSON schema.
+    """
     return {
         "arxiv_id": "1234.56789",
         "title": "A Valid Paper Title",

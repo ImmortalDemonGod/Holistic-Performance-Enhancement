@@ -127,8 +127,13 @@ def _transform_raw_card_to_model(
     # internal_note is now authorable from YAML and should be passed through
 
     """
-    Transforms a validated raw card entry into a canonical Card model.
-    Performs sanitization, media validation, secrets detection, and final Card instantiation.
+    Convert a validated raw YAML card entry into a canonical Card model instance.
+    
+    Performs HTML sanitization on question and answer fields, detects potential secrets if enabled, validates and processes media paths, merges deck and card tags, and constructs a Card model. Returns either the created Card or a YAMLProcessingError describing any validation or transformation issue encountered.
+     
+    Returns:
+        Card: The canonical Card model instance if transformation succeeds.
+        YAMLProcessingError: Detailed error information if transformation fails at any step.
     """
     card_q_preview = raw_card_model.q[:50]
 

@@ -36,7 +36,11 @@ def load_tasks(tasks_json_path: str) -> List[Dict[str, Any]]:
     return []
 
 def get_day_of_week(target_date_str: Optional[str] = None) -> int:
-    """Gets the ISO day of the week (Monday=1, Sunday=7) for a target date string or current date."""
+    """
+    Return the ISO weekday number (Monday=1, Sunday=7) for a given date string or for today if no date is provided.
+    
+    If the input date string is invalid, logs a warning and returns the weekday for the current date.
+    """
     try:
         if target_date_str:
             dt = datetime.strptime(target_date_str, "%Y-%m-%d")
@@ -48,7 +52,15 @@ def get_day_of_week(target_date_str: Optional[str] = None) -> int:
         return datetime.now().isoweekday()
 
 def build_task_status_map(all_tasks: List[Dict[str, Any]]) -> Dict[str, str]:
-    """Builds a map from task identifier to task status for quick lookups."""
+    """
+    Constructs a dictionary mapping each task's canonical identifier (preferring `csm_id` if available, otherwise `id`) to its status string.
+    
+    Parameters:
+        all_tasks (List[Dict[str, Any]]): List of task dictionaries to process.
+    
+    Returns:
+        Dict[str, str]: Mapping from stringified task IDs to their status values.
+    """
     status_map = {}
     for task in all_tasks:
         # Prioritize csm_id as the canonical identifier if it exists
@@ -63,7 +75,12 @@ def build_task_status_map(all_tasks: List[Dict[str, Any]]) -> Dict[str, str]:
     return status_map
 
 def dependencies_met(task: Dict[str, Any], task_statuses: Dict[str, str]) -> bool:
-    """Check if all dependencies for a task are met."""
+    """
+    Determine whether all dependencies of a task are marked as done.
+    
+    Returns:
+        bool: True if the task has no dependencies or all dependencies are marked "done" in the status map; otherwise, False.
+    """
     dependency_ids = task.get("dependencies", [])
     if not dependency_ids:
         return True
@@ -86,9 +103,18 @@ def filter_active_tasks(
     min_tasks_for_day_focus: int = MIN_REQUIRED_TASKS_FOR_DAY_FOCUS
 ) -> List[Dict[str, Any]]:
     """
-    Filters tasks suitable for the Active Learning Block, including subtask promotion for oversized tasks.
-    Considers 'recommended_block', 'activity_type', dependencies, status, and minimum effort fitting.
-    Uses a two-pass system for day preference. If a parent task is too large, considers eligible subtasks.
+    Filter tasks eligible for inclusion in the Active Learning Block, promoting subtasks from oversized tasks when appropriate.
+    
+    This function selects tasks with status "pending" and all dependencies met, identifying those suitable for active learning based on `recommended_block` or `activity_type` metadata. Tasks whose minimum estimated effort exceeds the block duration are not scheduled directly; instead, their eligible pending subtasks (with sibling dependencies met) are promoted as individual candidates, with effort estimated explicitly or via fallback distribution. The function uses a two-pass approach: it first selects tasks planned for the current day, and if fewer than the minimum required are found, it supplements with other eligible active tasks.
+    
+    Parameters:
+        all_tasks (List[Dict[str, Any]]): List of all task dictionaries to consider.
+        current_day_of_week (int): ISO weekday number (Monday=1, Sunday=7) for scheduling context.
+        task_statuses (Dict[Any, str]): Mapping of task identifiers to their status.
+        min_tasks_for_day_focus (int): Minimum number of on-day tasks to prioritize before considering off-day tasks.
+    
+    Returns:
+        List[Dict[str, Any]]: List of candidate tasks and promoted subtasks eligible for scheduling in the active learning block.
     """
     candidate_tasks: List[Dict[str, Any]] = []
     
