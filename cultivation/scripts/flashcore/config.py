@@ -10,7 +10,7 @@ Configuration and constants for flashcore.
 # These parameters are used by the FSRS algorithm to schedule card reviews.
 # Each parameter influences a specific aspect of the memory model.
 # For detailed explanations of each parameter, refer to FSRS documentation and the optimizer source.
-DEFAULT_FSRS_PARAMETERS = (
+DEFAULT_PARAMETERS = (
     0.2172,  # w[0]
     1.1771,  # w[1]
     3.2602,  # w[2]
