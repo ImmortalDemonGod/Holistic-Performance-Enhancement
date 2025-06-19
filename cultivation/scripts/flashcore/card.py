@@ -14,7 +14,7 @@ from typing import List, Optional, Set
 from pathlib import Path
 import re
 
-from pydantic import BaseModel, Field, validator, conint, constr
+from pydantic import BaseModel, Field, validator
 
 # Regex for Kebab-case validation (e.g., "my-cool-tag", "learning-python-3")
 KEBAB_CASE_REGEX_PATTERN = r"^[a-z0-9]+(?:-[a-z0-9]+)*$"
@@ -111,8 +111,10 @@ class Review(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         description="The UTC timestamp when the review occurred."
     )
-    rating: conint(ge=0, le=3) = Field(  # type: ignore
+    rating: int = Field(
         ...,
+        ge=0,
+        le=3,
         description="The user's rating of their recall performance (0=Again, 1=Hard, 2=Good, 3=Easy)."
     )
     resp_ms: Optional[int] = Field(
