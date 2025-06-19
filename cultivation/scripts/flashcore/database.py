@@ -100,8 +100,11 @@ class FlashcardDatabase:
             logger.info(f"FlashcardDatabase initialized for DB at: {self.db_path_resolved}")
         self.read_only: bool = read_only
         self._connection: Optional[duckdb.DuckDBPyConnection] = None
+        self._is_closed: bool = False
 
     def get_connection(self) -> duckdb.DuckDBPyConnection:
+        if self._is_closed:
+            raise DatabaseConnectionError("Database connection has been permanently closed.")
         if self._connection is None or getattr(self._connection, 'closed', False):
             try:
                 if str(self.db_path_resolved) != ":memory:":
@@ -120,7 +123,7 @@ class FlashcardDatabase:
         if self._connection and not getattr(self._connection, 'closed', False):
             self._connection.close()
             logger.debug(f"DuckDB connection to {self.db_path_resolved} closed.")
-        self._connection = None
+        self._is_closed = True
 
     def __enter__(self) -> 'FlashcardDatabase':
         self.get_connection()
