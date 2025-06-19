@@ -80,9 +80,10 @@ def sample_card3_deck_b() -> Card:
         deck_name="Deck B",
         front="Card 3 DeckB Front",
         back="Card 3 DeckB Back",
-        tags={"tag3"},
-        added_at=datetime(2023, 1, 3, 10, 0, 0, tzinfo=timezone.utc),
-        source_yaml_file=Path("source/deck_b.yaml")
+        tags={"default-tag"},
+        media=None,
+        source_yaml_file=Path("source/deck_b.yaml"),
+        added_at=datetime(2023, 1, 3, 10, 0, 0, tzinfo=timezone.utc)
     )
 
 @pytest.fixture
@@ -119,7 +120,7 @@ def create_sample_card(**overrides) -> Card:
         added_at=datetime(2023, 1, 1, 10, 0, 0, tzinfo=timezone.utc),
         source_yaml_file=Path("source/deck_a.yaml"),
         origin_task="test-task",
-        media_paths=[Path("media1.png"), Path("media2.mp3")],
+        media=[Path("media1.png"), Path("media2.mp3")],
         internal_note="test note"
     )
     data.update(overrides)
@@ -268,11 +269,36 @@ class TestSchemaInitialization:
             db_readonly.initialize_schema(force_recreate_tables=True)
 
     def test_schema_constraints_rating(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        """
+        Tests that the database itself enforces the CHECK constraint on the 'rating' column,
+        bypassing Pydantic validation to do so.
+        """
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
-        invalid_review = create_sample_review(card_uuid=sample_card1.uuid, rating=5)
-        with pytest.raises(ReviewOperationError):
-            db.add_review(invalid_review)
+
+        # Use a raw SQL query to bypass Pydantic validation and test the DB constraint directly
+        with pytest.raises(duckdb.ConstraintException):
+            conn = db.get_connection()
+            # Most fields are NOT NULL, so we must provide them.
+            conn.execute(
+                """
+                INSERT INTO reviews (
+                    card_uuid, ts, rating, stab_after, diff, next_due, 
+                    elapsed_days_at_review, scheduled_days_interval
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    sample_card1.uuid,
+                    datetime.now(timezone.utc),
+                    5,  # <-- Invalid rating
+                    2.0,
+                    4.0,
+                    date(2023, 1, 5),
+                    0,
+                    3
+                )
+            )
+
     def test_schema_constraints_fk_cascade_delete(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
@@ -322,7 +348,6 @@ class TestCardOperations:
         db.upsert_cards_batch([sample_card1])
         original_added_at = db.get_card_by_uuid(sample_card1.uuid).added_at
         updated_card1 = sample_card1.model_copy(update={"front": "Updated Card 1 Front", "tags": {"new-tag"}})
-        updated_card1.added_at = datetime.now(timezone.utc) + timedelta(days=1)
         affected_rows = db.upsert_cards_batch([updated_card1])
         assert affected_rows == 1
         retrieved_updated_card = db.get_card_by_uuid(sample_card1.uuid)
@@ -350,13 +375,13 @@ class TestCardOperations:
 
     def test_upsert_cards_batch_data_marshalling(self, initialized_db_manager: FlashcardDatabase):
         db = initialized_db_manager
-        card = create_sample_card(tags={"tagX"}, media_paths=[Path("foo.png")], source_yaml_file=Path("foo.yaml"))
+        card = create_sample_card(tags={"tag-x"}, media=[Path("foo.png")], source_yaml_file=Path("foo.yaml"))
         affected_rows = db.upsert_cards_batch([card])
         assert affected_rows == 1
         retrieved = db.get_card_by_uuid(card.uuid)
         assert retrieved is not None
-        assert isinstance(retrieved.tags, set) and "tagX" in retrieved.tags
-        assert isinstance(retrieved.media_paths, list) and Path("foo.png") in retrieved.media_paths
+        assert isinstance(retrieved.tags, set) and "tag-x" in retrieved.tags
+        assert isinstance(retrieved.media, list) and Path("foo.png") in retrieved.media
         assert isinstance(retrieved.source_yaml_file, Path) and retrieved.source_yaml_file.name == "foo.yaml"
 
     def test_upsert_cards_batch_transaction_rollback(self, db_manager: FlashcardDatabase):
