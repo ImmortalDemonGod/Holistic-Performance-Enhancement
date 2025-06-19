@@ -286,10 +286,10 @@ class FlashcardDatabase:
             result_df = conn.execute(sql, params).fetch_df()
             if result_df.empty:
                 return []
-            return [self._db_row_to_card(row_dict) for row_dict in result_df.to_dict('records')]
+            return [self._db_row_to_card(row) for row in result_df.to_dict('records')]
         except duckdb.Error as e:
             logger.error(f"Error fetching all cards (filter: {deck_name_filter}): {e}")
-            raise CardOperationError(f"Failed to fetch all cards: {e}", original_exception=e) from e
+            raise CardOperationError(f"Failed to get all cards: {e}", original_exception=e) from e
 
     def get_due_cards(self, on_date: date, limit: Optional[int] = 20) -> List['Card']:
         conn = self.get_connection()
@@ -478,10 +478,6 @@ class FlashcardDatabase:
             result_df = conn.execute(sql, params).fetch_df()
             if result_df.empty:
                 return []
-            return [self._db_row_to_review(row_dict) for row_dict in result_df.to_dict('records')]
-        except duckdb.Error as e:
-            logger.error(f"Error fetching all reviews: {e}")
-            raise ReviewOperationError(f"Failed to get all reviews: {e}", original_exception=e) from e
             return [self._db_row_to_review(row_dict) for row_dict in result_df.to_dict('records')]
         except duckdb.Error as e:
             logger.error(f"Error fetching all reviews (range: {start_ts} to {end_ts}): {e}")
