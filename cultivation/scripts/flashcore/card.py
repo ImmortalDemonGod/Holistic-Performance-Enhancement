@@ -50,11 +50,15 @@ class Card(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         description="UTC timestamp indicating when the card was first added/ingested into the system. This timestamp persists even if the card content is updated later."
     )
+    modified_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="UTC timestamp indicating when the card was last modified. It is updated upon any change to the card's content."
+    )
     origin_task: Optional[str] = Field(
         default=None,
         description="Optional reference to an originating task ID (e.g., from Task Master)."
     )
-    media: Optional[List[Path]] = Field(
+    media_paths: Optional[List[Path]] = Field(
         default=None,
         description="Optional list of paths to media files (images, audio, etc.) associated with the card. Paths should be relative to a defined assets root directory (e.g., 'outputs/flashcards/assets/')."
     )
