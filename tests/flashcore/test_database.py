@@ -224,7 +224,7 @@ class TestFlashcardDatabaseConnection:
         conn = db_readonly.get_connection()
         assert conn is not None
         # Attempt write
-        with pytest.raises((DatabaseConnectionError, duckdb.IOException, duckdb.ReadOnlyException, Exception)):
+        with pytest.raises((DatabaseConnectionError, duckdb.IOException, duckdb.InvalidInputException)):
             db_readonly.upsert_cards_batch([create_sample_card()])
 
 class TestSchemaInitialization:
@@ -578,5 +578,5 @@ class TestGeneralErrorHandling:
         db_man.close_connection()
         db_readonly = FlashcardDatabase(db_path_file, read_only=True)
         db_readonly.initialize_schema()
-        with pytest.raises((DatabaseConnectionError, duckdb.IOException, duckdb.ReadOnlyException, Exception)):
+        with pytest.raises((DatabaseConnectionError, duckdb.IOException, duckdb.InvalidInputException)):
             db_readonly.upsert_cards_batch([create_sample_card()])
