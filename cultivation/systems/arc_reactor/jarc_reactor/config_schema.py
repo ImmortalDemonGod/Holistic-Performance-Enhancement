@@ -52,7 +52,6 @@ class PrecisionOpt(Enum):
 
 @dataclass
 class TrainingConfigSchema:
-    batch_size: int = 1
     learning_rate: float = 0.00002009
     max_epochs: int = 100
     device_choice: DeviceChoice = DeviceChoice.AUTO
@@ -187,6 +186,7 @@ class EvaluationConfigSchema:
 
 @dataclass
 class DataLoaderConfig:
+    batch_size: int = 1  # Add batch_size here
     num_workers: int = 0
     pin_memory: bool = False
     drop_last_train: bool = False  # For training dataloader

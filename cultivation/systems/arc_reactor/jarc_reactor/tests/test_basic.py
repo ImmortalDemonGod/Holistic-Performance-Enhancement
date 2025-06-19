@@ -78,7 +78,10 @@ def _get_base_test_config_dict() -> dict:
         },
         "dataloader": {
             "batch_size": 1,
-            "num_workers": 0
+            "num_workers": 0,
+            "pin_memory": False,
+            "drop_last_train": False,
+            "drop_last_eval": False
         },
         "logging": {
             "log_level": "DEBUG",

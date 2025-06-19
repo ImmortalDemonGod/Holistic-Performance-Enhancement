@@ -270,7 +270,7 @@ def prepare_data(cfg: DictConfig, return_datasets: bool = False):
     """
     # 1. Initialize paths and parameters from Hydra config
     directory = cfg.training.training_data_dir
-    batch_size = cfg.training.batch_size
+    batch_size = cfg.dataloader.batch_size
     
     # 2. Validate path and inspect a sample of data files
     data_path = _validate_and_inspect_path(cfg, directory)
