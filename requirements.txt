@@ -24,6 +24,12 @@ duckdb>=1.0.0
 mkdocs>=1.5.3
 mkdocs-material>=9.5.13
 pymarkdownlnt
+fsrs-optimizer
+fsrs
+
+# Type stubs for Mypy
+types-PyYAML
+types-bleach
 
 # Dependencies for JARC-Reactor
 torch
