@@ -36,7 +36,7 @@ class TestCardModel:
         assert isinstance(card.added_at, datetime)
         assert card.added_at.tzinfo == timezone.utc
         assert card.origin_task is None
-        assert card.media is None
+        assert card.media_paths is None
         assert card.source_yaml_file is None
         assert card.internal_note is None
 
@@ -52,7 +52,7 @@ class TestCardModel:
             tags={"valid-tag", "another-valid-one"},
             added_at=specific_added_at,
             origin_task="TASK-001",
-            media=[Path("assets/image.png"), Path("assets/audio.mp3")],
+            media_paths=[Path("assets/image.png"), Path("assets/audio.mp3")],
             source_yaml_file=Path("outputs/flashcards/yaml/feature_showcase.yaml"),
             internal_note="This card was programmatically generated."
         )
@@ -61,7 +61,7 @@ class TestCardModel:
         assert card.tags == {"valid-tag", "another-valid-one"}
         assert card.added_at == specific_added_at
         assert card.origin_task == "TASK-001"
-        assert card.media == [Path("assets/image.png"), Path("assets/audio.mp3")]
+        assert card.media_paths == [Path("assets/image.png"), Path("assets/audio.mp3")]
         assert card.source_yaml_file == Path("outputs/flashcards/yaml/feature_showcase.yaml")
         assert card.internal_note == "This card was programmatically generated."
 
