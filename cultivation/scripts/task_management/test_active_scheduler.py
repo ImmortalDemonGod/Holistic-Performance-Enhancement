@@ -266,13 +266,13 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
             {"id": 7, "status": "done"},
             {"id": 11, "status": "done"},
         ]
+        self._modify_tasks(modifications)
         for task in self.current_tasks_data:
             if task.get("id") == 2:
                 for st in task.get("subtasks", []):
                     st["status"] = "pending"
                     if "hpe_learning_meta" in st:
                         del st["hpe_learning_meta"]
-        self._modify_tasks(modifications)
         scheduled_block = self._run_scheduler(self.current_tasks_data, target_date)
         print("[DEBUG] test_subtask_promotion_subtask_no_explicit_effort scheduled_block:", scheduled_block)
         # Should schedule at least one subtask, with fallback effort 1.2/len(subtasks)
@@ -301,12 +301,12 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
             {"id": 7, "status": "done"},
             {"id": 11, "status": "done"},
         ]
+        self._modify_tasks(modifications)
         for task in self.current_tasks_data:
             if task.get("id") == 2:
                 for st in task.get("subtasks", []):
                     st["status"] = "pending"
                     st["hpe_learning_meta"] = {"estimated_effort_hours_min": 0.5}
-        self._modify_tasks(modifications)
         scheduled_block = self._run_scheduler(self.current_tasks_data, target_date)
         print("[DEBUG] scheduled_block (reporting/labeling):", scheduled_block)
         subtask = next(t for t in scheduled_block if t.get("_parent_task_id") == 2)

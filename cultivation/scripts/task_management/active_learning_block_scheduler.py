@@ -1,6 +1,7 @@
 # cultivation/scripts/task_management/active_learning_block_scheduler.py
 import json
 import logging
+import copy
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 import argparse
@@ -140,21 +141,27 @@ def filter_active_tasks(
                 # --- Subtask Promotion Logic ---
                 # Only promote subtasks that are pending and whose sibling dependencies are met.
                 # Fallback effort is distributed among only these eligible subtasks.
+                # Use a deep copy of subtasks to prevent any mutation of the original task data.
+                all_subtasks_in_parent = copy.deepcopy(task.get("subtasks", []))
+
                 eligible_subtasks_for_promotion: List[Dict[str, Any]] = []
-                all_subtasks_in_parent = task.get("subtasks", [])
-                for subtask in all_subtasks_in_parent:
-                    if subtask.get("status") != "pending":
+                logger.debug(f"  Parent Task {task_id}: Checking {len(all_subtasks_in_parent)} subtasks for eligibility.")
+                for subtask_item in all_subtasks_in_parent:
+                    if subtask_item.get("status") != "pending":
                         continue
-                    subtask_id_local = subtask.get("id")
-                    sibling_dependencies = subtask.get("dependencies", [])
-                    if all(
+                    
+                    sibling_dependencies = subtask_item.get("dependencies", [])
+                    is_eligible = all(
                         next((st for st in all_subtasks_in_parent if st.get("id") == dep_id), {"status": "done"}).get("status") == "done"
                         for dep_id in sibling_dependencies
-                    ):
-                        eligible_subtasks_for_promotion.append(subtask)
+                    )
+                    logger.debug(f"    Subtask {subtask_item.get('id')}: status='{subtask_item.get('status')}', deps={sibling_dependencies}, eligible={is_eligible}")
+                    if is_eligible:
+                        eligible_subtasks_for_promotion.append(subtask_item)
 
                 num_eligible_pending_subtasks = len(eligible_subtasks_for_promotion)
-                # NEW: Calculate total pending subtasks for fallback effort distribution
+                
+                # Calculate total pending subtasks for fallback effort distribution
                 all_pending_subtasks_for_effort_calc = [
                     st for st in all_subtasks_in_parent if st.get("status", "pending") == "pending"
                 ]
@@ -187,13 +194,15 @@ def filter_active_tasks(
                             "title": f"{task.get('title', 'Task')} -> {subtask.get('title', 'Subtask')}",
                             "status": "pending",
                             "_parent_task_id": task_id,
+                            "_parent_title": task.get("title"),
                             "_original_parent_id": task_id,
                             # Carry over essential metadata from the parent
-                            "hpe_learning_meta": task.get("hpe_learning_meta", {}),
+                            "hpe_learning_meta": task.get("hpe_learning_meta", {}).copy(),  # Use copy to prevent mutation
                             "priority": task.get("priority"),
                         }
-                        # Update effort from the subtask's metadata
-                        promoted_subtask["hpe_learning_meta"]["estimated_effort_hours_min"] = subtask_hpe_learning_meta.get("estimated_effort_hours_min")
+                        # CRITICAL: Set the effort to the calculated value (either from subtask or fallback)
+                        promoted_subtask["hpe_learning_meta"]["estimated_effort_hours_min"] = sub_min_effort_hours
+                        # Also carry over max effort if it exists on the subtask, otherwise it will inherit parent's
                         promoted_subtask["hpe_learning_meta"]["estimated_effort_hours_max"] = subtask_hpe_learning_meta.get("estimated_effort_hours_max")
 
                         candidate_tasks.append(promoted_subtask)
