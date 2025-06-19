@@ -214,3 +214,150 @@ def test_review_lapsed_card(scheduler: FSRS_Scheduler, sample_card_uuid: UUID):
     assert result_lapsed["stability"] > result_on_time["stability"]
     assert result_lapsed["scheduled_days"] > result_on_time["scheduled_days"]
     assert result_lapsed["next_review_due"] > result_on_time["next_review_due"]
+
+
+def test_review_early_card(scheduler: FSRS_Scheduler, sample_card_uuid: UUID):
+    """
+    Test scheduling for a card reviewed before its due date.
+    An early review should result in a smaller stability increase than a timely one.
+    """
+    history: list[Review] = []
+    review_ts_base = datetime.datetime(2024, 1, 1, 10, 0, 0, tzinfo=UTC)
+    current_card_uuid = sample_card_uuid
+
+    # Review 1: New card, rated Good (2), scheduled for a future date.
+    rating1 = 2
+    result1 = scheduler.compute_next_state(history, rating1, review_ts_base)
+    next_due1 = result1["next_review_due"]
+
+    history.append(Review(
+        card_uuid=current_card_uuid,
+        ts=review_ts_base,
+        rating=rating1,
+        stab_before=0,
+        stab_after=result1["stability"],
+        diff=result1["difficulty"],
+        next_due=next_due1,
+        elapsed_days_at_review=0,
+        scheduled_days_interval=result1["scheduled_days"]
+    ))
+
+    # Scenario 1 (Control): Review on the exact due date.
+    review_ts_on_time = datetime.datetime.combine(next_due1, datetime.time(10, 0, 0), tzinfo=UTC)
+    result_on_time = scheduler.compute_next_state(history, 2, review_ts_on_time) # Rated Good
+
+    # Scenario 2 (Early): Review 2 days BEFORE the due date.
+    # Ensure we don't go back in time if the interval is very short.
+    review_ts_early = review_ts_on_time - datetime.timedelta(days=min(2, result1["scheduled_days"] - 1))
+    if review_ts_early <= review_ts_base:
+        pytest.skip("Scheduled interval is too short to test an early review.")
+
+    result_early = scheduler.compute_next_state(history, 2, review_ts_early) # Rated Good
+
+    # FSRS theory: A successful early review provides less information about memory
+    # strength, so the stability increase should be smaller.
+    assert result_early["stability"] < result_on_time["stability"]
+    assert result_early["scheduled_days"] < result_on_time["scheduled_days"]
+
+
+def test_mature_card_lapse(sample_card_uuid: UUID):
+    """
+    Test the effect of forgetting a mature card (rating 'Again').
+    Stability should reset, but difficulty should increase.
+    """
+    # Use a dedicated scheduler with explicit relearning steps to isolate the test
+    config = FSRSSchedulerConfig(
+        relearning_steps=(1,)
+    )
+    scheduler = FSRS_Scheduler(config=config)
+    history: list[Review] = []
+    review_ts = datetime.datetime(2024, 1, 1, 10, 0, 0, tzinfo=UTC)
+    current_card_uuid = sample_card_uuid
+
+    # Build up a mature card with high stability through several 'Good' reviews
+    last_result = scheduler.compute_next_state(history, 2, review_ts)
+    history.append(Review(
+        card_uuid=current_card_uuid, ts=review_ts, rating=2, stab_before=0,
+        stab_after=last_result["stability"], diff=last_result["difficulty"],
+        next_due=last_result["next_review_due"], elapsed_days_at_review=0,
+        scheduled_days_interval=last_result["scheduled_days"]
+    ))
+
+    for _ in range(4): # 4 more successful reviews
+        review_ts = datetime.datetime.combine(last_result["next_review_due"], datetime.time(10,0,0), tzinfo=UTC)
+        
+        stab_before = last_result["stability"]
+        
+        last_result = scheduler.compute_next_state(history, 2, review_ts)
+        history.append(Review(
+            card_uuid=current_card_uuid, ts=review_ts, rating=2, stab_before=stab_before,
+            stab_after=last_result["stability"], diff=last_result["difficulty"],
+            next_due=last_result["next_review_due"],
+            elapsed_days_at_review=(review_ts.date() - history[-1].ts.date()).days,
+            scheduled_days_interval=last_result["scheduled_days"]
+        ))
+    
+    mature_stability = last_result["stability"]
+    mature_difficulty = last_result["difficulty"]
+    assert mature_stability > 20 # Arbitrary check for maturity
+
+    # Now, the user forgets the card (rates 'Again')
+    lapse_review_ts = datetime.datetime.combine(last_result["next_review_due"], datetime.time(10,0,0), tzinfo=UTC)
+    lapse_result = scheduler.compute_next_state(history, 0, lapse_review_ts) # Rating: Again
+
+    # After a lapse, stability should be significantly reduced.
+    # Difficulty should increase.
+    assert lapse_result["stability"] < mature_stability
+    assert lapse_result["difficulty"] > mature_difficulty
+    # The new interval should be short, typical for relearning.
+    # After a lapse, the card enters relearning. The first interval is short.
+    # With default relearning steps, this should be 1 day.
+    assert lapse_result["scheduled_days"] == 1
+
+
+def test_config_impact_on_scheduling():
+    """
+    Test that changing scheduler config (e.g., desired_retention) affects outcomes.
+    """
+    # Initial review to create some history, as retention has no effect on the first review's stability
+    base_scheduler = FSRS_Scheduler()
+    initial_history: list[Review] = []
+    review_ts1 = datetime.datetime(2024, 1, 1, 10, 0, 0, tzinfo=UTC)
+    initial_result = base_scheduler.compute_next_state(initial_history, 2, review_ts1) # Good
+
+    history: list[Review] = [
+        Review(
+            card_uuid=UUID("a3f4b1d0-c2e8-4a6a-8f9a-3b1c5d7a9e0f"),
+            ts=review_ts1,
+            rating=2,
+            stab_before=0,
+            stab_after=initial_result["stability"],
+            diff=initial_result["difficulty"],
+            next_due=initial_result["next_review_due"],
+            elapsed_days_at_review=0,
+            scheduled_days_interval=initial_result["scheduled_days"]
+        )
+    ]
+    review_ts2 = datetime.datetime.combine(initial_result["next_review_due"], datetime.time(10,0,0), tzinfo=UTC)
+
+    # Scheduler 1: Default retention (e.g., 0.9)
+    config1 = FSRSSchedulerConfig(
+        parameters=tuple(DEFAULT_FSRS_PARAMETERS),
+        desired_retention=0.9,
+    )
+    scheduler1 = FSRS_Scheduler(config=config1)
+    result1 = scheduler1.compute_next_state(history, 2, review_ts2) # Good
+
+    # Scheduler 2: Higher retention (e.g., 0.95) - should result in shorter intervals
+    config2 = FSRSSchedulerConfig(
+        parameters=tuple(DEFAULT_FSRS_PARAMETERS),
+        desired_retention=0.95,
+    )
+    scheduler2 = FSRS_Scheduler(config=config2)
+    result2 = scheduler2.compute_next_state(history, 2, review_ts2) # Good
+
+    # Higher desired retention means we need to review more often to achieve it.
+    # Higher desired retention means we need to review more often to achieve it.
+    # The stability calculation itself is not directly affected by desired_retention,
+    # but the resulting interval is.
+    assert result2["scheduled_days"] < result1["scheduled_days"]
