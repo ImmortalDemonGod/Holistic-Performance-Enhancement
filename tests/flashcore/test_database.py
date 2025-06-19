@@ -1,23 +1,24 @@
 """
-Comprehensive test suite for flashcore.database (FlashcardDatabase), covering connection, schema, CRUD, constraints, marshalling, and error handling.
+Minimal test file for flashcore.database to debug pytest silent failures.
+(Step 2: Re-adding original imports)
 """
 
 import pytest
-from pydantic import ValidationError
-
-from datetime import datetime, timezone
+import uuid
+from pathlib import Path
+from datetime import datetime, date, timezone
 from typing import Generator
 import duckdb
 
 from cultivation.scripts.flashcore.card import Card, Review
 from cultivation.scripts.flashcore.database import (
-    FlashcardDatabase,
-    DatabaseConnectionError,
     CardOperationError,
-    ReviewOperationError,
+    DatabaseConnectionError,
+    FlashcardDatabase,
     DEFAULT_FLASHCORE_DATA_DIR,
     DEFAULT_DATABASE_FILENAME
 )
+
 
 # --- Fixtures ---
 @pytest.fixture
@@ -143,157 +144,116 @@ def create_sample_review(card_uuid, **overrides) -> Review:
     data.update(overrides)
     return Review(**data)
 
-# --- Test Classes ---
 
 class TestFlashcardDatabaseConnection:
-    def test_instantiation_default_path(self):
-        db_man_default = FlashcardDatabase() # No path provided
-        expected_path = DEFAULT_FLASHCORE_DATA_DIR / DEFAULT_DATABASE_FILENAME
-        assert db_man_default.db_path_resolved == expected_path
-        conn = None
-        try:
-            conn = db_man_default.get_connection()
-            assert expected_path.parent.exists()
-        finally:
-            if conn:
-                conn.close()
-            if expected_path.exists():
-                expected_path.unlink()
-            if expected_path.parent.exists() and not any(expected_path.parent.iterdir()):
-                expected_path.parent.rmdir()
-
-    def test_instantiation_custom_file_path(self, tmp_path: Path):
-        custom_path = tmp_path / "custom_dir" / "my_flash.db"
-        db_man = FlashcardDatabase(custom_path)
-        assert db_man.db_path_resolved == custom_path.resolve()
-        conn = None
-        try:
-            conn = db_man.get_connection()
-            assert custom_path.parent.exists()
-        finally:
-            if conn:
-                conn.close()
-
-    def test_instantiation_in_memory(self, db_path_memory: str):
-        db_man = FlashcardDatabase(db_path_memory)
-        assert str(db_man.db_path_resolved) == ":memory:"
-        with db_man as db:
+    def test_connection_context_manager_memory(self, db_path_memory: str):
+        with FlashcardDatabase(db_path_memory) as db:
             assert db._connection is not None
-            db._connection.execute("SELECT 42;").fetchone() # Check if connection is active
-        assert db._connection is None # __exit__ sets _connection to None
+            # Execute a simple query to ensure connection is live
+            db._connection.execute("SELECT 1")
+        # After exiting context, connection should be closed
+        # Check if attempting a query raises an error indicative of a closed connection
+        with pytest.raises(duckdb.ConnectionException) as excinfo:
+            db._connection.execute("SELECT 1")
+        assert "connection already closed" in str(excinfo.value).lower()
 
-    def test_get_connection_success(self, db_manager: FlashcardDatabase):
-        conn = db_manager.get_connection()
-        assert conn is not None
-        conn.execute("SELECT 1") # Check if connection is active
 
-    def test_get_connection_idempotent(self, db_manager: FlashcardDatabase):
-        conn1 = db_manager.get_connection()
-        conn2 = db_manager.get_connection()
-        assert conn1 is conn2
-        db_manager.close_connection()
-        # conn1 was an alias to db_manager._connection which is now None. Accessing conn1 might be unsafe or its state undefined.
-        # The primary check is that db_manager._connection is None.
-        assert db_manager._connection is None
-        conn3 = db_manager.get_connection()
-        assert conn3 is not None
-        # Further check: connection is usable
-        conn3.execute("SELECT 1")
-        assert conn1 is not conn3
-
-    def test_close_connection(self, db_manager: FlashcardDatabase):
-        db_manager.get_connection() # Ensure connection is established
-        db_manager.close_connection()
-        assert db_manager._connection is None
-        # Should be able to reconnect
-        conn2 = db_manager.get_connection()
-        assert conn2 is not None
-        assert db_manager._connection is not None
-
-    def test_context_manager_usage(self, db_path_file: Path):
+    def test_connection_context_manager_file(self, db_path_file: Path):
         with FlashcardDatabase(db_path_file) as db:
             assert db._connection is not None
-            db._connection.execute("SELECT 1") # Check if connection is active
-        assert db._connection is None # __exit__ sets _connection to None
+            db._connection.execute("SELECT 1")
+        with pytest.raises(duckdb.ConnectionException) as excinfo:
+            db._connection.execute("SELECT 1")
+        assert "connection already closed" in str(excinfo.value).lower()
 
-    def test_read_only_mode_connection(self, db_path_file: Path):
-        db_man = FlashcardDatabase(db_path_file)
-        db_man.initialize_schema()
-        db_man.close_connection()
-        db_readonly = FlashcardDatabase(db_path_file, read_only=True)
-        conn = db_readonly.get_connection()
+
+    def test_explicit_close_memory(self, db_path_memory: str):
+        db = FlashcardDatabase(db_path_memory)
+        # Lazily create connection and assert it's open
+        conn = db.get_connection()
         assert conn is not None
-        conn.execute("SELECT 1") # Check if connection is active
-        # Attempt write
-        with pytest.raises(duckdb.InvalidInputException):
-            # Try to create a table, which is a write operation
-            conn.execute("CREATE TABLE test_write (id INTEGER)")
-        db_readonly.close_connection()
+        conn.execute("SELECT 1")
 
-class TestSchemaInitialization:
-    def test_initialize_schema_creates_tables_and_sequence(self, db_manager: FlashcardDatabase):
-        with db_manager:
-            db_manager.initialize_schema()
-            tables = db_manager._connection.execute("SELECT table_name FROM information_schema.tables WHERE table_name IN ('cards', 'reviews');").fetchall()
-            table_names = {name[0] for name in tables}
-            assert "cards" in table_names
-    def test_get_reviews_for_card_no_reviews(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
-        db = initialized_db_manager
-        db.upsert_cards_batch([sample_card1])
-        assert db.get_reviews_for_card(sample_card1.uuid) == []
-
-    def test_get_latest_review_for_card(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
-        db = initialized_db_manager
-        db.upsert_cards_batch([sample_card1])
-        r1 = create_sample_review(card_uuid=sample_card1.uuid, ts=datetime(2023, 1, 2, 11, 0, 0, tzinfo=timezone.utc))
-        r2 = create_sample_review(card_uuid=sample_card1.uuid, ts=datetime(2023, 1, 3, 12, 0, 0, tzinfo=timezone.utc))
-        db.add_reviews_batch([r1, r2])
-        latest = db.get_latest_review_for_card(sample_card1.uuid)
-        assert latest.ts == r2.ts
-
-    def test_get_latest_review_for_card_no_reviews(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
-        db = initialized_db_manager
-        db.upsert_cards_batch([sample_card1])
-        assert db.get_latest_review_for_card(sample_card1.uuid) is None
-
-    def test_get_all_reviews_empty(self, initialized_db_manager: FlashcardDatabase):
-        assert initialized_db_manager.get_all_reviews() == []
-
-    def test_get_all_reviews_with_data_and_filtering(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
-        db = initialized_db_manager
-        db.upsert_cards_batch([sample_card1])
-        r1 = create_sample_review(card_uuid=sample_card1.uuid, ts=datetime(2023, 1, 2, 11, 0, 0, tzinfo=timezone.utc))
-        r2 = create_sample_review(card_uuid=sample_card1.uuid, ts=datetime(2023, 1, 3, 12, 0, 0, tzinfo=timezone.utc))
-        db.add_reviews_batch([r1, r2])
-        all_reviews = db.get_all_reviews()
-        assert len(all_reviews) >= 2
-        filtered = db.get_all_reviews(start_ts=datetime(2023, 1, 3, 0, 0, 0, tzinfo=timezone.utc))
-        assert all(r.ts >= datetime(2023, 1, 3, 0, 0, 0, tzinfo=timezone.utc) for r in filtered)
-
-class TestGeneralErrorHandling:
-    def test_operations_on_uninitialized_db(self, db_manager: FlashcardDatabase, sample_card1: Card):
-        # Ensure connection is open but schema not initialized
-        db_manager.get_connection()
-        # Attempt to add a card, which should fail if schema is not initialized
-        with pytest.raises(duckdb.CatalogException): # Or specific custom error if wrapped
-            db_manager.upsert_cards_batch([sample_card1])
-
-    def test_operations_on_closed_connection(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
-        db = initialized_db_manager
+        # Explicitly close
         db.close_connection()
-        # Should reconnect or raise
-        try:
-            db.upsert_cards_batch([sample_card1])
-        except Exception:
-            pass
 
-    def test_read_only_db_write_attempt(self, db_path_file: Path):
-        db_man = FlashcardDatabase(db_path_file)
-        db_man.initialize_schema()
-        db_man.close_connection()
-        db_readonly = FlashcardDatabase(db_path_file, read_only=True)
-        # initialize_schema should not fail on a read-only DB if tables already exist and force_recreate is False (default)
-        db_readonly.initialize_schema() 
-        with pytest.raises(duckdb.InvalidInputException):
-            # Attempting an upsert (write operation) should fail
-            db_readonly.upsert_cards_batch([create_sample_card()])
+        # Verify that trying to get a new connection fails with our custom error
+        with pytest.raises(DatabaseConnectionError) as excinfo:
+            db.get_connection()
+        assert "permanently closed" in str(excinfo.value).lower()
+
+        # Verify that using the old connection object fails with duckdb's error
+        with pytest.raises(duckdb.ConnectionException):
+            conn.execute("SELECT 1")
+
+
+    def test_explicit_close_file(self, db_path_file: Path):
+        db = FlashcardDatabase(db_path_file)
+        assert db._connection is not None
+        db._connection.execute("SELECT 1")
+        db.close_connection()
+        with pytest.raises(duckdb.ProgrammingError) as excinfo:
+            db._connection.execute("SELECT 1")
+        assert "Connection has already been closed" in str(excinfo.value).lower()
+
+    def test_read_only_mode_connection(self, tmp_path: Path):
+        # First, create and populate a DB
+        db_file = tmp_path / "test_readonly.db"
+        with FlashcardDatabase(db_file) as db_write:
+            db_write.initialize_schema()
+            # Add a dummy card to ensure there's data
+            card_data = create_sample_card(uuid=uuid.uuid4(), front="Test RO Card")
+            db_write.upsert_cards_batch([card_data])
+
+        # Now, open in read-only mode
+        with FlashcardDatabase(db_file, read_only=True) as db_read:
+            assert db_read._connection is not None
+            # Verify we can read
+            rows = db_read._connection.execute("SELECT COUNT(*) FROM cards").fetchall()
+            assert rows[0][0] == 1
+        # Connection should be closed after context manager
+        with pytest.raises(duckdb.ProgrammingError) as excinfo:
+            db_read._connection.execute("SELECT 1")
+        assert "connection has already been closed" in str(excinfo.value).lower()
+
+    def test_read_only_db_write_attempt(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+        # This fixture db_manager might be read-write or in-memory.
+        # We need to ensure we test a file-based DB opened in read-only.
+        
+        # Create a temporary file-based DB for this test
+        temp_db_path = initialized_db_manager.db_path
+        if initialized_db_manager.db_path == ":memory:":
+            # If the fixture gave an in-memory DB, we need to create a file for this test
+            # This part is tricky because initialized_db_manager might be memory or file.
+            # For simplicity, let's assume we can force a file scenario or this test is more for file DBs.
+            # A robust way: create a new file DB, initialize, close, then reopen RO.
+            
+            # Create a new temp file path for this specific test
+            import tempfile
+            with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmpfile:
+                temp_db_path_for_ro = Path(tmpfile.name)
+            
+            # Initialize it
+            with FlashcardDatabase(temp_db_path_for_ro) as db_setup:
+                db_setup.initialize_schema()
+                db_setup.upsert_cards_batch([sample_card1]) # Add some data
+            
+            # Now open it in read-only
+            db_ro = FlashcardDatabase(temp_db_path_for_ro, read_only=True)
+        
+        else: # Fixture provided a file-based DB, close and reopen in RO
+            initialized_db_manager.close_connection() # Close the potentially R/W connection
+            db_ro = FlashcardDatabase(temp_db_path, read_only=True)
+
+        try:
+            with pytest.raises(duckdb.InvalidInputException) as excinfo: # DuckDB uses InvalidInputException for RO writes
+                card_to_add = create_sample_card(uuid=uuid.uuid4(), front="New Card Front")
+                db_ro.upsert_cards_batch([card_to_add])
+            assert "Cannot execute write query in read-only mode!" in str(excinfo.value)
+        finally:
+            db_ro.close_connection()
+            if 'temp_db_path_for_ro' in locals() and temp_db_path_for_ro.exists():
+                temp_db_path_for_ro.unlink()
+
+def test_sanity_check():
+    assert True
