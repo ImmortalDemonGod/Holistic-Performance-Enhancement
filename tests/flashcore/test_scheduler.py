@@ -4,7 +4,7 @@ from uuid import uuid4, UUID
 
 from cultivation.scripts.flashcore.scheduler import FSRS_Scheduler, FSRSSchedulerConfig
 from cultivation.scripts.flashcore.card import Review
-from cultivation.scripts.flashcore.config import DEFAULT_FSRS_PARAMETERS, DEFAULT_DESIRED_RETENTION
+from cultivation.scripts.flashcore.config import DEFAULT_PARAMETERS, DEFAULT_DESIRED_RETENTION
 
 # Helper to create datetime objects easily
 UTC = datetime.timezone.utc
@@ -13,7 +13,7 @@ UTC = datetime.timezone.utc
 def scheduler() -> FSRS_Scheduler:
     """Provides an FSRS_Scheduler instance with default parameters."""
     config = FSRSSchedulerConfig(
-        parameters=tuple(DEFAULT_FSRS_PARAMETERS), # Ensure it's a tuple as per Pydantic model
+        parameters=tuple(DEFAULT_PARAMETERS),
         desired_retention=DEFAULT_DESIRED_RETENTION,
         # Assuming other FSRSSchedulerConfig fields have defaults or are not needed for these tests
     )
@@ -61,10 +61,10 @@ def test_invalid_rating_input(scheduler: FSRS_Scheduler, sample_card_uuid: UUID)
     history: list[Review] = []
     review_ts = datetime.datetime(2024, 1, 1, 10, 0, 0, tzinfo=UTC)
 
-    with pytest.raises(ValueError, match="Invalid rating: 4. Must be between 0 and 3."):
+    with pytest.raises(ValueError, match="Invalid rating: 4. Must be 0-3."):
         scheduler.compute_next_state(history, 4, review_ts)
 
-    with pytest.raises(ValueError, match="Invalid rating: -1. Must be between 0 and 3."):
+    with pytest.raises(ValueError, match="Invalid rating: -1. Must be 0-3."):
         scheduler.compute_next_state(history, -1, review_ts)
 
 
@@ -267,7 +267,7 @@ def test_mature_card_lapse(sample_card_uuid: UUID):
     """
     # Use a dedicated scheduler with explicit relearning steps to isolate the test
     config = FSRSSchedulerConfig(
-        relearning_steps=(1,)
+        relearning_steps=(datetime.timedelta(days=1),)
     )
     scheduler = FSRS_Scheduler(config=config)
     history: list[Review] = []
@@ -342,7 +342,7 @@ def test_config_impact_on_scheduling():
 
     # Scheduler 1: Default retention (e.g., 0.9)
     config1 = FSRSSchedulerConfig(
-        parameters=tuple(DEFAULT_FSRS_PARAMETERS),
+        parameters=tuple(DEFAULT_PARAMETERS),
         desired_retention=0.9,
     )
     scheduler1 = FSRS_Scheduler(config=config1)
@@ -350,7 +350,7 @@ def test_config_impact_on_scheduling():
 
     # Scheduler 2: Higher retention (e.g., 0.95) - should result in shorter intervals
     config2 = FSRSSchedulerConfig(
-        parameters=tuple(DEFAULT_FSRS_PARAMETERS),
+        parameters=tuple(DEFAULT_PARAMETERS),
         desired_retention=0.95,
     )
     scheduler2 = FSRS_Scheduler(config=config2)
