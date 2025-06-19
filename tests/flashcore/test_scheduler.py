@@ -175,23 +175,42 @@ def test_multiple_reviews_stability_increase(scheduler: FSRS_Scheduler, sample_c
     assert scheduled_days3 > scheduled_days2
     assert next_due3 > next_due2
 
-# --- Placeholder for more tests --- 
+def test_review_lapsed_card(scheduler: FSRS_Scheduler, sample_card_uuid: UUID):
+    """
+    Test scheduling for a card reviewed significantly after its due date.
+    A lapsed review should result in a greater stability increase than a timely one.
+    """
+    history: list[Review] = []
+    review_ts_base = datetime.datetime(2024, 1, 1, 10, 0, 0, tzinfo=UTC)
+    current_card_uuid = sample_card_uuid
 
-# def test_review_lapsed_card():
-#     """Test scheduling for a card reviewed after its due date."""
-#     pass
+    # Review 1: New card, rated Good (2), scheduled for a future date.
+    rating1 = 2
+    result1 = scheduler.compute_next_state(history, rating1, review_ts_base)
+    next_due1 = result1["next_review_due"]
 
-# def test_multiple_reviews_stability_increase():
-#     """Test that stability generally increases with multiple successful (Good/Easy) reviews."""
-#     pass
+    history.append(Review(
+        card_uuid=current_card_uuid,
+        ts=review_ts_base,
+        rating=rating1,
+        stab_before=0,
+        stab_after=result1["stability"],
+        diff=result1["difficulty"],
+        next_due=next_due1,
+        elapsed_days_at_review=0,
+        scheduled_days_interval=result1["scheduled_days"]
+    ))
 
-# def test_difficulty_adjustment():
-#     """Test how difficulty changes based on different rating sequences."""
-#     pass
+    # Scenario 1 (Control): Review on the exact due date.
+    review_ts_on_time = datetime.datetime.combine(next_due1, datetime.time(10, 0, 0), tzinfo=UTC)
+    result_on_time = scheduler.compute_next_state(history, 2, review_ts_on_time) # Rated Good
 
-# def test_timezone_insensitivity_of_inputs():
-#     """Ensure that providing naive datetimes (if ever allowed by mistake) or different timezones
-#        are handled consistently, assuming scheduler forces UTC internally.
-#        (Current FSRS_Scheduler._ensure_utc should handle this)
-#     """
-#     pass
+    # Scenario 2 (Lapsed): Review 10 days AFTER the due date.
+    review_ts_lapsed = review_ts_on_time + datetime.timedelta(days=10)
+    result_lapsed = scheduler.compute_next_state(history, 2, review_ts_lapsed) # Rated Good
+
+    # FSRS theory: A successful review after a longer-than-scheduled delay indicates
+    # stronger memory retention, thus stability should increase more.
+    assert result_lapsed["stability"] > result_on_time["stability"]
+    assert result_lapsed["scheduled_days"] > result_on_time["scheduled_days"]
+    assert result_lapsed["next_review_due"] > result_on_time["next_review_due"]
