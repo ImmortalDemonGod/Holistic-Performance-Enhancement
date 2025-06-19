@@ -2,6 +2,8 @@
 Comprehensive test suite for flashcore.database (FlashcardDatabase), covering connection, schema, CRUD, constraints, marshalling, and error handling.
 """
 
+from unittest.mock import patch
+
 import pytest
 import uuid
 from pathlib import Path
@@ -385,15 +387,44 @@ class TestCardOperations:
         assert isinstance(retrieved.source_yaml_file, Path) and retrieved.source_yaml_file.name == "foo.yaml"
 
     def test_upsert_cards_batch_transaction_rollback(self, db_manager: FlashcardDatabase):
+        """
+        Tests that if one card in a batch fails validation at the DB level, the entire
+        transaction is rolled back and no cards from that batch are inserted.
+        It uses mocking to bypass Pydantic validation and create a "broken" record.
+        """
         db = db_manager
         db.initialize_schema()
+
         valid_card = create_sample_card()
-        # Intentionally break a card (deck_name=None violates NOT NULL)
-        broken_card = create_sample_card(deck_name=None)
-        with pytest.raises(CardOperationError):
-            db.upsert_cards_batch([valid_card, broken_card])
-        # Neither should be present
+        card_to_break = create_sample_card()
+
+        # Get the real parameters for both cards first by calling the real method.
+        # The method expects a sequence, so we wrap the cards in a list.
+        all_params = db._card_to_db_params_list([valid_card, card_to_break])
+        valid_params_tuple = all_params[0]
+
+        # Create a broken version of the second card's parameters
+        broken_params_list = list(all_params[1])
+        broken_params_list[1] = None  # Set deck_name to None to violate NOT NULL
+
+        # This is the list of parameter tuples the mock will return.
+        mock_return_value = [valid_params_tuple, tuple(broken_params_list)]
+
+        # Mock the internal helper method `_card_to_db_params_list`
+        with patch.object(db, '_card_to_db_params_list', return_value=mock_return_value) as mock_method:
+            with pytest.raises(CardOperationError) as excinfo:
+                # The content of the list passed here is what the original method would be called with.
+                # The mock intercepts this call and returns our custom list of params.
+                db.upsert_cards_batch([valid_card, card_to_break])
+
+        # Check that the underlying error is a database constraint error
+        assert isinstance(excinfo.value.__cause__, duckdb.Error)
+
+        # Verify that the valid card was NOT inserted due to the rollback
         assert db.get_card_by_uuid(valid_card.uuid) is None
+
+        # Verify the mock was called correctly
+        mock_method.assert_called_once_with([valid_card, card_to_break])
 
     def test_get_card_by_uuid_exists(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
         db = initialized_db_manager
