@@ -6,43 +6,62 @@ import sys
 import os
 import logging
 from typing import List, Dict, Any
-from datetime import datetime
+
+from pathlib import Path
 
 # Ensure module import works regardless of test runner cwd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 import active_learning_block_scheduler as scheduler
 
-BASELINE_TASKS_PATH = os.path.join(os.path.dirname(__file__), '../../..', 'tasks', 'tasks.json')
+# Suppress logging for cleaner test output
+scheduler.logger.setLevel(logging.CRITICAL)
+
+def get_project_root() -> Path:
+    """Traverses up to find the project root, marked by '.git' directory."""
+    current_path = Path(__file__).resolve()
+    while current_path != current_path.parent:
+        if (current_path / '.git').exists():
+            return current_path
+        current_path = current_path.parent
+    raise FileNotFoundError("Project root with .git folder not found.")
+
+PROJECT_ROOT = get_project_root()
+TEST_DATA_PATH = PROJECT_ROOT / 'tests' / 'test_data' / 'tasks_for_scheduler.json'
 
 class TestActiveLearningBlockScheduler(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        try:
-            with open(BASELINE_TASKS_PATH, 'r', encoding='utf-8') as f:
-                cls.baseline_tasks_data = json.load(f)["tasks"]
-        except FileNotFoundError:
-            print(f"ERROR: Baseline tasks file not found at {BASELINE_TASKS_PATH}")
-            cls.baseline_tasks_data = []
-        except json.JSONDecodeError:
-            print(f"ERROR: Could not decode JSON from {BASELINE_TASKS_PATH}")
-            cls.baseline_tasks_data = []
+        """Load tasks from a baseline JSON file once for all tests."""
+        if not TEST_DATA_PATH.is_file():
+            raise FileNotFoundError(
+                f"FATAL: Test data file 'tasks_for_scheduler.json' not found. "
+                f"Attempted path: {TEST_DATA_PATH}. "
+                f"Ensure you are running tests from the project root and the file exists."
+            )
+        with open(TEST_DATA_PATH, 'r') as f:
+            cls.baseline_tasks = json.load(f)
 
     def setUp(self):
-        self.current_tasks_data = copy.deepcopy(self.baseline_tasks_data)
+        self.current_tasks_data = copy.deepcopy(self.baseline_tasks)
         scheduler.logger.setLevel(logging.INFO)
         for handler in logging.root.handlers:
             handler.setLevel(logging.INFO)
 
     def _modify_tasks(self, modifications: List[Dict[str, Any]]):
-        for mod in modifications:
-            task_found = False
-            for task in self.current_tasks_data:
+
+        def recursive_modify(tasks_list: List[Dict[str, Any]], mod: Dict[str, Any]) -> bool:
+            found_in_level = False
+            for task in tasks_list:
+                # Check if current task matches
                 csm_id = task.get("hpe_csm_reference", {}).get("csm_id")
                 numeric_id = task.get("id")
                 match_csm_id = mod.get("csm_id") and csm_id == mod["csm_id"]
                 match_numeric_id = "id" in mod and numeric_id == mod["id"]
+
                 if match_csm_id or match_numeric_id:
-                    task_found = True
+                    found_in_level = True
+                    # Apply modifications
                     if "status" in mod:
                         task["status"] = mod["status"]
                     if "priority" in mod:
@@ -58,7 +77,16 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
                                     current_level = current_level.setdefault(key, {})
                         except TypeError:
                             self.fail(f"Failed to traverse field_path {field_path_keys} for task {task.get('id', csm_id)}. Is the path correct and does the structure exist?")
-                    break
+
+                # Recurse into subtasks even if parent matches, as IDs can be duplicated
+                if "subtasks" in task:
+                    if recursive_modify(task["subtasks"], mod):
+                        found_in_level = True
+            
+            return found_in_level
+
+        for mod in modifications:
+            task_found = recursive_modify(self.current_tasks_data, mod)
             if not task_found and (mod.get("csm_id") or "id" in mod):
                 print(f"Warning: Modification target not found in tasks: {mod}")
 
@@ -91,7 +119,13 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
     def test_task2_not_scheduled_due_to_effort(self):
         target_date = "2025-05-19"
         modifications = [
-            {"id": 1, "status": "done"}
+            {"id": 1, "status": "done"},
+            # Mark all other potentially schedulable tasks as done to isolate the test
+            {"id": 3, "status": "done"},
+            {"id": 4, "status": "done"},
+            {"id": 5, "status": "done"},
+            {"id": 7, "status": "done"},
+            {"id": 11, "status": "done"},
         ]
         # Also make all subtasks of Task 2 oversized so nothing is scheduled
         for task in self.current_tasks_data:
@@ -118,7 +152,12 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         target_date = "2025-05-20"
         modifications = [
             {"id": 1, "status": "done"},
-            {"id": 2, "status": "done"}
+            {"id": 2, "status": "done"},
+            # Mark other tasks as done to isolate the test for Task 3
+            {"id": 4, "status": "done"},
+            {"id": 5, "status": "done"},
+            {"id": 7, "status": "done"},
+            {"id": 11, "status": "done"},
         ]
         self._modify_tasks(modifications)
         scheduled_block = self._run_scheduler(self.current_tasks_data, target_date)
@@ -155,22 +194,33 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         target_date = "2025-05-26"
         # Pick Task 2 (RNA.P1.Foundations.W1.Part1.Biochem.NucleotideStructure), min effort 1.5hr, has subtasks
         modifications = [
-            {"id": 1, "status": "done"},  # Complete Task 1 (dependency)
+            # Correctly complete the dependency using its csm_id
+            {"csm_id": "RNA.P1.Foundations.W1.Task0", "status": "done"},
+            {"id": 2, "status": "pending"}, # Ensure parent task is pending
+            {"id": 2, "field_path": ("hpe_learning_meta", "recommended_block"), "value": "active_learning"}, # Force task to be active
             {"id": 2, "field_path": ("hpe_learning_meta", "estimated_effort_hours_min"), "value": 1.5},
+            # Mark other tasks as done to isolate subtask promotion
+            {"id": 3, "status": "done"},
+            {"id": 4, "status": "done"},
+            {"id": 5, "status": "done"},
+            {"id": 7, "status": "done"},
+            {"id": 11, "status": "done"},
         ]
-        # Set subtask 1 to pending and give it explicit effort 0.5hr (fits block)
+        self._modify_tasks(modifications)
+
+        # This must be done AFTER the main modifications to prevent being overwritten
         for task in self.current_tasks_data:
             if task.get("id") == 2:
                 for st in task.get("subtasks", []):
                     if st.get("id") == 1:
                         st["status"] = "pending"
                         st["hpe_learning_meta"] = {"estimated_effort_hours_min": 0.5}
-        self._modify_tasks(modifications)
+
         scheduled_block = self._run_scheduler(self.current_tasks_data, target_date)
-        print("[DEBUG] scheduled_block (parent too large, subtask fits):", scheduled_block)
         # Should schedule subtask 1 of Task 2
         self.assertTrue(any("_parent_task_id" in t for t in scheduled_block), "A promoted subtask should be scheduled.")
         subtask = next(t for t in scheduled_block if t.get("_parent_task_id") == 2)
+        self.assertEqual(subtask.get("id"), 1)
         self.assertEqual(subtask["hpe_learning_meta"]["estimated_effort_hours_min"], 0.5)
         self.assertEqual(subtask["_parent_task_id"], 2)
         self.assertIn("_parent_title", subtask)
@@ -184,6 +234,12 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         modifications = [
             {"id": 1, "status": "done"},
             {"id": 2, "field_path": ("hpe_learning_meta", "estimated_effort_hours_min"), "value": 2.0},
+            # Mark other tasks as done to isolate test
+            {"id": 3, "status": "done"},
+            {"id": 4, "status": "done"},
+            {"id": 5, "status": "done"},
+            {"id": 7, "status": "done"},
+            {"id": 11, "status": "done"},
         ]
         for task in self.current_tasks_data:
             if task.get("id") == 2:
@@ -203,6 +259,12 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         modifications = [
             {"id": 1, "status": "done"},
             {"id": 2, "field_path": ("hpe_learning_meta", "estimated_effort_hours_min"), "value": 1.2},
+            # Mark other tasks as done to isolate test
+            {"id": 3, "status": "done"},
+            {"id": 4, "status": "done"},
+            {"id": 5, "status": "done"},
+            {"id": 7, "status": "done"},
+            {"id": 11, "status": "done"},
         ]
         for task in self.current_tasks_data:
             if task.get("id") == 2:
@@ -232,6 +294,12 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
         modifications = [
             {"id": 1, "status": "done"},
             {"id": 2, "field_path": ("hpe_learning_meta", "estimated_effort_hours_min"), "value": 1.5},
+            # Mark other tasks as done to isolate test
+            {"id": 3, "status": "done"},
+            {"id": 4, "status": "done"},
+            {"id": 5, "status": "done"},
+            {"id": 7, "status": "done"},
+            {"id": 11, "status": "done"},
         ]
         for task in self.current_tasks_data:
             if task.get("id") == 2:
@@ -334,7 +402,9 @@ class TestActiveLearningBlockScheduler(unittest.TestCase):
     def test_exclusion_of_passive_review_task(self):
         target_date = "2025-05-23"
         modifications = []
-        for i in range(1, 8): modifications.append({"id": i, "status": "done"})
+        # Mark all active tasks as done to isolate the passive task
+        for i in [1, 2, 3, 4, 5, 7, 11]:
+            modifications.append({"id": i, "status": "done"})
         # Patch: Set activity_type to a non-active keyword to ensure robust exclusion
         modifications.append({
             "csm_id": "RNA.P1.Foundations.W1.Part2.Thermo.EnvFactors",
