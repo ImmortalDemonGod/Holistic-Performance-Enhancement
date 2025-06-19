@@ -60,10 +60,13 @@ class BaseScheduler(ABC):
 
 class FSRSSchedulerConfig(BaseModel):
     """Configuration for the FSRS Scheduler."""
+
     parameters: Tuple[float, ...] = Field(default_factory=lambda: tuple(DEFAULT_PARAMETERS))
     desired_retention: float = DEFAULT_DESIRED_RETENTION
-    learning_steps: Tuple[int, ...] = ()  # In days. Empty means graduate immediately.
-    relearning_steps: Tuple[int, ...] = (1,) # In days. Default: next day review after lapse.
+    learning_steps: Tuple[datetime.timedelta, ...] = ()
+    relearning_steps: Tuple[datetime.timedelta, ...] = Field(
+        default_factory=lambda: (datetime.timedelta(days=1),)
+    )
     max_interval: int = 36500
 
 
@@ -94,7 +97,7 @@ class FSRS_Scheduler(BaseScheduler):
             "desired_retention": self.config.desired_retention,
             "learning_steps": learning_steps,
             "relearning_steps": relearning_steps,
-            "max_interval": self.config.max_interval
+            "maximum_interval": self.config.max_interval
         }
         
         self.fsrs_scheduler = PyFSRSScheduler(**scheduler_args)
@@ -102,70 +105,46 @@ class FSRS_Scheduler(BaseScheduler):
     def _ensure_utc(self, ts: datetime.datetime) -> datetime.datetime:
         """Ensures the given datetime is UTC. Assumes UTC if naive."""
         if ts.tzinfo is None or ts.tzinfo.utcoffset(ts) is None:
-            logger.warning(f"Timestamp {ts} is naive. Assuming UTC.")
             return ts.replace(tzinfo=datetime.timezone.utc)
         if ts.tzinfo != datetime.timezone.utc:
-            logger.warning(f"Timestamp {ts} is not UTC. Converting to UTC.")
             return ts.astimezone(datetime.timezone.utc)
         return ts
-
-    def _prepare_fsrs_card_from_history(self, history: List[Review]) -> FSRSCard:
-        """Prepares an FSRSCard object from the review history."""
-        fsrs_card = FSRSCard() # Initializes card in State.New, S=0, D=0
-        if history:
-            last_review = history[-1]
-            fsrs_card.stability = last_review.stab_after
-            fsrs_card.difficulty = last_review.diff
-            
-            # prev_due_dt: previous due date, must be datetime for FSRSCard
-            prev_due_dt = datetime.datetime.combine(last_review.next_due, datetime.datetime.min.time(), tzinfo=datetime.timezone.utc)
-            fsrs_card.due = prev_due_dt
-            
-            fsrs_card.last_review = self._ensure_utc(last_review.ts)
-            
-            logger.debug(
-                f"Card state from history: S={fsrs_card.stability:.4f}, D={fsrs_card.difficulty:.4f}, "
-                f"PrevDue={fsrs_card.due.date()}, LastReview={fsrs_card.last_review.date() if fsrs_card.last_review else 'None'}"
-            )
-        else:
-            logger.debug("New card (no history). Initializing with default S=0, D=0.")
-        return fsrs_card
 
     def _map_flashcore_rating_to_fsrs(self, flashcore_rating: int) -> FSRSRating:
         """Maps flashcore rating (0-3) to FSRSRating and validates."""
         if not (0 <= flashcore_rating <= 3):
-            logger.error(f"Invalid rating received: {flashcore_rating}")
-            raise ValueError(f"Invalid rating: {flashcore_rating}. Must be between 0 and 3.")
-        
-        fsrs_rating = self.RATING_MAP.get(flashcore_rating)
-        # This check is technically redundant due to the initial validation, but good for safety.
-        if fsrs_rating is None: # Should not happen if RATING_MAP is correct and validation passes
-            raise ValueError(f"Internal error: Rating {flashcore_rating} could not be mapped.")
-        return fsrs_rating
+            raise ValueError(f"Invalid rating: {flashcore_rating}. Must be 0-3.")
+        return self.RATING_MAP[flashcore_rating]
 
     def compute_next_state(
         self, history: List[Review], new_rating: int, review_ts: datetime.datetime
     ) -> Dict[str, Any]:
-        
+        """
+        Computes the next state of a card by replaying its entire history.
+        """
+        # Start with a fresh card object.
+        fsrs_card = FSRSCard()
+
+        # Replay the entire review history to build the correct current state.
+        for review in history:
+            rating = self._map_flashcore_rating_to_fsrs(review.rating)
+            ts = self._ensure_utc(review.ts)
+            fsrs_card, _ = self.fsrs_scheduler.review_card(fsrs_card, rating, review_datetime=ts)
+
+        # Now, apply the new review to the final state.
         current_fsrs_rating = self._map_flashcore_rating_to_fsrs(new_rating)
         utc_review_ts = self._ensure_utc(review_ts)
-        fsrs_card = self._prepare_fsrs_card_from_history(history)
-
-        logger.debug(f"Reviewing card at {utc_review_ts.isoformat()} with flashcore_rating={new_rating} (py-fsrs.Rating.{current_fsrs_rating.name})")
-
-        updated_fsrs_card, review_log_entry = self.fsrs_scheduler.review_card(fsrs_card, current_fsrs_rating, review_datetime=utc_review_ts)
-
-        logger.info(
-            f"Card state after review: S={updated_fsrs_card.stability:.4f}, "
-            f"D={updated_fsrs_card.difficulty:.4f}, NewDueFull={updated_fsrs_card.due}, "
-            f"ReviewTSFull={utc_review_ts}, NewDueDateOnly={updated_fsrs_card.due.date()}, "
-            f"State={updated_fsrs_card.state.name}"
+        updated_fsrs_card, _ = self.fsrs_scheduler.review_card(
+            fsrs_card, current_fsrs_rating, review_datetime=utc_review_ts
         )
-        logger.debug(f"FSRS Learning Steps: {self.fsrs_scheduler.learning_steps}")
+
+        # Calculate scheduled days based on the new due date.
+        scheduled_days = (updated_fsrs_card.due.date() - utc_review_ts.date()).days
 
         return {
             "stability": round(updated_fsrs_card.stability, 4),
             "difficulty": round(updated_fsrs_card.difficulty, 4),
             "next_review_due": updated_fsrs_card.due.date(),
-            "scheduled_days": (updated_fsrs_card.due.date() - utc_review_ts.date()).days,
+            "scheduled_days": scheduled_days,
+            "state": updated_fsrs_card.state.name,
         }
