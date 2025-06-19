@@ -7,7 +7,7 @@ from source YAML files into canonical `flashcore.card.Card` Pydantic model insta
 
 import uuid
 from pathlib import Path
-from typing import List, Dict, Any, Set, Optional, Tuple, Union
+from typing import List, Dict, Optional, Set, Tuple, Union
 import re
 import logging
 
@@ -17,10 +17,7 @@ from pydantic import BaseModel as PydanticBaseModel, Field, validator, constr, V
 from dataclasses import dataclass
 
 # Local project imports
-try:
-    from cultivation.scripts.flashcore.card import Card, KEBAB_CASE_REGEX_PATTERN
-except ImportError:
-    from card import Card, KEBAB_CASE_REGEX_PATTERN
+from cultivation.scripts.flashcore.card import Card, KEBAB_CASE_REGEX_PATTERN
 
 # --- Configuration Constants ---
 RAW_KEBAB_CASE_PATTERN = KEBAB_CASE_REGEX_PATTERN
@@ -207,7 +204,7 @@ def _transform_raw_card_to_model(
                     return YAMLProcessingError(
                         file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
                         field_name="media", message=f"Error validating media path '{media_path}': {e}."
-                    ) from e
+                    )
             processed_media_paths.append(media_path) # Store the original relative path
 
     # Instantiate canonical Card model
