@@ -1737,7 +1737,7 @@
             "title": "Research and select a suitable Python FSRS library",
             "description": "Evaluate available Python FSRS libraries based on features, maintenance, license, and ease of integration. Document the choice and rationale.",
             "dependencies": [],
-            "status": "pending",
+            "status": "done",
             "risks": "Analysis paralysis; spending excessive time on selection. Chosen library could be unmaintained or have a restrictive license.",
             "mitigation": "Time-box research to 2-3 hours. Prioritize libraries with recent commit activity, good documentation, and a permissive license (MIT, Apache 2.0). Create a small ADR to document the final choice.",
             "implementation_details": {
@@ -2274,7 +2274,7 @@
     ],
     "metadata": {
       "created": "2025-06-16T21:05:48.595Z",
-      "updated": "2025-06-17T01:49:11.456Z",
+      "updated": "2025-06-18T22:27:14.580Z",
       "description": "Tasks for master context"
     }
   }
