@@ -6,8 +6,8 @@ Implements the FlashcardDatabase class and supporting exceptions as per the v3.0
 import duckdb
 import uuid
 from pathlib import Path
-from typing import List, Optional, Set, Tuple, Dict, Any, Sequence, Union
-from datetime import datetime, date, timezone
+from typing import List, Optional, Tuple, Dict, Any, Sequence, Union
+from datetime import datetime, date
 import logging
 
 # Local project imports from previously defined modules
@@ -59,6 +59,7 @@ class FlashcardDatabase:
             back                VARCHAR NOT NULL,
             tags                VARCHAR[],
             added_at            TIMESTAMP WITH TIME ZONE NOT NULL,
+            modified_at         TIMESTAMP WITH TIME ZONE NOT NULL,
             origin_task         VARCHAR,
             media_paths         VARCHAR[],
             source_yaml_file    VARCHAR,
@@ -150,7 +151,7 @@ class FlashcardDatabase:
             logger.info(f"Database schema at {self.db_path_resolved} initialized successfully (or already exists).")
         except duckdb.Error as e:
             logger.error(f"Error initializing database schema at {self.db_path_resolved}: {e}")
-            if 'cursor' in locals() and cursor.connection.is_open:
+            if 'cursor' in locals() and not getattr(cursor.connection, 'closed', True):
                 try:
                     cursor.rollback()
                 except duckdb.Error as rb_err:
@@ -168,6 +169,7 @@ class FlashcardDatabase:
                 card.back,
                 list(card.tags) if card.tags else None,
                 card.added_at,
+                card.modified_at,
                 card.origin_task,
                 [str(p) for p in card.media] if card.media else None,
                 str(card.source_yaml_file) if card.source_yaml_file else None,
@@ -176,11 +178,20 @@ class FlashcardDatabase:
         return params_list
 
     def _db_row_to_card(self, row_dict: Dict[str, Any]) -> 'Card':
-        media_paths = row_dict.pop("media_paths", None)
-        row_dict["media"] = [Path(p) for p in media_paths] if media_paths else None
+        # Handle media: convert string list from 'media_paths' column to Path list for 'media' field
+        media_paths_val = row_dict.pop("media_paths", None)
+        if media_paths_val is not None:
+            row_dict["media"] = [Path(p) for p in media_paths_val]
+        else:
+            row_dict["media"] = None
+
+        # Handle source_yaml_file: convert string to Path
         if row_dict.get("source_yaml_file"):
             row_dict["source_yaml_file"] = Path(row_dict["source_yaml_file"])
-        row_dict["tags"] = set(row_dict["tags"]) if row_dict.get("tags") else set()
+
+        # Handle tags: convert list to set, ensuring it's never None
+        row_dict["tags"] = set(row_dict["tags"]) if row_dict.get("tags") is not None else set()
+
         return Card(**row_dict)
 
     def _review_to_db_params_tuple(self, review: 'Review') -> Tuple:
@@ -205,19 +216,21 @@ class FlashcardDatabase:
     def upsert_cards_batch(self, cards: Sequence['Card']) -> int:
         if not cards:
             return 0
-        if self.read_only:
-            raise DatabaseConnectionError("Cannot upsert cards in read-only mode.")
+        # Ensure NO explicit 'if self.read_only: raise ...' check here.
+        # DuckDB itself should raise an error if trying to write to a read-only DB.
+        
         conn = self.get_connection()
         card_params_list = self._card_to_db_params_list(cards)
         sql = """
-        INSERT INTO cards (uuid, deck_name, front, back, tags, added_at, 
+        INSERT INTO cards (uuid, deck_name, front, back, tags, added_at, modified_at,
                            origin_task, media_paths, source_yaml_file, internal_note)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         ON CONFLICT (uuid) DO UPDATE SET
             deck_name = EXCLUDED.deck_name,
             front = EXCLUDED.front,
             back = EXCLUDED.back,
             tags = EXCLUDED.tags,
+            modified_at = EXCLUDED.modified_at, -- Update modified_at timestamp
             origin_task = EXCLUDED.origin_task,
             media_paths = EXCLUDED.media_paths,
             source_yaml_file = EXCLUDED.source_yaml_file,
@@ -227,14 +240,25 @@ class FlashcardDatabase:
             with conn.cursor() as cursor:
                 cursor.begin()
                 cursor.executemany(sql, card_params_list)
-                affected_rows = cursor.rowcount if cursor.rowcount is not None else len(cards)
+                affected_rows = len(cards)
                 cursor.commit()
             logger.info(f"Successfully upserted/processed {affected_rows} out of {len(cards)} cards provided.")
             return affected_rows
-        except duckdb.Error as e:
+        except duckdb.Error as e:  # Catch any DuckDB specific error
             logger.error(f"Error during batch card upsert: {e}")
-            if 'cursor' in locals() and cursor.connection.is_open: cursor.rollback()
-            raise CardOperationError(f"Batch card upsert failed: {e}", original_exception=e)
+            if conn and not getattr(conn, 'closed', True):
+                try:
+                    conn.rollback()
+                    logger.info("Transaction rolled back due to error in batch card upsert.")
+                except duckdb.Error as rb_err:
+                    logger.error(f"Error during rollback after upsert failure: {rb_err}")
+
+            # If the error is due to read-only violation or similar, re-raise it directly.
+            # DuckDB might raise IOException or InvalidInputException for read-only writes.
+            if isinstance(e, (duckdb.IOException, duckdb.InvalidInputException)):
+                raise e
+            # Otherwise, wrap it in our custom exception.
+            raise CardOperationError(f"Batch card upsert failed: {e}", original_exception=e) from e
 
     def get_card_by_uuid(self, card_uuid: uuid.UUID) -> Optional['Card']:
         conn = self.get_connection()
@@ -244,10 +268,11 @@ class FlashcardDatabase:
             if result.empty:
                 return None
             row_dict = result.to_dict('records')[0]
+            logger.info(f"DEBUG: Fetched row for UUID {card_uuid}: {row_dict}")
             return self._db_row_to_card(row_dict)
         except duckdb.Error as e:
             logger.error(f"Error fetching card by UUID {card_uuid}: {e}")
-            raise CardOperationError(f"Failed to fetch card by UUID: {e}", original_exception=e)
+            raise CardOperationError(f"Failed to fetch card by UUID: {e}", original_exception=e) from e
 
     def get_all_cards(self, deck_name_filter: Optional[str] = None) -> List['Card']:
         conn = self.get_connection()
@@ -264,11 +289,11 @@ class FlashcardDatabase:
             return [self._db_row_to_card(row_dict) for row_dict in result_df.to_dict('records')]
         except duckdb.Error as e:
             logger.error(f"Error fetching all cards (filter: {deck_name_filter}): {e}")
-            raise CardOperationError(f"Failed to fetch all cards: {e}", original_exception=e)
+            raise CardOperationError(f"Failed to fetch all cards: {e}", original_exception=e) from e
 
     def get_due_cards(self, on_date: date, limit: Optional[int] = 20) -> List['Card']:
         conn = self.get_connection()
-        sql = f"""
+        sql = """
         SELECT c.*
         FROM cards c
         WHERE c.uuid NOT IN (
@@ -301,7 +326,7 @@ class FlashcardDatabase:
             return [self._db_row_to_card(row_dict) for row_dict in result_df.to_dict('records')]
         except duckdb.Error as e:
             logger.error(f"Error fetching due cards for date {on_date}: {e}")
-            raise CardOperationError(f"Failed to fetch due cards: {e}", original_exception=e)
+            raise CardOperationError(f"Failed to fetch due cards: {e}", original_exception=e) from e
 
     def delete_cards_by_uuids_batch(self, card_uuids: Sequence[uuid.UUID]) -> int:
         if not card_uuids:
@@ -320,8 +345,9 @@ class FlashcardDatabase:
             return deleted_count
         except duckdb.Error as e:
             logger.error(f"Error during batch card delete: {e}")
-            if 'cursor' in locals() and cursor.connection.is_open: cursor.rollback()
-            raise CardOperationError(f"Batch card delete failed: {e}", original_exception=e)
+            if conn and not getattr(conn, 'closed', True):
+                conn.rollback()
+            raise CardOperationError(f"Batch card delete failed: {e}", original_exception=e) from e
 
     def get_all_card_fronts_and_uuids(self) -> Dict[str, uuid.UUID]:
         conn = self.get_connection()
@@ -343,7 +369,7 @@ class FlashcardDatabase:
             return front_to_uuid
         except duckdb.Error as e:
             logger.error(f"Error fetching all card fronts and UUIDs: {e}")
-            raise CardOperationError(f"Failed to fetch card fronts and UUIDs: {e}", original_exception=e)
+            raise CardOperationError(f"Failed to fetch card fronts and UUIDs: {e}", original_exception=e) from e
 
     # --- Review Operations ---
     def add_review(self, review: 'Review') -> int:
@@ -368,14 +394,20 @@ class FlashcardDatabase:
                 cursor.commit()
             logger.info(f"Successfully added review with ID: {new_review_id} for card UUID: {review.card_uuid}")
             return new_review_id
+        except duckdb.ConstraintException as e:
+            logger.error(f"Constraint violation while adding review for card {review.card_uuid}: {e}")
+            if 'cursor' in locals() and not getattr(cursor.connection, 'closed', True):
+                cursor.rollback()
+            # Re-raise specifically so tests can catch the constraint violation
+            raise CardOperationError(f"Cannot add review due to a foreign key constraint. Card UUID '{review.card_uuid}' may not exist.", original_exception=e) from e
         except duckdb.Error as e:
             logger.error(f"Error adding review for card UUID {review.card_uuid}: {e}")
-            if 'cursor' in locals() and cursor.connection.is_open:
+            if 'cursor' in locals() and not getattr(cursor.connection, 'closed', True):
                 try:
                     cursor.rollback()
                 except duckdb.Error as rb_err:
                     logger.error(f"Error during rollback for add_review: {rb_err}")
-            raise ReviewOperationError(f"Failed to add review: {e}", original_exception=e)
+            raise ReviewOperationError(f"Failed to add review: {e}", original_exception=e) from e
 
     def add_reviews_batch(self, reviews: Sequence['Review']) -> List[int]:
         if not reviews:
@@ -409,7 +441,7 @@ class FlashcardDatabase:
                     cursor.rollback()
                 except duckdb.Error as rb_err:
                     logger.error(f"Error during rollback for add_reviews_batch: {rb_err}")
-            raise ReviewOperationError(f"Batch review add failed: {e}") from e
+            raise ReviewOperationError(f"Batch review add failed: {e}", original_exception=e) from e
 
     def get_reviews_for_card(self, card_uuid: uuid.UUID, order_by_ts_desc: bool = True) -> List['Review']:
         conn = self.get_connection()
@@ -422,7 +454,7 @@ class FlashcardDatabase:
             return [self._db_row_to_review(row_dict) for row_dict in result_df.to_dict('records')]
         except duckdb.Error as e:
             logger.error(f"Error fetching reviews for card UUID {card_uuid}: {e}")
-            raise ReviewOperationError(f"Failed to get reviews for card {card_uuid}: {e}", original_exception=e)
+            raise ReviewOperationError(f"Failed to get reviews for card {card_uuid}: {e}", original_exception=e) from e
 
     def get_latest_review_for_card(self, card_uuid: uuid.UUID) -> Optional['Review']:
         reviews = self.get_reviews_for_card(card_uuid, order_by_ts_desc=True)
@@ -448,5 +480,9 @@ class FlashcardDatabase:
                 return []
             return [self._db_row_to_review(row_dict) for row_dict in result_df.to_dict('records')]
         except duckdb.Error as e:
+            logger.error(f"Error fetching all reviews: {e}")
+            raise ReviewOperationError(f"Failed to get all reviews: {e}", original_exception=e) from e
+            return [self._db_row_to_review(row_dict) for row_dict in result_df.to_dict('records')]
+        except duckdb.Error as e:
             logger.error(f"Error fetching all reviews (range: {start_ts} to {end_ts}): {e}")
-            raise ReviewOperationError(f"Failed to get all reviews: {e}", original_exception=e)
+            raise ReviewOperationError(f"Failed to get all reviews: {e}", original_exception=e) from e
