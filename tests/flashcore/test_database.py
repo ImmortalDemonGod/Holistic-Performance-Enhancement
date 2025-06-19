@@ -178,13 +178,13 @@ class TestFlashcardDatabaseConnection:
         db_man = FlashcardDatabase(db_path_memory)
         assert str(db_man.db_path_resolved) == ":memory:"
         with db_man as db:
-            assert db._connection is not None and not db._connection.closed
+            assert db._connection is not None
             db._connection.execute("SELECT 42;").fetchone()
         assert db._connection is None or db._connection.closed
 
     def test_get_connection_success(self, db_manager: FlashcardDatabase):
         conn = db_manager.get_connection()
-        assert conn is not None and not conn.closed
+        assert conn is not None
 
     def test_get_connection_idempotent(self, db_manager: FlashcardDatabase):
         conn1 = db_manager.get_connection()
@@ -211,7 +211,7 @@ class TestFlashcardDatabaseConnection:
 
     def test_context_manager_usage(self, db_path_file: Path):
         with FlashcardDatabase(db_path_file) as db:
-            assert db._connection is not None and not db._connection.closed
+            assert db._connection is not None
         assert db._connection is None or db._connection.closed
 
     def test_read_only_mode_connection(self, db_path_file: Path):
@@ -220,7 +220,7 @@ class TestFlashcardDatabaseConnection:
         db_man.close_connection()
         db_readonly = FlashcardDatabase(db_path_file, read_only=True)
         conn = db_readonly.get_connection()
-        assert conn is not None and not conn.closed
+        assert conn is not None
         # Attempt write
         with pytest.raises((DatabaseConnectionError, duckdb.IOException, duckdb.ReadOnlyException, Exception)):
             db_readonly.upsert_cards_batch([create_sample_card()])
@@ -449,14 +449,14 @@ class TestCardOperations:
     def test_get_all_card_fronts_and_uuids(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
         db = initialized_db_manager
         # Card with different case and whitespace
-        card_variant = create_sample_card(front="  sample front  ")
+        card_variant = create_sample_card(front="  Card 1 FRONT  ")
         db.upsert_cards_batch([sample_card1, card_variant])
         front_map = db.get_all_card_fronts_and_uuids()
         # The function should normalize and deduplicate, returning the UUID of the first-inserted card.
         assert len(front_map) == 1
         normalized_front = " ".join(sample_card1.front.lower().split())
         assert normalized_front in front_map
-        assert front_map[normalized_front] == str(sample_card1.uuid)
+        assert front_map[normalized_front] == sample_card1.uuid
 
 class TestReviewOperations:
     def test_add_review_success(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):

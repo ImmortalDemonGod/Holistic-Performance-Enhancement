@@ -120,8 +120,9 @@ class FlashcardDatabase:
         return self._connection
 
     def close_connection(self) -> None:
-        if self._connection and not getattr(self._connection, 'closed', False):
+        if self._connection:
             self._connection.close()
+            self._connection = None
             logger.debug(f"DuckDB connection to {self.db_path_resolved} closed.")
         self._is_closed = True
 
@@ -339,12 +340,12 @@ class FlashcardDatabase:
         if self.read_only:
             raise DatabaseConnectionError("Cannot delete cards in read-only mode.")
         conn = self.get_connection()
-        sql = "DELETE FROM cards WHERE uuid IN (SELECT unnest($1::UUID[]));"
+        sql = "DELETE FROM cards WHERE uuid IN (SELECT unnest($1::UUID[])) RETURNING uuid;"
         try:
             with conn.cursor() as cursor:
                 cursor.begin()
                 cursor.execute(sql, [list(card_uuids)])
-                deleted_count = cursor.rowcount if cursor.rowcount is not None else 0
+                deleted_count = len(cursor.fetchall())
                 cursor.commit()
             logger.info(f"Batch deleted {deleted_count} cards for {len(card_uuids)} UUIDs provided.")
             return deleted_count
@@ -400,18 +401,12 @@ class FlashcardDatabase:
             logger.info(f"Successfully added review with ID: {new_review_id} for card UUID: {review.card_uuid}")
             return new_review_id
         except duckdb.ConstraintException as e:
-            logger.error(f"Constraint violation while adding review for card {review.card_uuid}: {e}")
-            if 'cursor' in locals() and not getattr(cursor.connection, 'closed', True):
-                cursor.rollback()
-            # Re-raise specifically so tests can catch the constraint violation
-            raise CardOperationError(f"Cannot add review due to a foreign key constraint. Card UUID '{review.card_uuid}' may not exist.", original_exception=e) from e
+            logger.error(f"Failed to add review due to constraint violation: {e}")
+            conn.rollback()
+            raise ReviewOperationError(f"Failed to add review due to constraint violation: {e}") from e
         except duckdb.Error as e:
             logger.error(f"Error adding review for card UUID {review.card_uuid}: {e}")
-            if 'cursor' in locals() and not getattr(cursor.connection, 'closed', True):
-                try:
-                    cursor.rollback()
-                except duckdb.Error as rb_err:
-                    logger.error(f"Error during rollback for add_review: {rb_err}")
+            conn.rollback()
             raise ReviewOperationError(f"Failed to add review: {e}", original_exception=e) from e
 
     def add_reviews_batch(self, reviews: Sequence['Review']) -> List[int]:
