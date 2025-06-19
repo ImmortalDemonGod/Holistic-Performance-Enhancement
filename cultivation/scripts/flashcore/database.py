@@ -69,7 +69,7 @@ class FlashcardDatabase:
         """
         CREATE TABLE IF NOT EXISTS reviews (
             review_id                   BIGINT DEFAULT nextval('review_seq') PRIMARY KEY,
-            card_uuid                   UUID NOT NULL REFERENCES cards(uuid) ON DELETE CASCADE,
+            card_uuid                   UUID NOT NULL REFERENCES cards(uuid),
             ts                          TIMESTAMP WITH TIME ZONE NOT NULL,
             rating                      SMALLINT NOT NULL CHECK (rating >= 0 AND rating <= 3),
             resp_ms                     INTEGER CHECK (resp_ms IS NULL OR resp_ms >= 0),
