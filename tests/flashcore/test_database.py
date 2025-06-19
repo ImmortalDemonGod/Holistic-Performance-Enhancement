@@ -126,7 +126,7 @@ def create_sample_card(**overrides) -> Card:
     data.update(overrides)
     return Card(**data)
 
-def create_sample_review(card_uuid, **overrides) -> Review:
+def create_sample_review(card_uuid, bypass_validation: bool = False, **overrides) -> Review:
     data = dict(
         card_uuid=card_uuid,
         ts=datetime(2023, 1, 2, 11, 0, 0, tzinfo=timezone.utc),
@@ -141,6 +141,8 @@ def create_sample_review(card_uuid, **overrides) -> Review:
         review_type="learn"
     )
     data.update(overrides)
+    if bypass_validation:
+        return Review.model_construct(**data)
     return Review(**data)
 
 # --- Test Classes ---
@@ -479,7 +481,9 @@ class TestReviewOperations:
     def test_add_review_check_constraint_violation(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
-        bad_review = create_sample_review(card_uuid=sample_card1.uuid, rating=99)
+        bad_review = create_sample_review(
+            card_uuid=sample_card1.uuid, rating=99, bypass_validation=True
+        )
         with pytest.raises(ReviewOperationError):
             db.add_review(bad_review)
 
@@ -500,8 +504,10 @@ class TestReviewOperations:
         card = create_sample_card()
         db.upsert_cards_batch([card])
         valid_review = create_sample_review(card_uuid=card.uuid)
-        bad_review = create_sample_review(card_uuid=card.uuid, rating=999)
-        with pytest.raises(CardOperationError):
+        bad_review = create_sample_review(
+            card_uuid=card.uuid, rating=999, bypass_validation=True
+        )
+        with pytest.raises(ReviewOperationError):
             db.add_reviews_batch([valid_review, bad_review])
         assert db.get_reviews_for_card(card.uuid) == []
 
@@ -554,7 +560,7 @@ class TestGeneralErrorHandling:
         # Ensure connection is open but schema not initialized
         db_manager.get_connection()
         # Attempt to add a card, which should fail if schema is not initialized
-        with pytest.raises(duckdb.CatalogException): # Or specific custom error if wrapped
+        with pytest.raises(CardOperationError):
             db_manager.upsert_cards_batch([sample_card1])
 
     def test_operations_on_closed_connection(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):

@@ -103,8 +103,6 @@ class FlashcardDatabase:
         self._is_closed: bool = False
 
     def get_connection(self) -> duckdb.DuckDBPyConnection:
-        if self._is_closed:
-            raise DatabaseConnectionError("Database connection has been permanently closed.")
         if self._connection is None or getattr(self._connection, 'closed', False):
             try:
                 if str(self.db_path_resolved) != ":memory:":
@@ -124,7 +122,6 @@ class FlashcardDatabase:
             self._connection.close()
             self._connection = None
             logger.debug(f"DuckDB connection to {self.db_path_resolved} closed.")
-        self._is_closed = True
 
     def __enter__(self) -> 'FlashcardDatabase':
         self.get_connection()
@@ -402,7 +399,8 @@ class FlashcardDatabase:
             return new_review_id
         except duckdb.ConstraintException as e:
             logger.error(f"Failed to add review due to constraint violation: {e}")
-            conn.rollback()
+            # On constraint violation, DuckDB automatically rolls back the transaction.
+            # Explicitly calling rollback() here would cause a TransactionException.
             raise ReviewOperationError(f"Failed to add review due to constraint violation: {e}") from e
         except duckdb.Error as e:
             logger.error(f"Error adding review for card UUID {review.card_uuid}: {e}")
@@ -434,6 +432,11 @@ class FlashcardDatabase:
             logger.info("Successfully batch-added %d reviews.", len(review_ids))
             logger.info(f"Successfully batch-added {len(review_ids)} reviews.")
             return review_ids
+        except duckdb.ConstraintException as e:
+            logger.error(f"Failed to add review in batch due to constraint violation: {e}")
+            # On constraint violation, DuckDB automatically rolls back the transaction.
+            # No explicit rollback() needed here, as it would cause a TransactionException.
+            raise ReviewOperationError(f"Failed to add review in batch due to constraint violation: {e}") from e
         except duckdb.Error as e:
             logger.error(f"Error during batch review add: {e}")
             if 'cursor' in locals() and cursor.connection.is_open:
