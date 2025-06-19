@@ -295,6 +295,8 @@ class FlashcardDatabase:
             raise CardOperationError(f"Failed to get all cards: {e}", original_exception=e) from e
 
     def get_due_cards(self, on_date: date, limit: Optional[int] = 20) -> List['Card']:
+        if limit == 0:
+            return []
         conn = self.get_connection()
         sql = """
         SELECT c.*

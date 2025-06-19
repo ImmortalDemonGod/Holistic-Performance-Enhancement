@@ -10,7 +10,6 @@ from typing import Generator
 
 import duckdb
 
-from fsrs.card import State
 from cultivation.scripts.flashcore.card import Card, Review
 from cultivation.scripts.flashcore.database import (
     CardOperationError,
@@ -335,7 +334,7 @@ class TestCardOperations:
 
     def test_upsert_cards_batch_mixed_insert_update(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card, sample_card2: Card):
         db = initialized_db_manager
-        db.upsert_cards_batch([sample_card1])
+        db.upsert_cards_batch([sample_card1]) # Re-indenting this line
         updated_card1 = sample_card1.model_copy(update={"front": "Mixed Updated", "tags": {"mixed"}})
         new_card = create_sample_card()
         affected = db.upsert_cards_batch([updated_card1, new_card, sample_card2])
@@ -365,7 +364,12 @@ class TestCardOperations:
         db = db_manager
         db.initialize_schema()
         valid_card = create_sample_card()
-        broken_card = create_sample_card(deck_name=None)
+        # Create a card with an invalid deck_name by bypassing Pydantic validation.
+        # This allows us to test the database-level NOT NULL constraint.
+        broken_card_data = create_sample_card().model_dump()
+        broken_card_data['deck_name'] = None
+        broken_card_data['uuid'] = uuid.uuid4()  # Ensure it has a unique UUID
+        broken_card = Card.model_construct(**broken_card_data)
         with pytest.raises(CardOperationError):
             db.upsert_cards_batch([valid_card, broken_card])
         assert db.get_card_by_uuid(valid_card.uuid) is None
@@ -410,24 +414,22 @@ class TestCardOperations:
         # Card 1: Due yesterday, should be fetched
         review1 = create_sample_review(
             card_uuid=sample_card1.uuid,
-            review_ts=now - timedelta(days=10),
-            scheduled_days=-1,  # Due yesterday
-            state=State.REVIEW
+            ts=now - timedelta(days=10),
+            next_due=(now - timedelta(days=1)).date()
         )
         # Card 2: Due tomorrow, should NOT be fetched
         review2 = create_sample_review(
             card_uuid=sample_card2.uuid,
-            review_ts=now,
-            scheduled_days=1,  # Due tomorrow
-            state=State.REVIEW
+            ts=now,
+            next_due=(now + timedelta(days=1)).date()
         )
         db.upsert_cards_batch([sample_card1, sample_card2])
         db.add_reviews_batch([review1, review2])
-        due_cards = db.get_due_cards()
+        due_cards = db.get_due_cards(on_date=now.date())
         assert len(due_cards) == 1
         assert due_cards[0].uuid == sample_card1.uuid
         # Test with limit
-        due_cards_limit = db.get_due_cards(limit=0)
+        due_cards_limit = db.get_due_cards(on_date=now.date(), limit=0)
         assert len(due_cards_limit) == 0
 
     def test_delete_cards_by_uuids_batch_fails_with_reviews(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
