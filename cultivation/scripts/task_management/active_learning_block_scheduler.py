@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 import argparse
-import copy
+
 
 # --- Configuration ---
 ACTIVE_BLOCK_MINUTES: int = 60
@@ -46,23 +46,33 @@ def get_day_of_week(target_date_str: Optional[str] = None) -> int:
         logger.warning(f"Invalid date format: {target_date_str}. Defaulting to today's date.")
         return datetime.now().isoweekday()
 
-def build_task_status_map(tasks: List[Dict[str, Any]]) -> Dict[Any, str]:
-    """Builds a map of task IDs to their statuses."""
-    status_map: Dict[Any, str] = {}
-    for task in tasks:
-        task_id = task.get("id")
-        if task_id is not None: # Task IDs can be numbers or strings
-            status_map[task_id] = str(task.get("status", "pending"))
+def build_task_status_map(all_tasks: List[Dict[str, Any]]) -> Dict[str, str]:
+    """Builds a map from task identifier to task status for quick lookups."""
+    status_map = {}
+    for task in all_tasks:
+        # Prioritize csm_id as the canonical identifier if it exists
+        if "hpe_csm_reference" in task and "csm_id" in task["hpe_csm_reference"]:
+            task_id = task["hpe_csm_reference"]["csm_id"]
+        else:
+            task_id = task.get("id")
+
+        if task_id:
+            # Ensure the key is a string for consistency
+            status_map[str(task_id)] = str(task.get("status", "pending"))
     return status_map
 
-def dependencies_met(task: Dict[str, Any], task_statuses: Dict[Any, str]) -> bool:
-    """Checks if all dependencies for a given task are met (status: 'done')."""
-    deps = task.get("dependencies", [])
-    if not deps:
+def dependencies_met(task: Dict[str, Any], task_statuses: Dict[str, str]) -> bool:
+    """Check if all dependencies for a task are met."""
+    dependency_ids = task.get("dependencies", [])
+    if not dependency_ids:
         return True
-    for dep_id in deps:
-        if task_statuses.get(dep_id) != "done":
-            logger.debug(f"Task '{task.get('id')}' (Title: {task.get('title', '')[:30]}...) dependency {dep_id} not met (status: {task_statuses.get(dep_id)}).")
+    for dep_id in dependency_ids:
+        # The status map uses csm_id if available, so we check that first.
+        # This logic needs to be robust.
+        dep_status = task_statuses.get(str(dep_id)) # Ensure key is string
+        if dep_status != "done":
+            task_id = task.get('id', 'Unknown')
+            logger.debug(f"Task {task_id} dependency {dep_id} not met (status: {dep_status}).")
             return False
     return True
 
@@ -99,15 +109,6 @@ def filter_active_tasks(
             logger.debug(f"Task {task_id} skipped: dependencies not met.")
             continue
 
-        if str(task_id) == "2": # Specific debug for parent task 2
-            logger.info(f"[DEBUG_TASK_2] Inspecting parent task ID 2 in filter_active_tasks.")
-            logger.info(f"[DEBUG_TASK_2] Raw task data: {task}")
-            parent_hpe_meta_content = task.get("hpe_learning_meta", "PARENT_HPE_META_MISSING")
-            logger.info(f"[DEBUG_TASK_2] Content of task.get('hpe_learning_meta'): {parent_hpe_meta_content}")
-            if isinstance(parent_hpe_meta_content, dict):
-                logger.info(f"[DEBUG_TASK_2] hpe_meta.get('est_effort'): {parent_hpe_meta_content.get('estimated_effort_hours_min', 'KEY_MISSING_IN_HPE_META')}")
-            logger.info(f"[DEBUG_TASK_2] task.get('est_effort_top_level'): {task.get('estimated_effort_hours_min', 'KEY_MISSING_TOP_LEVEL')}")
-
         hpe_learning_meta = task.get("hpe_learning_meta", {})
         recommended_block = hpe_learning_meta.get("recommended_block", "").lower()
         activity_type = hpe_learning_meta.get("activity_type", "").lower()
@@ -139,10 +140,8 @@ def filter_active_tasks(
                 # --- Subtask Promotion Logic ---
                 # Only promote subtasks that are pending and whose sibling dependencies are met.
                 # Fallback effort is distributed among only these eligible subtasks.
-                eligible_subtasks_for_promotion = []
+                eligible_subtasks_for_promotion: List[Dict[str, Any]] = []
                 all_subtasks_in_parent = task.get("subtasks", [])
-                # Subtask promotion logic: parent is oversized
-                eligible_subtasks_for_promotion = []
                 for subtask in all_subtasks_in_parent:
                     if subtask.get("status") != "pending":
                         continue
@@ -181,25 +180,23 @@ def filter_active_tasks(
                         continue
                     logger.debug(f"    Subtask {task_id}.{subtask_id_local}: Final min_effort_hours to check: {sub_min_effort_hours}hr (block limit: {ACTIVE_BLOCK_MINUTES/60}hr)")
                     if (sub_min_effort_hours * 60) <= ACTIVE_BLOCK_MINUTES:
-                        augmented_subtask = copy.deepcopy(subtask)
-                        augmented_subtask["_parent_task_id"] = task_id
-                        augmented_subtask["_parent_title"] = task.get("title")
-                        augmented_subtask["_parent_priority"] = task.get("priority", "medium")
-                        augmented_subtask["_is_promoted_subtask"] = True
-                        # Patch: Add required fields for weekly_schedule_simulator
-                        augmented_subtask["_parent_numeric_id"] = task_id
-                        augmented_subtask["_subtask_local_id"] = subtask_id_local
-
-                        effective_sub_meta = {
-                            **hpe_learning_meta,
-                            **subtask_hpe_learning_meta,
-                            "estimated_effort_hours_min": sub_min_effort_hours,
-                            "estimated_effort_hours_max": subtask_hpe_learning_meta.get("estimated_effort_hours_max", sub_min_effort_hours + 0.25)
+                        # Promote the subtask by constructing a new dictionary
+                        # to avoid inheriting unwanted parent fields like dependencies or csm_id.
+                        promoted_subtask = {
+                            "id": subtask.get("id"),
+                            "title": f"{task.get('title', 'Task')} -> {subtask.get('title', 'Subtask')}",
+                            "status": "pending",
+                            "_parent_task_id": task_id,
+                            "_original_parent_id": task_id,
+                            # Carry over essential metadata from the parent
+                            "hpe_learning_meta": task.get("hpe_learning_meta", {}),
+                            "priority": task.get("priority"),
                         }
-                        augmented_subtask["hpe_learning_meta"] = effective_sub_meta
-                        augmented_subtask["hpe_scheduling_meta"] = task.get("hpe_scheduling_meta", {})
-                        augmented_subtask["hpe_csm_reference"] = task.get("hpe_csm_reference", {})
-                        candidate_tasks.append(augmented_subtask)
+                        # Update effort from the subtask's metadata
+                        promoted_subtask["hpe_learning_meta"]["estimated_effort_hours_min"] = subtask_hpe_learning_meta.get("estimated_effort_hours_min")
+                        promoted_subtask["hpe_learning_meta"]["estimated_effort_hours_max"] = subtask_hpe_learning_meta.get("estimated_effort_hours_max")
+
+                        candidate_tasks.append(promoted_subtask)
                         logger.info(f"    Promoted Subtask {task_id}.{subtask_id_local} added as candidate (min_effort: {sub_min_effort_hours:.2f}hr).")
                     else:
                         logger.info(f"    Subtask {task_id}.{subtask_id_local} (min_effort: {sub_min_effort_hours:.2f}hr) too large for block. Not promoted.")
