@@ -1,0 +1,157 @@
+[
+  {
+    "id": 1,
+    "title": "Task 1: Foundations Intro",
+    "status": "pending",
+    "dependencies": [],
+    "priority": "medium",
+    "hpe_csm_reference": {
+      "csm_id": "RNA.P1.Foundations.W1.Task0"
+    },
+    "hpe_learning_meta": {
+      "recommended_block": "active_learning",
+      "estimated_effort_hours_min": 1.0,
+      "activity_type": "coding_exercise"
+    },
+    "hpe_scheduling_meta": {
+      "planned_day_of_week": 1
+    }
+  },
+  {
+    "id": 2,
+    "title": "Task 2: Nucleotide Structure",
+    "status": "pending",
+    "dependencies": [
+      "RNA.P1.Foundations.W1.Task0"
+    ],
+    "priority": "medium",
+    "hpe_csm_reference": {
+      "csm_id": "RNA.P1.Foundations.W1.Part1.Biochem.NucleotideStructure"
+    },
+    "hpe_learning_meta": {
+      "recommended_block": "active_learning",
+      "estimated_effort_hours_min": 1.5,
+      "activity_type": "reading"
+    },
+    "hpe_scheduling_meta": {
+      "planned_day_of_week": 1
+    },
+    "subtasks": [
+      {
+        "id": 1,
+        "title": "Subtask 2.1: Purines vs Pyrimidines",
+        "status": "pending"
+      },
+      {
+        "id": 2,
+        "title": "Subtask 2.2: Ribose vs Deoxyribose",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Task 3: Backbone Directionality",
+    "status": "pending",
+    "dependencies": [
+      "RNA.P1.Foundations.W1.Part1.Biochem.NucleotideStructure"
+    ],
+    "priority": "medium",
+    "hpe_csm_reference": {
+      "csm_id": "RNA.P1.Foundations.W1.Part1.Biochem.BackboneDirectionality"
+    },
+    "hpe_learning_meta": {
+      "recommended_block": "active_learning",
+      "estimated_effort_hours_min": 1.0,
+      "activity_type": "reading"
+    },
+    "hpe_scheduling_meta": {
+      "planned_day_of_week": 2
+    }
+  },
+  {
+    "id": 4,
+    "title": "Task 4: Some Other Task",
+    "status": "pending",
+    "dependencies": [],
+    "priority": "medium",
+    "hpe_csm_reference": {
+      "csm_id": "SOME_OTHER_CSM_ID_4"
+    },
+    "hpe_learning_meta": {
+      "recommended_block": "active_learning",
+      "estimated_effort_hours_min": 0.5,
+      "activity_type": "reading"
+    }
+  },
+  {
+    "id": 5,
+    "title": "Task 5: Another Task with Subtasks",
+    "status": "pending",
+    "dependencies": [],
+    "priority": "medium",
+    "hpe_csm_reference": {
+      "csm_id": "SOME_OTHER_CSM_ID_5"
+    },
+    "hpe_learning_meta": {
+      "recommended_block": "active_learning",
+      "estimated_effort_hours_min": 0.5,
+      "activity_type": "reading"
+    },
+    "subtasks": [
+      {
+        "id": 1,
+        "title": "Subtask 5.1",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "title": "Task 7: Loops & Electrostatics",
+    "status": "pending",
+    "dependencies": [],
+    "priority": "medium",
+    "hpe_csm_reference": {
+      "csm_id": "RNA.P1.Foundations.W1.Part2.Thermo.LoopsElectrostatics"
+    },
+    "hpe_learning_meta": {
+      "recommended_block": "active_learning",
+      "estimated_effort_hours_min": 0.5,
+      "activity_type": "reading"
+    },
+    "hpe_scheduling_meta": {
+      "planned_day_of_week": 5
+    }
+  },
+  {
+    "id": 8,
+    "title": "Task 8: Environmental Factors",
+    "status": "pending",
+    "dependencies": [],
+    "priority": "medium",
+    "hpe_csm_reference": {
+      "csm_id": "RNA.P1.Foundations.W1.Part2.Thermo.EnvFactors"
+    },
+    "hpe_learning_meta": {
+      "recommended_block": "passive_review",
+      "estimated_effort_hours_min": 0.5,
+      "activity_type": "summary_writing"
+    }
+  },
+  {
+    "id": 11,
+    "title": "Task 11: Yet Another Task",
+    "status": "pending",
+    "dependencies": [],
+    "priority": "medium",
+    "hpe_csm_reference": {
+      "csm_id": "SOME_OTHER_CSM_ID_11"
+    },
+    "hpe_learning_meta": {
+      "recommended_block": "active_learning",
+      "estimated_effort_hours_min": 0.5,
+      "activity_type": "reading"
+    }
+  }
+]
