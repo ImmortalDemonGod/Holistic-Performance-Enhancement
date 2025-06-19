@@ -62,7 +62,7 @@ The GEORGE model requires the ARC-AGI dataset to be placed in the `data/` direct
 
 ### Required Files
 
-Ensure the following files exist in the `/Users/tomriddle1/Holistic-Performance-Enhancement/cultivation/systems/george/data/` directory:
+Ensure the following files exist in the `data/` directory within your GEORGE project folder:
 
 - `arc-agi_training_challenges.json`: The input-output examples for training tasks.
 - `arc-agi_training_solutions.json`: The ground-truth solutions for the test portion of training tasks.
