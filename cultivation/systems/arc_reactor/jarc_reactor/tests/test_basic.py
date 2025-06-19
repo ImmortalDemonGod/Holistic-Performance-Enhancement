@@ -69,14 +69,16 @@ def _get_base_test_config_dict() -> dict:
         "training": {
             "num_labels": 12,
             "learning_rate": 5e-5,
-            "batch_size": 1,
             "max_epochs": 1,
-            "num_workers": 0,
             "training_data_dir": str(dummy_data_dir),
             "synthetic_data_dir": None,
             "include_synthetic_training_data": False,
             "fast_dev_run": False,
             "checkpoint_dir": str(test_checkpoints_dir)
+        },
+        "dataloader": {
+            "batch_size": 1,
+            "num_workers": 0
         },
         "logging": {
             "log_level": "DEBUG",
@@ -125,7 +127,7 @@ def test_data_module_loads_dummy_data(test_output_dirs):
         batch = next(iter(train_dataloader))
         src, tgt, ctx_input, ctx_output, task_ids = batch
 
-        expected_batch_size = cfg.training.batch_size
+        expected_batch_size = cfg.dataloader.batch_size
         expected_grid_size = cfg.data_preparation.max_grid_size
 
         # The data loader provides 2D grids, not flattened sequences
