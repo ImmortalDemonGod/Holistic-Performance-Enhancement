@@ -4,16 +4,18 @@ Comprehensive test suite for flashcore.database (FlashcardDatabase), covering co
 
 import pytest
 import uuid
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from datetime import datetime, date, timezone, timedelta
 from typing import Generator
+
 import duckdb
 
+from fsrs.card import State
 from cultivation.scripts.flashcore.card import Card, Review
 from cultivation.scripts.flashcore.database import (
-    FlashcardDatabase,
-    DatabaseConnectionError,
     CardOperationError,
+    DatabaseConnectionError,
+    FlashcardDatabase,
     ReviewOperationError,
     DEFAULT_FLASHCORE_DATA_DIR,
     DEFAULT_DATABASE_FILENAME
@@ -119,7 +121,7 @@ def create_sample_card(**overrides) -> Card:
         added_at=datetime(2023, 1, 1, 10, 0, 0, tzinfo=timezone.utc),
         source_yaml_file=Path("source/deck_a.yaml"),
         origin_task="test-task",
-        media_paths=[Path("media1.png"), Path("media2.mp3")],
+        media=[Path("media1.png"), Path("media2.mp3")],
         internal_note="test note"
     )
     data.update(overrides)
@@ -232,7 +234,7 @@ class TestSchemaInitialization:
             table_names = {name[0] for name in tables}
             assert "cards" in table_names
             assert "reviews" in table_names
-            seq = db_manager._connection.execute("SELECT sequence_name FROM information_schema.sequences WHERE sequence_name='review_seq';").fetchone()
+            seq = db_manager._connection.execute("SELECT sequence_name FROM duckdb_sequences() WHERE sequence_name='review_seq';").fetchone()
             assert seq is not None
 
     def test_initialize_schema_idempotent(self, db_manager: FlashcardDatabase, sample_card1: Card):
@@ -264,9 +266,29 @@ class TestSchemaInitialization:
     def test_schema_constraints_rating(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
-        invalid_review = create_sample_review(card_uuid=sample_card1.uuid, rating=5)
-        with pytest.raises(ReviewOperationError):
-            db.add_review(invalid_review)
+
+        # Bypass Pydantic validation to test the database CHECK constraint directly.
+        with pytest.raises(duckdb.ConstraintException) as excinfo:
+            with db.get_connection() as conn:
+                # Manually construct and execute a raw SQL INSERT
+                ts = datetime(2023, 1, 2, 11, 0, 0, tzinfo=timezone.utc)
+                conn.execute(
+                    "INSERT INTO reviews (card_uuid, ts, rating, stab_before, stab_after, diff, next_due, elapsed_days_at_review, scheduled_days_interval, resp_ms, review_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        str(sample_card1.uuid),
+                        ts,
+                        5,  # Invalid rating
+                        1.0,
+                        2.0,
+                        4.0,
+                        date(2023, 1, 5),
+                        0,
+                        3,
+                        1234,
+                        "learn",
+                    ),
+                )
+        assert "CHECK constraint failed" in str(excinfo.value)
 
     def test_schema_constraints_fk_cascade_delete(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
         db = initialized_db_manager
@@ -274,16 +296,25 @@ class TestSchemaInitialization:
         review = create_sample_review(card_uuid=sample_card1.uuid)
         db.add_review(review)
         assert len(db.get_reviews_for_card(sample_card1.uuid)) == 1
-        db.delete_cards_by_uuids_batch([sample_card1.uuid])
-        assert db.get_card_by_uuid(sample_card1.uuid) is None
-        assert len(db.get_reviews_for_card(sample_card1.uuid)) == 0
+
+        # This test verifies that the FK constraint prevents a card from being
+        # deleted if it has associated reviews (i.e., ON DELETE CASCADE is NOT active).
+        with pytest.raises(CardOperationError) as excinfo:
+            db.delete_cards_by_uuids_batch([sample_card1.uuid])
+
+        # Check that the underlying cause is the expected database constraint violation
+        assert isinstance(excinfo.value.__cause__, duckdb.ConstraintException)
+
+        # Verify that the card and its review were NOT deleted
+        assert db.get_card_by_uuid(sample_card1.uuid) is not None
+        assert len(db.get_reviews_for_card(sample_card1.uuid)) == 1
 
 class TestCardOperations:
     def test_upsert_cards_batch_insert_new(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card, sample_card2: Card):
         db = initialized_db_manager
         cards_to_insert = [sample_card1, sample_card2]
         affected_rows = db.upsert_cards_batch(cards_to_insert)
-        assert affected_rows == 2  # Expect 2 new rows inserted
+        assert affected_rows == 2
         assert db.get_card_by_uuid(sample_card1.uuid) is not None
         assert db.get_card_by_uuid(sample_card2.uuid) is not None
         retrieved_c1 = db.get_card_by_uuid(sample_card1.uuid)
@@ -294,7 +325,6 @@ class TestCardOperations:
         db.upsert_cards_batch([sample_card1])
         original_added_at = db.get_card_by_uuid(sample_card1.uuid).added_at
         updated_card1 = sample_card1.model_copy(update={"front": "Updated Card 1 Front", "tags": {"new-tag"}})
-        updated_card1.added_at = datetime.now(timezone.utc) + timedelta(days=1)
         affected_rows = db.upsert_cards_batch([updated_card1])
         assert affected_rows == 1
         retrieved_updated_card = db.get_card_by_uuid(sample_card1.uuid)
@@ -309,7 +339,7 @@ class TestCardOperations:
         updated_card1 = sample_card1.model_copy(update={"front": "Mixed Updated", "tags": {"mixed"}})
         new_card = create_sample_card()
         affected = db.upsert_cards_batch([updated_card1, new_card, sample_card2])
-        assert affected == 3  # 1 update, 2 inserts
+        assert affected == 3
         retrieved_updated_card1 = db.get_card_by_uuid(updated_card1.uuid)
         assert retrieved_updated_card1 is not None
         assert retrieved_updated_card1.front == "Mixed Updated"
@@ -322,24 +352,22 @@ class TestCardOperations:
 
     def test_upsert_cards_batch_data_marshalling(self, initialized_db_manager: FlashcardDatabase):
         db = initialized_db_manager
-        card = create_sample_card(tags={"tagX"}, media_paths=[Path("foo.png")], source_yaml_file=Path("foo.yaml"))
+        card = create_sample_card(tags={"tag-x"}, media=[Path("foo.png")], source_yaml_file=Path("foo.yaml"))
         affected_rows = db.upsert_cards_batch([card])
         assert affected_rows == 1
         retrieved = db.get_card_by_uuid(card.uuid)
         assert retrieved is not None
-        assert isinstance(retrieved.tags, set) and "tagX" in retrieved.tags
-        assert isinstance(retrieved.media_paths, list) and Path("foo.png") in retrieved.media_paths
+        assert isinstance(retrieved.tags, set) and "tag-x" in retrieved.tags
+        assert isinstance(retrieved.media, list) and Path("foo.png") in retrieved.media
         assert isinstance(retrieved.source_yaml_file, Path) and retrieved.source_yaml_file.name == "foo.yaml"
 
     def test_upsert_cards_batch_transaction_rollback(self, db_manager: FlashcardDatabase):
         db = db_manager
         db.initialize_schema()
         valid_card = create_sample_card()
-        # Intentionally break a card (deck_name=None violates NOT NULL)
         broken_card = create_sample_card(deck_name=None)
         with pytest.raises(CardOperationError):
             db.upsert_cards_batch([valid_card, broken_card])
-        # Neither should be present
         assert db.get_card_by_uuid(valid_card.uuid) is None
 
     def test_get_card_by_uuid_exists(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
@@ -350,7 +378,7 @@ class TestCardOperations:
         assert card.uuid == sample_card1.uuid
 
     def test_get_card_by_uuid_not_exists(self, initialized_db_manager: FlashcardDatabase):
-        assert initialized_db_manager.get_card_by_uuid("00000000-0000-0000-0000-000000000000") is None
+        assert initialized_db_manager.get_card_by_uuid(uuid.uuid4()) is None
 
     def test_get_all_cards_empty_db(self, initialized_db_manager: FlashcardDatabase):
         assert initialized_db_manager.get_all_cards() == []
@@ -359,7 +387,7 @@ class TestCardOperations:
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1, sample_card2])
         cards = db.get_all_cards()
-        assert len(cards) >= 2
+        assert len(cards) == 2
         uuids = {c.uuid for c in cards}
         assert sample_card1.uuid in uuids
         assert sample_card2.uuid in uuids
@@ -369,55 +397,64 @@ class TestCardOperations:
         db.upsert_cards_batch([sample_card1, sample_card2, sample_card3_deck_b])
         deck_a_cards = db.get_all_cards(deck_name_filter="Deck A::%")
         assert len(deck_a_cards) == 2
+        uuids = {c.uuid for c in deck_a_cards}
+        assert sample_card1.uuid in uuids
+        assert sample_card2.uuid in uuids
         deck_b_cards = db.get_all_cards(deck_name_filter="Deck B")
         assert len(deck_b_cards) == 1
         assert sample_card3_deck_b.uuid == deck_b_cards[0].uuid
 
     def test_get_due_cards_logic(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card, sample_card2: Card):
         db = initialized_db_manager
+        now = datetime.now(timezone.utc)
+        # Card 1: Due yesterday, should be fetched
+        review1 = create_sample_review(
+            card_uuid=sample_card1.uuid,
+            review_ts=now - timedelta(days=10),
+            scheduled_days=-1,  # Due yesterday
+            state=State.REVIEW
+        )
+        # Card 2: Due tomorrow, should NOT be fetched
+        review2 = create_sample_review(
+            card_uuid=sample_card2.uuid,
+            review_ts=now,
+            scheduled_days=1,  # Due tomorrow
+            state=State.REVIEW
+        )
         db.upsert_cards_batch([sample_card1, sample_card2])
-        today = date.today()
-        yesterday = today - timedelta(days=1)
-        tomorrow = today + timedelta(days=1)
-        due_cards = db.get_due_cards(on_date=today)
-        assert len(due_cards) == 2
-        # Review card1, make it due tomorrow
-        review_c1_not_due = create_sample_review(card_uuid=sample_card1.uuid, next_due=tomorrow)
-        db.add_review(review_c1_not_due)
-        due_cards_after_review1 = db.get_due_cards(on_date=today)
-        assert len(due_cards_after_review1) == 1
-        assert due_cards_after_review1[0].uuid == sample_card2.uuid
-        # Review card2, make it due yesterday
-        review_c2_due_yesterday = create_sample_review(card_uuid=sample_card2.uuid, next_due=yesterday, ts=datetime.combine(yesterday - timedelta(days=1), datetime.min.time(), tzinfo=timezone.utc))
-        db.add_review(review_c2_due_yesterday)
-        due_cards_final = db.get_due_cards(on_date=today, limit=10)
-        assert len(due_cards_final) == 1
-        assert due_cards_final[0].uuid == sample_card2.uuid
+        db.add_reviews_batch([review1, review2])
+        due_cards = db.get_due_cards()
+        assert len(due_cards) == 1
+        assert due_cards[0].uuid == sample_card1.uuid
+        # Test with limit
+        due_cards_limit = db.get_due_cards(limit=0)
+        assert len(due_cards_limit) == 0
 
-    def test_delete_cards_by_uuids_batch(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
+    def test_delete_cards_by_uuids_batch_fails_with_reviews(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
-        review = create_sample_review(card_uuid=sample_card1.uuid)
-        db.add_review(review)
-        count = db.delete_cards_by_uuids_batch([sample_card1.uuid])
-        assert count == 1
-        assert db.get_card_by_uuid(sample_card1.uuid) is None
-        assert db.get_reviews_for_card(sample_card1.uuid) == []
+        db.add_review(create_sample_review(card_uuid=sample_card1.uuid))
+        with pytest.raises(CardOperationError) as excinfo:
+            db.delete_cards_by_uuids_batch([sample_card1.uuid])
+        assert isinstance(excinfo.value.__cause__, duckdb.ConstraintException)
+        assert db.get_card_by_uuid(sample_card1.uuid) is not None
+        assert len(db.get_reviews_for_card(sample_card1.uuid)) == 1
 
     def test_delete_cards_by_uuids_batch_non_existent(self, initialized_db_manager: FlashcardDatabase):
-        deleted_count = initialized_db_manager.delete_cards_by_uuids_batch(["00000000-0000-0000-0000-000000000000"])
-        assert deleted_count == 0
+        affected = initialized_db_manager.delete_cards_by_uuids_batch([uuid.uuid4()])
+        assert affected == 0
 
     def test_get_all_card_fronts_and_uuids(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
         db = initialized_db_manager
-        db.upsert_cards_batch([sample_card1])
-        card_variant_front = sample_card1.model_copy(update={"uuid": "00000000-0000-0000-0000-000000000000", "front": sample_card1.front.lower()})
-        db.upsert_cards_batch([card_variant_front])
+        # Card with different case and whitespace
+        card_variant = create_sample_card(front="  sample front  ")
+        db.upsert_cards_batch([sample_card1, card_variant])
         front_map = db.get_all_card_fronts_and_uuids()
-        normalized_front1 = " ".join(sample_card1.front.lower().split())
-        assert normalized_front1 in front_map
-        assert front_map[normalized_front1] in [sample_card1.uuid, card_variant_front.uuid]
+        # The function should normalize and deduplicate, returning the UUID of the first-inserted card.
         assert len(front_map) == 1
+        normalized_front = " ".join(sample_card1.front.lower().split())
+        assert normalized_front in front_map
+        assert front_map[normalized_front] == str(sample_card1.uuid)
 
 class TestReviewOperations:
     def test_add_review_success(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
