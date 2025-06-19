@@ -2,7 +2,7 @@ import pytest
 import datetime
 from uuid import uuid4, UUID
 
-from cultivation.scripts.flashcore.scheduler import FSRS_Scheduler
+from cultivation.scripts.flashcore.scheduler import FSRS_Scheduler, FSRSSchedulerConfig
 from cultivation.scripts.flashcore.card import Review
 from cultivation.scripts.flashcore.config import DEFAULT_FSRS_PARAMETERS, DEFAULT_DESIRED_RETENTION
 
@@ -12,10 +12,12 @@ UTC = datetime.timezone.utc
 @pytest.fixture
 def scheduler() -> FSRS_Scheduler:
     """Provides an FSRS_Scheduler instance with default parameters."""
-    return FSRS_Scheduler(
-        parameters=DEFAULT_FSRS_PARAMETERS,
-        desired_retention=DEFAULT_DESIRED_RETENTION
+    config = FSRSSchedulerConfig(
+        parameters=tuple(DEFAULT_FSRS_PARAMETERS), # Ensure it's a tuple as per Pydantic model
+        desired_retention=DEFAULT_DESIRED_RETENTION,
+        # Assuming other FSRSSchedulerConfig fields have defaults or are not needed for these tests
     )
+    return FSRS_Scheduler(config=config)
 
 @pytest.fixture
 def sample_card_uuid() -> UUID:
