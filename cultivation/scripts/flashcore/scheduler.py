@@ -11,7 +11,10 @@ import datetime
 from typing import List, Optional, Dict, Any, Tuple
 from pydantic import BaseModel, Field
 
-from .config import DEFAULT_FSRS_PARAMETERS, DEFAULT_DESIRED_RETENTION
+from cultivation.scripts.flashcore.config import (
+    DEFAULT_PARAMETERS,
+    DEFAULT_DESIRED_RETENTION,
+)
 
 from fsrs import Card as FSRSCard
 from fsrs import Rating as FSRSRating
@@ -56,11 +59,12 @@ class BaseScheduler(ABC):
 
 
 class FSRSSchedulerConfig(BaseModel):
-    parameters: Tuple[float, ...] = Field(default_factory=lambda: tuple(DEFAULT_FSRS_PARAMETERS))
+    """Configuration for the FSRS Scheduler."""
+    parameters: Tuple[float, ...] = Field(default_factory=lambda: tuple(DEFAULT_PARAMETERS))
     desired_retention: float = DEFAULT_DESIRED_RETENTION
-    learning_steps: List[datetime.timedelta] = Field(default_factory=list)  
-    relearning_steps: Optional[List[datetime.timedelta]] = None
-    max_interval: Optional[int] = None
+    learning_steps: Tuple[int, ...] = ()  # In days. Empty means graduate immediately.
+    relearning_steps: Tuple[int, ...] = (1,) # In days. Default: next day review after lapse.
+    max_interval: int = 36500
 
 
 class FSRS_Scheduler(BaseScheduler):
@@ -79,30 +83,21 @@ class FSRS_Scheduler(BaseScheduler):
     def __init__(self, config: Optional[FSRSSchedulerConfig] = None):
         if config is None:
             config = FSRSSchedulerConfig()
+        self.config = config
 
-        # Ensure parameters is a tuple if provided as a list in a custom config
-        # The default_factory in FSRSSchedulerConfig already handles this for default params.
-        effective_params = tuple(config.parameters) if isinstance(config.parameters, list) else config.parameters
+        # The py-fsrs library expects steps as lists of integers.
+        learning_steps = list(self.config.learning_steps)
+        relearning_steps = list(self.config.relearning_steps)
 
         scheduler_args = {
-            "parameters": effective_params,
-            "desired_retention": config.desired_retention,
-            "learning_steps": config.learning_steps, 
+            "parameters": list(self.config.parameters),
+            "desired_retention": self.config.desired_retention,
+            "learning_steps": learning_steps,
+            "relearning_steps": relearning_steps,
+            "max_interval": self.config.max_interval
         }
         
-        if config.relearning_steps is not None:
-            scheduler_args["relearning_steps"] = config.relearning_steps
-        if config.max_interval is not None:
-            scheduler_args["max_interval"] = config.max_interval
-        
         self.fsrs_scheduler = PyFSRSScheduler(**scheduler_args)
-
-        # Store the configuration for potential logging/debugging
-        self.config_params = effective_params
-        self.config_retention = config.desired_retention
-        self.config_learning_steps = config.learning_steps
-        self.config_relearning_steps = config.relearning_steps
-        self.config_max_interval = config.max_interval
 
     def _ensure_utc(self, ts: datetime.datetime) -> datetime.datetime:
         """Ensures the given datetime is UTC. Assumes UTC if naive."""
