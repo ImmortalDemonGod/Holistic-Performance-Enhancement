@@ -10,13 +10,14 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import passive_learning_block_scheduler as scheduler
 
-BASELINE_TASKS_PATH = os.path.join(os.path.dirname(__file__), '../../..', 'tasks', 'tasks.json')
+BASELINE_TASKS_PATH = os.path.join(os.path.dirname(__file__), '../../..', '.taskmaster', 'tasks', 'tasks.json')
 
 class TestPassiveLearningBlockScheduler(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         with open(BASELINE_TASKS_PATH, 'r') as f:
-            cls.baseline_tasks_data = json.load(f)["tasks"]
+            json_data = json.load(f)
+        cls.baseline_tasks_data = json_data["master"]["tasks"]
 
     def setUp(self):
         self.current_tasks_data = copy.deepcopy(self.baseline_tasks_data)
