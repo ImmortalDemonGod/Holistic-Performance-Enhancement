@@ -7,15 +7,17 @@ integrating py-fsrs for scheduling.
 
 import logging
 from abc import ABC, abstractmethod
-import datetime # Changed import
-from typing import List, Dict, Any, Optional
+import datetime 
+from typing import List, Optional, Dict, Any, Tuple
+from pydantic import BaseModel, Field
+
+from .config import DEFAULT_FSRS_PARAMETERS, DEFAULT_DESIRED_RETENTION
 
 from fsrs import Card as FSRSCard
 from fsrs import Rating as FSRSRating
 from fsrs import Scheduler as PyFSRSScheduler
 
 from .card import Review
-from .config import DEFAULT_FSRS_PARAMETERS, DEFAULT_DESIRED_RETENTION
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +43,7 @@ class BaseScheduler(ABC):
             {
                 "stability": float,
                 "difficulty": float,
-                "next_review_date": datetime.date, # Changed to datetime.date
+                "next_review_date": datetime.date, 
                 "scheduled_days": int
             }
         
@@ -49,6 +51,16 @@ class BaseScheduler(ABC):
             ValueError: If the new_rating is invalid.
         """
         pass
+
+
+
+
+class FSRSSchedulerConfig(BaseModel):
+    parameters: Tuple[float, ...] = Field(default_factory=lambda: tuple(DEFAULT_FSRS_PARAMETERS))
+    desired_retention: float = DEFAULT_DESIRED_RETENTION
+    learning_steps: List[datetime.timedelta] = Field(default_factory=list)  
+    relearning_steps: Optional[List[datetime.timedelta]] = None
+    max_interval: Optional[int] = None
 
 
 class FSRS_Scheduler(BaseScheduler):
@@ -64,43 +76,33 @@ class FSRS_Scheduler(BaseScheduler):
         3: FSRSRating.Easy,
     }
 
-    def __init__(
-        self,
-        parameters: Optional[List[float]] = None,
-        desired_retention: Optional[float] = None,
-        learning_steps: Optional[List[datetime.timedelta]] = None,
-        relearning_steps: Optional[List[datetime.timedelta]] = None,
-        max_interval: Optional[int] = None,
-    ):
-        # CodeScene: Excess Number of Function Arguments (5). Acknowledged.
-        # Could be refactored with a config object if complexity increases.
-        effective_params = parameters if parameters is not None else DEFAULT_FSRS_PARAMETERS
-        effective_retention = desired_retention if desired_retention is not None else DEFAULT_DESIRED_RETENTION
+    def __init__(self, config: Optional[FSRSSchedulerConfig] = None):
+        if config is None:
+            config = FSRSSchedulerConfig()
 
-        if isinstance(effective_params, list):
-            effective_params = tuple(effective_params)
+        # Ensure parameters is a tuple if provided as a list in a custom config
+        # The default_factory in FSRSSchedulerConfig already handles this for default params.
+        effective_params = tuple(config.parameters) if isinstance(config.parameters, list) else config.parameters
 
         scheduler_args = {
             "parameters": effective_params,
-            "desired_retention": effective_retention,
+            "desired_retention": config.desired_retention,
+            "learning_steps": config.learning_steps, 
         }
-        if learning_steps is None:
-            # Default to immediate graduation if no specific learning steps are provided to FSRS_Scheduler
-            scheduler_args["learning_steps"] = []
-        elif learning_steps: # If it's a non-empty list passed to FSRS_Scheduler
-            scheduler_args["learning_steps"] = tuple(learning_steps)
-        # If learning_steps was explicitly passed as an empty list [], it will be included as is.
-
-        if relearning_steps is not None:
-            scheduler_args["relearning_steps"] = tuple(relearning_steps)
-        if max_interval is not None:
-            scheduler_args["maximum_interval"] = max_interval
+        
+        if config.relearning_steps is not None:
+            scheduler_args["relearning_steps"] = config.relearning_steps
+        if config.max_interval is not None:
+            scheduler_args["max_interval"] = config.max_interval
         
         self.fsrs_scheduler = PyFSRSScheduler(**scheduler_args)
-        logger.info(
-            f"FSRS_Scheduler initialized with {len(effective_params)} parameters, "
-            f"desired retention {effective_retention:.2f}."
-        )
+
+        # Store the configuration for potential logging/debugging
+        self.config_params = effective_params
+        self.config_retention = config.desired_retention
+        self.config_learning_steps = config.learning_steps
+        self.config_relearning_steps = config.relearning_steps
+        self.config_max_interval = config.max_interval
 
     def _ensure_utc(self, ts: datetime.datetime) -> datetime.datetime:
         """Ensures the given datetime is UTC. Assumes UTC if naive."""
