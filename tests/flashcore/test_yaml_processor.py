@@ -1,7 +1,7 @@
 import pytest
-import yaml # For creating malformed YAML strings
+
 from pathlib import Path
-from typing import List, Tuple, Dict, Any
+
 import uuid # For checking UUID types
 
 # Assuming the module is in cultivation.scripts.flashcore.yaml_processor
@@ -12,9 +12,7 @@ try:
         _process_single_yaml_file, # To test this internal function directly for some cases
         _transform_raw_card_to_model, # Potentially test this for very fine-grained checks
         YAMLProcessingError,
-        _RawYAMLCardEntry, # For testing _transform_raw_card_to_model
-        DEFAULT_ALLOWED_HTML_TAGS, DEFAULT_ALLOWED_HTML_ATTRIBUTES, # If testing sanitization details
-        DEFAULT_SECRET_PATTERNS
+        _RawYAMLCardEntry # For testing _transform_raw_card_to_model
     )
     from cultivation.scripts.flashcore.card import Card
 except ImportError:
@@ -26,8 +24,7 @@ except ImportError:
         _transform_raw_card_to_model,
         YAMLProcessingError,
         _RawYAMLCardEntry,
-        DEFAULT_ALLOWED_HTML_TAGS, DEFAULT_ALLOWED_HTML_ATTRIBUTES,
-        DEFAULT_SECRET_PATTERNS
+
     )
     from flashcore.card import Card
 
@@ -269,7 +266,7 @@ class TestProcessSingleYAMLFile:
             
     def test_invalid_top_level_schema_no_deck(self, tmp_path: Path, assets_dir: Path):
         file = create_yaml_file(tmp_path, "no_deck.yaml", INVALID_YAML_SCHEMA_NO_DECK_CONTENT)
-        with pytest.raises(YAMLProcessingError, match="File-level schema validation failed. Details: deck: Field required"):
+        with pytest.raises(YAMLProcessingError, match=r"Missing or invalid 'deck' field at top level"):
              _process_single_yaml_file(file, assets_dir, False, False)
 
     def test_card_level_error_collection(self, tmp_path: Path, assets_dir: Path):
@@ -339,7 +336,7 @@ class TestLoadAndProcessFlashcardYamls:
         assert len(cards) == 1 # Only from valid.yaml
         assert len(errors) == 2
         assert any("Invalid YAML syntax" in str(e) for e in errors if e.file_path.name == "badsyntax.yaml")
-        assert any("File-level schema validation failed" in str(e) for e in errors if e.file_path.name == "card_no_q.yaml") # _RawYAMLDeckFile catches missing q in cards list items
+        assert any("Card-level schema validation failed" in str(e) for e in errors if e.file_path.name == "card_no_q.yaml")
 
     def test_fail_fast_true_on_file_error(self, tmp_path: Path, assets_dir: Path):
         source_dir = tmp_path / "src_fail_fast"
