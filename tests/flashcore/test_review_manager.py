@@ -8,7 +8,7 @@ from collections import deque
 from datetime import datetime, date, timedelta, timezone
 from unittest.mock import MagicMock
 
-from cultivation.scripts.flashcore.card import Card, Review
+from cultivation.scripts.flashcore.card import Card, Review, CardState
 from cultivation.scripts.flashcore.database import FlashcardDatabase
 from cultivation.scripts.flashcore.scheduler import FSRS_Scheduler
 from cultivation.scripts.flashcore.review_manager import ReviewSessionManager
@@ -148,8 +148,13 @@ class TestStartSessionAndGetNextCard:
 class TestSubmitReviewAndHelpers:
     def test_calculate_elapsed_days_new_card(self, review_manager: ReviewSessionManager, sample_card: Card):
         """Test _calculate_elapsed_days for a card with no prior reviews."""
-        review_ts = sample_card.added_at + timedelta(days=5, hours=2) # Reviewed 5 days after adding
+        # Set explicit timestamps to avoid fixture-related date boundary issues
+        sample_card.added_at = datetime(2025, 6, 20, 12, 0, 0, tzinfo=timezone.utc)
+        review_ts = sample_card.added_at + timedelta(days=5, hours=2)  # This will be 2025-06-25 14:00:00 UTC
+
         elapsed_days = review_manager._calculate_elapsed_days(sample_card, [], review_ts)
+
+        # The difference between 2025-06-25 and 2025-06-20 is 5 days.
         assert elapsed_days == 5
 
     def test_calculate_elapsed_days_with_history(self, review_manager: ReviewSessionManager, sample_card: Card):
@@ -238,7 +243,8 @@ class TestSubmitReviewAndHelpers:
 
         assert returned_review is not None
         assert returned_review.last_review_id == 123 # From mock_db.add_review
-        assert returned_review.stab_after == scheduler_output["stability"]
+        assert returned_review.state == CardState[scheduler_output["state"].title()]
+        assert returned_review.next_due_date == scheduler_output["next_review_due"]
 
     def test_submit_review_successful_with_history(self, review_manager: ReviewSessionManager, mock_db: MagicMock, sample_card: Card):
         """Test submit_review for a card with existing review history."""
