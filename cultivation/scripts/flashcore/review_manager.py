@@ -168,7 +168,7 @@ class ReviewSessionManager:
         if len(self.review_queue) < initial_len:
             logger.debug(f"Removed card {card_uuid} from review queue.")
 
-        self.current_session_card_uuids.discard(card_uuid)
+
 
     def submit_review(self, card_uuid: UUID, rating: int, resp_ms: int, review_ts: Optional[datetime.datetime] = None) -> Optional[Card]:
         """
