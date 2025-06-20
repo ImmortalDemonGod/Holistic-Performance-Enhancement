@@ -178,15 +178,16 @@ class ReviewSessionManager:
         Returns:
             The updated card object, or None if the review failed.
         """
-        if card_uuid not in self.current_session_card_uuids:
-            logger.warning(f"Attempted to review card {card_uuid} not in the current session. Ignoring.")
-            return None
-
         ts = self._normalize_review_timestamp(review_ts)
         card = self.db.get_card_by_uuid(card_uuid)
         if not card:
             logger.error(f"Card with UUID {card_uuid} not found for review submission.")
             return None
+
+        # If card is not in the current session, add it.
+        if card_uuid not in self.current_session_card_uuids:
+            logger.info(f"Adding card {card_uuid} to the current session for review.")
+            self.current_session_card_uuids.add(card_uuid)
 
         history = self.db.get_reviews_for_card(card_uuid, order_by_ts_desc=False)
         elapsed_days = self._calculate_elapsed_days(card, history, ts)
@@ -212,7 +213,7 @@ class ReviewSessionManager:
             return None
 
         # Update the card's state, due date, and last review ID in the database
-        card.state = CardState[scheduler_output["state"]]
+        card.state = CardState[scheduler_output["state"].upper()]
         card.next_due_date = scheduler_output["next_review_due"]
         card.last_review_id = persisted_review.review_id
         card.modified_at = ts  # Also update modified_at to the review timestamp
