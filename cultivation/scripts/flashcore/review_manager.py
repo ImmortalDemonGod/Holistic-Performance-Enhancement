@@ -7,9 +7,10 @@ import logging
 from typing import List, Optional
 from uuid import UUID
 import datetime
+from collections import deque
 
 from .database import FlashcardDatabase
-from .scheduler import FSRS_Scheduler # FSRSSchedulerConfig if needed for custom config
+from .scheduler import FSRS_Scheduler
 from .card import Card, Review
 
 logger = logging.getLogger(__name__)
@@ -25,19 +26,22 @@ class ReviewSessionManager:
     - Getting the count of currently due cards.
     """
 
-    def __init__(self, db: FlashcardDatabase):
+    def __init__(self, db: FlashcardDatabase, scheduler: FSRS_Scheduler):
         """
         Initializes the ReviewSessionManager.
 
         Args:
             db: An instance of FlashcardDatabase to interact with the card store.
+            scheduler: An instance of FSRS_Scheduler for review scheduling.
         """
         if not isinstance(db, FlashcardDatabase):
             raise TypeError("db must be an instance of FlashcardDatabase")
+        if not isinstance(scheduler, FSRS_Scheduler):
+            raise TypeError("scheduler must be an instance of FSRS_Scheduler")
         
         self.db: FlashcardDatabase = db
-        self.scheduler: FSRS_Scheduler = FSRS_Scheduler() # Uses default config
-        self.review_queue: List[Card] = []
+        self.scheduler: FSRS_Scheduler = scheduler
+        self.review_queue: deque[Card] = deque()
         self.current_session_card_uuids: set[UUID] = set()
 
         logger.info("ReviewSessionManager initialized.")
@@ -56,7 +60,7 @@ class ReviewSessionManager:
         logger.info(f"Starting new review session for date {today} with limit {limit}.")
         
         due_cards = self.db.get_due_cards(on_date=today, limit=limit)
-        self.review_queue = due_cards
+        self.review_queue = deque(due_cards)
         self.current_session_card_uuids = {card.uuid for card in due_cards}
         
         logger.info(f"Review session started with {len(self.review_queue)} cards.")
@@ -72,8 +76,7 @@ class ReviewSessionManager:
             logger.info("Review queue is empty. No next card.")
             return None
         
-        next_card = self.review_queue.pop(0) # FIFO
-        # self.current_session_card_uuids.remove(next_card.uuid) # No, keep track of all cards loaded in this session
+        next_card = self.review_queue.popleft() # O(1) operation
         logger.info(f"Retrieved card {next_card.uuid} from queue. {len(self.review_queue)} cards remaining.")
         return next_card
 
@@ -155,7 +158,7 @@ class ReviewSessionManager:
 
             # If card was in the current session's queue, remove it
             if review.card_uuid in self.current_session_card_uuids:
-                self.review_queue = [c for c in self.review_queue if c.uuid != review.card_uuid]
+                self.review_queue = deque([c for c in self.review_queue if c.uuid != review.card_uuid])
 
             return review
         except Exception as e:
@@ -206,13 +209,10 @@ class ReviewSessionManager:
 
     def get_due_card_count(self) -> int:
         """
-        Gets the total number of cards currently due for review.
+        Gets the total number of cards currently due for review using the efficient database count method.
 
         Returns:
             The count of due cards.
         """
         today = datetime.datetime.now(datetime.timezone.utc).date()
-        # The database does not have a dedicated count method. Fetch all due cards and return the count.
-        # A high limit is used to ensure all cards are fetched.
-        due_cards = self.db.get_due_cards(on_date=today, limit=999999)
-        return len(due_cards)
+        return self.db.get_due_card_count(on_date=today)
