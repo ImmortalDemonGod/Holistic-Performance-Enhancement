@@ -211,22 +211,21 @@ class ReviewSessionManager:
             return None
 
         # Update the card's state and due date in the database
+        # The scheduler returns state as a string (e.g. "Review"), but the DB expects a CardState enum.
+        new_card_state = CardState[scheduler_output["state"]]
         self.db.update_card_state(
             card_uuid=card_uuid,
-            state=scheduler_output["next_state"],
+            state=new_card_state,
             due=scheduler_output["next_review_due"]
         )
 
         # The card object in memory is now stale. We need to get the updated version.
         updated_card = self.db.get_card_by_uuid(card_uuid)
         
-        logger.info(f"Updated card {card_uuid} with new state. New due date: {updated_card.due.date()}.")
+        if updated_card and updated_card.next_due_date:
+            logger.info(f"Updated card {card_uuid} with new state. New due date: {updated_card.next_due_date}.")
         
         return updated_card
-            reps=card.reps,
-            lapses=card.lapses,
-        )
-        return new_card_state
 
     def get_due_card_count(self) -> int:
         """
