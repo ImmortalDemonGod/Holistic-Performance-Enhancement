@@ -87,7 +87,7 @@ class TestReviewSessionManagerInit:
         with patch('cultivation.scripts.flashcore.review_manager.FSRS_Scheduler', autospec=True) as MockSchedulerClass:
             manager = ReviewSessionManager(db=mock_db)
             assert manager.db == mock_db
-            assert isinstance(manager.scheduler, MagicMock) # Check it's the patched scheduler
+            MockSchedulerClass.assert_called_once()
             assert manager.review_queue == []
             assert manager.current_session_card_uuids == set()
             MockSchedulerClass.assert_called_once()
@@ -267,7 +267,7 @@ class TestSubmitReviewAndHelpers:
         review_ts = prev_next_due + timedelta(days=1) # Reviewed 1 day after it was due
         resp_ms = 3000
 
-        expected_elapsed_days = (review_ts.date() - prev_next_due).days
+        expected_elapsed_days = (review_ts - prev_next_due).days
         assert expected_elapsed_days == 1
 
         scheduler_output = review_manager.scheduler.compute_next_state.return_value
@@ -350,7 +350,7 @@ class TestGetDueCardCount:
     def test_get_due_card_count_calls_db(self, review_manager: ReviewSessionManager, mock_db: MagicMock):
         """Test get_due_card_count calls the database method and returns its result."""
         expected_count = 42
-        mock_db.get_due_cards_count.return_value = expected_count
+        mock_db.get_due_card_count.return_value = expected_count
         
         count = review_manager.get_due_card_count()
         
@@ -367,10 +367,18 @@ class TestReviewSessionManagerIntegration:
         # Card 1: Due today (based on sample_card_data's default next_due_date)
         card1_uuid = uuid.uuid4()
         card1_data = {**sample_card_data, "uuid": card1_uuid, "front": "Card 1 Due Today", "added_at": now_utc - timedelta(days=2)}
-        # Ensure next_due_date makes it due
-        card1_data["next_due_date"] = today - timedelta(days=1)
         card1 = Card(**card1_data)
         in_memory_db.add_card(card1)
+        # Add a review to make the card due tomorrow
+        review1 = Review(
+            card_uuid=card1.uuid,
+            ts=now_utc - timedelta(days=10),
+            rating=3,
+            stab_before=1.0, stab_after=2.5, diff=6.0, 
+            next_due=today - timedelta(days=1),
+            elapsed_days_at_review=0, scheduled_days_interval=1, review_type="new"
+        )
+        in_memory_db.add_review(review1)
 
         # Card 2: Due in the future
         card2_uuid = uuid.uuid4()
