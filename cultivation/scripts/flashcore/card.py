@@ -29,7 +29,7 @@ class Card(BaseModel):
         default_factory=uuid.uuid4,
         description="Unique UUIDv4 identifier for the card. Auto-generated if not provided in YAML 'id'."
     )
-    last_review_id: Optional[UUID] = Field(default=None, description="The ID of the last review record associated with this card.")
+    last_review_id: Optional[int] = Field(default=None, description="The ID of the last review record associated with this card.")
     next_due_date: Optional[date] = Field(default=None, description="The next date the card is scheduled for review.")
 
     deck_name: str = Field(
