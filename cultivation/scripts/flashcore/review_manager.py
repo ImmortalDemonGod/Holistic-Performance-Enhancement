@@ -160,7 +160,7 @@ class ReviewSessionManager:
             logger.error(f"Database error submitting review for card {review.card_uuid}: {e}")
             return None
 
-    def submit_review(self, card_uuid: UUID, rating: int, resp_ms: int) -> Optional[Card]:
+    def submit_review(self, card_uuid: UUID, rating: int, resp_ms: int, review_ts: Optional[datetime.datetime] = None) -> Optional[Card]:
         """
         Processes a review for a given card.
 
@@ -173,6 +173,7 @@ class ReviewSessionManager:
             card_uuid: The UUID of the card being reviewed.
             rating: The user's rating for the card (e.g., 1-4).
             resp_ms: The user's response time in milliseconds.
+            review_ts: The timestamp of the review. If None, defaults to now(). For testing.
 
         Returns:
             The updated card object, or None if the review failed.
@@ -181,7 +182,7 @@ class ReviewSessionManager:
             logger.warning(f"Attempted to review card {card_uuid} not in the current session. Ignoring.")
             return None
 
-        ts = self._normalize_review_timestamp(None)
+        ts = self._normalize_review_timestamp(review_ts)
         card = self.db.get_card_by_uuid(card_uuid)
         if not card:
             logger.error(f"Card with UUID {card_uuid} not found for review submission.")
@@ -210,24 +211,18 @@ class ReviewSessionManager:
         if not persisted_review:
             return None
 
-        # Update the card's state and due date in the database
-        # The scheduler returns state as a string (e.g. "Review"), but the DB expects a CardState enum.
-        new_card_state = CardState[scheduler_output["state"]]
-        self.db.update_card_state(
-            card_uuid=card_uuid,
-            state=new_card_state,
-            due=scheduler_output["next_review_due"]
-        )
+        # Update the card's state, due date, and last review ID in the database
+        card.state = CardState[scheduler_output["state"]]
+        card.next_due_date = scheduler_output["next_review_due"]
+        card.last_review_id = persisted_review.review_id
+        card.modified_at = ts  # Also update modified_at to the review timestamp
 
-        # The card object in memory is now stale. We need to get the updated version.
-        updated_card = self.db.get_card_by_uuid(card_uuid)
-        
-        if updated_card and updated_card.next_due_date:
-            logger.info(f"Updated card {card_uuid} with new state. New due date: {updated_card.next_due_date}.")
-            return updated_card
-        else:
-            logger.error(f"Failed to retrieve updated card {card_uuid} after review submission.")
-            return None
+        self.db.upsert_cards_batch([card])
+
+        # Remove the card from the in-memory queue for this session
+        self._remove_card_from_queue(card_uuid)
+
+        return card
 
     def get_due_card_count(self) -> int:
         """
