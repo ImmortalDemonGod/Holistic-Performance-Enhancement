@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple, Dict, Any, Sequence, Union
 from datetime import datetime, date
 import logging
+import pandas as pd
 
 # Local project imports from previously defined modules
 try:
@@ -204,6 +205,15 @@ class FlashcardDatabase:
         if state_val:
             row_dict["state"] = CardState[state_val]
         # If state_val is None, we don't add it to the dict, so Pydantic uses the default.
+
+        # Convert any pandas missing values (NaT, NaN, etc.) to None.
+        # This is a general fix for any nullable fields that might come from the DB as missing.
+        for key, value in list(row_dict.items()):
+            # Skip collections like lists of media paths or sets of tags.
+            if isinstance(value, (list, set)):
+                continue
+            if pd.isna(value):
+                row_dict[key] = None
 
         return Card(**row_dict)
 
@@ -446,25 +456,39 @@ class FlashcardDatabase:
         if self.read_only:
             raise DatabaseConnectionError("Cannot add reviews in read-only mode.")
         conn = self.get_connection()
-        review_params_list = [self._review_to_db_params_tuple(r) for r in reviews]
-        sql = """
+        insert_review_sql = """
         INSERT INTO reviews (card_uuid, ts, rating, resp_ms, stab_before, stab_after, diff, next_due,
                              elapsed_days_at_review, scheduled_days_interval, review_type)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING review_id;
         """
+        update_card_sql = """
+        UPDATE cards
+        SET next_due_date = $1, last_review_id = $2
+        WHERE uuid = $3;
+        """
         try:
             with conn.cursor() as cursor:
                 cursor.begin()
                 result_ids = []
-                for params in review_params_list:
-                    result = cursor.execute(sql, params).fetchone()
-                    result_ids.append(int(result[0]))
+                for review in reviews:
+                    review_params = self._review_to_db_params_tuple(review)
+                    # Insert review and get new ID
+                    new_review_id_tuple = cursor.execute(insert_review_sql, review_params).fetchone()
+                    if not new_review_id_tuple or not new_review_id_tuple[0]:
+                        conn.rollback()
+                        raise CardOperationError(f"Failed to insert review for card {review.card_uuid}, no review_id returned.")
+                    
+                    new_review_id = int(new_review_id_tuple[0])
+                    result_ids.append(new_review_id)
+
+                    # Update the corresponding card
+                    update_params = (review.next_due, new_review_id, review.card_uuid)
+                    cursor.execute(update_card_sql, update_params)
+
                 cursor.commit()
-            review_ids = result_ids
-            logger.info("Successfully batch-added %d reviews.", len(review_ids))
-            logger.info(f"Successfully batch-added {len(review_ids)} reviews.")
-            return review_ids
+            logger.info(f"Successfully batch-added {len(result_ids)} reviews and updated corresponding cards.")
+            return result_ids
         except duckdb.ConstraintException as e:
             logger.error(f"Failed to add review in batch due to constraint violation: {e}")
             # On constraint violation, DuckDB automatically rolls back the transaction.
