@@ -63,7 +63,7 @@ class Card(BaseModel):
         default=None,
         description="Optional reference to an originating task ID (e.g., from Task Master)."
     )
-    media: Optional[List[Path]] = Field(
+    media: List[Path] = Field(
         default_factory=list,
         description="Optional list of paths to media files (images, audio, etc.) associated with the card. Paths should be relative to a defined assets root directory (e.g., 'outputs/flashcards/assets/')."
     )
