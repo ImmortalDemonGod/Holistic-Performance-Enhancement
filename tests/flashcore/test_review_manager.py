@@ -4,6 +4,7 @@ Unit and integration tests for ReviewSessionManager in flashcore.review_manager.
 
 import pytest
 import uuid
+from collections import deque
 from datetime import datetime, date, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
@@ -55,47 +56,38 @@ def sample_card(sample_card_data: dict) -> Card:
     return Card(**sample_card_data)
 
 @pytest.fixture
-def review_manager(mock_db: MagicMock) -> ReviewSessionManager:
-    """Provides a ReviewSessionManager instance with a mocked DB."""
-    # Patch the FSRS_Scheduler instantiation within ReviewSessionManager's scope
-    with patch('cultivation.scripts.flashcore.review_manager.FSRS_Scheduler', autospec=True) as MockSchedulerClass:
-        mock_scheduler_instance = MockSchedulerClass.return_value
-        mock_scheduler_instance.compute_next_state.return_value = {
-            "stability": 10.0,
-            "difficulty": 5.0,
-            "next_review_due": date.today() + timedelta(days=10),
-            "scheduled_days": 10,
-            "state": "REVIEW"
-        }
-        manager = ReviewSessionManager(db=mock_db)
-        # Attach the instance for tests to assert calls against it if needed
-        manager.scheduler = mock_scheduler_instance 
-        return manager
+def review_manager(mock_db: MagicMock, mock_scheduler: MagicMock) -> ReviewSessionManager:
+    """Provides a ReviewSessionManager instance with mocked DB and scheduler."""
+    return ReviewSessionManager(db=mock_db, scheduler=mock_scheduler)
+
 
 @pytest.fixture
 def in_memory_db() -> FlashcardDatabase:
     """Provides an in-memory FlashcardDatabase instance for integration tests."""
     db = FlashcardDatabase(db_path=':memory:')
-    # Schema is created on init by FlashcardDatabase
+    db.initialize_schema()
     return db
 
-# --- Test Cases --- 
+# --- Test Cases ---
 
 class TestReviewSessionManagerInit:
-    def test_init_successful(self, mock_db: MagicMock):
+    def test_init_successful(self, mock_db: MagicMock, mock_scheduler: MagicMock):
         """Test successful initialization of ReviewSessionManager."""
-        with patch('cultivation.scripts.flashcore.review_manager.FSRS_Scheduler', autospec=True) as MockSchedulerClass:
-            manager = ReviewSessionManager(db=mock_db)
-            assert manager.db == mock_db
-            MockSchedulerClass.assert_called_once()
-            assert manager.review_queue == []
-            assert manager.current_session_card_uuids == set()
-            MockSchedulerClass.assert_called_once()
+        manager = ReviewSessionManager(db=mock_db, scheduler=mock_scheduler)
+        assert manager.db == mock_db
+        assert manager.scheduler == mock_scheduler
+        assert isinstance(manager.review_queue, deque)
+        assert manager.current_session_card_uuids == set()
 
-    def test_init_type_error_for_db(self):
+    def test_init_type_error_for_db(self, mock_scheduler: MagicMock):
         """Test that TypeError is raised if db is not FlashcardDatabase."""
         with pytest.raises(TypeError, match="db must be an instance of FlashcardDatabase"):
-            ReviewSessionManager(db="not_a_db_instance")
+            ReviewSessionManager(db="not_a_db_instance", scheduler=mock_scheduler)
+
+    def test_init_type_error_for_scheduler(self, mock_db: MagicMock):
+        """Test that TypeError is raised if scheduler is not FSRS_Scheduler."""
+        with pytest.raises(TypeError, match="scheduler must be an instance of FSRS_Scheduler"):
+            ReviewSessionManager(db=mock_db, scheduler="not_a_scheduler")
 
 class TestStartSessionAndGetNextCard:
     def test_start_session_populates_queue(self, review_manager: ReviewSessionManager, mock_db: MagicMock, sample_card: Card):
@@ -106,14 +98,14 @@ class TestStartSessionAndGetNextCard:
         review_manager.start_session(limit=10)
         
         mock_db.get_due_cards.assert_called_once_with(on_date=date.today(), limit=10)
-        assert review_manager.review_queue == mock_cards
+        assert list(review_manager.review_queue) == mock_cards
         assert review_manager.current_session_card_uuids == {c.uuid for c in mock_cards}
 
     def test_start_session_clears_existing_queue(self, review_manager: ReviewSessionManager, mock_db: MagicMock, sample_card: Card):
         """Test start_session clears any pre-existing queue before populating."""
         # Pre-populate queue
         initial_card = Card(**{**sample_card.model_dump(), "uuid": uuid.uuid4(), "front": "Old Card"})
-        review_manager.review_queue = [initial_card]
+        review_manager.review_queue = deque([initial_card])
         review_manager.current_session_card_uuids = {initial_card.uuid}
         
         new_mock_cards = [sample_card]
@@ -122,7 +114,7 @@ class TestStartSessionAndGetNextCard:
         review_manager.start_session(limit=5)
         
         mock_db.get_due_cards.assert_called_with(on_date=date.today(), limit=5)
-        assert review_manager.review_queue == new_mock_cards
+        assert list(review_manager.review_queue) == new_mock_cards
         assert initial_card not in review_manager.review_queue
         assert review_manager.current_session_card_uuids == {c.uuid for c in new_mock_cards}
 
@@ -131,18 +123,18 @@ class TestStartSessionAndGetNextCard:
         card1 = sample_card
         card2_uuid = uuid.uuid4()
         card2 = Card(**{**sample_card.model_dump(), "uuid": card2_uuid, "front": "Second Card"})
-        review_manager.review_queue = [card1, card2]
+        review_manager.review_queue = deque([card1, card2])
         review_manager.current_session_card_uuids = {card1.uuid, card2.uuid}
         
         next_c = review_manager.get_next_card()
         assert next_c == card1
-        assert review_manager.review_queue == [card2]
+        assert list(review_manager.review_queue) == [card2]
         # current_session_card_uuids should remain unchanged by get_next_card
         assert review_manager.current_session_card_uuids == {card1.uuid, card2.uuid} 
 
         next_c_2 = review_manager.get_next_card()
         assert next_c_2 == card2
-        assert review_manager.review_queue == []
+        assert list(review_manager.review_queue) == []
         assert review_manager.current_session_card_uuids == {card1.uuid, card2.uuid}
 
     def test_get_next_card_empty_queue_returns_none(self, review_manager: ReviewSessionManager):
@@ -350,14 +342,15 @@ class TestGetDueCardCount:
     def test_get_due_card_count_calls_db(self, review_manager: ReviewSessionManager, mock_db: MagicMock):
         """Test get_due_card_count calls the database method and returns its result."""
         expected_count = 42
-        # The method now calls get_due_cards and returns the length.
-        mock_db.get_due_cards.return_value = [MagicMock()] * expected_count
+        # The method should call the efficient get_due_card_count method on the db.
+        mock_db.get_due_card_count.return_value = expected_count
 
         count = review_manager.get_due_card_count()
 
         assert count == expected_count
         # Verify the underlying DB method is called correctly
-        mock_db.get_due_cards.assert_called_once_with(on_date=date.today(), limit=999999)
+        mock_db.get_due_card_count.assert_called_once_with(on_date=date.today())
+        mock_db.get_due_cards.assert_not_called() # Ensure the less efficient method is not called.
 
 class TestReviewSessionManagerIntegration:
     def test_e2e_session_flow(self, in_memory_db: FlashcardDatabase, sample_card_data: dict):
@@ -399,8 +392,9 @@ class TestReviewSessionManagerIntegration:
         )
         in_memory_db.add_review(review_for_card2) # This will also update card2's next_due_date in DB
 
-        # 2. Initialize ReviewSessionManager with the real DB
-        manager = ReviewSessionManager(db=in_memory_db)
+        # 2. Initialize ReviewSessionManager with the real DB and a real scheduler
+        scheduler = FSRS_Scheduler()
+        manager = ReviewSessionManager(db=in_memory_db, scheduler=scheduler)
 
         # 3. Start session & verify due counts
         # get_due_cards_count uses `next_due_date <= on_date`
