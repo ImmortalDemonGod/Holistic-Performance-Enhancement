@@ -173,7 +173,16 @@ class ReviewSessionManager:
             logger.error(f"Database error submitting review for card {card_uuid}: {e}")
             return None
 
-    # --- Placeholder for future methods ---
-    # def get_due_card_count(self) -> int:
-    #     pass
+    def get_due_card_count(self) -> int:
+        """
+        Gets the total number of cards currently due for review.
+
+        Returns:
+            The count of due cards.
+        """
+        today = datetime.datetime.now(datetime.timezone.utc).date()
+        count = self.db.get_due_card_count(on_date=today)
+        logger.info(f"There are {count} cards due as of {today}.")
+        return count
+
 
