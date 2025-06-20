@@ -43,6 +43,7 @@ class Card(BaseModel):
     )
     last_review_id: Optional[int] = Field(default=None, description="The ID of the last review record associated with this card.")
     next_due_date: Optional[date] = Field(default=None, description="The next date the card is scheduled for review.")
+    state: CardState = Field(default=CardState.New, description="The current FSRS state of the card.")
 
     deck_name: str = Field(
         ...,
