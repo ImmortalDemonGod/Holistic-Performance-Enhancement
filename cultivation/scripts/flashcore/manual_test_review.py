@@ -34,8 +34,10 @@ class MockDatabase(FlashcardDatabase):
     def get_card_by_uuid(self, card_uuid: UUID) -> Optional[Card]:
         return self._cards.get(card_uuid)
 
-    def get_reviews_for_card(self, card_uuid: UUID) -> List[Review]:
-        return self._reviews.get(card_uuid, [])
+    def get_reviews_for_card(self, card_uuid: UUID, order_by_ts_desc: bool = True) -> List[Review]:
+        reviews = self._reviews.get(card_uuid, [])
+        # The mock doesn't need to implement sorting for this test, but it accepts the arg.
+        return reviews
 
     def add_review(self, review: Review) -> None:
         if review.card_uuid not in self._reviews:
