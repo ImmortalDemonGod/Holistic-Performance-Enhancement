@@ -295,35 +295,24 @@ class FlashcardDatabase:
             raise CardOperationError(f"Failed to get all cards: {e}", original_exception=e) from e
 
     def get_due_cards(self, on_date: date, limit: Optional[int] = 20) -> List['Card']:
+        """
+        Fetches cards due for review on or before a given date, ordered by due date.
+        A card is considered due if its next_due_date is on or before the specified date,
+        or if it has never been reviewed (next_due_date is NULL).
+        """
         if limit == 0:
             return []
         conn = self.get_connection()
         sql = """
-        SELECT c.*
-        FROM cards c
-        WHERE c.uuid NOT IN (
-            SELECT r_future.card_uuid
-            FROM reviews r_future
-            INNER JOIN (
-                SELECT card_uuid, MAX(ts) as max_ts
-                FROM reviews
-                WHERE next_due > $1
-                GROUP BY card_uuid
-            ) latest_future_rev ON r_future.card_uuid = latest_future_rev.card_uuid 
-                               AND r_future.ts = latest_future_rev.max_ts
-            WHERE r_future.next_due > $1
-        )
-        ORDER BY (
-            SELECT MIN(r_order.next_due) 
-            FROM reviews r_order 
-            WHERE r_order.card_uuid = c.uuid AND r_order.next_due <= $1
-        ) ASC NULLS LAST,
-        c.added_at ASC
+        SELECT * FROM cards
+        WHERE next_due_date <= $1 OR next_due_date IS NULL
+        ORDER BY next_due_date ASC NULLS FIRST, added_at ASC
         """
         params: List[Any] = [on_date]
         if limit is not None and limit > 0:
             sql += f" LIMIT ${len(params) + 1}"
             params.append(limit)
+
         try:
             result_df = conn.execute(sql, params).fetch_df()
             if result_df.empty:
@@ -332,6 +321,22 @@ class FlashcardDatabase:
         except duckdb.Error as e:
             logger.error(f"Error fetching due cards for date {on_date}: {e}")
             raise CardOperationError(f"Failed to fetch due cards: {e}", original_exception=e) from e
+
+    def get_due_card_count(self, on_date: date) -> int:
+        """
+        Efficiently counts the number of cards due for review on or before a given date.
+        A card is considered due if its next_due_date is on or before the specified date,
+        or if it has never been reviewed (next_due_date is NULL).
+        """
+        conn = self.get_connection()
+        # Cards are due if they have a due date in the past/present, or have never been reviewed (NULL)
+        sql = "SELECT COUNT(*) FROM cards WHERE next_due_date <= $1 OR next_due_date IS NULL;"
+        try:
+            result = conn.execute(sql, (on_date,)).fetchone()
+            return result[0] if result else 0
+        except duckdb.Error as e:
+            logger.error(f"Error counting due cards for date {on_date}: {e}")
+            raise CardOperationError(f"Failed to count due cards: {e}", original_exception=e) from e
 
     def delete_cards_by_uuids_batch(self, card_uuids: Sequence[uuid.UUID]) -> int:
         if not card_uuids:
