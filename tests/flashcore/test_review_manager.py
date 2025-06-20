@@ -291,7 +291,7 @@ class TestSubmitReviewAndHelpers:
         unknown_uuid = uuid.uuid4()
         mock_db.get_card_by_uuid.return_value = None
         
-        returned_review = review_manager.submit_review(unknown_uuid, 2)
+        returned_review = review_manager.submit_review(unknown_uuid, 2, resp_ms=1000)
         
         assert returned_review is None
         mock_db.get_card_by_uuid.assert_called_once_with(unknown_uuid)
@@ -305,7 +305,7 @@ class TestSubmitReviewAndHelpers:
         mock_db.get_reviews_for_card.return_value = []
         review_manager.scheduler.compute_next_state.side_effect = ValueError("Invalid rating for FSRS")
         
-        returned_review = review_manager.submit_review(sample_card.uuid, 99) # Invalid rating to trigger error
+        returned_review = review_manager.submit_review(sample_card.uuid, 99, resp_ms=1000) # Invalid rating to trigger error
         
         assert returned_review is None
         review_manager.scheduler.compute_next_state.assert_called_once()
@@ -317,7 +317,7 @@ class TestSubmitReviewAndHelpers:
         mock_db.get_reviews_for_card.return_value = []
         mock_db.add_review.side_effect = Exception("DB connection failed")
         
-        returned_review = review_manager.submit_review(sample_card.uuid, 2)
+        returned_review = review_manager.submit_review(sample_card.uuid, 2, resp_ms=1000)
         
         assert returned_review is None
         mock_db.add_review.assert_called_once()
@@ -332,7 +332,7 @@ class TestSubmitReviewAndHelpers:
         mock_db.get_card_by_uuid.return_value = sample_card
         mock_db.get_reviews_for_card.return_value = []
 
-        review_manager.submit_review(sample_card.uuid, rating=2)
+        review_manager.submit_review(sample_card.uuid, rating=2, resp_ms=1000)
 
         assert sample_card not in review_manager.review_queue
         # current_session_card_uuids should still contain it, as it tracks all cards loaded in session
