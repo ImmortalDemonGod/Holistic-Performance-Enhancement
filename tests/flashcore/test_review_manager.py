@@ -237,7 +237,7 @@ class TestSubmitReviewAndHelpers:
         assert actual_review_arg.model_dump(exclude={'review_id'}) == expected_review_args.model_dump(exclude={'review_id'})
 
         assert returned_review is not None
-        assert returned_review.review_id == 123 # From mock_db.add_review
+        assert returned_review.last_review_id == 123 # From mock_db.add_review
         assert returned_review.stab_after == scheduler_output["stability"]
 
     def test_submit_review_successful_with_history(self, review_manager: ReviewSessionManager, mock_db: MagicMock, sample_card: Card):
@@ -284,7 +284,7 @@ class TestSubmitReviewAndHelpers:
         assert actual_review_arg.model_dump(exclude={'review_id'}) == expected_review_args.model_dump(exclude={'review_id'})
 
         assert returned_review is not None
-        assert returned_review.review_id == 123 # From mock_db.add_review
+        assert returned_review.last_review_id == 123 # From mock_db.add_review
 
     def test_submit_review_card_not_found(self, review_manager: ReviewSessionManager, mock_db: MagicMock):
         """Test submit_review when the card UUID does not exist."""
