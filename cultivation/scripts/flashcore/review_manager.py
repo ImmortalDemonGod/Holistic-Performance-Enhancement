@@ -11,7 +11,7 @@ from collections import deque
 
 from .database import FlashcardDatabase
 from .scheduler import FSRS_Scheduler
-from .card import Card, Review
+from .card import Card, Review, CardState
 
 logger = logging.getLogger(__name__)
 
@@ -150,40 +150,41 @@ class ReviewSessionManager:
         )
 
     def _persist_review(self, review: Review) -> Optional[Review]:
-        """Saves the review to the database and updates the session queue."""
+        """Saves the review to the database."""
         try:
             review_id = self.db.add_review(review)
             review.review_id = review_id  # Update model with DB-generated ID
             logger.info(f"Successfully submitted review ID {review_id} for card {review.card_uuid}.")
-
-            # If card was in the current session's queue, remove it
-            if review.card_uuid in self.current_session_card_uuids:
-                self.review_queue = deque([c for c in self.review_queue if c.uuid != review.card_uuid])
-
             return review
         except Exception as e:
             logger.error(f"Database error submitting review for card {review.card_uuid}: {e}")
             return None
 
-    def submit_review(self, card_uuid: UUID, rating: int, review_ts: Optional[datetime.datetime] = None, resp_ms: Optional[int] = None) -> Optional[Review]:
+    def submit_review(self, card_uuid: UUID, rating: int, resp_ms: int) -> Optional[CardState]:
         """
-        Submits a review for a given card by orchestrating data fetching,
-        scheduling, and persistence.
+        Processes a review for a given card.
+
+        - Fetches the card and its history.
+        - Calculates the next review state using the scheduler.
+        - Creates a new Review object.
+        - Persists the new review and updates the card's state in the database.
 
         Args:
             card_uuid: The UUID of the card being reviewed.
-            rating: The user's rating (0=Again, 1=Hard, 2=Good, 3=Easy).
-            review_ts: The UTC timestamp of the review. Defaults to now if None.
-            resp_ms: Optional response time in milliseconds.
+            rating: The user's rating for the card (e.g., 1-4).
+            resp_ms: The user's response time in milliseconds.
 
         Returns:
-            The newly created Review object if successful, else None.
+            The new state of the card after the review, or None if the review failed.
         """
-        ts = self._normalize_review_timestamp(review_ts)
+        if card_uuid not in self.current_session_card_uuids:
+            logger.warning(f"Attempted to review card {card_uuid} not in the current session. Ignoring.")
+            return None
 
+        ts = self._normalize_review_timestamp(None)
         card = self.db.get_card_by_uuid(card_uuid)
         if not card:
-            logger.error(f"submit_review: Card with UUID {card_uuid} not found.")
+            logger.error(f"Card with UUID {card_uuid} not found for review submission.")
             return None
 
         history = self.db.get_reviews_for_card(card_uuid, order_by_ts_desc=False)
@@ -205,7 +206,39 @@ class ReviewSessionManager:
             resp_ms=resp_ms,
         )
 
-        return self._persist_review(new_review)
+        persisted_review = self._persist_review(new_review)
+        if not persisted_review:
+            return None
+
+        # Update card's state based on the new review
+        card.due = scheduler_output["next_review_due"]
+        card.stability = scheduler_output["stability"]
+        card.difficulty = scheduler_output["difficulty"]
+        card.reps += 1
+        # FSRS 'state' can be 'New', 'Learn', 'Review', 'Relearn'. 'Relearn' indicates a lapse.
+        if scheduler_output["state"] == "Relearn":
+            card.lapses += 1
+        
+        # Persist the updated card state. Assuming this method exists in the DB layer.
+        self.db.update_card_state(
+            card_uuid=card.uuid,
+            due=card.due,
+            stability=card.stability,
+            difficulty=card.difficulty,
+            reps=card.reps,
+            lapses=card.lapses,
+        )
+        logger.info(f"Updated card {card_uuid} with new state. New due date: {card.due.date()}.")
+
+        # Return the new state
+        new_card_state = CardState(
+            due=card.due,
+            stability=card.stability,
+            difficulty=card.difficulty,
+            reps=card.reps,
+            lapses=card.lapses,
+        )
+        return new_card_state
 
     def get_due_card_count(self) -> int:
         """
