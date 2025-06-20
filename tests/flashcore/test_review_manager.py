@@ -223,7 +223,7 @@ class TestSubmitReviewAndHelpers:
         returned_review = review_manager.submit_review(sample_card.uuid, rating, review_ts, resp_ms)
 
         mock_db.get_card_by_uuid.assert_called_once_with(sample_card.uuid)
-        mock_db.get_reviews_for_card.assert_called_once_with(sample_card.uuid, order_desc=False)
+        mock_db.get_reviews_for_card.assert_called_once_with(sample_card.uuid, order_by_ts_desc=False)
         review_manager.scheduler.compute_next_state.assert_called_once_with([], rating, review_ts)
         
         expected_review_args = Review(
@@ -275,7 +275,7 @@ class TestSubmitReviewAndHelpers:
         returned_review = review_manager.submit_review(sample_card.uuid, rating, review_ts, resp_ms)
 
         mock_db.get_card_by_uuid.assert_called_once_with(sample_card.uuid)
-        mock_db.get_reviews_for_card.assert_called_once_with(sample_card.uuid, order_desc=False)
+        mock_db.get_reviews_for_card.assert_called_once_with(sample_card.uuid, order_by_ts_desc=False)
         review_manager.scheduler.compute_next_state.assert_called_once_with(history, rating, review_ts)
         
         expected_review_args = Review(
@@ -352,11 +352,12 @@ class TestGetDueCardCount:
         expected_count = 42
         # The method now calls get_due_cards and returns the length.
         mock_db.get_due_cards.return_value = [MagicMock()] * expected_count
-        
+
         count = review_manager.get_due_card_count()
-        
+
         assert count == expected_count
-        mock_db.get_due_card_count.assert_called_once_with(on_date=date.today())
+        # Verify the underlying DB method is called correctly
+        mock_db.get_due_cards.assert_called_once_with(on_date=date.today(), limit=999999)
 
 class TestReviewSessionManagerIntegration:
     def test_e2e_session_flow(self, in_memory_db: FlashcardDatabase, sample_card_data: dict):
