@@ -224,8 +224,10 @@ class ReviewSessionManager:
         
         if updated_card and updated_card.next_due_date:
             logger.info(f"Updated card {card_uuid} with new state. New due date: {updated_card.next_due_date}.")
-        
-        return updated_card
+            return updated_card
+        else:
+            logger.error(f"Failed to retrieve updated card {card_uuid} after review submission.")
+            return None
 
     def get_due_card_count(self) -> int:
         """
