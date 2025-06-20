@@ -160,6 +160,16 @@ class ReviewSessionManager:
             logger.error(f"Database error submitting review for card {review.card_uuid}: {e}")
             return None
 
+    def _remove_card_from_queue(self, card_uuid: UUID):
+        """Removes a card from the in-memory review queue by its UUID."""
+        # Rebuild the deque to remove the card. This is simpler than finding and removing.
+        initial_len = len(self.review_queue)
+        self.review_queue = deque(c for c in self.review_queue if c.uuid != card_uuid)
+        if len(self.review_queue) < initial_len:
+            logger.debug(f"Removed card {card_uuid} from review queue.")
+
+        self.current_session_card_uuids.discard(card_uuid)
+
     def submit_review(self, card_uuid: UUID, rating: int, resp_ms: int, review_ts: Optional[datetime.datetime] = None) -> Optional[Card]:
         """
         Processes a review for a given card.
@@ -213,7 +223,7 @@ class ReviewSessionManager:
             return None
 
         # Update the card's state, due date, and last review ID in the database
-        card.state = CardState[scheduler_output["state"].upper()]
+        card.state = CardState[scheduler_output["state"].title()]
         card.next_due_date = scheduler_output["next_review_due"]
         card.last_review_id = persisted_review.review_id
         card.modified_at = ts  # Also update modified_at to the review timestamp
