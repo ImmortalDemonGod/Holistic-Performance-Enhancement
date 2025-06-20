@@ -8,7 +8,7 @@ from datetime import datetime, timezone, date
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-# Add the project root to the Python path
+# Add the project root to the Python path for module resolution
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
