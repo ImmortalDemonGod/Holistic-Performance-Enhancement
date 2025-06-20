@@ -210,10 +210,13 @@ class ReviewSessionManager:
         if not persisted_review:
             return None
 
-        # Update card's state based on the new review
-        card.due = scheduler_output["next_review_due"]
-        card.stability = scheduler_output["stability"]
-        card.difficulty = scheduler_output["difficulty"]
+        # Update the card's state and due date in the database
+        card.next_due_date = scheduler_output["next_review_due"]
+        self.db.update_card_state(
+            card_uuid=card_uuid,
+            state=scheduler_output["next_state"],
+            due=scheduler_output["next_review_due"]
+        )
         card.reps += 1
         # FSRS 'state' can be 'New', 'Learn', 'Review', 'Relearn'. 'Relearn' indicates a lapse.
         if scheduler_output["state"] == "Relearn":
