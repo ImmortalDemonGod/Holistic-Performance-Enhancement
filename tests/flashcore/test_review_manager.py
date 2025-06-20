@@ -350,7 +350,8 @@ class TestGetDueCardCount:
     def test_get_due_card_count_calls_db(self, review_manager: ReviewSessionManager, mock_db: MagicMock):
         """Test get_due_card_count calls the database method and returns its result."""
         expected_count = 42
-        mock_db.get_due_card_count.return_value = expected_count
+        # The method now calls get_due_cards and returns the length.
+        mock_db.get_due_cards.return_value = [MagicMock()] * expected_count
         
         count = review_manager.get_due_card_count()
         
