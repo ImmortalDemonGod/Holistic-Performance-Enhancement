@@ -131,7 +131,7 @@ class ReviewSessionManager:
             return None
 
         # Fetch history sorted chronologically (oldest first) for FSRS
-        history = self.db.get_reviews_for_card(card_uuid, order_desc=False)
+        history = self.db.get_reviews_for_card(card_uuid, order_by_ts_desc=False)
 
         elapsed_days = self._calculate_elapsed_days(card, history, review_ts)
 
@@ -181,8 +181,7 @@ class ReviewSessionManager:
             The count of due cards.
         """
         today = datetime.datetime.now(datetime.timezone.utc).date()
-        count = self.db.get_due_card_count(on_date=today)
-        logger.info(f"There are {count} cards due as of {today}.")
-        return count
-
-
+        # The database does not have a dedicated count method. Fetch all due cards and return the count.
+        # A high limit is used to ensure all cards are fetched.
+        due_cards = self.db.get_due_cards(on_date=today, limit=999999)
+        return len(due_cards)
