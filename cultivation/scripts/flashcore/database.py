@@ -186,7 +186,7 @@ class FlashcardDatabase:
         if media_paths_val is not None:
             row_dict["media"] = [Path(p) for p in media_paths_val]
         else:
-            row_dict["media"] = None
+            row_dict["media"] = []
 
         # Handle source_yaml_file: convert string to Path
         if row_dict.get("source_yaml_file"):
