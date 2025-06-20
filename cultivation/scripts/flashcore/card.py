@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import uuid
 import re
+from enum import IntEnum
 from uuid import UUID
 from datetime import datetime, date, timezone
 from typing import List, Optional, Set
@@ -15,6 +16,17 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # Regex for Kebab-case validation (e.g., "my-cool-tag", "learning-python-3")
 KEBAB_CASE_REGEX_PATTERN = r"^[a-z0-9]+(?:-[a-z0-9]+)*$"
+
+
+class CardState(IntEnum):
+    """
+    Represents the FSRS-defined state of a card's memory trace.
+    """
+    New = 0
+    Learning = 1
+    Review = 2
+    Relearning = 3
+
 
 class Card(BaseModel):
     """
