@@ -62,6 +62,7 @@ class FlashcardDatabase:
             modified_at         TIMESTAMP WITH TIME ZONE NOT NULL,
             last_review_id      BIGINT, -- FK to reviews.review_id, can be NULL
             next_due_date       DATE,   -- The next date the card is due for review
+            state               VARCHAR, -- Current state: NEW, LEARNING, REVIEW, RELEARNING
             origin_task         VARCHAR,
             media_paths         VARCHAR[],
             source_yaml_file    VARCHAR,
@@ -173,6 +174,9 @@ class FlashcardDatabase:
                 list(card.tags) if card.tags else None,
                 card.added_at,
                 card.modified_at,
+                card.last_review_id,
+                card.next_due_date,
+                card.state.name if card.state else None,
                 card.origin_task,
                 [str(p) for p in card.media] if card.media else None,
                 str(card.source_yaml_file) if card.source_yaml_file else None,
@@ -226,14 +230,18 @@ class FlashcardDatabase:
         card_params_list = self._card_to_db_params_list(cards)
         sql = """
         INSERT INTO cards (uuid, deck_name, front, back, tags, added_at, modified_at,
+                           last_review_id, next_due_date, state,
                            origin_task, media_paths, source_yaml_file, internal_note)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
         ON CONFLICT (uuid) DO UPDATE SET
             deck_name = EXCLUDED.deck_name,
             front = EXCLUDED.front,
             back = EXCLUDED.back,
             tags = EXCLUDED.tags,
-            modified_at = EXCLUDED.modified_at, -- Update modified_at timestamp
+            modified_at = EXCLUDED.modified_at,
+            last_review_id = EXCLUDED.last_review_id,
+            next_due_date = EXCLUDED.next_due_date,
+            state = EXCLUDED.state,
             origin_task = EXCLUDED.origin_task,
             media_paths = EXCLUDED.media_paths,
             source_yaml_file = EXCLUDED.source_yaml_file,
