@@ -264,10 +264,10 @@ class TestSubmitReviewAndHelpers:
         mock_db.get_reviews_for_card.return_value = history
         
         rating = 3 # Easy
-        review_ts = prev_next_due + timedelta(days=1) # Reviewed 1 day after it was due
+        review_ts = datetime.combine(prev_next_due + timedelta(days=1), datetime.min.time(), tzinfo=timezone.utc) # Reviewed 1 day after it was due
         resp_ms = 3000
 
-        expected_elapsed_days = (review_ts - prev_next_due).days
+        expected_elapsed_days = (review_ts.date() - prev_next_due).days
         assert expected_elapsed_days == 1
 
         scheduler_output = review_manager.scheduler.compute_next_state.return_value
@@ -355,12 +355,13 @@ class TestGetDueCardCount:
         count = review_manager.get_due_card_count()
         
         assert count == expected_count
-        mock_db.get_due_cards_count.assert_called_once_with(on_date=date.today())
+        mock_db.get_due_card_count.assert_called_once_with(on_date=date.today())
 
 class TestReviewSessionManagerIntegration:
     def test_e2e_session_flow(self, in_memory_db: FlashcardDatabase, sample_card_data: dict):
         """Test the end-to-end flow of a review session using an in-memory DB."""
-        # 1. Setup: Add cards to the in-memory DB
+        # 1. Setup: Initialize schema and add cards to the in-memory DB
+        in_memory_db.initialize_schema()
         today = date.today()
         now_utc = datetime.now(timezone.utc)
 
@@ -368,7 +369,7 @@ class TestReviewSessionManagerIntegration:
         card1_uuid = uuid.uuid4()
         card1_data = {**sample_card_data, "uuid": card1_uuid, "front": "Card 1 Due Today", "added_at": now_utc - timedelta(days=2)}
         card1 = Card(**card1_data)
-        in_memory_db.add_card(card1)
+        in_memory_db.upsert_cards_batch([card1])
         # Add a review to make the card due tomorrow
         review1 = Review(
             card_uuid=card1.uuid,
@@ -376,7 +377,7 @@ class TestReviewSessionManagerIntegration:
             rating=3,
             stab_before=1.0, stab_after=2.5, diff=6.0, 
             next_due=today - timedelta(days=1),
-            elapsed_days_at_review=0, scheduled_days_interval=1, review_type="new"
+            elapsed_days_at_review=0, scheduled_days_interval=1, review_type="learn"
         )
         in_memory_db.add_review(review1)
 
@@ -384,7 +385,7 @@ class TestReviewSessionManagerIntegration:
         card2_uuid = uuid.uuid4()
         card2_data = {**sample_card_data, "uuid": card2_uuid, "front": "Card 2 Due Future", "added_at": now_utc - timedelta(days=10)}
         card2 = Card(**card2_data)
-        in_memory_db.add_card(card2)
+        in_memory_db.upsert_cards_batch([card2])
         
         # Add a review to make card2 due in the future
         review_for_card2 = Review(
@@ -426,7 +427,7 @@ class TestReviewSessionManagerIntegration:
 
         # 6. Verify DB state
         card1_reviews = in_memory_db.get_reviews_for_card(card1_uuid)
-        assert len(card1_reviews) == 1
+        assert len(card1_reviews) == 2
         assert card1_reviews[0].review_id == submitted_review.review_id # DB generates review_id
         assert card1_reviews[0].rating == rating
 
