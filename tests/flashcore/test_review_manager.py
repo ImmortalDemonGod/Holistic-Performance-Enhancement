@@ -356,7 +356,7 @@ class TestReviewSessionManagerIntegration:
     def test_e2e_session_flow(self, in_memory_db: FlashcardDatabase, sample_card_data: dict):
         """Test the end-to-end flow of a review session using an in-memory DB."""
         # 1. Setup: Initialize schema and add cards to the in-memory DB
-        in_memory_db.initialize_schema()
+        in_memory_db.initialize_schema(force_recreate_tables=True)
         today = date.today()
         now_utc = datetime.now(timezone.utc)
 

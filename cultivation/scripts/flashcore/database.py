@@ -12,11 +12,11 @@ import logging
 
 # Local project imports from previously defined modules
 try:
-    from cultivation.scripts.flashcore.card import Card, Review
+    from cultivation.scripts.flashcore.card import Card, Review, CardState
 except ImportError:
     logger_init = logging.getLogger(__name__)
     logger_init.warning("Could not import Card/Review from cultivation.scripts.flashcore.card. Attempting relative import.")
-    from card import Card, Review
+    from card import Card, Review, CardState
 
 logger = logging.getLogger(__name__)
 
@@ -198,6 +198,12 @@ class FlashcardDatabase:
 
         # Handle tags: convert list to set, ensuring it's never None
         row_dict["tags"] = set(row_dict["tags"]) if row_dict.get("tags") is not None else set()
+
+        # Handle state: convert string from DB to CardState enum
+        state_val = row_dict.pop("state", None)
+        if state_val:
+            row_dict["state"] = CardState[state_val]
+        # If state_val is None, we don't add it to the dict, so Pydantic uses the default.
 
         return Card(**row_dict)
 
