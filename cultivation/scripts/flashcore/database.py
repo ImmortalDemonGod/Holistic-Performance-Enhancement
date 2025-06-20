@@ -60,6 +60,8 @@ class FlashcardDatabase:
             tags                VARCHAR[],
             added_at            TIMESTAMP WITH TIME ZONE NOT NULL,
             modified_at         TIMESTAMP WITH TIME ZONE NOT NULL,
+            last_review_id      BIGINT, -- FK to reviews.review_id, can be NULL
+            next_due_date       DATE,   -- The next date the card is due for review
             origin_task         VARCHAR,
             media_paths         VARCHAR[],
             source_yaml_file    VARCHAR,
@@ -394,6 +396,18 @@ class FlashcardDatabase:
                     cursor.rollback()
                     raise ReviewOperationError("Failed to retrieve review_id after insert: No ID returned.")
                 new_review_id = int(result[0])
+
+                # Also update the card's last_review_id and next_due_date
+                update_card_sql = """
+                UPDATE cards
+                SET last_review_id = $1, next_due_date = $2
+                WHERE uuid = $3;
+                """
+                cursor.execute(update_card_sql, (new_review_id, review.next_due, review.card_uuid))
+                logger.debug(
+                    f"Updated card {review.card_uuid} with last_review_id={new_review_id} and next_due={review.next_due}"
+                )
+
                 cursor.commit()
             logger.info(f"Successfully added review with ID: {new_review_id} for card UUID: {review.card_uuid}")
             return new_review_id
