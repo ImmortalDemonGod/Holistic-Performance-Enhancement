@@ -104,9 +104,68 @@ class ReviewSessionManager:
         # FSRS expects non-negative elapsed_days.
         return max(0, elapsed)
 
+    def _normalize_review_timestamp(self, review_ts: Optional[datetime.datetime]) -> datetime.datetime:
+        """Ensures the review timestamp is a timezone-aware UTC datetime."""
+        if review_ts is None:
+            return datetime.datetime.now(datetime.timezone.utc)
+        
+        if review_ts.tzinfo is None or review_ts.tzinfo.utcoffset(review_ts) is None:
+            # If a naive datetime is passed, assume it's UTC
+            return review_ts.replace(tzinfo=datetime.timezone.utc)
+        
+        if review_ts.tzinfo != datetime.timezone.utc:
+            return review_ts.astimezone(datetime.timezone.utc)
+        
+        return review_ts
+
+    def _build_review_object(
+        self,
+        *,
+        card_uuid: UUID,
+        rating: int,
+        review_ts: datetime.datetime,
+        elapsed_days: int,
+        scheduler_output: dict,
+        history: List[Review],
+        resp_ms: Optional[int] = None,
+    ) -> Review:
+        """Constructs the Review object from computed and provided data."""
+        stab_before = history[-1].stab_after if history else None
+        
+        return Review(
+            card_uuid=card_uuid,
+            ts=review_ts,
+            rating=rating,
+            resp_ms=resp_ms,
+            stab_before=stab_before,
+            stab_after=scheduler_output["stability"],
+            diff=scheduler_output["difficulty"],
+            next_due=scheduler_output["next_review_due"],
+            elapsed_days_at_review=elapsed_days,
+            scheduled_days_interval=scheduler_output["scheduled_days"],
+            review_type=scheduler_output["state"].lower(),
+        )
+
+    def _persist_review(self, review: Review) -> Optional[Review]:
+        """Saves the review to the database and updates the session queue."""
+        try:
+            review_id = self.db.add_review(review)
+            review.review_id = review_id  # Update model with DB-generated ID
+            logger.info(f"Successfully submitted review ID {review_id} for card {review.card_uuid}.")
+
+            # If card was in the current session's queue, remove it
+            if review.card_uuid in self.current_session_card_uuids:
+                self.review_queue = [c for c in self.review_queue if c.uuid != review.card_uuid]
+
+            return review
+        except Exception as e:
+            logger.error(f"Database error submitting review for card {review.card_uuid}: {e}")
+            return None
+
     def submit_review(self, card_uuid: UUID, rating: int, review_ts: Optional[datetime.datetime] = None, resp_ms: Optional[int] = None) -> Optional[Review]:
         """
-        Submits a review for a given card.
+        Submits a review for a given card by orchestrating data fetching,
+        scheduling, and persistence.
 
         Args:
             card_uuid: The UUID of the card being reviewed.
@@ -117,61 +176,33 @@ class ReviewSessionManager:
         Returns:
             The newly created Review object if successful, else None.
         """
-        if review_ts is None:
-            review_ts = datetime.datetime.now(datetime.timezone.utc)
-        elif review_ts.tzinfo is None or review_ts.tzinfo.utcoffset(review_ts) is None:
-            # If a naive datetime is passed, assume it's UTC, then localize
-            review_ts = review_ts.replace(tzinfo=datetime.timezone.utc)
-        elif review_ts.tzinfo != datetime.timezone.utc:
-            review_ts = review_ts.astimezone(datetime.timezone.utc)
+        ts = self._normalize_review_timestamp(review_ts)
 
         card = self.db.get_card_by_uuid(card_uuid)
         if not card:
             logger.error(f"submit_review: Card with UUID {card_uuid} not found.")
             return None
 
-        # Fetch history sorted chronologically (oldest first) for FSRS
         history = self.db.get_reviews_for_card(card_uuid, order_by_ts_desc=False)
-
-        elapsed_days = self._calculate_elapsed_days(card, history, review_ts)
+        elapsed_days = self._calculate_elapsed_days(card, history, ts)
 
         try:
-            scheduler_output = self.scheduler.compute_next_state(history, rating, review_ts)
+            scheduler_output = self.scheduler.compute_next_state(history, rating, ts)
         except ValueError as e:
             logger.error(f"Error computing next state for card {card_uuid}: {e}")
             return None
 
-        stab_before = history[-1].stab_after if history else None # FSRS handles initial stability if None
-
-        new_review = Review(
+        new_review = self._build_review_object(
             card_uuid=card_uuid,
-            ts=review_ts,
             rating=rating,
+            review_ts=ts,
+            elapsed_days=elapsed_days,
+            scheduler_output=scheduler_output,
+            history=history,
             resp_ms=resp_ms,
-            stab_before=stab_before, # Will be None for the first review
-            stab_after=scheduler_output["stability"],
-            diff=scheduler_output["difficulty"],
-            next_due=scheduler_output["next_review_due"],
-            elapsed_days_at_review=elapsed_days,
-            scheduled_days_interval=scheduler_output["scheduled_days"],
-            review_type=scheduler_output["state"].lower() # e.g. 'review', 'learn'
         )
 
-        try:
-            review_id = self.db.add_review(new_review)
-            new_review.review_id = review_id # Update the model with the DB-generated ID
-            logger.info(f"Successfully submitted review ID {review_id} for card {card_uuid}.")
-            
-            # If card was in the current session's queue, remove it
-            # This prevents re-reviewing in the same session after submission
-            if card_uuid in self.current_session_card_uuids:
-                self.review_queue = [c for c in self.review_queue if c.uuid != card_uuid]
-                # self.current_session_card_uuids.remove(card_uuid) # No, keep for session stats if needed
-
-            return new_review
-        except Exception as e: # Catch broader exceptions from DB layer
-            logger.error(f"Database error submitting review for card {card_uuid}: {e}")
-            return None
+        return self._persist_review(new_review)
 
     def get_due_card_count(self) -> int:
         """
