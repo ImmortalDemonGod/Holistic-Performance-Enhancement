@@ -6,7 +6,7 @@ import pytest
 import uuid
 from collections import deque
 from datetime import datetime, date, timedelta, timezone
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from cultivation.scripts.flashcore.card import Card, Review
 from cultivation.scripts.flashcore.database import FlashcardDatabase
@@ -212,7 +212,7 @@ class TestSubmitReviewAndHelpers:
         # Scheduler's expected output (already configured in review_manager fixture)
         scheduler_output = review_manager.scheduler.compute_next_state.return_value
 
-        returned_review = review_manager.submit_review(sample_card.uuid, rating, review_ts, resp_ms)
+        returned_review = review_manager.submit_review(sample_card.uuid, rating, resp_ms, review_ts)
 
         mock_db.get_card_by_uuid.assert_called_once_with(sample_card.uuid)
         mock_db.get_reviews_for_card.assert_called_once_with(sample_card.uuid, order_by_ts_desc=False)
@@ -264,7 +264,7 @@ class TestSubmitReviewAndHelpers:
 
         scheduler_output = review_manager.scheduler.compute_next_state.return_value
 
-        returned_review = review_manager.submit_review(sample_card.uuid, rating, review_ts, resp_ms)
+        returned_review = review_manager.submit_review(sample_card.uuid, rating, resp_ms, review_ts)
 
         mock_db.get_card_by_uuid.assert_called_once_with(sample_card.uuid)
         mock_db.get_reviews_for_card.assert_called_once_with(sample_card.uuid, order_by_ts_desc=False)
