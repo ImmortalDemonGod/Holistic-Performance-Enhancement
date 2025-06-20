@@ -1,0 +1,13 @@
+# Task ID: 24
+# Title: [Task 16] Unify JARC-Reactor Logging
+# Status: done
+# Dependencies: None
+# Priority: high
+
+# Description:
+Consolidate all log outputs (lightning_logs, app logs, test logs) from the jarc_reactor system into a unified directory under cultivation/systems/arc_reactor/logs/
+
+# Details:
+
+# Test Strategy:
+

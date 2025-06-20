@@ -1,0 +1,167 @@
+# Task ID: 26
+# Title: [EPIC] Refactor Running Data Pipeline to V2.0
+# Status: pending
+# Dependencies: 14
+# Priority: critical
+
+# Description:
+A foundational architectural refactoring of the `cultivation/running` scripts to improve robustness, testability, and performance. This addresses significant technical debt and de-risks future development.
+
+# Details:
+The current running data pipeline is a brittle, script-based system with tight filesystem coupling, duplicated logic, and decentralized configuration. This epic initiative will re-architect the pipeline into an industrial-grade, configuration-driven, and highly-testable software component. The goal is to create a reliable engine that can be extended with confidence, enabling advanced features like predictive modeling and deeper integration with the Holistic Integration Layer (HIL). This is a MUST-HAVE technical debt-repayment initiative, as specified in the 'Running Data Pipeline V2.0' PRD.
+
+# Test Strategy:
+Success is validated by a multi-faceted approach, enforced by the CI pipeline: 
+1. **Unit Testing:** All new, pure-logic utility functions must achieve >85% line coverage with `pytest`.
+2. **Regression Testing:** A 'Golden Dataset' test must be created. The refactored pipeline MUST produce numerically identical output artifacts (plots, summaries, dataframes, text files) to the old pipeline for a canonical run file, ensuring no logical regressions are introduced.
+3. **Data Contract Validation:** Key DataFrames at critical pipeline stages (e.g., post-parsing, pre-analysis) must be validated against `pandera` schemas to ensure data integrity.
+4. **Performance Benchmarking:** The final parallelized pipeline must show a >40% speedup for a benchmark set of 20 runs.
+
+# HPE Learning Meta (Main Task):
+    Learning objective summary: None
+    Task objective summary: To transform the brittle, script-based running pipeline into a robust, object-oriented, testable, configuration-driven, and performant system, eliminating critical technical debt and enabling future scalability.
+    Estimated effort tshirt: XL
+    Estimated effort hours raw: 24-42 hours (4-7 Deep Work Days)
+    Estimated effort hours min: 24
+    Estimated effort hours max: 42
+    Mastery criteria summary: Pipeline is fully refactored into a class-based system, passes all unit tests (>85% coverage), validates data against schemas, runs >40% faster in parallel, and produces numerically identical results to the legacy pipeline for a 'golden dataset'.
+    Activity type: systems_engineering_refactoring
+    Recommended block: deep_work
+    Deliverables: ['A new `RunningSession` class encapsulating single-run processing.', 'A central `config.py` for all running parameters.', 'A parallelized pipeline orchestrator in `process_all_runs.py`.', "A comprehensive `pytest` suite for core logic and a 'Golden Dataset' regression test.", 'Explicit `pandera` schemas for data validation.', 'Abstracted clients for GitHub and Weather APIs.']
+# Subtask Details:
+
+## Subtask 26.26.1: Centralize Configuration & Consolidate Logic
+Description: Eliminate all hardcoded parameters and duplicated utility functions by creating a single source of truth for configuration and consolidating shared logic into a central utility module. This is the first step to reduce code sprawl and improve maintainability.
+Dependencies: None
+Status: pending
+Risks: A hardcoded parameter (e.g., a pace threshold) is missed during the refactor, leading to subtle bugs where part of the system uses the new config and another part uses an old, hidden default.
+Mitigation: Perform a project-wide search for all numeric literals and string constants related to thresholds (e.g., pace, cadence, HR). Systematically replace each one with a call to the new config loader. The 'Golden Dataset' regression test (implemented in a later subtask) will be the final backstop to catch any missed values that alter the output.
+Implementation Steps:
+  1. 1. **Create the new package structure:** `mkdir -p cultivation/running/utils` and add `__init__.py` to `cultivation/running/` and `cultivation/running/utils/` to make them proper Python packages.
+  2. 2. Create a new file `cultivation/running/config.py` and define a dictionary or dataclass `RUNNING_CONFIG` to hold all parameters from `metrics.py`, `parse_run_files.py`, `fatigue_watch.py`, etc.
+  3. 3. The config MUST include the cadence auto-scaling threshold (e.g., `cadence_rpm_to_spm_threshold: 100`) to explicitly preserve this domain logic.
+  4. 4. Create a `load_config()` function in this module.
+  5. 5. Rename and move all core utility scripts to the `utils` package: `detect_strides_temp.py` -> `utils/stride_detection.py`, `metrics.py` -> `utils/physiological_metrics.py`, `walk_utils.py` -> `utils/walk_processing.py`.
+  6. 6. The core architectural shift is from script-based `subprocess` calls to a Python-native pipeline. This subtask prepares for that by consolidating logic into importable modules.
+  7. 7. Refactor all relevant utility scripts to import `load_config` and retrieve parameters from it instead of using local constants.
+  8. 8. Remove the duplicated `detect_strides` function from `run_performance_analysis.py` and replace it with an import from the new canonical utility module.
+  9. 9. Remove the redundant HR drift calculation from `run_performance_analysis.py`.
+Testing Approach:
+  - Create a new test file `tests/running/test_config.py` and write a unit test for the `load_config()` function.
+  - Create a new test file `tests/running/test_stride_detection.py` and write unit tests for the consolidated `detect_strides` utility.
+  - Add a concrete integration test for the config. Example: Write a test that calls the `walk_detection` logic. Pass it a mock DataFrame where a point has a pace of 11.5 min/km. First, test with the default config and assert the point is classified as a walk. Then, pass a mock config object where `walk_pace_min_per_km` is set to `12.0` and assert the same point is now classified as a run. This proves the config is correctly wired up and respected by the business logic.
+
+## Subtask 26.26.2: Implement Data Schemas & Core Logic Unit Tests
+Description: Define explicit data contracts for key DataFrames using `pandera`. Create a comprehensive unit test suite for the pure logic that was consolidated in the previous step.
+Dependencies: 26.1
+Status: pending
+Risks: Pandera schemas are initially too strict or too loose, causing failures on valid edge-case data or allowing errors to pass through.
+Mitigation: Develop schemas iteratively. First, use `pandera.infer_schema` on existing, valid processed CSV files to generate a baseline. Then, manually refine the schema to add specific constraints (e.g., ranges, non-nullability). Test against multiple historical run files.
+Implementation Steps:
+  1. 1. Create `cultivation/running/schemas.py` and define a `pandera.DataFrameSchema` for the main processed run DataFrame (the output of parsing a GPX/FIT file).
+  2. 2. Ensure the schema validates column names, dtypes, and sensible ranges (e.g., latitude between -90 and 90).
+  3. 3. Create `tests/running/test_metrics.py` and write `pytest` unit tests for the pure logic functions in `utils/physiological_metrics.py` (e.g., `_haversine`, hrTSS calculation). Use `pytest.mark.parametrize` to test with known inputs and expected outputs.
+  4. 4. Aim for >85% test coverage on these pure utility functions.
+Testing Approach:
+  - Verify that the new `pandera` schemas can successfully validate a known-good processed run file.
+  - Verify that the CI `task test` command runs the new unit tests and that they pass.
+
+## Subtask 26.26.3: Implement Core `RunningSession` Class
+Description: Create the central object-oriented structure, the `RunningSession` class, which will encapsulate the state and processing logic for a single run, migrating logic from the old procedural scripts.
+Dependencies: 26.2
+Status: pending
+Risks: The class design becomes a monolithic 'God Object' that is difficult to manage and test.
+Mitigation: Maintain a strict separation of concerns. The `RunningSession` class should be an *orchestrator*. Its methods should be high-level (e.g., `.calculate_metrics()`, `.generate_visualizations()`) and should call the pure utility functions (from `utils/`) for the actual computation. It should hold state, but delegate complex logic.
+Implementation Steps:
+  1. 1. Create `cultivation/running/session.py` and implement the `RunningSession` class.
+  2. 2. The `__init__` method should accept a raw file path and the central config object.
+  3. 3. In the `__init__` method, implement logic to detect if a corresponding `_hr_override.gpx` file exists. If so, set the internal file path to the override file. This preserves existing data correction functionality.
+  4. 4. Implement a `.load_and_parse()` method that contains the logic from `parse_run_files.py` to load a GPX/FIT file into an internal DataFrame (`self.raw_df`).
+  5. 5. Implement a `.segment_run_walk()` method that uses the walk detection logic on the DataFrame.
+  6. 6. Implement a `.calculate_all_metrics()` method that calls the pure `run_metrics` function and stores the results in `self.metrics`.
+  7. 7. Implement a `.generate_outputs(output_dir)` method to orchestrate the creation of plots and text summaries.
+  8. 8. Implement a main `.process(output_dir)` method that calls the other methods in sequence.
+  9. 9. In the appropriate methods, use the `pandera` schemas from subtask 26.2 to validate the internal DataFrames.
+Testing Approach:
+  - Create `tests/running/test_session.py` and write unit tests for the `RunningSession` class methods, mocking file I/O using `pyfakefs` or `pytest-mock`'s `mock_open`.
+
+## Subtask 26.26.4: Refactor Orchestrator & Implement Golden Dataset Test
+Description: Rewrite the main orchestrator script (`process_all_runs.py`) to use the new `RunningSession` class. Implement the critical 'Golden Dataset' regression test to ensure end-to-end correctness and prevent regressions.
+Dependencies: 26.3
+Status: pending
+Risks: The refactored pipeline produces numerically different results due to subtle changes in data handling (e.g., floating point precision, `pandas` operation changes).
+Mitigation: The Golden Dataset test is the primary mitigation. Use `pandas.testing.assert_frame_equal` for DataFrames and file diffs with a reasonable tolerance for floating-point comparisons. Log any differences meticulously during test development to ensure they are understood and acceptable.
+Implementation Steps:
+  1. 1. Refactor `process_all_runs.py` to scan for all raw run files.
+  2. 2. Implement logic to identify corresponding `_hr_override.gpx` files and filter out the original base `.gpx` files from the processing list to prevent double-counting runs.
+  3. 3. Initially, process the `RunningSession` objects in a simple serial loop to validate the class-based logic.
+  4. 4. Create a new test in `tests/running/test_pipeline_integration.py` for the Golden Dataset test.
+  5. 5. In a setup step for this test, select a canonical 'golden' run file. A good candidate is a run with diverse features: walking, strides, and some environmental variability (e.g., `20250531_..._LongThreshold...gpx`). Run the *old* pipeline on this file and store all its output artifacts in `tests/golden_files/`.
+  6. 6. The test will then run the *new* refactored pipeline on the same 'golden' run file. It must perform a deep comparison of the newly generated artifacts against the stored golden master artifacts, asserting numerical and structural equivalence.
+  7. 7. This comparison should be implemented as a helper function that recursively traverses the golden and new output directories, comparing files by content hash (for images) and with tolerance-based diffs (for CSV/TXT), and asserting that no unexpected files were created or omitted.
+  8. 8. Update the `run:process-runs` command in `Taskfile.yml` to point to the new, refactored orchestrator script, ensuring the user-facing command is seamless.
+  9. 9. Add a new target to `Taskfile.yml`, e.g., `task run:process-single-file -- <file_path>`, which allows the new orchestrator to be invoked for a single file, preserving developer utility for debugging and re-analysis.
+Testing Approach:
+  - The Golden Dataset test passing in CI is the primary acceptance criterion for this subtask.
+
+## Subtask 26.26.5: [SHOULD] Parallelize Orchestrator & Integrate Aggregation
+Description: Improve pipeline performance by processing multiple runs in parallel. Integrate the weekly aggregation step to ensure the longitudinal dataset is always up-to-date automatically.
+Dependencies: 26.4
+Status: pending
+Risks: Parallel processing can introduce race conditions, especially with file I/O, or make debugging difficult due to interleaved log outputs.
+Mitigation: Design the worker function (that processes a single `RunningSession`) to be completely stateless. It should only take a file path and config, and all its outputs should be written to a unique, per-run directory to avoid any conflicts. Use a robust logging setup that can handle multiprocessing.
+Implementation Steps:
+  1. 1. In the refactored orchestrator, modify the main loop to use Python's `multiprocessing.Pool` to distribute the `RunningSession.process()` calls across multiple cores.
+  2. 2. Define a top-level worker function that can be pickled by `multiprocessing`.
+  3. 3. The worker function must be wrapped in a `try...except` block. In case of an exception for a single file, it should log the error and return a failure status, allowing the main process to report on failures without halting the entire batch.
+  4. 4. After all parallel jobs complete successfully, add a final step to the orchestrator that calls the `aggregate_weekly_runs` logic to update `weekly_metrics.parquet`.
+  5. 5. Benchmark the new parallel pipeline against the old sequential one on a set of 20 files to verify the >40% performance improvement.
+Testing Approach:
+  - Successful completion of a batch run with parallel processing.
+  - Verification that `weekly_metrics.parquet` is updated correctly after the run.
+  - A documented benchmark test showing the performance improvement.
+  - As part of this, a simple test should load the newly generated `weekly_metrics.parquet` and assert that it contains the expected columns (`ef_mean`, `decoupling_mean`, `km`, `rpe_avg`) required by downstream analysis or scheduling systems.
+
+## Subtask 26.26.6: [SHOULD] Abstract External Service Interactions
+Description: Decouple the pipeline from specific external tools and APIs by creating dedicated client classes. This improves modularity and testability.
+Dependencies: None
+Status: pending
+Risks: The new client abstractions are 'leaky' and do not fully encapsulate the complexity of the underlying tool or API, making them hard to use or mock.
+Mitigation: Design the clients with a simple, clean interface that hides implementation details. For example, the `GitHubClient` should have a method `.create_issue(title, body)` and should handle the `subprocess` call internally. Ensure the clients can be easily mocked in tests.
+Implementation Steps:
+  1. 1. Create a `cultivation/utils/github_client.py` module with a `GitHubClient` class that wraps the `subprocess` call to the `gh` CLI.
+  2. 2. Refactor `fatigue_watch.py` to instantiate and use this client instead of calling `subprocess` directly.
+  3. 3. Create a `cultivation/running/utils/weather.py` module by refactoring the existing `weather_utils.py`. Wrap the logic in a `WeatherClient` class, making the caching mechanism an internal detail.
+  4. 4. Refactor the `RunningSession` class to use this new `WeatherClient`.
+Testing Approach:
+  - Write unit tests for the new clients, mocking the `subprocess` and `requests` calls to test their internal logic.
+  - Write a unit test for `fatigue_watch.py`'s main logic. Create mock DataFrames for wellness data that are designed to trigger the alert rules. Pass a mocked `GitHubClient` instance to the function and assert that its `.create_issue()` method is called with the expected title and body.
+
+## Subtask 26.26.7: [COULD] Add Package-Level Documentation
+Description: Create a `README.md` for the new `cultivation/running` package explaining its new object-oriented architecture, data flow, and usage. Ensure all new public classes and functions have clear docstrings.
+Dependencies: 26.5
+Status: pending
+Risks: Documentation becomes outdated if written too early in the process.
+Mitigation: This task is scheduled after the core implementation is complete to ensure the documentation reflects the final state of the refactored code.
+Implementation Steps:
+  1. 1. Create `cultivation/running/README.md`.
+  2. 2. In the README, add sections for: Overview, Architecture (describing the `RunningSession` class), Configuration (`config.py`), and How to Run.
+  3. 3. Review all new modules (`session.py`, `config.py`, `utils/*.py`) and add clear, concise docstrings to all public classes and functions.
+Testing Approach:
+  - The `README.md` file is present and contains the required sections.
+  - A manual review confirms docstrings are present on key public APIs.
+
+## Subtask 26.26.8: [COULD] Final Cleanup of Obsolete Scripts
+Description: Once the new object-oriented pipeline is validated and stable, remove the old, superseded procedural scripts from `cultivation/scripts/running/` to prevent confusion and reduce code clutter.
+Dependencies: 26.7
+Status: pending
+Risks: A piece of logic from an old script was missed during the refactor, and deleting the script removes the only implementation.
+Mitigation: The 'Golden Dataset' test (26.4) is the primary mitigation. Before deletion, move the old scripts to a temporary `cultivation/scripts/running/archive/` directory for one full release cycle. If no issues arise, they can be safely deleted.
+Implementation Steps:
+  1. 1. Create a temporary `archive` directory inside `cultivation/scripts/running/`.
+  2. 2. Move scripts like `parse_run_files.py`, `run_performance_analysis.py`, `analyze_hr_pace_distribution.py`, etc., into the archive directory.
+  3. 3. Run the full test suite (`task test`) again to ensure no broken dependencies.
+  4. 4. After a period of stability (e.g., one week of successful runs), delete the archive directory.
+Testing Approach:
+  - The project's test suite passes after the old scripts are moved/deleted.
+  - The `task run:process-runs` command continues to function correctly, using only the new refactored code.

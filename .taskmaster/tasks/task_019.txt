@@ -1,6 +1,6 @@
 # Task ID: 19
 # Title: [Flashcore] Integrate FSRS Library for Core Scheduling in `flashcore.scheduler`
-# Status: pending
+# Status: done
 # Dependencies: None
 # Priority: critical
 
@@ -38,7 +38,7 @@ Implement the Free Spaced Repetition Scheduling (FSRS) algorithm by integrating 
 ## Subtask 19.1: Research and select a suitable Python FSRS library
 Description: Evaluate available Python FSRS libraries based on features, maintenance, license, and ease of integration. Document the choice and rationale.
 Dependencies: None
-Status: pending
+Status: done
 Risks: Analysis paralysis; spending excessive time on selection. Chosen library could be unmaintained or have a restrictive license.
 Mitigation: Time-box research to 2-3 hours. Prioritize libraries with recent commit activity, good documentation, and a permissive license (MIT, Apache 2.0). Create a small ADR to document the final choice.
 Implementation Steps:
@@ -53,7 +53,7 @@ Testing Approach:
 ## Subtask 19.2: Implement the FSRS_Scheduler class as a wrapper
 Description: Develop the `FSRS_Scheduler` class in `flashcore.scheduler` to wrap the chosen FSRS library, handling input/output translation and configuration.
 Dependencies: 1
-Status: pending
+Status: done
 Risks: The chosen library's API may have subtle behaviors or require complex input data structures. An upstream library update could introduce breaking changes.
 Mitigation: Pin the library's version in `requirements.txt`. Write clear data mapping functions to translate between `flashcore.card.Review` and the library's internal format. Add extensive logging.
 Implementation Steps:
@@ -69,7 +69,7 @@ Testing Approach:
 ## Subtask 19.3: Write comprehensive unit tests for the FSRS wrapper
 Description: Create tests in `tests/flashcore/test_scheduler.py` for the wrapper, covering various scenarios, edge cases, and library interactions.
 Dependencies: 2
-Status: pending
+Status: done
 Risks: Tests become too coupled to the specific library's API, making it hard to switch libraries later. Lack of official test vectors for the library.
 Mitigation: Abstract test cases to test the FSRS *concept* (e.g., 'a low rating should result in a shorter interval'). Use examples from FSRS research papers as a source for test vectors if the library lacks them.
 Implementation Steps:

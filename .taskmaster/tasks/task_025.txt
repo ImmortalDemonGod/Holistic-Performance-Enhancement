@@ -1,0 +1,128 @@
+# Task ID: 25
+# Title: [EPIC] JARC-Reactor: Foundational Refactor & Bug Squashing
+# Status: pending
+# Dependencies: 16
+# Priority: critical
+
+# Description:
+This foundational epic addresses all critical bugs, inconsistencies, and architectural weaknesses identified in the JARC-Reactor codebase audit. The objective is to transform the platform from a 'brittle expert tool' into a stable, reliable, and trustworthy research platform, thereby enabling confident and efficient experimentation for the ARC Prize sprint. This task is a mandatory prerequisite for all subsequent training and HPO activities.
+
+# Details:
+A thorough audit of the JARC-Reactor codebase revealed several critical flaws that undermine its reliability, including a silent data-corrupting bug in the evaluation pipeline (dtype mismatch), confusing and redundant logic for Kaggle submission generation, and unexplained 'magic number' heuristics in the core model. This epic is designed to systematically remediate these issues, establishing a 'Golden Path' for the core workflow and ensuring that all future work is built on a solid foundation. The successful completion of this task will de-risk the entire 5-month sprint and provide the necessary confidence to build a winning solution.
+
+# Test Strategy:
+The epic is considered complete when all MUST-HAVE subtasks pass their respective definitions of done. The final validation will be a successful end-to-end run of the 'First Light' integration test (`task arc:run-first-light`) on the fully refactored codebase. This run must complete without errors and produce a validation report confirming system stability, data integrity, and correctness of the generated artifacts.
+
+# HPE Learning Meta (Main Task):
+    Task objective summary: To transform the JARC-Reactor from a brittle expert tool into a stable, reliable, and trustworthy research platform by remediating all critical bugs and architectural flaws identified in the codebase audit.
+    Estimated effort tshirt: L
+    Estimated effort hours raw: 2-4 days
+    Estimated effort hours min: 16
+    Estimated effort hours max: 32
+    Mastery criteria summary: Data integrity is validated by CI tests. Submission generation is unified. The 'First Light' integration test passes on the refactored codebase without errors, and the README is updated to reflect the new canonical workflow.
+    Activity type: refactoring_bug_fixing_testing
+    Recommended block: deep_work
+    Deliverables: ['A unified data loading module in `cultivation/systems/arc_reactor/jarc_reactor/data/data_preparation.py`.', 'New data integrity unit tests passing in CI (`tests/test_data_pipeline.py`).', 'A single, canonical submission handler in `cultivation/systems/arc_reactor/jarc_reactor/kaggle/submission_handler.py`.', 'A final validation report confirming system stability post-refactor.']
+    Actionable advice for execution: 1. **Tackle Subtasks Sequentially:** Follow the dependency chain: 25.1 -> 25.2. Subtasks 25.3 and 25.4 can be done in parallel. Subtask 25.6 is the final integration test.
+2. **Commit Atomically:** Create a separate, focused Git commit for each completed subtask. This isolates changes and makes the PR easy to review.
+3. **Test-Driven Refactoring:** For subtask 25.3 (Submission Logic), write the new unit tests first. These tests should initially fail. Then, refactor the code until the tests pass. This ensures correctness.
+4. **Time-Box Heuristic Investigation:** Strictly adhere to the 4-hour time box for subtask 25.4. Its priority is lower than fixing the data bugs. If it proves difficult, document it and move on to ensure the epic is not blocked.
+# Subtask Details:
+
+## Subtask 25.25.1: Unify Data Pipeline & Fix Critical `dtype` Bug
+Description: Refactor data/data_preparation.py and data/eval_data_prep.py into a single, unified module. This new module must be configurable for 'train'/'eval' modes and MUST resolve the critical dtype mismatch bug, ensuring all grid tensors are output as `torch.long`.
+Dependencies: None
+Status: pending
+Risks: Refactoring data loaders could introduce subtle bugs affecting how context pairs or synthetic data are handled.
+Mitigation: The new data integrity tests (Subtask 25.2) are the primary mitigation. Additionally, perform a manual diff of the output from the old vs. new pipeline on a single, representative task file to ensure logical equivalence, ignoring the intended dtype change.
+Implementation Steps:
+  1. 1. Analyze `cultivation/systems/arc_reactor/jarc_reactor/data/eval_data_prep.py` to identify the logic that incorrectly casts tensors to `torch.float32`.
+  2. 2. Modify `cultivation/systems/arc_reactor/jarc_reactor/data/data_preparation.py` to accept a `mode` parameter (e.g., 'train', 'eval').
+  3. 3. Port the evaluation-specific logic into the unified function, ensuring all tensor outputs are consistently cast to `torch.long`.
+  4. 4. Delete the now-redundant `cultivation/systems/arc_reactor/jarc_reactor/data/eval_data_prep.py` file.
+  5. 5. Refactor `MyDataModule` in `cultivation/systems/arc_reactor/jarc_reactor/data/data_module.py` to call the single, unified data preparation function for both training and validation/testing stages.
+Testing Approach:
+  - File `cultivation/systems/arc_reactor/jarc_reactor/data/eval_data_prep.py` is verified as DELETED.
+  - The `MyDataModule` is confirmed to call only the new unified function.
+  - The automated data integrity tests created in Subtask 25.2 pass, confirming the `dtype` is `torch.long`.
+
+## Subtask 25.25.2: Implement Data Integrity Unit Tests & Integrate into CI
+Description: Implement new unit tests in `tests/` to validate the unified data loading pipeline's output. These tests must explicitly check tensor dtypes (`torch.long`) and shapes to prevent future regressions. Integrate these tests into the `arc:test` Taskfile command.
+Dependencies: 25.1
+Status: pending
+Risks: Tests might be too brittle if they rely on specific data files; they should be robust to changes in the dummy data.
+Mitigation: Use the dedicated, static dummy ARC task file at `cultivation/systems/arc_reactor/jarc_reactor/tests/data/dummy_training_data/dummy_arc_task.json` as a stable input for the tests.
+Implementation Steps:
+  1. 1. Create a new test file: `cultivation/systems/arc_reactor/jarc_reactor/tests/test_data_pipeline.py`.
+  2. 2. In the new test file, write a `pytest` test function that instantiates `MyDataModule` using a Hydra config override to point to the dummy data directory.
+  3. 3. Call `data_module.setup()` and `data_module.train_dataloader()`.
+  4. 4. In the test, iterate one batch from the dataloader.
+  5. 5. Assert that the `dtype` of the source and target grid tensors is `torch.long`.
+  6. 6. Assert that the shape of the tensors is as expected (e.g., `[B, 30, 30]`).
+  7. 7. Ensure the `Taskfile.yml`'s `arc:test` target correctly discovers and runs this new test file.
+Testing Approach:
+  - The new test file (e.g., `tests/test_data_pipeline.py`) is created and committed.
+  - Running `task arc:test` executes the new tests.
+  - The new tests pass successfully in the CI workflow.
+
+## Subtask 25.25.3: Consolidate Submission Generation Logic
+Description: Deprecate redundant submission logic in `evaluate.py` and `kaggle/kaggle_submission.py`. Refactor the system to use `kaggle/submission_handler.py` as the single, canonical source for creating `submission.json` files.
+Dependencies: None
+Status: pending
+Risks: The padding removal and grid formatting logic is complex; centralizing it might break edge cases handled by one of the old implementations.
+Mitigation: Before deleting old code, create a small suite of test cases with various prediction grid shapes and padding patterns. Ensure the new canonical `SubmissionManager` passes all these test cases.
+Implementation Steps:
+  1. 1. Identify `cultivation/systems/arc_reactor/jarc_reactor/kaggle/submission_handler.py` as the canonical module.
+  2. 2. Refactor `evaluate.py` to import and call the `SubmissionManager` from the canonical module, removing its local `create_submission` implementation.
+  3. 3. Refactor `kaggle/kaggle_submission.py` to also use the canonical `SubmissionManager`, ensuring consistency.
+  4. 4. Create a new test file `tests/kaggle/test_submission_handler.py` with test cases for padding removal and correct JSON formatting.
+Testing Approach:
+  - `kaggle/submission_handler.py` is verified as the single source of truth.
+  - A `git diff` confirms that redundant submission generation code has been removed from all other files.
+  - The `evaluate.py` script successfully generates a submission file using the new handler.
+
+## Subtask 25.25.4: Investigate & Remove Arbitrary Model Scaling
+Description: Remove the `output = output * 5.0` line from `models/transformer_model.py`. Perform a brief experimental run (`fast_dev_run`) to ensure that removing it does not catastrophically destabilize training.
+Dependencies: None
+Status: pending
+Risks: Removing the scaling factor significantly destabilizes training, indicating a deeper, undiagnosed issue with loss scaling or gradient flow.
+Mitigation: Time-box the investigation to 4 hours. If no root cause is found, revert the change, add a detailed `# TODO` comment explaining the issue, and create a new low-priority tech debt task. Do not let this block the epic.
+Implementation Steps:
+  1. 1. Locate and comment out the `output = output * 5.0` line in `cultivation/systems/arc_reactor/jarc_reactor/models/transformer_model.py`.
+  2. 2. Run a `fast_dev_run` training cycle: `task arc:run-first-light training.fast_dev_run=true`.
+  3. 3. Monitor the `val_loss` in the output. It must show a clear downward trend.
+  4. 4. If stable, permanently delete the line and commit with a message documenting the stability check. If unstable, revert and add a detailed `# TODO` comment.
+Testing Approach:
+  - The line `output = output * 5.0` is confirmed as removed from `transformer_model.py`.
+  - The log from a `fast_dev_run` training cycle is reviewed and confirms a decreasing loss curve.
+
+## Subtask 25.25.5: [STRETCH] Decompose `EvaluationManager` Class
+Description: If time permits, decompose the `EvaluationManager` 'God Object' in `evaluate.py` into smaller, single-responsibility classes (e.g., `EvaluationRunner`, `ReportGenerator`) to improve maintainability.
+Dependencies: 25.1, 25.3
+Status: pending
+Risks: The refactor proves more complex than anticipated and threatens the timeline for MUST-HAVE fixes.
+Mitigation: Strictly adhere to this being a stretch goal. Defer immediately if any higher-priority subtasks encounter delays.
+Implementation Steps:
+  1. 1. Create a new file `evaluation/runner.py` for an `EvaluationRunner` class.
+  2. 2. Create a new file `evaluation/reporting.py` for a `ReportGenerator` class.
+  3. 3. Move the evaluation loop logic from `EvaluationManager` into `EvaluationRunner`.
+  4. 4. Move the JSON/summary file generation logic into `ReportGenerator`.
+  5. 5. Refactor the `evaluate.py` entry point script to orchestrate these new, smaller classes.
+Testing Approach:
+  - The `EvaluationManager` class is confirmed as removed and replaced by 2-3 smaller classes.
+  - The public-facing functionality and outputs of the `evaluate.py` script are confirmed to be identical to the pre-refactor version.
+
+## Subtask 25.25.6: Final Validation: E2E Integration Test & Documentation Update
+Description: Run the full 'First Light' integration test (`task arc:run-first-light`) on the refactored codebase to ensure all components work together correctly. Update the `README.md` and other relevant docs to reflect the new, simplified 'Golden Path' workflow.
+Dependencies: 25.1, 25.2, 25.3, 25.4
+Status: pending
+Risks: An unforeseen integration error emerges only when all refactored components run together.
+Mitigation: Run the test with a debugger attached. Analyze logs from the full run to trace the error. Be prepared to revisit and patch previous subtasks.
+Implementation Steps:
+  1. 1. After all other MUST-HAVE subtasks are complete, run `task arc:run-first-light` from the project root.
+  2. 2. Verify that the run completes without any Python errors and that a model checkpoint and TensorBoard log file are generated in the `.../first_light_test/` directory.
+  3. 3. Update `cultivation/systems/arc_reactor/README.md` to describe the new, unified workflow for training, evaluation, and submission.
+Testing Approach:
+  - The command `task arc:run-first-light` completes successfully without errors.
+  - A model checkpoint and a TensorBoard log file are generated and their contents are briefly inspected for validity.
+  - The project's main `README.md` is updated to describe the new, canonical workflow.
