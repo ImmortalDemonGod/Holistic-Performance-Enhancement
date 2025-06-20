@@ -160,7 +160,7 @@ class ReviewSessionManager:
             logger.error(f"Database error submitting review for card {review.card_uuid}: {e}")
             return None
 
-    def submit_review(self, card_uuid: UUID, rating: int, resp_ms: int) -> Optional[CardState]:
+    def submit_review(self, card_uuid: UUID, rating: int, resp_ms: int) -> Optional[Card]:
         """
         Processes a review for a given card.
 
@@ -175,7 +175,7 @@ class ReviewSessionManager:
             resp_ms: The user's response time in milliseconds.
 
         Returns:
-            The new state of the card after the review, or None if the review failed.
+            The updated card object, or None if the review failed.
         """
         if card_uuid not in self.current_session_card_uuids:
             logger.warning(f"Attempted to review card {card_uuid} not in the current session. Ignoring.")
@@ -211,33 +211,18 @@ class ReviewSessionManager:
             return None
 
         # Update the card's state and due date in the database
-        card.next_due_date = scheduler_output["next_review_due"]
         self.db.update_card_state(
             card_uuid=card_uuid,
             state=scheduler_output["next_state"],
             due=scheduler_output["next_review_due"]
         )
-        card.reps += 1
-        # FSRS 'state' can be 'New', 'Learn', 'Review', 'Relearn'. 'Relearn' indicates a lapse.
-        if scheduler_output["state"] == "Relearn":
-            card.lapses += 1
-        
-        # Persist the updated card state. Assuming this method exists in the DB layer.
-        self.db.update_card_state(
-            card_uuid=card.uuid,
-            due=card.due,
-            stability=card.stability,
-            difficulty=card.difficulty,
-            reps=card.reps,
-            lapses=card.lapses,
-        )
-        logger.info(f"Updated card {card_uuid} with new state. New due date: {card.due.date()}.")
 
-        # Return the new state
-        new_card_state = CardState(
-            due=card.due,
-            stability=card.stability,
-            difficulty=card.difficulty,
+        # The card object in memory is now stale. We need to get the updated version.
+        updated_card = self.db.get_card_by_uuid(card_uuid)
+        
+        logger.info(f"Updated card {card_uuid} with new state. New due date: {updated_card.due.date()}.")
+        
+        return updated_card
             reps=card.reps,
             lapses=card.lapses,
         )
