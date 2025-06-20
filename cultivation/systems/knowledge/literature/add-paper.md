@@ -13,3 +13,4 @@ https://arxiv.org/html/2503.11842v1
 https://dev.to/teamcamp/the-4-hour-focus-block-advanced-deep-work-techniques-for-senior-developers-4136
 
 https://www.nature.com/articles/s41589-025-01922-3
+https://arxiv.org/pdf/2505.24832
