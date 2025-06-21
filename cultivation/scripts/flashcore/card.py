@@ -28,6 +28,16 @@ class CardState(IntEnum):
     Relearning = 3
 
 
+class Rating(IntEnum):
+    """
+    Represents the user's rating of their recall performance.
+    """
+    Again = 0
+    Hard = 1
+    Good = 2
+    Easy = 3
+
+
 class Card(BaseModel):
     """
     Represents a single flashcard after parsing and processing from YAML.
@@ -44,6 +54,8 @@ class Card(BaseModel):
     last_review_id: Optional[int] = Field(default=None, description="The ID of the last review record associated with this card.")
     next_due_date: Optional[date] = Field(default=None, description="The next date the card is scheduled for review.")
     state: CardState = Field(default=CardState.New, description="The current FSRS state of the card.")
+    stability: Optional[float] = Field(default=None, description="The stability of the card's memory trace (in days).")
+    difficulty: Optional[float] = Field(default=None, description="The difficulty of the card.")
 
     deck_name: str = Field(
         ...,
