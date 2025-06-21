@@ -10,7 +10,7 @@ from typing import Generator
 
 import duckdb
 
-from cultivation.scripts.flashcore.card import Card, Review
+from cultivation.scripts.flashcore.card import Card, Review, CardState
 from cultivation.scripts.flashcore.database import (
     CardOperationError,
     DatabaseConnectionError,
@@ -295,7 +295,7 @@ class TestSchemaInitialization:
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         review = create_sample_review(card_uuid=sample_card1.uuid)
-        db.add_review(review)
+        db.add_review_and_update_card(review, CardState.Review)
         assert len(db.get_reviews_for_card(sample_card1.uuid)) == 1
 
         # This test verifies that the FK constraint prevents a card from being
@@ -426,18 +426,20 @@ class TestCardOperations:
             next_due=(now + timedelta(days=1)).date()
         )
         db.upsert_cards_batch([sample_card1, sample_card2])
-        db.add_reviews_batch([review1, review2])
-        due_cards = db.get_due_cards(on_date=now.date())
+        db.add_review_and_update_card(review1, CardState.Review)
+        db.add_review_and_update_card(review2, CardState.Review)
+        due_cards = db.get_due_cards(deck_name=sample_card1.deck_name, on_date=now.date())
         assert len(due_cards) == 1
         assert due_cards[0].uuid == sample_card1.uuid
         # Test with limit
-        due_cards_limit = db.get_due_cards(on_date=now.date(), limit=0)
+        due_cards_limit = db.get_due_cards(deck_name=sample_card1.deck_name, on_date=now.date(), limit=0)
         assert len(due_cards_limit) == 0
 
     def test_delete_cards_by_uuids_batch_fails_with_reviews(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
-        db.add_review(create_sample_review(card_uuid=sample_card1.uuid))
+        review = create_sample_review(card_uuid=sample_card1.uuid)
+        db.add_review_and_update_card(review, CardState.Review)
         with pytest.raises(CardOperationError) as excinfo:
             db.delete_cards_by_uuids_batch([sample_card1.uuid])
         assert isinstance(excinfo.value.__cause__, duckdb.ConstraintException)
@@ -465,18 +467,22 @@ class TestReviewOperations:
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1])
         review = create_sample_review(card_uuid=sample_card1.uuid)
-        review_id = db.add_review(review)
-        assert isinstance(review_id, int) and review_id > 0
+        db.add_review_and_update_card(review, CardState.Review)
         retrieved_reviews = db.get_reviews_for_card(sample_card1.uuid)
         assert len(retrieved_reviews) == 1
-        assert retrieved_reviews[0].review_id == review_id
         assert retrieved_reviews[0].rating == review.rating
 
     def test_add_review_fk_violation(self, initialized_db_manager: FlashcardDatabase):
         db = initialized_db_manager
-        bad_review = create_sample_review(card_uuid="00000000-0000-0000-0000-000000000000")
-        with pytest.raises(ReviewOperationError):
-            db.add_review(bad_review)
+        # Create a review for a card UUID that does not exist in the DB
+        bad_review = create_sample_review(card_uuid=uuid.uuid4())
+
+        # The operation should fail because of the foreign key constraint
+        with pytest.raises(ReviewOperationError) as excinfo:
+            db.add_review_and_update_card(bad_review, CardState.Review)
+
+        # Check that the underlying cause is the expected database constraint violation
+        assert isinstance(excinfo.value.original_exception, duckdb.ConstraintException)
 
     def test_add_review_check_constraint_violation(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
         db = initialized_db_manager
@@ -484,31 +490,33 @@ class TestReviewOperations:
         bad_review = create_sample_review(
             card_uuid=sample_card1.uuid, rating=99, bypass_validation=True
         )
-        with pytest.raises(ReviewOperationError):
-            db.add_review(bad_review)
+        with pytest.raises(ReviewOperationError) as excinfo:
+            db.add_review_and_update_card(bad_review, CardState.Review)
+        assert isinstance(excinfo.value.original_exception, duckdb.ConstraintException)
 
-    def test_add_reviews_batch_success(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card, sample_card2: Card):
+    def test_add_reviews_individually(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card, sample_card2: Card):
         db = initialized_db_manager
         db.upsert_cards_batch([sample_card1, sample_card2])
         r1 = create_sample_review(card_uuid=sample_card1.uuid)
         r2 = create_sample_review(card_uuid=sample_card2.uuid)
-        db.add_reviews_batch([r1, r2])
+        db.add_review_and_update_card(r1, CardState.Review)
+        db.add_review_and_update_card(r2, CardState.Review)
         reviews1 = db.get_reviews_for_card(sample_card1.uuid)
         reviews2 = db.get_reviews_for_card(sample_card2.uuid)
         assert len(reviews1) == 1
         assert len(reviews2) == 1
 
-    def test_add_reviews_batch_partial_failure_transaction(self, db_manager: FlashcardDatabase):
+    def test_add_review_transactionality(self, db_manager: FlashcardDatabase):
         db = db_manager
         db.initialize_schema()
         card = create_sample_card()
         db.upsert_cards_batch([card])
-        valid_review = create_sample_review(card_uuid=card.uuid)
         bad_review = create_sample_review(
             card_uuid=card.uuid, rating=999, bypass_validation=True
         )
         with pytest.raises(ReviewOperationError):
-            db.add_reviews_batch([valid_review, bad_review])
+            # This should fail and roll back, leaving no review.
+            db.add_review_and_update_card(bad_review, CardState.Review)
         assert db.get_reviews_for_card(card.uuid) == []
 
     def test_get_reviews_for_card(self, initialized_db_manager: FlashcardDatabase, sample_card1: Card):
@@ -516,7 +524,8 @@ class TestReviewOperations:
         db.upsert_cards_batch([sample_card1])
         r1 = create_sample_review(card_uuid=sample_card1.uuid, ts=datetime(2023, 1, 2, 11, 0, 0, tzinfo=timezone.utc))
         r2 = create_sample_review(card_uuid=sample_card1.uuid, ts=datetime(2023, 1, 3, 12, 0, 0, tzinfo=timezone.utc))
-        db.add_reviews_batch([r1, r2])
+        db.add_review_and_update_card(r1, CardState.Review)
+        db.add_review_and_update_card(r2, CardState.Review)
         reviews_asc = db.get_reviews_for_card(sample_card1.uuid, order_by_ts_desc=False)
         reviews_desc = db.get_reviews_for_card(sample_card1.uuid, order_by_ts_desc=True)
         assert reviews_asc[0].ts < reviews_asc[1].ts
@@ -532,7 +541,8 @@ class TestReviewOperations:
         db.upsert_cards_batch([sample_card1])
         r1 = create_sample_review(card_uuid=sample_card1.uuid, ts=datetime(2023, 1, 2, 11, 0, 0, tzinfo=timezone.utc))
         r2 = create_sample_review(card_uuid=sample_card1.uuid, ts=datetime(2023, 1, 3, 12, 0, 0, tzinfo=timezone.utc))
-        db.add_reviews_batch([r1, r2])
+        db.add_review_and_update_card(r1, CardState.Review)
+        db.add_review_and_update_card(r2, CardState.Review)
         latest = db.get_latest_review_for_card(sample_card1.uuid)
         assert latest.ts == r2.ts
 
@@ -549,7 +559,8 @@ class TestReviewOperations:
         db.upsert_cards_batch([sample_card1])
         r1 = create_sample_review(card_uuid=sample_card1.uuid, ts=datetime(2023, 1, 2, 11, 0, 0, tzinfo=timezone.utc))
         r2 = create_sample_review(card_uuid=sample_card1.uuid, ts=datetime(2023, 1, 3, 12, 0, 0, tzinfo=timezone.utc))
-        db.add_reviews_batch([r1, r2])
+        db.add_review_and_update_card(r1, CardState.Review)
+        db.add_review_and_update_card(r2, CardState.Review)
         all_reviews = db.get_all_reviews()
         assert len(all_reviews) >= 2
         filtered = db.get_all_reviews(start_ts=datetime(2023, 1, 3, 0, 0, 0, tzinfo=timezone.utc))
