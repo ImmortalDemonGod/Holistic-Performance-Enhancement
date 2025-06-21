@@ -27,8 +27,9 @@ class MockDatabase(FlashcardDatabase):
         self._cards = {c.uuid: c for c in cards}
         self._reviews: dict[UUID, List[Review]] = {}
 
-    def get_due_cards(self, on_date: date, limit: int = 50) -> List[Card]:
+    def get_due_cards(self, deck_name: str, on_date: date, limit: int = 50) -> List[Card]:
         # For this test, all cards are new, so they are all due.
+        # The mock can ignore deck_name for simplicity.
         return list(self._cards.values())[:limit]
 
     def get_card_by_uuid(self, card_uuid: UUID) -> Optional[Card]:
