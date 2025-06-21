@@ -55,7 +55,7 @@ def start_review_flow(manager: ReviewSessionManager) -> None:
         manager: An instance of ReviewSessionManager.
     """
     console.print("[bold cyan]Starting review session...[/bold cyan]")
-    manager.start_session()
+    manager.initialize_session()
 
     due_cards_count = len(manager.review_queue)
     if due_cards_count == 0:
