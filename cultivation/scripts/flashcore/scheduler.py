@@ -160,6 +160,6 @@ class FSRS_Scheduler(BaseScheduler):
             next_due=updated_fsrs_card.due.date(),
             scheduled_days=scheduled_days,
             review_type=state_before_review.name.lower(),
-            elapsed_days=log.elapsed_days,
+            elapsed_days=updated_fsrs_card.elapsed_days,
             state=new_card_state
         )
