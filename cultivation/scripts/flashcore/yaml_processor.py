@@ -13,7 +13,8 @@ import logging
 
 import yaml       # PyYAML for YAML parsing
 import bleach     # For HTML content sanitization
-from pydantic import BaseModel as PydanticBaseModel, Field, validator, constr, ValidationError
+from bleach.css_sanitizer import CSSSanitizer
+from pydantic import BaseModel as PydanticBaseModel, Field, field_validator, ConfigDict, constr, ValidationError
 from dataclasses import dataclass
 
 # Local project imports
@@ -45,6 +46,7 @@ DEFAULT_ALLOWED_HTML_ATTRIBUTES = {
     "math": ["display", "xmlns"],
     "annotation": ["encoding"],
 }
+DEFAULT_CSS_SANITIZER = CSSSanitizer()
 DEFAULT_SECRET_PATTERNS = [
     re.compile(r"""
         (?:key|token|secret|password|passwd|pwd|auth|credential|cred|api_key|apikey|access_key|secret_key)
@@ -72,22 +74,21 @@ class _RawYAMLCardEntry(PydanticBaseModel):
     media: Optional[List[str]] = Field(default_factory=list)
     internal_note: Optional[str] = Field(default=None)  # Authorable from YAML
 
-    @validator("tags", pre=True, each_item=True)
-    def normalize_tag(cls, v):
-        if isinstance(v, str):
-            return v.strip().lower()
-        return v
+    model_config = ConfigDict(extra="forbid")
 
-    class Config:
-        extra = "forbid"
+    @field_validator("tags", mode='before')
+    @classmethod
+    def normalize_tags(cls, v):
+        if isinstance(v, list):
+            return [tag.strip().lower() if isinstance(tag, str) else tag for tag in v]
+        return v
 
 class _RawYAMLDeckFile(PydanticBaseModel):
     deck: constr(min_length=1) # type: ignore
     tags: Optional[List[constr(pattern=RAW_KEBAB_CASE_PATTERN)]] = Field(default_factory=list) # type: ignore
-    cards: List[_RawYAMLCardEntry] = Field(..., min_items=1)
+    cards: List[_RawYAMLCardEntry] = Field(..., min_length=1)
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 # --- Custom Error Reporting Dataclass ---
 @dataclass
@@ -144,8 +145,8 @@ def _sanitize_card_text(raw_card: _RawYAMLCardEntry) -> Tuple[str, str]:
     """Normalizes and sanitizes card front and back text."""
     front_normalized = raw_card.q.strip()
     back_normalized = raw_card.a.strip()
-    front_sanitized = bleach.clean(front_normalized, tags=DEFAULT_ALLOWED_HTML_TAGS, attributes=DEFAULT_ALLOWED_HTML_ATTRIBUTES, strip=True)
-    back_sanitized = bleach.clean(back_normalized, tags=DEFAULT_ALLOWED_HTML_TAGS, attributes=DEFAULT_ALLOWED_HTML_ATTRIBUTES, strip=True)
+    front_sanitized = bleach.clean(front_normalized, tags=DEFAULT_ALLOWED_HTML_TAGS, attributes=DEFAULT_ALLOWED_HTML_ATTRIBUTES, css_sanitizer=DEFAULT_CSS_SANITIZER, strip=True)
+    back_sanitized = bleach.clean(back_normalized, tags=DEFAULT_ALLOWED_HTML_TAGS, attributes=DEFAULT_ALLOWED_HTML_ATTRIBUTES, css_sanitizer=DEFAULT_CSS_SANITIZER, strip=True)
     return front_sanitized, back_sanitized
 
 def _check_for_secrets(
