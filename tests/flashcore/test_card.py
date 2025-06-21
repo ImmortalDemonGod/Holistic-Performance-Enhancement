@@ -248,13 +248,19 @@ class TestReviewModel:
                    scheduled_days_interval=1)
 
     def test_review_scheduled_interval_validation(self, valid_card_uuid):
+        # Valid: 0 and 1 are now allowed for learning steps.
+        Review(card_uuid=valid_card_uuid, rating=0, stab_after=1.0, diff=7.0,
+               next_due=date.today(), elapsed_days_at_review=0,
+               scheduled_days_interval=0)
         Review(card_uuid=valid_card_uuid, rating=0, stab_after=1.0, diff=7.0,
                next_due=date.today() + timedelta(days=1), elapsed_days_at_review=0,
-               scheduled_days_interval=1) # Valid: 1
+               scheduled_days_interval=1)
+
+        # Invalid: Negative intervals are not allowed.
         with pytest.raises(ValidationError):
             Review(card_uuid=valid_card_uuid, rating=0, stab_after=1.0, diff=7.0,
                    next_due=date.today() + timedelta(days=1), elapsed_days_at_review=0,
-                   scheduled_days_interval=0)
+                   scheduled_days_interval=-1)
 
     @pytest.mark.parametrize("valid_review_type", ["learn", "review", "relearn", "manual", None])
     def test_review_type_valid(self, valid_card_uuid, valid_review_type):
