@@ -141,6 +141,13 @@ class FSRS_Scheduler(BaseScheduler):
         # Capture the state before the new review to determine the review type.
         state_before_review = fsrs_card.state
 
+        # Manually calculate elapsed_days for the current review.
+        if fsrs_card.last_review:
+            elapsed_days = (review_ts.date() - fsrs_card.last_review.date()).days
+        else:
+            # For a new card, there are no elapsed days since a prior review.
+            elapsed_days = 0
+
         # Now, apply the new review to the final state.
         current_fsrs_rating = self._map_flashcore_rating_to_fsrs(new_rating)
         utc_review_ts = self._ensure_utc(review_ts)
@@ -160,6 +167,6 @@ class FSRS_Scheduler(BaseScheduler):
             next_due=updated_fsrs_card.due.date(),
             scheduled_days=scheduled_days,
             review_type=state_before_review.name.lower(),
-            elapsed_days=updated_fsrs_card.elapsed_days,
+            elapsed_days=elapsed_days,
             state=new_card_state
         )
