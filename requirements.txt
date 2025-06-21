@@ -26,6 +26,7 @@ mkdocs-material>=9.5.13
 pymarkdownlnt
 fsrs-optimizer
 fsrs
+rich
 
 # Type stubs for Mypy
 types-PyYAML
@@ -45,3 +46,5 @@ scipy
 tensorboard
 types-tqdm
 mypy
+typer[all]
+rich

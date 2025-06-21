@@ -7,8 +7,10 @@ integrating py-fsrs for scheduling.
 
 import logging
 from abc import ABC, abstractmethod
-import datetime 
-from typing import List, Optional, Dict, Any, Tuple
+import datetime
+from dataclasses import dataclass
+from typing import List, Optional, Tuple
+
 from pydantic import BaseModel, Field
 
 from cultivation.scripts.flashcore.config import (
@@ -16,13 +18,25 @@ from cultivation.scripts.flashcore.config import (
     DEFAULT_DESIRED_RETENTION,
 )
 
-from fsrs import Card as FSRSCard
-from fsrs import Rating as FSRSRating
-from fsrs import Scheduler as PyFSRSScheduler
+from fsrs import Card as FSRSCard  # type: ignore
+from fsrs import Rating as FSRSRating  # type: ignore
+from fsrs import Scheduler as PyFSRSScheduler  # type: ignore
 
-from .card import Review
+from .card import Review, CardState
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class SchedulerOutput:
+    stab: float
+    diff: float
+    next_due: datetime.date
+    scheduled_days: int
+    review_type: str
+    elapsed_days: int
+    state: CardState
+
 
 class BaseScheduler(ABC):
     """
@@ -32,7 +46,7 @@ class BaseScheduler(ABC):
     @abstractmethod
     def compute_next_state(
         self, history: List[Review], new_rating: int, review_ts: datetime.datetime
-    ) -> Dict[str, Any]:
+    ) -> SchedulerOutput:
         """
         Computes the next state of a card based on its review history and a new rating.
 
@@ -42,13 +56,7 @@ class BaseScheduler(ABC):
             review_ts: The UTC timestamp of the current review.
 
         Returns:
-            A dictionary containing the new state:
-            {
-                "stability": float,
-                "difficulty": float,
-                "next_review_date": datetime.date, 
-                "scheduled_days": int
-            }
+            A SchedulerOutput object containing the new state.
         
         Raises:
             ValueError: If the new_rating is invalid.
@@ -56,16 +64,16 @@ class BaseScheduler(ABC):
         pass
 
 
-
-
 class FSRSSchedulerConfig(BaseModel):
     """Configuration for the FSRS Scheduler."""
 
     parameters: Tuple[float, ...] = Field(default_factory=lambda: tuple(DEFAULT_PARAMETERS))
     desired_retention: float = DEFAULT_DESIRED_RETENTION
-    learning_steps: Tuple[datetime.timedelta, ...] = ()
+    learning_steps: Tuple[datetime.timedelta, ...] = Field(
+        default_factory=lambda: (datetime.timedelta(minutes=1), datetime.timedelta(minutes=10))
+    )
     relearning_steps: Tuple[datetime.timedelta, ...] = Field(
-        default_factory=lambda: (datetime.timedelta(days=1),)
+        default_factory=lambda: (datetime.timedelta(minutes=10),)
     )
     max_interval: int = 36500
 
@@ -75,6 +83,13 @@ class FSRS_Scheduler(BaseScheduler):
     FSRS (Free Spaced Repetition Scheduler) implementation for flashcore.
     This scheduler uses the py-fsrs library to determine card states and next review dates.
     """
+
+    REVIEW_TYPE_MAP = {
+        "new": "learn",
+        "learning": "learn",
+        "review": "review",
+        "relearning": "relearn",
+    }
 
     RATING_MAP = {
         0: FSRSRating.Again,
@@ -88,19 +103,14 @@ class FSRS_Scheduler(BaseScheduler):
             config = FSRSSchedulerConfig()
         self.config = config
 
-        # The py-fsrs library expects steps as lists of integers.
-        learning_steps = list(self.config.learning_steps)
-        relearning_steps = list(self.config.relearning_steps)
-
-        scheduler_args = {
-            "parameters": list(self.config.parameters),
-            "desired_retention": self.config.desired_retention,
-            "learning_steps": learning_steps,
-            "relearning_steps": relearning_steps,
-            "maximum_interval": self.config.max_interval
-        }
-        
-        self.fsrs_scheduler = PyFSRSScheduler(**scheduler_args)
+        # The py-fsrs library now expects timedelta objects directly for steps.
+        self.fsrs_scheduler = PyFSRSScheduler(
+            parameters=list(self.config.parameters),
+            desired_retention=self.config.desired_retention,
+            learning_steps=list(self.config.learning_steps),
+            relearning_steps=list(self.config.relearning_steps),
+            maximum_interval=self.config.max_interval,
+        )
 
     def _ensure_utc(self, ts: datetime.datetime) -> datetime.datetime:
         """Ensures the given datetime is UTC. Assumes UTC if naive."""
@@ -118,7 +128,7 @@ class FSRS_Scheduler(BaseScheduler):
 
     def compute_next_state(
         self, history: List[Review], new_rating: int, review_ts: datetime.datetime
-    ) -> Dict[str, Any]:
+    ) -> SchedulerOutput:
         """
         Computes the next state of a card by replaying its entire history.
         """
@@ -131,20 +141,37 @@ class FSRS_Scheduler(BaseScheduler):
             ts = self._ensure_utc(review.ts)
             fsrs_card, _ = self.fsrs_scheduler.review_card(fsrs_card, rating, review_datetime=ts)
 
+        # Capture the state before the new review to determine the review type.
+        state_before_review = fsrs_card.state
+
+        # Manually calculate elapsed_days for the current review.
+        if fsrs_card.last_review:
+            elapsed_days = (review_ts.date() - fsrs_card.last_review.date()).days
+        else:
+            # For a new card, there are no elapsed days since a prior review.
+            elapsed_days = 0
+
         # Now, apply the new review to the final state.
         current_fsrs_rating = self._map_flashcore_rating_to_fsrs(new_rating)
         utc_review_ts = self._ensure_utc(review_ts)
-        updated_fsrs_card, _ = self.fsrs_scheduler.review_card(
+        updated_fsrs_card, log = self.fsrs_scheduler.review_card(
             fsrs_card, current_fsrs_rating, review_datetime=utc_review_ts
         )
 
         # Calculate scheduled days based on the new due date.
         scheduled_days = (updated_fsrs_card.due.date() - utc_review_ts.date()).days
+        
+        # Map FSRS state string back to our CardState enum
+        new_card_state = CardState[updated_fsrs_card.state.name.title()]
 
-        return {
-            "stability": round(updated_fsrs_card.stability, 4),
-            "difficulty": round(updated_fsrs_card.difficulty, 4),
-            "next_review_due": updated_fsrs_card.due.date(),
-            "scheduled_days": scheduled_days,
-            "state": updated_fsrs_card.state.name,
-        }
+        return SchedulerOutput(
+            stab=updated_fsrs_card.stability,
+            diff=updated_fsrs_card.difficulty,
+            next_due=updated_fsrs_card.due.date(),
+            scheduled_days=scheduled_days,
+            review_type=self.REVIEW_TYPE_MAP.get(
+                state_before_review.name.lower(), "review"
+            ),
+            elapsed_days=elapsed_days,
+            state=new_card_state
+        )

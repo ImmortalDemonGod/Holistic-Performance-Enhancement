@@ -105,7 +105,6 @@ tasks:
 
   test:
     desc: "Runs the full Python test suite with pytest."
-    deps: [setup]
     cmds:
       - "{{.PYTHON_INTERPRETER}} -m pytest --cov={{.CULTIVATION_ROOT}} --cov=tests -v --ignore=cultivation/systems/arc_reactor/"
 

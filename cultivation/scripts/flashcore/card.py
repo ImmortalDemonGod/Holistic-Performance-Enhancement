@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import uuid
 import re
+from enum import IntEnum
 from uuid import UUID
 from datetime import datetime, date, timezone
 from typing import List, Optional, Set
@@ -15,6 +16,27 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # Regex for Kebab-case validation (e.g., "my-cool-tag", "learning-python-3")
 KEBAB_CASE_REGEX_PATTERN = r"^[a-z0-9]+(?:-[a-z0-9]+)*$"
+
+
+class CardState(IntEnum):
+    """
+    Represents the FSRS-defined state of a card's memory trace.
+    """
+    New = 0
+    Learning = 1
+    Review = 2
+    Relearning = 3
+
+
+class Rating(IntEnum):
+    """
+    Represents the user's rating of their recall performance.
+    """
+    Again = 0
+    Hard = 1
+    Good = 2
+    Easy = 3
+
 
 class Card(BaseModel):
     """
@@ -29,6 +51,12 @@ class Card(BaseModel):
         default_factory=uuid.uuid4,
         description="Unique UUIDv4 identifier for the card. Auto-generated if not provided in YAML 'id'."
     )
+    last_review_id: Optional[int] = Field(default=None, description="The ID of the last review record associated with this card.")
+    next_due_date: Optional[date] = Field(default=None, description="The next date the card is scheduled for review.")
+    state: CardState = Field(default=CardState.New, description="The current FSRS state of the card.")
+    stability: Optional[float] = Field(default=None, description="The stability of the card's memory trace (in days).")
+    difficulty: Optional[float] = Field(default=None, description="The difficulty of the card.")
+
     deck_name: str = Field(
         ...,
         min_length=1,
@@ -60,7 +88,7 @@ class Card(BaseModel):
         default=None,
         description="Optional reference to an originating task ID (e.g., from Task Master)."
     )
-    media: Optional[List[Path]] = Field(
+    media: List[Path] = Field(
         default_factory=list,
         description="Optional list of paths to media files (images, audio, etc.) associated with the card. Paths should be relative to a defined assets root directory (e.g., 'outputs/flashcards/assets/')."
     )
@@ -136,7 +164,7 @@ class Review(BaseModel):
     )
     scheduled_days_interval: int = Field(
         ...,
-        ge=1,  # The interval calculated by FSRS must be at least 1 day.
+        ge=0,  # The interval can be 0 for same-day learning steps.
         description="The interval in days (e.g., 'nxt' from fsrs_once) that FSRS calculated for this review. next_due would be 'ts.date() + timedelta(days=scheduled_days_interval)'."
     )
     review_type: Optional[str] = Field(
