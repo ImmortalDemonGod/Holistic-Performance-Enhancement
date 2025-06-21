@@ -13,10 +13,10 @@ import pandas as pd
 
 # Local project imports from previously defined modules
 try:
-    from cultivation.scripts.flashcore.card import Card, Review, CardState
+    # Use a relative import for use as a package
+    from .card import Card, Review, CardState
 except ImportError:
-    logger_init = logging.getLogger(__name__)
-    logger_init.warning("Could not import Card/Review from cultivation.scripts.flashcore.card. Attempting relative import.")
+    # Fallback for when script is run directly
     from card import Card, Review, CardState
 
 logger = logging.getLogger(__name__)
@@ -64,6 +64,8 @@ class FlashcardDatabase:
             last_review_id      BIGINT, -- FK to reviews.review_id, can be NULL
             next_due_date       DATE,   -- The next date the card is due for review
             state               VARCHAR, -- Current state: NEW, LEARNING, REVIEW, RELEARNING
+            stability           DOUBLE,
+            difficulty          DOUBLE,
             origin_task         VARCHAR,
             media_paths         VARCHAR[],
             source_yaml_file    VARCHAR,
@@ -74,7 +76,7 @@ class FlashcardDatabase:
         """
         CREATE TABLE IF NOT EXISTS reviews (
             review_id                   BIGINT DEFAULT nextval('review_seq') PRIMARY KEY,
-            card_uuid                   UUID NOT NULL REFERENCES cards(uuid),
+            card_uuid                   UUID NOT NULL,
             ts                          TIMESTAMP WITH TIME ZONE NOT NULL,
             rating                      SMALLINT NOT NULL CHECK (rating >= 0 AND rating <= 3),
             resp_ms                     INTEGER CHECK (resp_ms IS NULL OR resp_ms >= 0),
@@ -84,7 +86,8 @@ class FlashcardDatabase:
             next_due                    DATE NOT NULL,
             elapsed_days_at_review      INTEGER NOT NULL CHECK (elapsed_days_at_review >= 0),
             scheduled_days_interval     INTEGER NOT NULL CHECK (scheduled_days_interval >= 1),
-            review_type                 VARCHAR(50)
+            review_type                 VARCHAR(50),
+            FOREIGN KEY (card_uuid) REFERENCES cards(uuid)
         );
         """,
         "CREATE INDEX IF NOT EXISTS idx_cards_deck_name ON cards (deck_name);",
@@ -156,12 +159,13 @@ class FlashcardDatabase:
             logger.info(f"Database schema at {self.db_path_resolved} initialized successfully (or already exists).")
         except duckdb.Error as e:
             logger.error(f"Error initializing database schema at {self.db_path_resolved}: {e}")
-            if 'cursor' in locals() and not getattr(cursor.connection, 'closed', True):
+            if conn:
                 try:
-                    cursor.rollback()
+                    conn.rollback()
+                    logger.info("Transaction rolled back due to schema initialization error.")
                 except duckdb.Error as rb_err:
-                    logger.error(f"Error during rollback: {rb_err}")
-            raise SchemaInitializationError(f"Schema initialization failed: {e}", original_exception=e)
+                    logger.error(f"Failed to rollback transaction: {rb_err}")
+            raise SchemaInitializationError(f"Failed to initialize schema: {e}", original_exception=e) from e
 
     # --- Data Marshalling Helpers (Internal) ---
     def _card_to_db_params_list(self, cards: Sequence['Card']) -> List[Tuple]:
@@ -178,6 +182,8 @@ class FlashcardDatabase:
                 card.last_review_id,
                 card.next_due_date,
                 card.state.name if card.state else None,
+                card.stability,
+                card.difficulty,
                 card.origin_task,
                 [str(p) for p in card.media] if card.media else None,
                 str(card.source_yaml_file) if card.source_yaml_file else None,
@@ -246,9 +252,9 @@ class FlashcardDatabase:
         card_params_list = self._card_to_db_params_list(cards)
         sql = """
         INSERT INTO cards (uuid, deck_name, front, back, tags, added_at, modified_at,
-                           last_review_id, next_due_date, state,
+                           last_review_id, next_due_date, state, stability, difficulty,
                            origin_task, media_paths, source_yaml_file, internal_note)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
         ON CONFLICT (uuid) DO UPDATE SET
             deck_name = EXCLUDED.deck_name,
             front = EXCLUDED.front,
@@ -258,6 +264,8 @@ class FlashcardDatabase:
             last_review_id = EXCLUDED.last_review_id,
             next_due_date = EXCLUDED.next_due_date,
             state = EXCLUDED.state,
+            stability = EXCLUDED.stability,
+            difficulty = EXCLUDED.difficulty,
             origin_task = EXCLUDED.origin_task,
             media_paths = EXCLUDED.media_paths,
             source_yaml_file = EXCLUDED.source_yaml_file,
@@ -318,9 +326,9 @@ class FlashcardDatabase:
             logger.error(f"Error fetching all cards (filter: {deck_name_filter}): {e}")
             raise CardOperationError(f"Failed to get all cards: {e}", original_exception=e) from e
 
-    def get_due_cards(self, on_date: date, limit: Optional[int] = 20) -> List['Card']:
+    def get_due_cards(self, deck_name: str, on_date: date, limit: Optional[int] = 20) -> List['Card']:
         """
-        Fetches cards due for review on or before a given date, ordered by due date.
+        Fetches cards from a specific deck due for review on or before a given date.
         A card is considered due if its next_due_date is on or before the specified date,
         or if it has never been reviewed (next_due_date is NULL).
         """
@@ -329,10 +337,10 @@ class FlashcardDatabase:
         conn = self.get_connection()
         sql = """
         SELECT * FROM cards
-        WHERE next_due_date <= $1 OR next_due_date IS NULL
+        WHERE deck_name = $1 AND (next_due_date <= $2 OR next_due_date IS NULL)
         ORDER BY next_due_date ASC NULLS FIRST, added_at ASC
         """
-        params: List[Any] = [on_date]
+        params: List[Any] = [deck_name, on_date]
         if limit is not None and limit > 0:
             sql += f" LIMIT ${len(params) + 1}"
             params.append(limit)
@@ -343,23 +351,22 @@ class FlashcardDatabase:
                 return []
             return [self._db_row_to_card(row_dict) for row_dict in result_df.to_dict('records')]
         except duckdb.Error as e:
-            logger.error(f"Error fetching due cards for date {on_date}: {e}")
+            logger.error(f"Error fetching due cards for deck '{deck_name}' on date {on_date}: {e}")
             raise CardOperationError(f"Failed to fetch due cards: {e}", original_exception=e) from e
 
-    def get_due_card_count(self, on_date: date) -> int:
+    def get_due_card_count(self, deck_name: str, on_date: date) -> int:
         """
-        Efficiently counts the number of cards due for review on or before a given date.
+        Efficiently counts the number of cards from a specific deck due for review.
         A card is considered due if its next_due_date is on or before the specified date,
         or if it has never been reviewed (next_due_date is NULL).
         """
         conn = self.get_connection()
-        # Cards are due if they have a due date in the past/present, or have never been reviewed (NULL)
-        sql = "SELECT COUNT(*) FROM cards WHERE next_due_date <= $1 OR next_due_date IS NULL;"
+        sql = "SELECT COUNT(*) FROM cards WHERE deck_name = $1 AND (next_due_date <= $2 OR next_due_date IS NULL);"
         try:
-            result = conn.execute(sql, (on_date,)).fetchone()
+            result = conn.execute(sql, (deck_name, on_date)).fetchone()
             return result[0] if result else 0
         except duckdb.Error as e:
-            logger.error(f"Error counting due cards for date {on_date}: {e}")
+            logger.error(f"Error counting due cards for deck '{deck_name}' on date {on_date}: {e}")
             raise CardOperationError(f"Failed to count due cards: {e}", original_exception=e) from e
 
     def delete_cards_by_uuids_batch(self, card_uuids: Sequence[uuid.UUID]) -> int:
@@ -406,56 +413,17 @@ class FlashcardDatabase:
             raise CardOperationError(f"Failed to fetch card fronts and UUIDs: {e}", original_exception=e) from e
 
     # --- Review Operations ---
-    def add_review(self, review: 'Review') -> int:
+    def add_review_and_update_card(self, review: 'Review', new_card_state: 'CardState') -> 'Card':
+        """
+        Atomically adds a review and updates the corresponding card's state and due date.
+        Returns the fully updated card object.
+        """
         if self.read_only:
             raise DatabaseConnectionError("Cannot add review in read-only mode.")
+        
         conn = self.get_connection()
         review_params_tuple = self._review_to_db_params_tuple(review)
-        sql = """
-        INSERT INTO reviews (card_uuid, ts, rating, resp_ms, stab_before, stab_after, diff, next_due,
-                             elapsed_days_at_review, scheduled_days_interval, review_type)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-        RETURNING review_id;
-        """
-        try:
-            with conn.cursor() as cursor:
-                cursor.begin()
-                result = cursor.execute(sql, review_params_tuple).fetchone()
-                if result is None or result[0] is None:
-                    cursor.rollback()
-                    raise ReviewOperationError("Failed to retrieve review_id after insert: No ID returned.")
-                new_review_id = int(result[0])
 
-                # Also update the card's last_review_id and next_due_date
-                update_card_sql = """
-                UPDATE cards
-                SET last_review_id = $1, next_due_date = $2
-                WHERE uuid = $3;
-                """
-                cursor.execute(update_card_sql, (new_review_id, review.next_due, review.card_uuid))
-                logger.debug(
-                    f"Updated card {review.card_uuid} with last_review_id={new_review_id} and next_due={review.next_due}"
-                )
-
-                cursor.commit()
-            logger.info(f"Successfully added review with ID: {new_review_id} for card UUID: {review.card_uuid}")
-            return new_review_id
-        except duckdb.ConstraintException as e:
-            logger.error(f"Failed to add review due to constraint violation: {e}")
-            # On constraint violation, DuckDB automatically rolls back the transaction.
-            # Explicitly calling rollback() here would cause a TransactionException.
-            raise ReviewOperationError(f"Failed to add review due to constraint violation: {e}") from e
-        except duckdb.Error as e:
-            logger.error(f"Error adding review for card UUID {review.card_uuid}: {e}")
-            conn.rollback()
-            raise ReviewOperationError(f"Failed to add review: {e}", original_exception=e) from e
-
-    def add_reviews_batch(self, reviews: Sequence['Review']) -> List[int]:
-        if not reviews:
-            return []
-        if self.read_only:
-            raise DatabaseConnectionError("Cannot add reviews in read-only mode.")
-        conn = self.get_connection()
         insert_review_sql = """
         INSERT INTO reviews (card_uuid, ts, rating, resp_ms, stab_before, stab_after, diff, next_due,
                              elapsed_days_at_review, scheduled_days_interval, review_type)
@@ -464,44 +432,52 @@ class FlashcardDatabase:
         """
         update_card_sql = """
         UPDATE cards
-        SET next_due_date = $1, last_review_id = $2
-        WHERE uuid = $3;
+        SET last_review_id = $1, next_due_date = $2, state = $3, modified_at = $4, stability = $5, difficulty = $6
+        WHERE uuid = $7;
         """
+        
         try:
             with conn.cursor() as cursor:
                 cursor.begin()
-                result_ids = []
-                for review in reviews:
-                    review_params = self._review_to_db_params_tuple(review)
-                    # Insert review and get new ID
-                    new_review_id_tuple = cursor.execute(insert_review_sql, review_params).fetchone()
-                    if not new_review_id_tuple or not new_review_id_tuple[0]:
-                        conn.rollback()
-                        raise CardOperationError(f"Failed to insert review for card {review.card_uuid}, no review_id returned.")
-                    
-                    new_review_id = int(new_review_id_tuple[0])
-                    result_ids.append(new_review_id)
-
-                    # Update the corresponding card
-                    update_params = (review.next_due, new_review_id, review.card_uuid)
-                    cursor.execute(update_card_sql, update_params)
-
-                cursor.commit()
-            logger.info(f"Successfully batch-added {len(result_ids)} reviews and updated corresponding cards.")
-            return result_ids
-        except duckdb.ConstraintException as e:
-            logger.error(f"Failed to add review in batch due to constraint violation: {e}")
-            # On constraint violation, DuckDB automatically rolls back the transaction.
-            # No explicit rollback() needed here, as it would cause a TransactionException.
-            raise ReviewOperationError(f"Failed to add review in batch due to constraint violation: {e}") from e
-        except duckdb.Error as e:
-            logger.error(f"Error during batch review add: {e}")
-            if 'cursor' in locals() and cursor.connection.is_open:
-                try:
+                
+                # 1. Insert the review and get its new ID
+                result = cursor.execute(insert_review_sql, review_params_tuple).fetchone()
+                if result is None or result[0] is None:
                     cursor.rollback()
+                    raise ReviewOperationError("Failed to retrieve review_id after insert: No ID returned.")
+                new_review_id = int(result[0])
+
+                # 2. Update the card with the new review ID and other state
+                update_time = datetime.now().astimezone()
+                cursor.execute(update_card_sql, (
+                    new_review_id,
+                    review.next_due,
+                    new_card_state.name,
+                    update_time,
+                    review.stab_after,
+                    review.diff,
+                    review.card_uuid
+                ))
+                
+                cursor.commit()
+            
+            # 3. Fetch and return the updated card
+            updated_card = self.get_card_by_uuid(review.card_uuid)
+            if not updated_card:
+                # This should not happen if the transaction was successful
+                raise RecordNotFoundError(f"Card with UUID {review.card_uuid} disappeared after update.")
+            
+            logger.info(f"Successfully added review ID {new_review_id} and updated card {review.card_uuid}.")
+            return updated_card
+
+        except duckdb.Error as e:
+            logger.error(f"Transaction failed for adding review to card {review.card_uuid}: {e}")
+            if conn and not getattr(conn, 'closed', True):
+                try:
+                    conn.rollback()
                 except duckdb.Error as rb_err:
-                    logger.error(f"Error during rollback for add_reviews_batch: {rb_err}")
-            raise ReviewOperationError(f"Batch review add failed: {e}", original_exception=e) from e
+                    logger.error(f"Error during rollback: {rb_err}")
+            raise ReviewOperationError(f"Atomic review add/card update failed: {e}", original_exception=e) from e
 
     def get_reviews_for_card(self, card_uuid: uuid.UUID, order_by_ts_desc: bool = True) -> List['Review']:
         conn = self.get_connection()
