@@ -94,20 +94,14 @@ class FSRS_Scheduler(BaseScheduler):
             config = FSRSSchedulerConfig()
         self.config = config
 
-        # The py-fsrs library expects steps as lists of floats (in minutes).
-        learning_steps = [s.total_seconds() / 60 for s in self.config.learning_steps]
-        relearning_steps = [s.total_seconds() / 60 for s in self.config.relearning_steps]
-
-        # Note: Using modern py-fsrs API param names
-        scheduler_args = {
-            "parameters": list(self.config.parameters),
-            "desired_retention": self.config.desired_retention,
-            "learning_steps": learning_steps,
-            "relearning_steps": relearning_steps,
-            "maximum_interval": self.config.max_interval
-        }
-        
-        self.fsrs_scheduler = PyFSRSScheduler(**scheduler_args)
+        # The py-fsrs library now expects timedelta objects directly for steps.
+        self.fsrs_scheduler = PyFSRSScheduler(
+            parameters=list(self.config.parameters),
+            desired_retention=self.config.desired_retention,
+            learning_steps=list(self.config.learning_steps),
+            relearning_steps=list(self.config.relearning_steps),
+            maximum_interval=self.config.max_interval,
+        )
 
     def _ensure_utc(self, ts: datetime.datetime) -> datetime.datetime:
         """Ensures the given datetime is UTC. Assumes UTC if naive."""
