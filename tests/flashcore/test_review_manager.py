@@ -8,7 +8,7 @@ from collections import deque
 from datetime import datetime, date, timedelta, timezone
 from unittest.mock import MagicMock
 
-from cultivation.scripts.flashcore.card import Card, Review, CardState
+from cultivation.scripts.flashcore.card import Card, Review, CardState, Rating
 from cultivation.scripts.flashcore.database import FlashcardDatabase
 from cultivation.scripts.flashcore.scheduler import FSRS_Scheduler
 from cultivation.scripts.flashcore.review_manager import ReviewSessionManager
@@ -380,7 +380,7 @@ class TestReviewSessionManagerIntegration:
             next_due=today - timedelta(days=1),
             elapsed_days_at_review=0, scheduled_days_interval=1, review_type="learn"
         )
-        in_memory_db.add_review(review1)
+        in_memory_db.add_review_and_update_card(review1, CardState.Review)
 
         # Card 2: Due in the future
         card2_uuid = uuid.uuid4()
@@ -396,17 +396,17 @@ class TestReviewSessionManagerIntegration:
             next_due=today + timedelta(days=3), # Explicitly due in 3 days
             elapsed_days_at_review=0, scheduled_days_interval=8, review_type="review"
         )
-        in_memory_db.add_review(review_for_card2) # This will also update card2's next_due_date in DB
+        in_memory_db.add_review_and_update_card(review_for_card2, CardState.Review) # This will also update card2's next_due_date in DB
 
         # 2. Initialize ReviewSessionManager with the real DB and a real scheduler
         scheduler = FSRS_Scheduler()
-        manager = ReviewSessionManager(db=in_memory_db, scheduler=scheduler)
+        manager = ReviewSessionManager(db_manager=in_memory_db, scheduler=scheduler, user_uuid=uuid.uuid4(), deck_name="Test Deck")
 
         # 3. Start session & verify due counts
         # get_due_cards_count uses `next_due_date <= on_date`
         assert manager.get_due_card_count() == 1, f"Expected 1 due card, found {manager.get_due_card_count()}. Card1 due: {card1.next_due_date}, Card2 due: {in_memory_db.get_card_by_uuid(card2_uuid).next_due_date}"
         
-        manager.start_session(limit=10)
+        manager.initialize_session(limit=10)
         assert len(manager.review_queue) == 1
         assert manager.review_queue[0].uuid == card1_uuid
 
@@ -416,10 +416,10 @@ class TestReviewSessionManagerIntegration:
         assert next_card_to_review.uuid == card1_uuid
 
         # 5. Submit review for the card
-        rating = 2 # Good
+        rating = Rating.Hard # Corresponds to value 2
         review_ts = datetime.now(timezone.utc) # Use current time for review
         resp_ms = 4000
-        submitted_review = manager.submit_review(card_uuid=card1_uuid, rating=rating, review_ts=review_ts, resp_ms=resp_ms)
+        submitted_review = manager.submit_review(card_uuid=card1_uuid, rating=rating, reviewed_at=review_ts, resp_ms=resp_ms)
         
         assert submitted_review is not None
         assert submitted_review.card_uuid == card1_uuid
