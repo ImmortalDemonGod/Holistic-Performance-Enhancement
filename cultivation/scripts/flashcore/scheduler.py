@@ -82,6 +82,13 @@ class FSRS_Scheduler(BaseScheduler):
     This scheduler uses the py-fsrs library to determine card states and next review dates.
     """
 
+    REVIEW_TYPE_MAP = {
+        "new": "learn",
+        "learning": "learn",
+        "review": "review",
+        "relearning": "relearn",
+    }
+
     RATING_MAP = {
         0: FSRSRating.Again,
         1: FSRSRating.Hard,
@@ -160,7 +167,9 @@ class FSRS_Scheduler(BaseScheduler):
             diff=updated_fsrs_card.difficulty,
             next_due=updated_fsrs_card.due.date(),
             scheduled_days=scheduled_days,
-            review_type=state_before_review.name.lower(),
+            review_type=self.REVIEW_TYPE_MAP.get(
+                state_before_review.name.lower(), "review"
+            ),
             elapsed_days=elapsed_days,
             state=new_card_state
         )
