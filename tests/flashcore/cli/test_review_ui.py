@@ -77,3 +77,42 @@ def test_start_review_flow_with_one_card(mock_manager: MagicMock, capsys):
     mock_manager.submit_review.assert_called_once_with(
         card_uuid=card_uuid, rating=3, resp_ms=ANY
     )
+
+
+def test_start_review_flow_invalid_rating_input(mock_manager: MagicMock, capsys):
+    """Tests that the review flow handles invalid rating inputs and re-prompts."""
+    # Arrange
+    card_uuid = uuid4()
+    mock_card = MagicMock(spec=Card)
+    mock_card.uuid = card_uuid
+    mock_card.front = "Question"
+    mock_card.back = "Answer"
+
+    mock_manager.review_queue = [mock_card]
+    mock_manager.get_next_card.side_effect = [mock_card, None]
+
+    # Mock the return value of submit_review to be an updated card
+    mock_updated_card = MagicMock(spec=Card)
+    mock_updated_card.next_due_date = date.today() + timedelta(days=1)
+    mock_manager.submit_review.return_value = mock_updated_card
+
+    # Act
+    # Simulate user pressing Enter, then entering 'abc', then '5', then '0', then a valid '2'
+    with patch('rich.console.Console.input', side_effect=["", "abc", "5", "0", "2"]):
+        start_review_flow(mock_manager)
+
+    # Assert
+    captured = capsys.readouterr()
+    output = captured.out
+
+    # Check that error messages were displayed for invalid inputs
+    assert "Invalid input. Please enter a number." in output
+    assert "Invalid rating. Please enter a number between 1 and 4." in output
+
+    # Check that submit_review was eventually called with the valid rating
+    mock_manager.submit_review.assert_called_once_with(
+        card_uuid=card_uuid, rating=2, resp_ms=ANY
+    )
+
+    # Check that the session finished
+    assert "Review session finished." in output
