@@ -6,11 +6,11 @@ import pytest
 import uuid
 from collections import deque
 from datetime import date, datetime, timedelta, timezone
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from cultivation.scripts.flashcore.card import Card, Review, CardState, Rating
-from cultivation.scripts.flashcore.database import FlashcardDatabase
-from cultivation.scripts.flashcore.scheduler import FSRS_Scheduler
+from cultivation.scripts.flashcore.database import FlashcardDatabase, CardOperationError
+from cultivation.scripts.flashcore.scheduler import FSRS_Scheduler, SchedulerOutput
 from cultivation.scripts.flashcore.review_manager import ReviewSessionManager
 
 # --- Fixtures --- 
@@ -19,25 +19,26 @@ from cultivation.scripts.flashcore.review_manager import ReviewSessionManager
 def mock_db() -> MagicMock:
     """Provides a MagicMock for FlashcardDatabase."""
     db = MagicMock(spec=FlashcardDatabase)
-    db.get_due_cards = MagicMock(return_value=[])
-    db.get_card_by_uuid = MagicMock(return_value=None)
-    db.get_reviews_for_card = MagicMock(return_value=[])
-    db.add_review = MagicMock(return_value=123) # Mock review_id
-    db.get_due_card_count = MagicMock(return_value=0)
+    db.CardOperationError = CardOperationError
+    db.get_due_cards.return_value = []
+    db.get_card_by_uuid.return_value = None
+    db.get_reviews_for_card.return_value = []
+    db.add_review_and_update_card = MagicMock()
+    db.get_due_card_count.return_value = 0
     return db
 
 @pytest.fixture
 def mock_scheduler() -> MagicMock:
     """Provides a MagicMock for FSRS_Scheduler."""
     scheduler = MagicMock(spec=FSRS_Scheduler)
-    scheduler.compute_next_state = MagicMock(
-        return_value={
-            "stability": 10.0,
-            "difficulty": 5.0,
-            "next_review_due": date.today() + timedelta(days=10),
-            "scheduled_days": 10,
-            "state": "REVIEW"
-        }
+    scheduler.compute_next_state.return_value = SchedulerOutput(
+        stab=10.0,
+        diff=5.0,
+        state=CardState.Review,
+        next_due=date.today() + timedelta(days=10),
+        scheduled_days=10,
+        review_type="review",
+        elapsed_days=1
     )
     return scheduler
 
@@ -80,285 +81,195 @@ class TestReviewSessionManagerInit:
         manager = ReviewSessionManager(
             db_manager=mock_db, scheduler=mock_scheduler, user_uuid=uuid.uuid4(), deck_name="Test Deck"
         )
-        assert manager.db == mock_db
-        assert manager.scheduler == mock_scheduler
-        assert isinstance(manager.review_queue, deque)
+        assert manager.user_uuid is not None
+        assert manager.deck_name == "Test Deck"
+        assert isinstance(manager.review_queue, list)
         assert manager.current_session_card_uuids == set()
 
-    def test_init_type_error_for_scheduler(self, mock_db: MagicMock):
-        """Test that TypeError is raised if scheduler is not FSRS_Scheduler."""
-        # This test is now obsolete as the manual type check was removed in favor of
-        # static type hints. This test is kept as a placeholder.
-        pass
+
 
 class TestStartSessionAndGetNextCard:
     def test_start_session_populates_queue(self, review_manager: ReviewSessionManager, mock_db: MagicMock, sample_card: Card):
-        """Test start_session fetches due cards and populates the review queue."""
-        mock_cards = [sample_card, Card(**{**sample_card.model_dump(), "uuid": uuid.uuid4()})]
-        mock_db.get_due_cards.return_value = mock_cards
-        
-        review_manager.start_session(limit=10)
-        
-        mock_db.get_due_cards.assert_called_once_with(on_date=date.today(), limit=10)
-        assert list(review_manager.review_queue) == mock_cards
-        assert review_manager.current_session_card_uuids == {c.uuid for c in mock_cards}
+        """Test that starting a session populates the review_queue with due cards."""
+        due_cards = [sample_card, Card(**{**sample_card.model_dump(), "uuid": uuid.uuid4()})]
+        mock_db.get_due_cards.return_value = due_cards
+
+        review_manager.initialize_session()
+
+        assert len(review_manager.review_queue) == len(due_cards)
+        # Compare sets of UUIDs since Card objects are not hashable
+        assert {c.uuid for c in review_manager.review_queue} == {c.uuid for c in due_cards}
+        assert review_manager.current_session_card_uuids == {c.uuid for c in due_cards}
 
     def test_start_session_clears_existing_queue(self, review_manager: ReviewSessionManager, mock_db: MagicMock, sample_card: Card):
-        """Test start_session clears any pre-existing queue before populating."""
-        # Pre-populate queue
-        initial_card = Card(**{**sample_card.model_dump(), "uuid": uuid.uuid4(), "front": "Old Card"})
-        review_manager.review_queue = deque([initial_card])
-        review_manager.current_session_card_uuids = {initial_card.uuid}
-        
-        new_mock_cards = [sample_card]
-        mock_db.get_due_cards.return_value = new_mock_cards
-        
-        review_manager.start_session(limit=5)
-        
-        mock_db.get_due_cards.assert_called_with(on_date=date.today(), limit=5)
-        assert list(review_manager.review_queue) == new_mock_cards
-        assert initial_card not in review_manager.review_queue
-        assert review_manager.current_session_card_uuids == {c.uuid for c in new_mock_cards}
+        """Test that starting a session clears any existing cards in the queue."""
+        # Pre-populate the queue
+        review_manager.review_queue = deque([Card(**{**sample_card.model_dump(), "uuid": uuid.uuid4()})])
+        review_manager.current_session_card_uuids = {review_manager.review_queue[0].uuid}
+
+        due_cards = [sample_card]
+        mock_db.get_due_cards.return_value = due_cards
+
+        review_manager.initialize_session()
+
+        assert len(review_manager.review_queue) == 1
+        assert review_manager.review_queue[0] == sample_card
 
     def test_get_next_card_returns_card_from_queue(self, review_manager: ReviewSessionManager, sample_card: Card):
-        """Test get_next_card returns the next card and removes it from queue (FIFO)."""
-        card1 = sample_card
-        card2_uuid = uuid.uuid4()
-        card2 = Card(**{**sample_card.model_dump(), "uuid": card2_uuid, "front": "Second Card"})
-        review_manager.review_queue = deque([card1, card2])
-        review_manager.current_session_card_uuids = {card1.uuid, card2.uuid}
+        """Test get_next_card returns the first card without removing it."""
+        manager = review_manager
+        manager.review_queue = deque([sample_card, Card(**{**sample_card.model_dump(), "uuid": uuid.uuid4()})])
         
-        next_c = review_manager.get_next_card()
-        assert next_c == card1
-        assert list(review_manager.review_queue) == [card2]
-        # current_session_card_uuids should remain unchanged by get_next_card
-        assert review_manager.current_session_card_uuids == {card1.uuid, card2.uuid} 
-
-        next_c_2 = review_manager.get_next_card()
-        assert next_c_2 == card2
-        assert list(review_manager.review_queue) == []
-        assert review_manager.current_session_card_uuids == {card1.uuid, card2.uuid}
+        next_card = manager.get_next_card()
+        assert next_card == sample_card
+        assert len(manager.review_queue) == 2 # Should not be removed
 
     def test_get_next_card_empty_queue_returns_none(self, review_manager: ReviewSessionManager):
-        """Test get_next_card returns None when the queue is empty."""
-        review_manager.review_queue = []
-        review_manager.current_session_card_uuids = set()
-        
-        next_c = review_manager.get_next_card()
-        assert next_c is None
+        """Test get_next_card returns None if the queue is empty."""
+        review_manager.review_queue = deque([])
+        assert review_manager.get_next_card() is None
 
 class TestSubmitReviewAndHelpers:
-    def test_calculate_elapsed_days_new_card(self, review_manager: ReviewSessionManager, sample_card: Card):
-        """Test _calculate_elapsed_days for a card with no prior reviews."""
-        # Set explicit timestamps to avoid fixture-related date boundary issues
-        sample_card.added_at = datetime(2025, 6, 20, 12, 0, 0, tzinfo=timezone.utc)
-        review_ts = sample_card.added_at + timedelta(days=5, hours=2)  # This will be 2025-06-25 14:00:00 UTC
-
-        elapsed_days = review_manager._calculate_elapsed_days(sample_card, [], review_ts)
-
-        # The difference between 2025-06-25 and 2025-06-20 is 5 days.
-        assert elapsed_days == 5
-
-    def test_calculate_elapsed_days_with_history(self, review_manager: ReviewSessionManager, sample_card: Card):
-        """Test _calculate_elapsed_days for a card with prior reviews."""
-        last_review_ts = datetime.now(timezone.utc) - timedelta(days=10)
-        history = [
-            Review(
-                card_uuid=sample_card.uuid,
-                ts=last_review_ts - timedelta(days=20),
-                rating=2, stab_after=5.0, diff=5.0, 
-                next_due=last_review_ts.date() - timedelta(days=10), # Due 10 days before last review
-                elapsed_days_at_review=0, scheduled_days_interval=10
-            ),
-            Review(
-                card_uuid=sample_card.uuid,
-                ts=last_review_ts, 
-                rating=2, stab_after=10.0, diff=5.0, 
-                next_due=last_review_ts.date() + timedelta(days=7), # Due 7 days after last review
-                elapsed_days_at_review=10, scheduled_days_interval=7
-            )
-        ]
-        # Current review is 3 days after it was due from the last review
-        current_review_ts = last_review_ts + timedelta(days=10, hours=1)
-        expected_elapsed_days = (current_review_ts.date() - history[-1].next_due).days
-        
-        elapsed_days = review_manager._calculate_elapsed_days(sample_card, history, current_review_ts)
-        assert elapsed_days == expected_elapsed_days
-        assert elapsed_days == 3 # Explicitly (10 days from last review - 7 days scheduled interval)
-
-    def test_calculate_elapsed_days_review_early(self, review_manager: ReviewSessionManager, sample_card: Card):
-        """Test _calculate_elapsed_days when reviewing earlier than scheduled (should be 0)."""
-        last_review_ts = datetime.now(timezone.utc) - timedelta(days=10)
-        history = [
-            Review(
-                card_uuid=sample_card.uuid,
-                ts=last_review_ts,
-                rating=2, stab_after=10.0, diff=5.0,
-                next_due=last_review_ts.date() + timedelta(days=5), # Due in 5 days
-                elapsed_days_at_review=0, scheduled_days_interval=5
-            )
-        ]
-        # Current review is 2 days before it was due
-        current_review_ts = last_review_ts + timedelta(days=3)
-        elapsed_days = review_manager._calculate_elapsed_days(sample_card, history, current_review_ts)
-        assert elapsed_days == 0 # Max(0, -2) is 0
-
     def test_submit_review_successful_new_card(self, review_manager: ReviewSessionManager, mock_db: MagicMock, sample_card: Card):
         """Test submit_review for a new card (no history)."""
-        mock_db.get_card_by_uuid.return_value = sample_card
-        mock_db.get_reviews_for_card.return_value = [] # No history
-        
-        rating = Rating.Good # Good
-        review_ts = sample_card.added_at + timedelta(days=1) # Reviewed 1 day after adding
+        review_manager.review_queue = deque([sample_card])
+        review_manager.current_session_card_uuids = {sample_card.uuid}
+        mock_db.get_reviews_for_card.return_value = []
+
+        rating = Rating.Good
+        review_ts = sample_card.added_at + timedelta(days=1)
         resp_ms = 5000
-
-        # Expected elapsed_days for _calculate_elapsed_days
-        expected_elapsed_days = (review_ts.date() - sample_card.added_at.date()).days
-        assert expected_elapsed_days == 1
-
-        # Scheduler's expected output (already configured in review_manager fixture)
         scheduler_output = review_manager.scheduler.compute_next_state.return_value
 
-        returned_review = review_manager.submit_review(sample_card.uuid, rating, resp_ms, review_ts)
+        # Configure the mock to return an updated card
+        expected_updated_card = sample_card.model_copy(deep=True)
+        expected_updated_card.state = scheduler_output.state
+        expected_updated_card.next_due_date = scheduler_output.next_due
+        mock_db.add_review_and_update_card.return_value = expected_updated_card
 
-        mock_db.get_card_by_uuid.assert_called_once_with(sample_card.uuid)
-        mock_db.get_reviews_for_card.assert_called_once_with(sample_card.uuid, order_by_ts_desc=False)
-        review_manager.scheduler.compute_next_state.assert_called_once_with([], rating, review_ts)
-        
-        expected_review_args = Review(
-            card_uuid=sample_card.uuid, ts=review_ts, rating=rating, resp_ms=resp_ms,
-            stab_before=None, # New card
-            stab_after=scheduler_output["stability"], diff=scheduler_output["difficulty"],
-            next_due=scheduler_output["next_review_due"], 
-            elapsed_days_at_review=expected_elapsed_days, 
-            scheduled_days_interval=scheduler_output["scheduled_days"],
-            review_type=scheduler_output["state"].lower()
+        updated_card = review_manager.submit_review(
+            sample_card.uuid, rating, reviewed_at=review_ts, resp_ms=resp_ms
         )
-        mock_db.add_review.assert_called_once()
-        # Check the Review object passed to add_review
-        actual_review_arg = mock_db.add_review.call_args[0][0]
-        assert actual_review_arg.card_uuid == expected_review_args.card_uuid
-        assert actual_review_arg.ts == expected_review_args.ts
-        assert actual_review_arg.rating == expected_review_args.rating
-        # ... (assert other fields similarly or use model_dump for full comparison if Pydantic supports it well with mocks)
-        assert actual_review_arg.model_dump(exclude={'review_id'}) == expected_review_args.model_dump(exclude={'review_id'})
 
-        assert returned_review is not None
-        assert returned_review.last_review_id == 123 # From mock_db.add_review
-        assert returned_review.state == CardState[scheduler_output["state"].title()]
-        assert returned_review.next_due_date == scheduler_output["next_review_due"]
+        review_manager.scheduler.compute_next_state.assert_called_once()
+        mock_db.add_review_and_update_card.assert_called_once()
+
+        _, kwargs = mock_db.add_review_and_update_card.call_args
+        actual_review: Review = kwargs['review']
+        actual_state: CardState = kwargs['new_card_state']
+
+        assert actual_review.card_uuid == sample_card.uuid
+        assert actual_review.rating == rating
+        assert actual_review.stab_after == scheduler_output.stab
+        assert actual_state == scheduler_output.state
+
+        assert updated_card is not None
+        assert updated_card.state == scheduler_output.state
+        assert updated_card.next_due_date == scheduler_output.next_due
 
     def test_submit_review_successful_with_history(self, review_manager: ReviewSessionManager, mock_db: MagicMock, sample_card: Card):
         """Test submit_review for a card with existing review history."""
-        mock_db.get_card_by_uuid.return_value = sample_card
-        
+        review_manager.review_queue = deque([sample_card])
+        review_manager.current_session_card_uuids = {sample_card.uuid}
+
         prev_review_ts = sample_card.added_at + timedelta(days=5)
         prev_next_due = prev_review_ts.date() + timedelta(days=2)
         history = [
             Review(
-                review_id=100, card_uuid=sample_card.uuid, ts=prev_review_ts, rating=1, resp_ms=6000,
+                review_id=100, card_uuid=sample_card.uuid, ts=prev_review_ts, rating=Rating.Again, resp_ms=6000,
                 stab_before=1.0, stab_after=2.5, diff=6.0, next_due=prev_next_due,
                 elapsed_days_at_review=5, scheduled_days_interval=2, review_type="learn"
             )
         ]
         mock_db.get_reviews_for_card.return_value = history
-        
-        rating = Rating.Easy # Easy
-        review_ts = datetime.combine(prev_next_due + timedelta(days=1), datetime.min.time(), tzinfo=timezone.utc) # Reviewed 1 day after it was due
+
+        # The card's current stability should reflect the last review
+        sample_card.stability = history[-1].stab_after
+
+        rating = Rating.Easy
+        review_ts = datetime.combine(prev_next_due + timedelta(days=1), datetime.min.time(), tzinfo=timezone.utc)
         resp_ms = 3000
-
-        expected_elapsed_days = (review_ts.date() - prev_next_due).days
-        assert expected_elapsed_days == 1
-
         scheduler_output = review_manager.scheduler.compute_next_state.return_value
 
-        returned_review = review_manager.submit_review(sample_card.uuid, rating, resp_ms, review_ts)
+        # Configure the mock to return an updated card
+        expected_updated_card = sample_card.model_copy(deep=True)
+        expected_updated_card.state = scheduler_output.state
+        expected_updated_card.next_due_date = scheduler_output.next_due
+        mock_db.add_review_and_update_card.return_value = expected_updated_card
 
-        mock_db.get_card_by_uuid.assert_called_once_with(sample_card.uuid)
-        mock_db.get_reviews_for_card.assert_called_once_with(sample_card.uuid, order_by_ts_desc=False)
-        review_manager.scheduler.compute_next_state.assert_called_once_with(history, rating, review_ts)
-        
-        expected_review_args = Review(
-            card_uuid=sample_card.uuid, ts=review_ts, rating=rating, resp_ms=resp_ms,
-            stab_before=history[-1].stab_after,
-            stab_after=scheduler_output["stability"], diff=scheduler_output["difficulty"],
-            next_due=scheduler_output["next_review_due"], 
-            elapsed_days_at_review=expected_elapsed_days, 
-            scheduled_days_interval=scheduler_output["scheduled_days"],
-            review_type=scheduler_output["state"].lower()
+        updated_card = review_manager.submit_review(
+            sample_card.uuid, rating, reviewed_at=review_ts, resp_ms=resp_ms
         )
-        mock_db.add_review.assert_called_once()
-        actual_review_arg = mock_db.add_review.call_args[0][0]
-        assert actual_review_arg.model_dump(exclude={'review_id'}) == expected_review_args.model_dump(exclude={'review_id'})
 
-        assert returned_review is not None
-        assert returned_review.last_review_id == 123 # From mock_db.add_review
+        mock_db.add_review_and_update_card.assert_called_once()
+        _, kwargs = mock_db.add_review_and_update_card.call_args
+        actual_review: Review = kwargs['review']
+        actual_state: CardState = kwargs['new_card_state']
 
-    def test_submit_review_card_not_found(self, review_manager: ReviewSessionManager, mock_db: MagicMock):
-        """Test submit_review when the card UUID does not exist."""
+        assert actual_review.stab_before == history[-1].stab_after
+        assert actual_review.stab_after == scheduler_output.stab
+        assert actual_state == scheduler_output.state
+
+        assert updated_card is not None
+        assert updated_card.state == scheduler_output.state
+        assert updated_card.next_due_date == scheduler_output.next_due
+
+    def test_submit_review_card_not_in_session(self, review_manager: ReviewSessionManager):
+        """Test submit_review raises ValueError if card is not in the current session queue."""
         unknown_uuid = uuid.uuid4()
-        mock_db.get_card_by_uuid.return_value = None
-        
-        returned_review = review_manager.submit_review(unknown_uuid, Rating.Again, resp_ms=1000)
-        
-        assert returned_review is None
-        mock_db.get_card_by_uuid.assert_called_once_with(unknown_uuid)
-        mock_db.get_reviews_for_card.assert_not_called()
-        review_manager.scheduler.compute_next_state.assert_not_called()
-        mock_db.add_review.assert_not_called()
+        review_manager.review_queue = deque()
 
-    def test_submit_review_scheduler_error(self, review_manager: ReviewSessionManager, mock_db: MagicMock, sample_card: Card):
-        """Test submit_review when the scheduler raises a ValueError."""
-        mock_db.get_card_by_uuid.return_value = sample_card
-        mock_db.get_reviews_for_card.return_value = []
-        review_manager.scheduler.compute_next_state.side_effect = ValueError("Invalid rating for FSRS")
-        
-        returned_review = review_manager.submit_review(sample_card.uuid, Rating.Again, resp_ms=1000) # Invalid rating to trigger error
-        
-        assert returned_review is None
-        review_manager.scheduler.compute_next_state.assert_called_once()
-        mock_db.add_review.assert_not_called()
+        with pytest.raises(ValueError, match="not found in the current review session"):
+            review_manager.submit_review(unknown_uuid, Rating.Again)
+
+    def test_submit_review_scheduler_error(self, review_manager: ReviewSessionManager, sample_card: Card):
+        """Test submit_review when the scheduler raises an exception."""
+        review_manager.review_queue = deque([sample_card])
+        review_manager.current_session_card_uuids = {sample_card.uuid}
+
+        review_manager.scheduler.compute_next_state.side_effect = ValueError("Scheduler failed")
+
+        with pytest.raises(ValueError, match="Scheduler failed"):
+            review_manager.submit_review(sample_card.uuid, Rating.Hard)
 
     def test_submit_review_db_add_error(self, review_manager: ReviewSessionManager, mock_db: MagicMock, sample_card: Card):
-        """Test submit_review when db.add_review raises an exception."""
-        mock_db.get_card_by_uuid.return_value = sample_card
-        mock_db.get_reviews_for_card.return_value = []
-        mock_db.add_review.side_effect = Exception("DB connection failed")
-        
-        returned_review = review_manager.submit_review(sample_card.uuid, Rating.Again, resp_ms=1000)
-        
-        assert returned_review is None
-        mock_db.add_review.assert_called_once()
+        """Test submit_review when the database raises an exception."""
+        review_manager.review_queue = deque([sample_card])
+        review_manager.current_session_card_uuids = {sample_card.uuid}
 
-    def test_submit_review_removes_card_from_active_queue(self, review_manager: ReviewSessionManager, mock_db: MagicMock, sample_card: Card):
-        """Test that a successfully reviewed card is removed from the active review_queue if it was part of the current session."""
-        # Setup: card is in the current session queue
-        review_manager.review_queue = [sample_card, Card(**{**sample_card.model_dump(), "uuid": uuid.uuid4()})]
-        review_manager.current_session_card_uuids = {c.uuid for c in review_manager.review_queue}
-        assert sample_card in review_manager.review_queue
+        mock_db.add_review_and_update_card.side_effect = mock_db.CardOperationError("DB connection failed")
 
-        mock_db.get_card_by_uuid.return_value = sample_card
-        mock_db.get_reviews_for_card.return_value = []
+        with pytest.raises(mock_db.CardOperationError, match="DB connection failed"):
+            review_manager.submit_review(sample_card.uuid, Rating.Good)
 
-        returned_review = review_manager.submit_review(sample_card.uuid, Rating.Again, resp_ms=1000)
+        mock_db.add_review_and_update_card.assert_called_once()
+
+    def test_submit_review_removes_card_from_active_queue(self, review_manager: ReviewSessionManager, sample_card: Card):
+        """Test that a successfully reviewed card is removed from the active review_queue."""
+        other_card = Card(**{**sample_card.model_dump(), "uuid": uuid.uuid4()})
+        review_manager.review_queue = deque([sample_card, other_card])
+        review_manager.current_session_card_uuids = {sample_card.uuid, other_card.uuid}
+
         review_manager.submit_review(sample_card.uuid, rating=Rating.Hard, resp_ms=1000)
 
         assert sample_card not in review_manager.review_queue
-        # current_session_card_uuids should still contain it, as it tracks all cards loaded in session
+        assert other_card in review_manager.review_queue
         assert sample_card.uuid in review_manager.current_session_card_uuids 
 
 class TestGetDueCardCount:
-    def test_get_due_card_count_calls_db(self, review_manager: ReviewSessionManager, mock_db: MagicMock):
+    @patch('cultivation.scripts.flashcore.review_manager.datetime')
+    def test_get_due_card_count_calls_db(self, mock_datetime: MagicMock, review_manager: ReviewSessionManager, mock_db: MagicMock):
         """Test get_due_card_count calls the database method and returns its result."""
+        test_date = date(2025, 6, 20)
+        mock_datetime.now.return_value.date.return_value = test_date
+
         expected_count = 42
-        # The method should call the efficient get_due_card_count method on the db.
         mock_db.get_due_card_count.return_value = expected_count
 
         count = review_manager.get_due_card_count()
 
         assert count == expected_count
-        # Verify the underlying DB method is called correctly
-        mock_db.get_due_card_count.assert_called_once_with(on_date=date.today(), deck_name="Test Deck")
+        mock_db.get_due_card_count.assert_called_once_with(on_date=test_date, deck_name="Test Deck")
         mock_db.get_due_cards.assert_not_called() # Ensure the less efficient method is not called.
 
 class TestReviewSessionManagerIntegration:
