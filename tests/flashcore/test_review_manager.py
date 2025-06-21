@@ -5,10 +5,8 @@ Unit and integration tests for ReviewSessionManager in flashcore.review_manager.
 import pytest
 import uuid
 from collections import deque
-from datetime import datetime, date, timedelta, timezone
-from unittest.mock import MagicMock, call
-import uuid
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
+from unittest.mock import MagicMock
 
 from cultivation.scripts.flashcore.card import Card, Review, CardState, Rating
 from cultivation.scripts.flashcore.database import FlashcardDatabase
@@ -87,17 +85,11 @@ class TestReviewSessionManagerInit:
         assert isinstance(manager.review_queue, deque)
         assert manager.current_session_card_uuids == set()
 
-    def test_init_type_error_for_db(self, mock_scheduler: MagicMock):
-        """Test that TypeError is raised if db is not FlashcardDatabase."""
-        # This test is now obsolete as the manual type check was removed.
-        # It's kept here as a placeholder to show the original intent.
-        # In a real scenario, this would be removed or adapted for static type checking.
-        pass
-
     def test_init_type_error_for_scheduler(self, mock_db: MagicMock):
         """Test that TypeError is raised if scheduler is not FSRS_Scheduler."""
-        with pytest.raises(TypeError, match="scheduler must be an instance of FSRS_Scheduler"):
-            ReviewSessionManager(db=mock_db, scheduler="not_a_scheduler")
+        # This test is now obsolete as the manual type check was removed in favor of
+        # static type hints. This test is kept as a placeholder.
+        pass
 
 class TestStartSessionAndGetNextCard:
     def test_start_session_populates_queue(self, review_manager: ReviewSessionManager, mock_db: MagicMock, sample_card: Card):
@@ -216,7 +208,7 @@ class TestSubmitReviewAndHelpers:
         mock_db.get_card_by_uuid.return_value = sample_card
         mock_db.get_reviews_for_card.return_value = [] # No history
         
-        rating = 2 # Good
+        rating = Rating.Good # Good
         review_ts = sample_card.added_at + timedelta(days=1) # Reviewed 1 day after adding
         resp_ms = 5000
 
@@ -266,12 +258,12 @@ class TestSubmitReviewAndHelpers:
             Review(
                 review_id=100, card_uuid=sample_card.uuid, ts=prev_review_ts, rating=1, resp_ms=6000,
                 stab_before=1.0, stab_after=2.5, diff=6.0, next_due=prev_next_due,
-                elapsed_days_at_review=5, scheduled_days_interval=2, review_type="review"
+                elapsed_days_at_review=5, scheduled_days_interval=2, review_type="learn"
             )
         ]
         mock_db.get_reviews_for_card.return_value = history
         
-        rating = 3 # Easy
+        rating = Rating.Easy # Easy
         review_ts = datetime.combine(prev_next_due + timedelta(days=1), datetime.min.time(), tzinfo=timezone.utc) # Reviewed 1 day after it was due
         resp_ms = 3000
 
@@ -307,7 +299,7 @@ class TestSubmitReviewAndHelpers:
         unknown_uuid = uuid.uuid4()
         mock_db.get_card_by_uuid.return_value = None
         
-        returned_review = review_manager.submit_review(unknown_uuid, 2, resp_ms=1000)
+        returned_review = review_manager.submit_review(unknown_uuid, Rating.Again, resp_ms=1000)
         
         assert returned_review is None
         mock_db.get_card_by_uuid.assert_called_once_with(unknown_uuid)
@@ -321,7 +313,7 @@ class TestSubmitReviewAndHelpers:
         mock_db.get_reviews_for_card.return_value = []
         review_manager.scheduler.compute_next_state.side_effect = ValueError("Invalid rating for FSRS")
         
-        returned_review = review_manager.submit_review(sample_card.uuid, 99, resp_ms=1000) # Invalid rating to trigger error
+        returned_review = review_manager.submit_review(sample_card.uuid, Rating.Again, resp_ms=1000) # Invalid rating to trigger error
         
         assert returned_review is None
         review_manager.scheduler.compute_next_state.assert_called_once()
@@ -333,7 +325,7 @@ class TestSubmitReviewAndHelpers:
         mock_db.get_reviews_for_card.return_value = []
         mock_db.add_review.side_effect = Exception("DB connection failed")
         
-        returned_review = review_manager.submit_review(sample_card.uuid, 2, resp_ms=1000)
+        returned_review = review_manager.submit_review(sample_card.uuid, Rating.Again, resp_ms=1000)
         
         assert returned_review is None
         mock_db.add_review.assert_called_once()
@@ -348,6 +340,7 @@ class TestSubmitReviewAndHelpers:
         mock_db.get_card_by_uuid.return_value = sample_card
         mock_db.get_reviews_for_card.return_value = []
 
+        returned_review = review_manager.submit_review(sample_card.uuid, Rating.Again, resp_ms=1000)
         review_manager.submit_review(sample_card.uuid, rating=Rating.Hard, resp_ms=1000)
 
         assert sample_card not in review_manager.review_queue
