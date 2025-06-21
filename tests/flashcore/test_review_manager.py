@@ -419,24 +419,32 @@ class TestReviewSessionManagerIntegration:
         rating = Rating.Hard # Corresponds to value 2
         review_ts = datetime.now(timezone.utc) # Use current time for review
         resp_ms = 4000
-        submitted_review = manager.submit_review(card_uuid=card1_uuid, rating=rating, reviewed_at=review_ts, resp_ms=resp_ms)
-        
-        assert submitted_review is not None
-        assert submitted_review.card_uuid == card1_uuid
-        assert submitted_review.rating == rating
-        assert submitted_review.review_type == "review" # New/Lapsed cards rated Good graduate
-        assert submitted_review.next_due > today # Should be scheduled for the future
+        updated_card = manager.submit_review(card_uuid=card1_uuid, rating=rating, reviewed_at=review_ts, resp_ms=resp_ms)
+
+        # 6. Verify the results
+        # Assert properties of the returned (and updated) Card object
+        assert updated_card is not None
+        assert updated_card.uuid == card1_uuid
+        assert updated_card.next_due_date > today
+        assert updated_card.state == CardState.Review
+        assert updated_card.last_review_id is not None
+
+        # Assert properties of the Review object that was created in the DB
+        latest_review = in_memory_db.get_latest_review_for_card(card1_uuid)
+        assert latest_review is not None
+        assert latest_review.review_id == updated_card.last_review_id
+        assert latest_review.rating == rating.value
+        assert latest_review.review_type == "review"
 
         # 6. Verify DB state
         card1_reviews = in_memory_db.get_reviews_for_card(card1_uuid)
         assert len(card1_reviews) == 2
-        assert card1_reviews[0].review_id == submitted_review.review_id # DB generates review_id
-        assert card1_reviews[0].rating == rating
+        assert card1_reviews[0].review_id == updated_card.last_review_id # DB generates review_id
 
         updated_card1_from_db = in_memory_db.get_card_by_uuid(card1_uuid)
         assert updated_card1_from_db is not None
-        assert updated_card1_from_db.last_review_id == submitted_review.review_id
-        assert updated_card1_from_db.next_due_date == submitted_review.next_due
+        assert updated_card1_from_db.last_review_id == updated_card.last_review_id
+        assert updated_card1_from_db.next_due_date == updated_card.next_due_date
 
         # 7. Verify manager state after review
         assert card1_uuid not in [c.uuid for c in manager.review_queue] # Card removed from active queue
