@@ -12,7 +12,8 @@ try:
         _process_single_yaml_file, # To test this internal function directly for some cases
         _transform_raw_card_to_model, # Potentially test this for very fine-grained checks
         YAMLProcessingError,
-        _RawYAMLCardEntry # For testing _transform_raw_card_to_model
+        _RawYAMLCardEntry,
+        _CardProcessingContext,
     )
     from cultivation.scripts.flashcore.card import Card
 except ImportError:
@@ -129,10 +130,13 @@ cards:
 class TestTransformRawCardToModel:
     def test_basic_transform_success(self, tmp_path: Path, assets_dir: Path):
         raw_entry = _RawYAMLCardEntry(q=" Test Q? ", a=" Test A. ")
-        result = _transform_raw_card_to_model(
-            raw_card_model=raw_entry, deck_name="TestDeck", deck_tags={"global"},
+        context = _CardProcessingContext(
             source_file_path=tmp_path / "test.yaml", assets_root_directory=assets_dir,
-            card_index=0, skip_media_validation=False, skip_secrets_detection=False
+            card_index=0, card_q_preview=raw_entry.q[:50],
+            skip_media_validation=False, skip_secrets_detection=False
+        )
+        result = _transform_raw_card_to_model(
+            raw_card_model=raw_entry, deck_name="TestDeck", deck_tags={"global"}, context=context
         )
         assert isinstance(result, Card)
         assert result.front == "Test Q?" # Stripped
@@ -143,24 +147,27 @@ class TestTransformRawCardToModel:
         # With provided valid ID
         valid_uuid_str = "123e4567-e89b-12d3-a456-426614174000"
         raw_entry_with_id = _RawYAMLCardEntry(id=valid_uuid_str, q="Q", a="A")
+        context1 = _CardProcessingContext(tmp_path / "f.yaml", assets_dir, 0, raw_entry_with_id.q[:50], False, False)
         card_with_id = _transform_raw_card_to_model(
-            raw_entry_with_id, "D", set(), tmp_path / "f.yaml", assets_dir, 0, False, False
+            raw_entry_with_id, "D", set(), context1
         )
         assert isinstance(card_with_id, Card)
         assert card_with_id.uuid == uuid.UUID(valid_uuid_str)
 
         # Without ID (default factory in Card model will handle this)
         raw_entry_no_id = _RawYAMLCardEntry(q="Q", a="A")
+        context2 = _CardProcessingContext(tmp_path / "f.yaml", assets_dir, 0, raw_entry_no_id.q[:50], False, False)
         card_no_id = _transform_raw_card_to_model(
-            raw_entry_no_id, "D", set(), tmp_path / "f.yaml", assets_dir, 0, False, False
+            raw_entry_no_id, "D", set(), context2
         )
         assert isinstance(card_no_id, Card)
         assert isinstance(card_no_id.uuid, uuid.UUID)
 
         # With invalid ID string
         raw_entry_invalid_id = _RawYAMLCardEntry(id="not-a-uuid", q="Q", a="A")
+        context3 = _CardProcessingContext(tmp_path / "f.yaml", assets_dir, 0, raw_entry_invalid_id.q[:50], False, False)
         error_invalid_id = _transform_raw_card_to_model(
-            raw_entry_invalid_id, "D", set(), tmp_path / "f.yaml", assets_dir, 0, False, False
+            raw_entry_invalid_id, "D", set(), context3
         )
         assert isinstance(error_invalid_id, YAMLProcessingError)
         assert "Invalid UUID format" in error_invalid_id.message
@@ -168,8 +175,9 @@ class TestTransformRawCardToModel:
     def test_tag_merging_and_formatting(self, tmp_path: Path, assets_dir: Path):
         raw_entry = _RawYAMLCardEntry(q="Q", a="A", tags=[" Card-Tag1 ", "card-tag2"])
         deck_tags = {"deck-tag", "card-tag2"} # card-tag2 is duplicate, Set will handle
+        context = _CardProcessingContext(tmp_path / "f.yaml", assets_dir, 0, raw_entry.q[:50], False, False)
         result = _transform_raw_card_to_model(
-            raw_entry, "Deck", deck_tags, tmp_path / "f.yaml", assets_dir, 0, False, False
+            raw_entry, "Deck", deck_tags, context
         )
         assert isinstance(result, Card)
         # Pydantic model for Card has `constr` that validates kebab-case.
@@ -179,39 +187,44 @@ class TestTransformRawCardToModel:
     def test_media_validation(self, tmp_path: Path, assets_dir: Path):
         # Valid media
         raw_valid_media = _RawYAMLCardEntry(q="Q", a="A", media=["image.png", "subfolder/audio.mp3"])
+        context1 = _CardProcessingContext(tmp_path / "f.yaml", assets_dir, 0, raw_valid_media.q[:50], False, False)
         card_valid_media = _transform_raw_card_to_model(
-            raw_valid_media, "D", set(), tmp_path / "f.yaml", assets_dir, 0, False, False
+            raw_valid_media, "D", set(), context1
         )
         assert isinstance(card_valid_media, Card)
         assert card_valid_media.media == [Path("image.png"), Path("subfolder/audio.mp3")]
 
         # Non-existent media
         raw_non_existent = _RawYAMLCardEntry(q="Q", a="A", media=["nonexistent.jpg"])
+        context2 = _CardProcessingContext(tmp_path / "f.yaml", assets_dir, 0, raw_non_existent.q[:50], False, False)
         err_non_existent = _transform_raw_card_to_model(
-            raw_non_existent, "D", set(), tmp_path / "f.yaml", assets_dir, 0, False, False
+            raw_non_existent, "D", set(), context2
         )
         assert isinstance(err_non_existent, YAMLProcessingError)
         assert "Media file not found" in err_non_existent.message
 
         # Non-existent media with skip_media_validation=True
+        context3 = _CardProcessingContext(tmp_path / "f.yaml", assets_dir, 0, raw_non_existent.q[:50], True, False)
         card_skipped_validation = _transform_raw_card_to_model(
-            raw_non_existent, "D", set(), tmp_path / "f.yaml", assets_dir, 0, True, False
+            raw_non_existent, "D", set(), context3
         )
         assert isinstance(card_skipped_validation, Card)
         assert card_skipped_validation.media == [Path("nonexistent.jpg")]
 
         # Absolute media path
         raw_abs_media = _RawYAMLCardEntry(q="Q", a="A", media=[str(assets_dir.resolve() / "image.png")])
+        context4 = _CardProcessingContext(tmp_path / "f.yaml", assets_dir, 0, raw_abs_media.q[:50], False, False)
         err_abs_media = _transform_raw_card_to_model(
-            raw_abs_media, "D", set(), tmp_path / "f.yaml", assets_dir, 0, False, False
+            raw_abs_media, "D", set(), context4
         )
         assert isinstance(err_abs_media, YAMLProcessingError)
         assert "Media path must be relative" in err_abs_media.message
         
         # Path traversal
         raw_trav_media = _RawYAMLCardEntry(q="Q", a="A", media=["../image.png"])
+        context5 = _CardProcessingContext(assets_dir / "f.yaml", assets_dir, 0, raw_trav_media.q[:50], False, False)
         err_trav_media = _transform_raw_card_to_model(
-            raw_trav_media, "D", set(), assets_dir / "f.yaml", assets_dir, 0, False, False
+            raw_trav_media, "D", set(), context5
         )
         assert isinstance(err_trav_media, YAMLProcessingError)
         assert "resolves outside the assets root" in err_trav_media.message
@@ -219,16 +232,18 @@ class TestTransformRawCardToModel:
 
     def test_secrets_detection(self, tmp_path: Path, assets_dir: Path):
         raw_secret_q = _RawYAMLCardEntry(q="api_key: sk_live_verylongtestkey1234567890", a="A")
+        context1 = _CardProcessingContext(tmp_path / "f.yaml", assets_dir, 0, raw_secret_q.q[:50], False, False)
         err_secret_q = _transform_raw_card_to_model(
-            raw_secret_q, "D", set(), tmp_path / "f.yaml", assets_dir, 0, False, False
+            raw_secret_q, "D", set(), context1
         )
         assert isinstance(err_secret_q, YAMLProcessingError)
         assert "Potential secret detected" in err_secret_q.message
         assert "card question" in err_secret_q.message
 
         # Skipped detection
+        context2 = _CardProcessingContext(tmp_path / "f.yaml", assets_dir, 0, raw_secret_q.q[:50], False, True)
         card_skipped_secret = _transform_raw_card_to_model(
-            raw_secret_q, "D", set(), tmp_path / "f.yaml", assets_dir, 0, False, True
+            raw_secret_q, "D", set(), context2
         )
         assert isinstance(card_skipped_secret, Card)
 
