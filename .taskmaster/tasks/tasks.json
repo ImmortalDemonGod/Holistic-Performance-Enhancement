@@ -1848,7 +1848,7 @@
         "description": "Develop the backend logic to manage a review session. This involves fetching due cards from the `FlashcardDatabase`, using the FSRS scheduler for updates, and saving review results.",
         "details": "1. Define `ReviewSessionManager` class in `flashcore/review_manager.py`.\n2. Constructor `__init__(self, db: FlashcardDatabase)`.\n3. Method `start_session(self, limit: int = 20) -> None`: fetches due cards using `db.get_due_cards` and populates an internal queue.\n4. Method `get_next_card(self) -> Optional[Card]`: returns the next card from the queue or None.\n5. Method `submit_review(self, card_uuid: UUID, rating: int, resp_ms: Optional[int]) -> Review`: retrieves card history from `db`, calls the FSRS scheduler, constructs a new `Review` object, and saves it to the `db` via `db.add_review()`.\n6. Method `get_due_card_count(self) -> int`: returns the total number of cards currently due for review.",
         "testStrategy": "• Unit tests in `tests/flashcore/test_review_manager.py` using pytest and mocks for `FlashcardDatabase` and `FSRS_Scheduler`.\n  - `start_session`: verify `db.get_due_cards` is called correctly.\n  - `submit_review`: mock scheduler return values, verify `db.add_review` is called with a correctly constructed `Review` object.\n• Integration test using an in-memory `FlashcardDatabase`.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           19
         ],
@@ -1859,7 +1859,7 @@
             "title": "Define ReviewSessionManager class structure",
             "description": "Create the `ReviewSessionManager` class with its constructor and internal state attributes (e.g., `self.db`, `self.scheduler`, `self.review_queue`).",
             "dependencies": [],
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 2,
@@ -1868,7 +1868,7 @@
             "dependencies": [
               1
             ],
-            "status": "pending",
+            "status": "done",
             "risks": "The `db.get_due_cards` query might be slow for a very large database.",
             "mitigation": "Ensure the underlying database query is indexed and optimized. For now, accept the performance as-is for the MVP."
           },
@@ -1879,7 +1879,7 @@
             "dependencies": [
               1
             ],
-            "status": "pending",
+            "status": "done",
             "risks": "Incorrectly calculating `elapsed_days_at_review` passed to FSRS, leading to scheduling errors.",
             "mitigation": "Write a specific helper function for this calculation that handles both first-time reviews (delta from `card.added_at`) and subsequent reviews (delta from previous `review.ts`). Cover these cases in unit tests.",
             "implementation_details": {
@@ -1899,7 +1899,7 @@
             "dependencies": [
               1
             ],
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 5,
@@ -1910,7 +1910,7 @@
               3,
               4
             ],
-            "status": "pending",
+            "status": "done",
             "risks": "Mocks for the database and scheduler become overly complex and brittle.",
             "mitigation": "Prioritize a full integration test using an in-memory DuckDB instance to validate the end-to-end flow, reducing reliance on complex mocks for the core `submit_review` logic."
           }
@@ -1959,7 +1959,7 @@
         "description": "Create a command-line interface (CLI) for users to review flashcards. This UI will interact with the `ReviewSessionManager` to fetch cards and submit review outcomes.",
         "details": "1. In `flashcore/cli/review_ui.py`, define a function `start_review_flow(manager: ReviewSessionManager)`.\n2. Call `manager.start_session()` to load due cards.\n3. Loop while `manager.get_next_card()` returns a card:\n   a. Display card front content (e.g., `card.front`).\n   b. Prompt user to show answer (e.g., press Enter).\n   c. Display card back content (e.g., `card.back`).\n   d. Prompt user for rating (e.g., 1:Again, 2:Hard, 3:Good, 4:Easy). Validate input.\n   e. Record response time (optional, `resp_ms`).\n   f. Call `manager.submit_review(card.uuid, rating, resp_ms)`.\n   g. Display next review date or feedback.\n4. Handle cases: no due cards, session completion.\n5. Provide clear instructions and progress indicators (e.g., 'Card X of Y').",
         "testStrategy": "• Manual testing: Run the CLI flow with a `ReviewSessionManager` connected to a test database.\n  - Verify card presentation, rating input, and session progression.\n  - Check behavior with no due cards and after completing all cards.\n• Unit tests in `tests/cli/test_review_ui.py` (using `pytest-mock` for `ReviewSessionManager`):\n  - Test card display and rating input loop.\n  - Test session start/completion messages.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           20
         ],
@@ -1970,7 +1970,7 @@
             "title": "Design basic CLI interaction flow",
             "description": "Outline the sequence of prompts, card display, and user inputs for a single card review cycle.",
             "dependencies": [],
-            "status": "pending",
+            "status": "done",
             "risks": "The interaction flow is clunky or unintuitive.",
             "mitigation": "Sketch the flow on paper first, simulating a user session. Prioritize clarity and minimal required keystrokes."
           },
@@ -1981,7 +1981,7 @@
             "dependencies": [
               1
             ],
-            "status": "pending",
+            "status": "done",
             "risks": "Complex Markdown or KaTeX in cards breaks terminal rendering.",
             "mitigation": "Use `rich.markdown.Markdown` which handles many cases gracefully. For unsupported elements, showing the raw Markdown/KaTeX is an acceptable fallback for the MVP."
           },
@@ -1992,7 +1992,7 @@
             "dependencies": [
               2
             ],
-            "status": "pending",
+            "status": "done",
             "risks": "User enters invalid input (e.g., 'text', 5), crashing the program.",
             "mitigation": "Implement a robust input validation loop that handles non-integer input and out-of-range numbers, re-prompting the user with a clear error message."
           },
@@ -2003,7 +2003,7 @@
             "dependencies": [
               1
             ],
-            "status": "pending"
+            "status": "done"
           },
           {
             "id": 5,
@@ -2012,7 +2012,7 @@
             "dependencies": [
               4
             ],
-            "status": "pending"
+            "status": "done"
           }
         ],
         "hpe_csm_reference": {
@@ -2734,7 +2734,7 @@
     ],
     "metadata": {
       "created": "2025-06-16T21:05:48.595Z",
-      "updated": "2025-06-20T17:27:18.628Z",
+      "updated": "2025-06-21T05:02:36.707Z",
       "description": "Tasks for master context"
     }
   }
