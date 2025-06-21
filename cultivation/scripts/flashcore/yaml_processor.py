@@ -219,22 +219,12 @@ def _transform_raw_card_to_model(
     raw_card_model: _RawYAMLCardEntry,
     deck_name: str,
     deck_tags: Set[str],
-    source_file_path: Path,
-    assets_root_directory: Path,
-    card_index: int,
-    skip_media_validation: bool,
-    skip_secrets_detection: bool
+    context: _CardProcessingContext,
 ) -> Union[Card, YAMLProcessingError]:
     """
     Transforms a validated raw card entry into a canonical Card model by orchestrating
     validation, sanitization, and instantiation steps.
     """
-    context = _CardProcessingContext(
-        source_file_path=source_file_path, assets_root_directory=assets_root_directory,
-        card_index=card_index, card_q_preview=raw_card_model.q[:50],
-        skip_media_validation=skip_media_validation, skip_secrets_detection=skip_secrets_detection
-    )
-
     # --- Field Processing and Validation ---
     uuid_or_error = _validate_card_uuid(raw_card_model, context)
     if isinstance(uuid_or_error, YAMLProcessingError):
@@ -283,16 +273,8 @@ def _transform_raw_card_to_model(
             message=f"Unexpected internal error during Card instantiation: {type(e).__name__} - {e}"
         )
 
-def _process_single_yaml_file(
-    file_path: Path,
-    assets_root_directory: Path,
-    skip_media_validation: bool,
-    skip_secrets_detection: bool
-) -> Tuple[List[Card], List[YAMLProcessingError]]:
-    """Processes a single YAML file, returning successfully created Cards and any card-level errors."""
-    cards_in_file: List[Card] = []
-    errors_in_file: List[YAMLProcessingError] = []
-
+def _load_and_parse_yaml(file_path: Path) -> dict:
+    """Loads and parses a YAML file, handling file-level exceptions."""
     try:
         with file_path.open('r', encoding='utf-8') as f:
             raw_yaml_content = yaml.safe_load(f)
@@ -305,8 +287,13 @@ def _process_single_yaml_file(
 
     if not isinstance(raw_yaml_content, dict):
         raise YAMLProcessingError(file_path, "Top level of YAML must be a dictionary (deck object).")
+    return raw_yaml_content
 
-    # Manual top-level validation
+
+def _validate_deck_and_extract_metadata(
+    raw_yaml_content: dict, file_path: Path
+) -> Tuple[str, Set[str], List[dict]]:
+    """Validates the deck structure and extracts metadata."""
     if 'deck' not in raw_yaml_content or not isinstance(raw_yaml_content['deck'], str) or not raw_yaml_content['deck'].strip():
         raise YAMLProcessingError(file_path, "Missing or invalid 'deck' field at top level.")
     deck_name = raw_yaml_content['deck'].strip()
@@ -322,10 +309,33 @@ def _process_single_yaml_file(
     if not cards_list:
         raise YAMLProcessingError(file_path, "No cards found in 'cards' list.")
 
-    encountered_fronts_this_file: Set[str] = set()
+    return deck_name, deck_tags, cards_list
 
+
+def _process_raw_cards(
+    cards_list: List[dict],
+    deck_name: str,
+    deck_tags: Set[str],
+    file_path: Path,
+    assets_root_directory: Path,
+    skip_media_validation: bool,
+    skip_secrets_detection: bool,
+) -> Tuple[List[Card], List[YAMLProcessingError]]:
+    """Processes a list of raw card dictionaries into Card objects and errors."""
+    cards_in_file: List[Card] = []
+    errors_in_file: List[YAMLProcessingError] = []
+    encountered_fronts_this_file: Set[str] = set()
     forbidden_fields = {"added_at"}
+
     for idx, card_dict in enumerate(cards_list):
+        if not isinstance(card_dict, dict):
+            errors_in_file.append(YAMLProcessingError(
+                file_path=file_path,
+                message=f"Card entry at index {idx} is not a dictionary.",
+                card_index=idx,
+            ))
+            continue
+
         forbidden_present = forbidden_fields.intersection(card_dict.keys())
         if forbidden_present:
             errors_in_file.append(
@@ -333,7 +343,7 @@ def _process_single_yaml_file(
                     file_path=file_path,
                     message=f"Forbidden field(s) present in card YAML: {', '.join(forbidden_present)}. These will be ignored and replaced by system-assigned values.",
                     card_index=idx,
-                    card_question_snippet=str(card_dict.get('q', ''))[:50] if isinstance(card_dict, dict) else None
+                    card_question_snippet=str(card_dict.get('q', ''))[:50]
                 )
             )
         try:
@@ -345,20 +355,23 @@ def _process_single_yaml_file(
                     file_path=file_path,
                     message=f"Card-level schema validation failed. Details: {error_details}",
                     card_index=idx,
-                    card_question_snippet=str(card_dict.get('q', ''))[:50] if isinstance(card_dict, dict) else None
+                    card_question_snippet=str(card_dict.get('q', ''))[:50]
                 )
             )
             continue
-        transformed_result = _transform_raw_card_to_model(
-            raw_card_entry_model,
-            deck_name,
-            deck_tags,
-            file_path,
-            assets_root_directory,
-            idx,
-            skip_media_validation,
-            skip_secrets_detection
+
+        context = _CardProcessingContext(
+            source_file_path=file_path,
+            assets_root_directory=assets_root_directory,
+            card_index=idx,
+            card_q_preview=raw_card_entry_model.q[:50],
+            skip_media_validation=skip_media_validation,
+            skip_secrets_detection=skip_secrets_detection,
         )
+        transformed_result = _transform_raw_card_to_model(
+            raw_card_entry_model, deck_name, deck_tags, context
+        )
+
         if isinstance(transformed_result, Card):
             card = transformed_result
             normalized_front = " ".join(card.front.lower().split())
@@ -368,13 +381,36 @@ def _process_single_yaml_file(
                     card_index=idx, card_question_snippet=card.front[:50]
                 ))
             else:
-                encountered_fronts_this_file.add(normalized_front)
                 cards_in_file.append(card)
-        else:
+                encountered_fronts_this_file.add(normalized_front)
+        else:  # It's a YAMLProcessingError
             errors_in_file.append(transformed_result)
-    
-    print(f"[DEBUG] _process_single_yaml_file({file_path}): errors_in_file={errors_in_file}")
+
     return cards_in_file, errors_in_file
+
+
+def _process_single_yaml_file(
+    file_path: Path,
+    assets_root_directory: Path,
+    skip_media_validation: bool,
+    skip_secrets_detection: bool
+) -> Tuple[List[Card], List[YAMLProcessingError]]:
+    """Processes a single YAML file, returning successfully created Cards and any card-level errors."""
+    raw_yaml_content = _load_and_parse_yaml(file_path)
+    deck_name, deck_tags, cards_list = _validate_deck_and_extract_metadata(
+        raw_yaml_content, file_path
+    )
+
+    return _process_raw_cards(
+        cards_list,
+        deck_name,
+        deck_tags,
+        file_path,
+        assets_root_directory,
+        skip_media_validation,
+        skip_secrets_detection,
+    )
+
 
 def _validate_directories(
     source_directory: Path, 
@@ -490,17 +526,13 @@ def load_and_process_flashcard_yamls(
     if not yaml_files:
         return [], []
 
-    try:
-        processed_cards, processing_errors = _process_all_files(
-            yaml_files,
-            assets_root_directory,
-            skip_media_validation,
-            skip_secrets_detection,
-            fail_fast,
-        )
-    except YAMLProcessingError as e:
-        # This handles the fail_fast exception from _process_all_files
-        return [], [e]
+    processed_cards, processing_errors = _process_all_files(
+        yaml_files,
+        assets_root_directory,
+        skip_media_validation,
+        skip_secrets_detection,
+        fail_fast,
+    )
 
     # If there are processing errors and we are not in fail_fast mode,
     # return the cards found so far without checking for duplicates.
