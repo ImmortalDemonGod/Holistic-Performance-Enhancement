@@ -86,7 +86,7 @@ class FlashcardDatabase:
             diff                        DOUBLE NOT NULL,
             next_due                    DATE NOT NULL,
             elapsed_days_at_review      INTEGER NOT NULL CHECK (elapsed_days_at_review >= 0),
-            scheduled_days_interval     INTEGER NOT NULL CHECK (scheduled_days_interval >= 1),
+            scheduled_days_interval     INTEGER NOT NULL CHECK (scheduled_days_interval >= 0),
             review_type                 VARCHAR(50),
             FOREIGN KEY (card_uuid) REFERENCES cards(uuid)
         );
