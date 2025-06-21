@@ -69,7 +69,9 @@ class FSRSSchedulerConfig(BaseModel):
 
     parameters: Tuple[float, ...] = Field(default_factory=lambda: tuple(DEFAULT_PARAMETERS))
     desired_retention: float = DEFAULT_DESIRED_RETENTION
-    learning_steps: Tuple[datetime.timedelta, ...] = ()
+    learning_steps: Tuple[datetime.timedelta, ...] = Field(
+        default_factory=lambda: (datetime.timedelta(minutes=1), datetime.timedelta(minutes=10))
+    )
     relearning_steps: Tuple[datetime.timedelta, ...] = Field(
         default_factory=lambda: (datetime.timedelta(minutes=10),)
     )
