@@ -93,7 +93,12 @@ def main():
     # 2. Initialize the mock database, scheduler, and manager
     mock_db = MockDatabase(cards=cards)
     scheduler = FSRS_Scheduler()
-    manager = ReviewSessionManager(db=mock_db, scheduler=scheduler)
+    manager = ReviewSessionManager(
+        db_manager=mock_db, 
+        scheduler=scheduler, 
+        user_uuid=UUID("DEADBEEF-DEAD-BEEF-DEAD-BEEFDEADBEEF"), 
+        deck_name="mock_deck"
+    )
 
     # 3. Start the review flow
     print("--- Starting Manual CLI Review Test ---")
