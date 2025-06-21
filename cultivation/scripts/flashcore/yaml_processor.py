@@ -114,6 +114,107 @@ class YAMLProcessingError(Exception):
 
 # --- Core Logic ---
 
+@dataclass
+class _CardProcessingContext:
+    """Holds contextual data for processing a single card to reduce argument passing."""
+    source_file_path: Path
+    assets_root_directory: Path
+    card_index: int
+    card_q_preview: str
+    skip_media_validation: bool
+    skip_secrets_detection: bool
+
+
+def _validate_card_uuid(
+    raw_card: _RawYAMLCardEntry, context: _CardProcessingContext
+) -> Union[uuid.UUID, YAMLProcessingError]:
+    """Validates the raw UUID, returning a UUID object or a YAMLProcessingError."""
+    if raw_card.id is None:
+        return uuid.uuid4() # Assign a new UUID if none is provided
+    try:
+        return uuid.UUID(raw_card.id)
+    except ValueError:
+        return YAMLProcessingError(
+            file_path=context.source_file_path, card_index=context.card_index, 
+            card_question_snippet=context.card_q_preview,
+            field_name="id", message=f"Invalid UUID format for 'id': '{raw_card.id}'."
+        )
+
+def _sanitize_card_text(raw_card: _RawYAMLCardEntry) -> Tuple[str, str]:
+    """Normalizes and sanitizes card front and back text."""
+    front_normalized = raw_card.q.strip()
+    back_normalized = raw_card.a.strip()
+    front_sanitized = bleach.clean(front_normalized, tags=DEFAULT_ALLOWED_HTML_TAGS, attributes=DEFAULT_ALLOWED_HTML_ATTRIBUTES, strip=True)
+    back_sanitized = bleach.clean(back_normalized, tags=DEFAULT_ALLOWED_HTML_TAGS, attributes=DEFAULT_ALLOWED_HTML_ATTRIBUTES, strip=True)
+    return front_sanitized, back_sanitized
+
+def _check_for_secrets(
+    front: str, back: str, context: _CardProcessingContext
+) -> Optional[YAMLProcessingError]:
+    """Scans text for secrets, returning an error if a secret is found."""
+    if context.skip_secrets_detection:
+        return None
+    for pattern in DEFAULT_SECRET_PATTERNS:
+        if pattern.search(back):
+            return YAMLProcessingError(
+                file_path=context.source_file_path, card_index=context.card_index, 
+                card_question_snippet=context.card_q_preview, field_name="a", 
+                message=f"Potential secret detected in card answer. Matched pattern: '{pattern.pattern[:50]}...'."
+            )
+        if pattern.search(front):
+            return YAMLProcessingError(
+                file_path=context.source_file_path, card_index=context.card_index, 
+                card_question_snippet=context.card_q_preview, field_name="q", 
+                message=f"Potential secret detected in card question. Matched pattern: '{pattern.pattern[:50]}...'."
+            )
+    return None
+
+def _compile_card_tags(deck_tags: Set[str], card_tags: Optional[List[str]]) -> Set[str]:
+    """Combines deck-level and card-level tags into a single set."""
+    final_tags = deck_tags.copy()
+    if card_tags:
+        final_tags.update(tag.strip().lower() for tag in card_tags)
+    return final_tags
+
+def _validate_media_paths(
+    raw_media: List[str], context: _CardProcessingContext
+) -> Union[List[Path], YAMLProcessingError]:
+    """Validates all media paths for a card, returning a list of Paths or an error."""
+    processed_media_paths = []
+    for media_item_str in raw_media:
+        media_path = Path(media_item_str.strip())
+        if media_path.is_absolute():
+            return YAMLProcessingError(
+                file_path=context.source_file_path, card_index=context.card_index, 
+                card_question_snippet=context.card_q_preview, field_name="media", 
+                message=f"Media path must be relative: '{media_path}'."
+            )
+        
+        if not context.skip_media_validation:
+            try:
+                full_media_path = (context.assets_root_directory / media_path).resolve(strict=False)
+                abs_assets_root = context.assets_root_directory.resolve(strict=True)
+                if not str(full_media_path).startswith(str(abs_assets_root)):
+                    return YAMLProcessingError(
+                        file_path=context.source_file_path, card_index=context.card_index, 
+                        card_question_snippet=context.card_q_preview, field_name="media", 
+                        message=f"Media path '{media_path}' resolves outside the assets root directory."
+                    )
+                if not full_media_path.exists():
+                    return YAMLProcessingError(
+                        file_path=context.source_file_path, card_index=context.card_index, 
+                        card_question_snippet=context.card_q_preview, field_name="media", 
+                        message=f"Media file not found at expected path: '{full_media_path}'."
+                    )
+            except Exception as e:
+                return YAMLProcessingError(
+                    file_path=context.source_file_path, card_index=context.card_index, 
+                    card_question_snippet=context.card_q_preview, field_name="media", 
+                    message=f"Error validating media path '{media_path}': {e}."
+                )
+        processed_media_paths.append(media_path)
+    return processed_media_paths
+
 def _transform_raw_card_to_model(
     raw_card_model: _RawYAMLCardEntry,
     deck_name: str,
@@ -124,123 +225,61 @@ def _transform_raw_card_to_model(
     skip_media_validation: bool,
     skip_secrets_detection: bool
 ) -> Union[Card, YAMLProcessingError]:
-    # internal_note is now authorable from YAML and should be passed through
-
     """
-    Transforms a validated raw card entry into a canonical Card model.
-    Performs sanitization, media validation, secrets detection, and final Card instantiation.
+    Transforms a validated raw card entry into a canonical Card model by orchestrating
+    validation, sanitization, and instantiation steps.
     """
-    card_q_preview = raw_card_model.q[:50]
+    context = _CardProcessingContext(
+        source_file_path=source_file_path, assets_root_directory=assets_root_directory,
+        card_index=card_index, card_q_preview=raw_card_model.q[:50],
+        skip_media_validation=skip_media_validation, skip_secrets_detection=skip_secrets_detection
+    )
 
-    # UUID Handling
-    card_uuid_obj: Optional[uuid.UUID] = None
-    if raw_card_model.id is not None:
-        try:
-            card_uuid_obj = uuid.UUID(raw_card_model.id)
-        except ValueError:
-            return YAMLProcessingError(
-                file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
-                field_name="id", message=f"Invalid UUID format for 'id': '{raw_card_model.id}'."
-            )
+    # --- Field Processing and Validation ---
+    uuid_or_error = _validate_card_uuid(raw_card_model, context)
+    if isinstance(uuid_or_error, YAMLProcessingError):
+        return uuid_or_error
 
-    # Text Normalization and Sanitization
-    front_normalized = raw_card_model.q.strip()
-    back_normalized = raw_card_model.a.strip()
+    front, back = _sanitize_card_text(raw_card_model)
 
-    front_sanitized = bleach.clean(front_normalized, tags=DEFAULT_ALLOWED_HTML_TAGS, attributes=DEFAULT_ALLOWED_HTML_ATTRIBUTES, strip=True)
-    back_sanitized = bleach.clean(back_normalized, tags=DEFAULT_ALLOWED_HTML_TAGS, attributes=DEFAULT_ALLOWED_HTML_ATTRIBUTES, strip=True)
+    secret_error = _check_for_secrets(front, back, context)
+    if secret_error:
+        return secret_error
 
-    # Secrets Detection
-    if not skip_secrets_detection:
-        for pattern in DEFAULT_SECRET_PATTERNS:
-            if pattern.search(back_sanitized):
-                return YAMLProcessingError(
-                    file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
-                    field_name="a", message=f"Potential secret detected in card answer. Matched pattern: '{pattern.pattern[:50]}...'."
-                )
-            if pattern.search(front_sanitized):
-                return YAMLProcessingError(
-                    file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
-                    field_name="q", message=f"Potential secret detected in card question. Matched pattern: '{pattern.pattern[:50]}...'."
-                )
+    final_tags = _compile_card_tags(deck_tags, raw_card_model.tags)
 
-    # Tags Processing
-    final_tags = deck_tags.copy() # Start with deck-level tags (already validated for format by _RawYAMLDeckFile)
-    if raw_card_model.tags: # raw_card_model.tags is List[str] validated for kebab-case
-        final_tags.update(tag.strip().lower() for tag in raw_card_model.tags)
+    media_paths_or_error: Optional[Union[List[Path], YAMLProcessingError]] = None
+    if raw_card_model.media:
+        media_paths_or_error = _validate_media_paths(raw_card_model.media, context)
+        if isinstance(media_paths_or_error, YAMLProcessingError):
+            return media_paths_or_error
 
-    # Media Processing
-    processed_media_paths: Optional[List[Path]] = None
-    if raw_card_model.media: # raw_card_model.media is List[str]
-        processed_media_paths = []
-        for media_item_str in raw_card_model.media:
-            media_path = Path(media_item_str.strip())
-            if media_path.is_absolute():
-                return YAMLProcessingError(
-                    file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
-                    field_name="media", message=f"Media path must be relative: '{media_path}'."
-                )
-            
-            if not skip_media_validation:
-                try:
-                    # Construct absolute path (may not exist yet)
-                    full_media_path = (assets_root_directory / media_path).resolve(strict=False)
-                    abs_assets_root = assets_root_directory.resolve(strict=True)
-
-                    # Ensure the resolved media path is truly within the assets_root_directory
-                    if not str(full_media_path).startswith(str(abs_assets_root)):
-                        return YAMLProcessingError(
-                            file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
-                            field_name="media", message=f"Media path '{media_path}' resolves outside the assets root directory '{assets_root_directory}'."
-                        )
-
-                    # Now check if file exists
-                    if not full_media_path.exists():
-                        return YAMLProcessingError(
-                            file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
-                            field_name="media", message=f"Media file not found at expected path: '{(assets_root_directory / media_path)}'."
-                        )
-                except Exception as e:
-                    return YAMLProcessingError(
-                        file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
-                        field_name="media", message=f"Error validating media path '{media_path}': {e}."
-                    )
-            processed_media_paths.append(media_path) # Store the original relative path
-
-    # Instantiate canonical Card model
+    # --- Final Model Instantiation ---
     try:
         card_data = {
+            "uuid": uuid_or_error,
             "deck_name": deck_name,
-            "front": front_sanitized,
-            "back": back_sanitized,
+            "front": front,
+            "back": back,
             "tags": final_tags,
-            "source_yaml_file": source_file_path.resolve() # Store absolute, resolved path
+            "source_yaml_file": context.source_file_path.resolve(),
+            "internal_note": raw_card_model.internal_note,
+            "origin_task": raw_card_model.origin_task,
+            "media": media_paths_or_error or []
         }
-        if raw_card_model.internal_note is not None:
-            card_data["internal_note"] = raw_card_model.internal_note
-        if card_uuid_obj: # Only include if explicitly provided in YAML
-            card_data["uuid"] = card_uuid_obj
-        if raw_card_model.origin_task is not None:
-            card_data["origin_task"] = raw_card_model.origin_task
-        if processed_media_paths is not None: # Only include if media was specified
-            card_data["media"] = processed_media_paths
-        
-        # `added_at` uses default_factory in Card model.
-        # `internal_note` can be added here if specific conditions are met during processing.
-        
-        card_instance = Card(**card_data)
-        return card_instance
+        return Card(**card_data)
     except ValidationError as e:
-        # Construct a detailed error message from Pydantic's ValidationError
         error_details = "; ".join([f"{err['loc'][0] if err['loc'] else 'card'}: {err['msg']}" for err in e.errors()])
         return YAMLProcessingError(
-            file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
+            file_path=context.source_file_path, card_index=context.card_index,
+            card_question_snippet=context.card_q_preview,
             message=f"Final Card model validation failed. Details: {error_details}"
         )
     except Exception as e:
-        logger.exception(f"Unexpected error transforming card data for {source_file_path} at index {card_index}: {raw_card_model}")
+        logger.exception(f"Unexpected error during Card instantiation for {context.source_file_path}")
         return YAMLProcessingError(
-            file_path=source_file_path, card_index=card_index, card_question_snippet=card_q_preview,
+            file_path=context.source_file_path, card_index=context.card_index,
+            card_question_snippet=context.card_q_preview,
             message=f"Unexpected internal error during Card instantiation: {type(e).__name__} - {e}"
         )
 
@@ -337,90 +376,144 @@ def _process_single_yaml_file(
     print(f"[DEBUG] _process_single_yaml_file({file_path}): errors_in_file={errors_in_file}")
     return cards_in_file, errors_in_file
 
-def load_and_process_flashcard_yamls(
-    source_directory: Path,
+def _validate_directories(
+    source_directory: Path, 
+    assets_root_directory: Path, 
+    skip_media_validation: bool
+) -> Optional[YAMLProcessingError]:
+    """Validates that the source and asset directories exist."""
+    if not source_directory.is_dir():
+        return YAMLProcessingError(source_directory, "Source directory does not exist or is not a directory.")
+    
+    if not assets_root_directory.is_dir():
+        # This error is only critical if we are validating media
+        if not skip_media_validation:
+            return YAMLProcessingError(assets_root_directory, "Assets root directory does not exist or is not a directory.")
+    
+    return None
+
+def _find_yaml_files(source_directory: Path) -> List[Path]:
+    """Finds all YAML files in the given directory, sorted for deterministic processing."""
+    yaml_files = sorted(
+        list(source_directory.rglob("*.yaml")) + list(source_directory.rglob("*.yml"))
+    )
+    if not yaml_files:
+        logger.info(f"No YAML files found in {source_directory}")
+    else:
+        logger.info(f"Found {len(yaml_files)} YAML files to process in {source_directory}")
+    return yaml_files
+
+def _process_all_files(
+    yaml_files: List[Path],
     assets_root_directory: Path,
-    fail_fast: bool = False,
-    skip_media_validation: bool = False,
-    skip_secrets_detection: bool = False
+    skip_media_validation: bool,
+    skip_secrets_detection: bool,
+    fail_fast: bool,
 ) -> Tuple[List[Card], List[YAMLProcessingError]]:
-    """
-    Scans a directory for flashcard YAML files, processes them, and returns
-    a list of Card objects and a list of any processing errors.
-    """
+    """Processes a list of YAML files, collecting cards and errors."""
     all_processed_cards: List[Card] = []
     all_errors: List[YAMLProcessingError] = []
 
-    if not source_directory.is_dir():
-        error = YAMLProcessingError(source_directory, "Source directory does not exist or is not a directory.")
-        if fail_fast:
-            raise error
-        return [], [error]
-    
-    if not assets_root_directory.is_dir():
-        error = YAMLProcessingError(assets_root_directory, "Assets root directory does not exist or is not a directory.")
-        if fail_fast:
-            raise error
-        if not skip_media_validation:
-            all_errors.append(error)
-            return [], all_errors
-
-    yaml_files = sorted(list(source_directory.rglob("*.yaml")) + list(source_directory.rglob("*.yml")))
-
-    if not yaml_files:
-        logger.info(f"No YAML files found in {source_directory}")
-        return [], []
-
-    logger.info(f"Found {len(yaml_files)} YAML files to process in {source_directory}")
-
     for yaml_file_path in yaml_files:
-        print(f"[DEBUG] Processing file: {yaml_file_path}")
         logger.debug(f"Processing file: {yaml_file_path}")
         try:
             cards_from_file, errors_from_file = _process_single_yaml_file(
                 yaml_file_path,
                 assets_root_directory,
                 skip_media_validation,
-                skip_secrets_detection
+                skip_secrets_detection,
             )
             all_processed_cards.extend(cards_from_file)
             all_errors.extend(errors_from_file)
             if fail_fast and errors_from_file:
-                print(f"[DEBUG] Raising error from file: {type(errors_from_file[0])} - {errors_from_file[0]}")
                 raise errors_from_file[0]
         except YAMLProcessingError as e:
-            all_errors.append(e)
+            # Re-raise to be caught by the main function's fail_fast logic
             if fail_fast:
-                raise e
+                raise
+            all_errors.append(e)
         except Exception as e:
             logger.exception(f"Unexpected error processing file {yaml_file_path}")
-            error = YAMLProcessingError(yaml_file_path, f"Unexpected system error: {type(e).__name__} - {e}")
-            all_errors.append(error)
+            error = YAMLProcessingError(
+                yaml_file_path, f"Unexpected system error: {type(e).__name__} - {e}"
+            )
             if fail_fast:
                 raise error
-    
-    if not fail_fast or not all_errors:
-        final_cards_list: List[Card] = []
-        global_encountered_fronts: Dict[str, Path] = {}
+            all_errors.append(error)
+            
+    return all_processed_cards, all_errors
 
-        for card in all_processed_cards:
-            normalized_front = " ".join(card.front.lower().split())
-            if normalized_front in global_encountered_fronts:
-                first_occurrence_path = global_encountered_fronts[normalized_front]
-                duplicate_error = YAMLProcessingError(
-                    card.source_yaml_file if card.source_yaml_file else Path("UnknownFile"),
-                    f"Cross-file duplicate question front. First seen in '{first_occurrence_path.name}'.",
-                    card_question_snippet=card.front[:50]
-                )
-                all_errors.append(duplicate_error)
-            else:
-                global_encountered_fronts[normalized_front] = card.source_yaml_file if card.source_yaml_file else Path("UnknownSource")
-                final_cards_list.append(card)
-        all_processed_cards = final_cards_list
+def _filter_duplicate_cards(
+    cards: List[Card],
+) -> Tuple[List[Card], List[YAMLProcessingError]]:
+    """Filters a list of cards for duplicates based on the question front."""
+    final_cards_list: List[Card] = []
+    duplicate_errors: List[YAMLProcessingError] = []
+    global_encountered_fronts: Dict[str, Path] = {}
+
+    for card in cards:
+        normalized_front = " ".join(card.front.lower().split())
+        if normalized_front in global_encountered_fronts:
+            first_occurrence_path = global_encountered_fronts[normalized_front]
+            error = YAMLProcessingError(
+                card.source_yaml_file or Path("UnknownFile"),
+                f"Cross-file duplicate question front. First seen in '{first_occurrence_path.name}'.",
+                card_question_snippet=card.front[:50],
+            )
+            duplicate_errors.append(error)
+        else:
+            global_encountered_fronts[normalized_front] = card.source_yaml_file or Path("UnknownSource")
+            final_cards_list.append(card)
+            
+    return final_cards_list, duplicate_errors
+
+def load_and_process_flashcard_yamls(
+    source_directory: Path,
+    assets_root_directory: Path,
+    fail_fast: bool = False,
+    skip_media_validation: bool = False,
+    skip_secrets_detection: bool = False,
+) -> Tuple[List[Card], List[YAMLProcessingError]]:
+    """
+    Scans a directory for flashcard YAML files, processes them, and returns
+    a list of Card objects and a list of any processing errors.
+    """
+    validation_error = _validate_directories(
+        source_directory, assets_root_directory, skip_media_validation
+    )
+    if validation_error:
+        if fail_fast:
+            raise validation_error
+        return [], [validation_error]
+
+    yaml_files = _find_yaml_files(source_directory)
+    if not yaml_files:
+        return [], []
+
+    try:
+        processed_cards, processing_errors = _process_all_files(
+            yaml_files,
+            assets_root_directory,
+            skip_media_validation,
+            skip_secrets_detection,
+            fail_fast,
+        )
+    except YAMLProcessingError as e:
+        # This handles the fail_fast exception from _process_all_files
+        return [], [e]
+
+    # If there are processing errors and we are not in fail_fast mode,
+    # return the cards found so far without checking for duplicates.
+    if processing_errors and not fail_fast:
+        return processed_cards, processing_errors
+
+    # Otherwise, proceed to check for duplicates.
+    final_cards, duplicate_errors = _filter_duplicate_cards(processed_cards)
+    all_errors = processing_errors + duplicate_errors
 
     if all_errors:
         logger.warning(f"Completed YAML processing with {len(all_errors)} errors.")
     else:
-        logger.info(f"Successfully processed {len(all_processed_cards)} cards from {len(yaml_files)} files with no errors.")
+        logger.info(f"Successfully processed {len(final_cards)} cards from {len(yaml_files)} files with no errors.")
         
-    return all_processed_cards, all_errors
+    return final_cards, all_errors
