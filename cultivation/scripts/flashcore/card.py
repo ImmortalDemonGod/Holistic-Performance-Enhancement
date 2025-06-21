@@ -164,7 +164,7 @@ class Review(BaseModel):
     )
     scheduled_days_interval: int = Field(
         ...,
-        ge=1,  # The interval calculated by FSRS must be at least 1 day.
+        ge=0,  # The interval can be 0 for same-day learning steps.
         description="The interval in days (e.g., 'nxt' from fsrs_once) that FSRS calculated for this review. next_due would be 'ts.date() + timedelta(days=scheduled_days_interval)'."
     )
     review_type: Optional[str] = Field(

@@ -7,7 +7,7 @@ import duckdb
 import uuid
 from pathlib import Path
 from typing import List, Optional, Tuple, Dict, Any, Sequence, Union
-from datetime import datetime, date
+from datetime import date, datetime, timezone
 import logging
 import pandas as pd
 
@@ -138,12 +138,14 @@ class FlashcardDatabase:
         self.close_connection()
 
     def initialize_schema(self, force_recreate_tables: bool = False) -> None:
-        if self.read_only and not force_recreate_tables:
+        if self.read_only:
+            if force_recreate_tables:
+                raise DatabaseConnectionError("Cannot force_recreate_tables in read-only mode.")
+            # For a non-memory DB, it's just a warning. For in-memory, we proceed.
             if str(self.db_path_resolved) != ":memory:":
                 logger.warning("Attempting to initialize schema in read-only mode. Skipping.")
                 return
-        if self.read_only and force_recreate_tables:
-            raise DatabaseConnectionError("Cannot force_recreate_tables in read-only mode.")
+
         conn = self.get_connection()
         try:
             with conn.cursor() as cursor:
@@ -153,8 +155,10 @@ class FlashcardDatabase:
                     cursor.execute("DROP TABLE IF EXISTS reviews CASCADE;")
                     cursor.execute("DROP TABLE IF EXISTS cards CASCADE;")
                     cursor.execute("DROP SEQUENCE IF EXISTS review_seq;")
+                
                 for statement in self._DB_SCHEMA_SQL:
                     cursor.execute(statement)
+                
                 cursor.commit()
             logger.info(f"Database schema at {self.db_path_resolved} initialized successfully (or already exists).")
         except duckdb.Error as e:
@@ -413,6 +417,39 @@ class FlashcardDatabase:
             raise CardOperationError(f"Failed to fetch card fronts and UUIDs: {e}", original_exception=e) from e
 
     # --- Review Operations ---
+    def _insert_review_and_get_id(self, cursor, review: 'Review') -> int:
+        """Inserts a review record and returns its new ID."""
+        review_params_tuple = self._review_to_db_params_tuple(review)
+        sql = """
+        INSERT INTO reviews (card_uuid, ts, rating, resp_ms, stab_before, stab_after, diff, next_due,
+                             elapsed_days_at_review, scheduled_days_interval, review_type)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING review_id;
+        """
+        cursor.execute(sql, review_params_tuple)
+        result = cursor.fetchone()
+        if not result:
+            raise ReviewOperationError("Failed to retrieve review_id after insertion.")
+        return result[0]
+
+    def _update_card_after_review(self, cursor, review: 'Review', new_card_state: 'CardState', new_review_id: int) -> None:
+        """Updates the card's state and links it to the new review."""
+        sql = """
+        UPDATE cards
+        SET last_review_id = $1, next_due_date = $2, state = $3, stability = $4, difficulty = $5, modified_at = $6
+        WHERE uuid = $7;
+        """
+        params = (
+            new_review_id,
+            review.next_due,
+            new_card_state.name,
+            review.stab_after,
+            review.diff,
+            datetime.now(timezone.utc), # modified_at
+            review.card_uuid
+        )
+        cursor.execute(sql, params)
+
     def add_review_and_update_card(self, review: 'Review', new_card_state: 'CardState') -> 'Card':
         """
         Atomically adds a review and updates the corresponding card's state and due date.
@@ -422,62 +459,27 @@ class FlashcardDatabase:
             raise DatabaseConnectionError("Cannot add review in read-only mode.")
         
         conn = self.get_connection()
-        review_params_tuple = self._review_to_db_params_tuple(review)
-
-        insert_review_sql = """
-        INSERT INTO reviews (card_uuid, ts, rating, resp_ms, stab_before, stab_after, diff, next_due,
-                             elapsed_days_at_review, scheduled_days_interval, review_type)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-        RETURNING review_id;
-        """
-        update_card_sql = """
-        UPDATE cards
-        SET last_review_id = $1, next_due_date = $2, state = $3, modified_at = $4, stability = $5, difficulty = $6
-        WHERE uuid = $7;
-        """
-        
         try:
             with conn.cursor() as cursor:
                 cursor.begin()
-                
-                # 1. Insert the review and get its new ID
-                result = cursor.execute(insert_review_sql, review_params_tuple).fetchone()
-                if result is None or result[0] is None:
-                    cursor.rollback()
-                    raise ReviewOperationError("Failed to retrieve review_id after insert: No ID returned.")
-                new_review_id = int(result[0])
-
-                # 2. Update the card with the new review ID and other state
-                update_time = datetime.now().astimezone()
-                cursor.execute(update_card_sql, (
-                    new_review_id,
-                    review.next_due,
-                    new_card_state.name,
-                    update_time,
-                    review.stab_after,
-                    review.diff,
-                    review.card_uuid
-                ))
-                
+                # Step 1: Insert the review and get its ID
+                new_review_id = self._insert_review_and_get_id(cursor, review)
+                # Step 2: Update the card with the new review info
+                self._update_card_after_review(cursor, review, new_card_state, new_review_id)
                 cursor.commit()
-            
-            # 3. Fetch and return the updated card
-            updated_card = self.get_card_by_uuid(review.card_uuid)
-            if not updated_card:
-                # This should not happen if the transaction was successful
-                raise RecordNotFoundError(f"Card with UUID {review.card_uuid} disappeared after update.")
-            
-            logger.info(f"Successfully added review ID {new_review_id} and updated card {review.card_uuid}.")
-            return updated_card
+
+            # Step 3: Fetch and return the updated card
+            return self.get_card_by_uuid(review.card_uuid)
 
         except duckdb.Error as e:
-            logger.error(f"Transaction failed for adding review to card {review.card_uuid}: {e}")
-            if conn and not getattr(conn, 'closed', True):
+            logger.error(f"Error during review and card update transaction: {e}")
+            if conn:
                 try:
                     conn.rollback()
+                    logger.info("Transaction rolled back due to review/update error.")
                 except duckdb.Error as rb_err:
-                    logger.error(f"Error during rollback: {rb_err}")
-            raise ReviewOperationError(f"Atomic review add/card update failed: {e}", original_exception=e) from e
+                    logger.error(f"Failed to rollback transaction: {rb_err}")
+            raise ReviewOperationError(f"Failed to add review and update card: {e}", original_exception=e) from e
 
     def get_reviews_for_card(self, card_uuid: uuid.UUID, order_by_ts_desc: bool = True) -> List['Review']:
         conn = self.get_connection()
