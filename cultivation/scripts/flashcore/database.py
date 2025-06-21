@@ -10,6 +10,7 @@ from typing import List, Optional, Tuple, Dict, Any, Sequence, Union
 from datetime import date, datetime, timezone
 import logging
 import pandas as pd
+from pydantic import ValidationError
 
 # Local project imports from previously defined modules
 try:
@@ -138,44 +139,66 @@ class FlashcardDatabase:
         self.close_connection()
 
     def initialize_schema(self, force_recreate_tables: bool = False) -> None:
-        if self.read_only:
-            if force_recreate_tables:
-                raise DatabaseConnectionError("Cannot force_recreate_tables in read-only mode.")
-            # For a non-memory DB, it's just a warning. For in-memory, we proceed.
-            if str(self.db_path_resolved) != ":memory:":
-                logger.warning("Attempting to initialize schema in read-only mode. Skipping.")
-                return
+        """
+        Initializes the database schema. Skips if in read-only mode unless it's an in-memory DB.
+        Can force recreation of tables, which will delete all existing data.
+        """
+        if self._handle_read_only_initialization(force_recreate_tables):
+            return
 
         conn = self.get_connection()
         try:
             with conn.cursor() as cursor:
                 cursor.begin()
                 if force_recreate_tables:
-                    logger.warning(f"Forcing table recreation for {self.db_path_resolved}. ALL EXISTING DATA WILL BE LOST.")
-                    cursor.execute("DROP TABLE IF EXISTS reviews CASCADE;")
-                    cursor.execute("DROP TABLE IF EXISTS cards CASCADE;")
-                    cursor.execute("DROP SEQUENCE IF EXISTS review_seq;")
+                    self._recreate_tables(cursor)
                 
-                for statement in self._DB_SCHEMA_SQL:
-                    cursor.execute(statement)
+                self._create_schema_from_sql(cursor)
                 
                 cursor.commit()
             logger.info(f"Database schema at {self.db_path_resolved} initialized successfully (or already exists).")
         except duckdb.Error as e:
-            logger.error(f"Error initializing database schema at {self.db_path_resolved}: {e}")
-            if conn:
-                try:
-                    conn.rollback()
-                    logger.info("Transaction rolled back due to schema initialization error.")
-                except duckdb.Error as rb_err:
-                    logger.error(f"Failed to rollback transaction: {rb_err}")
-            raise SchemaInitializationError(f"Failed to initialize schema: {e}", original_exception=e) from e
+            self._handle_schema_initialization_error(conn, e)
+
+    def _handle_read_only_initialization(self, force_recreate_tables: bool) -> bool:
+        """Handles the logic for schema initialization in read-only mode. Returns True if initialization should be skipped."""
+        if self.read_only:
+            if force_recreate_tables:
+                raise DatabaseConnectionError("Cannot force_recreate_tables in read-only mode.")
+            # For a non-memory DB, it's just a warning. For in-memory, we proceed.
+            if str(self.db_path_resolved) != ":memory:":
+                logger.warning("Attempting to initialize schema in read-only mode. Skipping.")
+                return True
+        return False
+
+    def _recreate_tables(self, cursor) -> None:
+        """Drops all tables and sequences to force recreation."""
+        logger.warning(f"Forcing table recreation for {self.db_path_resolved}. ALL EXISTING DATA WILL BE LOST.")
+        cursor.execute("DROP TABLE IF EXISTS reviews CASCADE;")
+        cursor.execute("DROP TABLE IF EXISTS cards CASCADE;")
+        cursor.execute("DROP SEQUENCE IF EXISTS review_seq;")
+
+    def _create_schema_from_sql(self, cursor) -> None:
+        """Executes the SQL statements to create the database schema."""
+        for statement in self._DB_SCHEMA_SQL:
+            cursor.execute(statement)
+
+    def _handle_schema_initialization_error(self, conn, e: duckdb.Error) -> None:
+        """Handles errors during schema initialization, including logging and transaction rollback."""
+        logger.error(f"Error initializing database schema at {self.db_path_resolved}: {e}")
+        if conn and not getattr(conn, 'closed', True):
+            try:
+                conn.rollback()
+                logger.info("Transaction rolled back due to schema initialization error.")
+            except duckdb.Error as rb_err:
+                logger.error(f"Failed to rollback transaction: {rb_err}")
+        raise SchemaInitializationError(f"Failed to initialize schema: {e}", original_exception=e) from e
 
     # --- Data Marshalling Helpers (Internal) ---
     def _card_to_db_params_list(self, cards: Sequence['Card']) -> List[Tuple]:
-        params_list = []
-        for card in cards:
-            params_list.append((
+        """Converts a sequence of Card models to a list of tuples for DB insertion."""
+        return [
+            (
                 card.uuid,
                 card.deck_name,
                 card.front,
@@ -192,40 +215,49 @@ class FlashcardDatabase:
                 [str(p) for p in card.media] if card.media else None,
                 str(card.source_yaml_file) if card.source_yaml_file else None,
                 card.internal_note
-            ))
-        return params_list
+            )
+            for card in cards
+        ]
 
     def _db_row_to_card(self, row_dict: Dict[str, Any]) -> 'Card':
-        # Handle media: convert string list from 'media_paths' column to Path list for 'media' field
-        media_paths_val = row_dict.pop("media_paths", None)
-        if media_paths_val is not None:
-            row_dict["media"] = [Path(p) for p in media_paths_val]
-        else:
-            row_dict["media"] = []
+        """
+        Converts a database row dictionary to a Card Pydantic model.
+        This method handles necessary type transformations from DB types to model types.
+        """
+        data = self._transform_db_row_for_card(row_dict)
+        data = self._clean_pandas_null_values(data)
+        
+        try:
+            return Card(**data)
+        except ValidationError as e:
+            logger.error(f"Pydantic validation failed while converting DB row to Card: {data}")
+            raise CardOperationError(f"Data validation failed for card: {e}", original_exception=e) from e
 
-        # Handle source_yaml_file: convert string to Path
-        if row_dict.get("source_yaml_file"):
-            row_dict["source_yaml_file"] = Path(row_dict["source_yaml_file"])
+    def _transform_db_row_for_card(self, row_dict: Dict[str, Any]) -> Dict[str, Any]:
+        """Transforms raw DB data into a dictionary suitable for the Card model."""
+        data = row_dict.copy()
+        
+        media_paths = data.pop("media_paths", None)
+        data["media"] = [Path(p) for p in media_paths] if media_paths is not None else []
 
-        # Handle tags: convert list to set, ensuring it's never None
-        row_dict["tags"] = set(row_dict["tags"]) if row_dict.get("tags") is not None else set()
+        if data.get("source_yaml_file"):
+            data["source_yaml_file"] = Path(data["source_yaml_file"])
 
-        # Handle state: convert string from DB to CardState enum
-        state_val = row_dict.pop("state", None)
+        tags_val = data.get("tags")
+        data["tags"] = set(tags_val) if tags_val is not None else set()
+
+        state_val = data.pop("state", None)
         if state_val:
-            row_dict["state"] = CardState[state_val]
-        # If state_val is None, we don't add it to the dict, so Pydantic uses the default.
+            data["state"] = CardState[state_val]
+            
+        return data
 
-        # Convert any pandas missing values (NaT, NaN, etc.) to None.
-        # This is a general fix for any nullable fields that might come from the DB as missing.
-        for key, value in list(row_dict.items()):
-            # Skip collections like lists of media paths or sets of tags.
-            if isinstance(value, (list, set)):
-                continue
-            if pd.isna(value):
-                row_dict[key] = None
-
-        return Card(**row_dict)
+    def _clean_pandas_null_values(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Converts pandas-specific nulls (e.g., NaT, NaN) to Python None."""
+        for key, value in data.items():
+            if not isinstance(value, (list, set)) and pd.isna(value):
+                data[key] = None
+        return data
 
     def _review_to_db_params_tuple(self, review: 'Review') -> Tuple:
         return (
@@ -246,15 +278,7 @@ class FlashcardDatabase:
         return Review(**row_dict)
 
     # --- Card Operations ---
-    def upsert_cards_batch(self, cards: Sequence['Card']) -> int:
-        if not cards:
-            return 0
-        # Ensure NO explicit 'if self.read_only: raise ...' check here.
-        # DuckDB itself should raise an error if trying to write to a read-only DB.
-        
-        conn = self.get_connection()
-        card_params_list = self._card_to_db_params_list(cards)
-        sql = """
+    _UPSERT_CARDS_SQL = """
         INSERT INTO cards (uuid, deck_name, front, back, tags, added_at, modified_at,
                            last_review_id, next_due_date, state, stability, difficulty,
                            origin_task, media_paths, source_yaml_file, internal_note)
@@ -275,29 +299,40 @@ class FlashcardDatabase:
             source_yaml_file = EXCLUDED.source_yaml_file,
             internal_note = EXCLUDED.internal_note;
         """
-        try:
-            with conn.cursor() as cursor:
-                cursor.begin()
-                cursor.executemany(sql, card_params_list)
-                affected_rows = len(cards)
-                cursor.commit()
-            logger.info(f"Successfully upserted/processed {affected_rows} out of {len(cards)} cards provided.")
-            return affected_rows
-        except duckdb.Error as e:  # Catch any DuckDB specific error
-            logger.error(f"Error during batch card upsert: {e}")
-            if conn and not getattr(conn, 'closed', True):
-                try:
-                    conn.rollback()
-                    logger.info("Transaction rolled back due to error in batch card upsert.")
-                except duckdb.Error as rb_err:
-                    logger.error(f"Error during rollback after upsert failure: {rb_err}")
 
-            # If the error is due to read-only violation or similar, re-raise it directly.
-            # DuckDB might raise IOException or InvalidInputException for read-only writes.
-            if isinstance(e, (duckdb.IOException, duckdb.InvalidInputException)):
-                raise e
-            # Otherwise, wrap it in our custom exception.
-            raise CardOperationError(f"Batch card upsert failed: {e}", original_exception=e) from e
+    def upsert_cards_batch(self, cards: Sequence['Card']) -> int:
+        if not cards:
+            return 0
+
+        conn = self.get_connection()
+        card_params_list = self._card_to_db_params_list(cards)
+
+        try:
+            return self._execute_upsert_transaction(conn, card_params_list)
+        except duckdb.Error as e:
+            self._handle_upsert_error(conn, e)
+
+    def _execute_upsert_transaction(self, conn, card_params_list: List[Tuple]) -> int:
+        with conn.cursor() as cursor:
+            cursor.begin()
+            cursor.executemany(self._UPSERT_CARDS_SQL, card_params_list)
+            affected_rows = len(card_params_list)
+            cursor.commit()
+        logger.info(f"Successfully upserted/processed {affected_rows} out of {len(card_params_list)} cards provided.")
+        return affected_rows
+
+    def _handle_upsert_error(self, conn, e: duckdb.Error) -> None:
+        logger.error(f"Error during batch card upsert: {e}")
+        if conn and not getattr(conn, 'closed', True):
+            try:
+                conn.rollback()
+                logger.info("Transaction rolled back due to error in batch card upsert.")
+            except duckdb.Error as rb_err:
+                logger.error(f"Error during rollback after upsert failure: {rb_err}")
+
+        if isinstance(e, (duckdb.IOException, duckdb.InvalidInputException)):
+            raise e
+        raise CardOperationError(f"Batch card upsert failed: {e}", original_exception=e) from e
 
     def get_card_by_uuid(self, card_uuid: uuid.UUID) -> Optional['Card']:
         conn = self.get_connection()
