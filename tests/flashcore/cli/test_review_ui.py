@@ -33,7 +33,7 @@ def test_start_review_flow_no_due_cards(mock_manager: MagicMock, capsys):
     captured = capsys.readouterr()
     assert "No cards are due for review." in captured.out
     assert "Review session finished." in captured.out
-    mock_manager.start_session.assert_called_once()
+    mock_manager.initialize_session.assert_called_once()
     mock_manager.get_next_card.assert_not_called()
 
 
@@ -72,7 +72,7 @@ def test_start_review_flow_with_one_card(mock_manager: MagicMock, capsys):
     assert "Review session finished." in output
 
     # Assert: Check for correct method calls
-    mock_manager.start_session.assert_called_once()
+    mock_manager.initialize_session.assert_called_once()
     mock_manager.get_next_card.assert_called()
     mock_manager.submit_review.assert_called_once_with(
         card_uuid=card_uuid, rating=3, resp_ms=ANY
