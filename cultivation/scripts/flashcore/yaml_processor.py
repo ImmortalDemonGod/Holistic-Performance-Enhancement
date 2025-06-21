@@ -55,8 +55,10 @@ class YAMLProcessor:
             self._process_all_files()
             self._filter_and_finalize()
         except YAMLProcessingError as e:
-            # Handle early exit errors from validation
+            # This is for critical, non-recoverable errors (e.g., dir not found)
             self.all_errors.append(e)
+            if self.config.fail_fast:
+                raise
         except Exception:
             # Catch any other unexpected errors during the process
             self.all_errors.append(
@@ -113,7 +115,7 @@ class YAMLProcessor:
                 logger.warning(
                     f"Fail-fast enabled. Stopping processing after first error in {file_path}"
                 )
-                break
+                raise self.all_errors[-1]
 
     def _process_single_yaml_file(
         self, file_path: Path
