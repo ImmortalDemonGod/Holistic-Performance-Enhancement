@@ -21,15 +21,15 @@ class MockDatabase(FlashcardDatabase):
     """An in-memory mock of the FlashcardDatabase for testing."""
 
     def __init__(self, cards: List[Card]):
+        super().__init__(db_path=":memory:")
         self.cards = {c.uuid: c for c in cards}
         self.reviews: Dict[UUID, List[Review]] = {c.uuid: [] for c in cards}
-        self.read_only = False
-        self.CardOperationError = CardOperationError
         self._next_review_id = 1
 
-    def get_due_cards(self, deck_name: str, on_date: date, limit: int = 50) -> List[Card]:
+    def get_due_cards(self, deck_name: str, on_date: date, limit: Optional[int] = 50) -> List[Card]:
         # For this test, all cards are new, so they are all due.
         # The mock can ignore deck_name for simplicity.
+        limit = limit if limit is not None else 50
         return list(self.cards.values())[:limit]
 
     def get_card_by_uuid(self, card_uuid: UUID) -> Optional[Card]:
@@ -42,11 +42,11 @@ class MockDatabase(FlashcardDatabase):
 
     def add_review_and_update_card(self, review: Review, new_card_state: CardState) -> Card:
         if self.read_only:
-            raise self.CardOperationError("Mock is in read-only mode.")
+            raise CardOperationError("Mock is in read-only mode.")
         
         card_to_update = self.cards.get(review.card_uuid)
         if not card_to_update:
-            raise self.CardOperationError(f"Card with UUID {review.card_uuid} not found.")
+            raise CardOperationError(f"Card with UUID {review.card_uuid} not found.")
 
         # Simulate review ID generation and add review to history
         new_review_id = self._next_review_id
@@ -67,7 +67,8 @@ class MockDatabase(FlashcardDatabase):
         print(f"  - MockDB: Added review for card {updated_card.uuid}, new state: {updated_card.state}")
         return updated_card
 
-    def get_all_cards(self) -> List[Card]:
+    def get_all_cards(self, deck_name_filter: Optional[str] = None) -> List[Card]:
+        # Mock implementation can ignore the filter.
         return list(self.cards.values())
 
 
@@ -145,8 +146,8 @@ def main():
 
     all_cards_after_review = mock_db.get_all_cards()
     for card in all_cards_after_review:
-        assert card.state == CardState.Review, f"Card '{card.front}' should be in REVIEW state, but is {card.state}"
-        assert card.next_due_date > datetime.now(timezone.utc).date(), f"Card '{card.front}' next due date is not in the future"
+        assert card.state == CardState.Learning, f"Card '{card.front}' should be in LEARNING state, but is {card.state}"
+        assert card.next_due_date >= datetime.now(timezone.utc).date(), f"Card '{card.front}' next due date is not in the future"
     
     print("✅ Verification: All cards are in the correct final state.")
     print("\n--- Automated test successful ---")

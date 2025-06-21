@@ -430,26 +430,32 @@ class FlashcardDatabase:
             raise CardOperationError(f"Batch card delete failed: {e}", original_exception=e) from e
 
     def get_all_card_fronts_and_uuids(self) -> Dict[str, uuid.UUID]:
+        """
+        Retrieves a dictionary mapping all normalized card fronts to their UUIDs.
+        This is used for efficient duplicate checking before inserting new cards.
+        """
         conn = self.get_connection()
-        front_to_uuid: Dict[str, uuid.UUID] = {}
         sql = "SELECT front, uuid FROM cards;"
         try:
-            result_df = conn.execute(sql).fetch_df()
-            for index, row_series in result_df.iterrows():
-                front_text = str(row_series['front'])
-                card_uuid_val = row_series['uuid']
-                normalized_front = " ".join(front_text.lower().split())
+            with conn.cursor() as cursor:
+                cursor.execute(sql)
+                results = cursor.fetchall()
+
+            front_to_uuid: Dict[str, uuid.UUID] = {}
+            for front, card_uuid in results:
+                normalized_front = " ".join(str(front).lower().split())
                 if normalized_front not in front_to_uuid:
-                    front_to_uuid[normalized_front] = card_uuid_val
+                    front_to_uuid[normalized_front] = card_uuid
                 else:
                     logger.warning(
-                        f"Duplicate normalized front '{normalized_front}' found in database. "
-                        f"Existing UUID: {front_to_uuid[normalized_front]}, current card UUID: {card_uuid_val}."
+                        f"Duplicate normalized front found: '{normalized_front}'. "
+                        f"Keeping first UUID seen: {front_to_uuid[normalized_front]}. "
+                        f"Discarding new UUID: {card_uuid}."
                     )
             return front_to_uuid
         except duckdb.Error as e:
             logger.error(f"Error fetching all card fronts and UUIDs: {e}")
-            raise CardOperationError(f"Failed to fetch card fronts and UUIDs: {e}", original_exception=e) from e
+            raise CardOperationError("Could not fetch card fronts and UUIDs.", original_exception=e) from e
 
     # --- Review Operations ---
     def _insert_review_and_get_id(self, cursor, review: 'Review') -> int:
